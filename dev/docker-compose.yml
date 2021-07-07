@@ -1,0 +1,16 @@
+version: "3"
+
+services:
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=doxa-dev
+      - POSTGRES_USER=doxa-dev
+      - POSTGRES_DB=matter
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+volumes:
+  pg_data:

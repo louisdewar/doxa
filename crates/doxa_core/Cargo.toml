@@ -1,0 +1,9 @@
+[package]
+name = "doxa_core"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+actix-web = "3"
+serde = "1.0"
+doxa_sys = { path = "../doxa_sys" }

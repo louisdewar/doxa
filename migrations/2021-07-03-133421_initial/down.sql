@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS agents;
+DROP TABLE IF EXISTS enrollment;
+DROP TABLE IF EXISTS competitions;
+DROP TABLE IF EXISTS users;
