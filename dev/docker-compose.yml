@@ -6,7 +6,7 @@ services:
     environment:
       - POSTGRES_PASSWORD=doxa-dev
       - POSTGRES_USER=doxa-dev
-      - POSTGRES_DB=matter
+      - POSTGRES_DB=doxa
     volumes:
       - pg_data:/var/lib/postgresql/data
     ports:

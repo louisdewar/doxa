@@ -28,6 +28,36 @@ pub struct UploadMultipartError {
 impl_respondable_error!(
     UploadMultipartError,
     INTERNAL_SERVER_ERROR,
-    "COULD_NOT_REEAD_FILE",
+    "COULD_NOT_READ_FILE",
     "There was an error receiving the artifact"
 );
+
+#[derive(Debug, Display, Error)]
+pub struct FileTooLarge;
+
+impl_respondable_error!(
+    FileTooLarge,
+    BAD_REQUEST,
+    "FILE_TOO_LARGE",
+    "The upload exceeds the maximum size for this user"
+);
+
+#[derive(Debug, Display, Error)]
+pub struct FileMissing;
+
+impl_respondable_error!(
+    FileMissing,
+    BAD_REQUEST,
+    "FILE_MISSING",
+    "The upload did not contain a file"
+);
+
+#[derive(Debug, Display, Error, RespondableError, From)]
+pub enum AgentUploadError {
+    #[from(forward)]
+    IOError(CouldNotWriteFile),
+    #[from]
+    MultipartError(UploadMultipartError),
+    #[from]
+    FileTooLarge(FileTooLarge),
+}

@@ -1,5 +1,5 @@
 use std::path::PathBuf;
 
-pub struct StorageSettings {
+pub struct Settings {
     pub root: PathBuf,
 }

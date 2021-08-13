@@ -1,6 +1,10 @@
 use std::fmt;
 
-use actix_web::{dev::HttpResponseBuilder, error::BlockingError, http::StatusCode, HttpResponse};
+use actix_web::{dev::HttpResponseBuilder, error::BlockingError};
+
+pub use actix_web::http::StatusCode;
+pub use actix_web::HttpResponse;
+
 use serde::Serialize;
 
 pub type EndpointResult = Result<HttpResponse, HttpResponse>;
@@ -83,6 +87,34 @@ impl<I: RespondableError> RespondableError for BlockingError<I> {
             BlockingError::Canceled => StatusCode::INTERNAL_SERVER_ERROR,
             BlockingError::Error(e) => e.status_code(),
         }
+    }
+}
+
+impl RespondableError for diesel::result::Error {
+    fn error_code(&self) -> String {
+        "INTERNAL_SERVER_ERROR".to_string()
+    }
+
+    fn error_message(&self) -> Option<String> {
+        None
+    }
+
+    fn status_code(&self) -> StatusCode {
+        StatusCode::INTERNAL_SERVER_ERROR
+    }
+}
+
+impl RespondableError for diesel::r2d2::PoolError {
+    fn error_code(&self) -> String {
+        "INTERNAL_SERVER_ERROR".to_string()
+    }
+
+    fn error_message(&self) -> Option<String> {
+        None
+    }
+
+    fn status_code(&self) -> StatusCode {
+        StatusCode::INTERNAL_SERVER_ERROR
     }
 }
 

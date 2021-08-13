@@ -1,9 +1,10 @@
+use crate::schema::users;
 use diesel::{Insertable, Queryable};
-use doxa_db::schema::users;
 
 #[derive(Debug, Clone, Queryable)]
 pub struct User {
     pub id: i32,
+    pub admin: bool,
     pub username: String,
     pub password: String,
 }

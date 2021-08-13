@@ -5,6 +5,11 @@ edition = "2018"
 
 [dependencies]
 doxa_storage = { path = "crates/doxa_storage" }
+doxa_auth = { path = "crates/doxa_auth" }
+doxa_competition = { path = "crates/doxa_competition" }
+doxa_db = { path = "crates/doxa_db" }
+actix-web = "3"
+dotenv = "0.15.0"
 
 [workspace]
 members = ["crates/*"]

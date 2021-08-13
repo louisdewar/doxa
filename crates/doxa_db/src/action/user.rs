@@ -1,6 +1,6 @@
-use crate::model;
+use crate::model::user as model;
+use crate::{schema as s, DieselError};
 use diesel::{ExpressionMethods, OptionalExtension, PgConnection, QueryDsl, RunQueryDsl};
-use doxa_db::{schema as s, DieselError};
 
 pub fn create_user(
     conn: &PgConnection,
@@ -30,4 +30,15 @@ pub fn get_user_by_id(conn: &PgConnection, id: i32) -> Result<model::User, Diese
     s::users::table
         .filter(s::users::columns::id.eq(id))
         .first(conn)
+}
+
+/// Sets whether or not the user with the specified username is an admin.
+pub fn set_admin_status(
+    conn: &PgConnection,
+    username: String,
+    admin: bool,
+) -> Result<model::User, DieselError> {
+    diesel::update(s::users::dsl::users.filter(s::users::columns::username.eq(username)))
+        .set(s::users::columns::admin.eq(admin))
+        .get_result(conn)
 }

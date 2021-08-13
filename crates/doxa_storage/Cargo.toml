@@ -6,10 +6,12 @@ edition = "2018"
 [dependencies]
 doxa_db = { path = "../doxa_db" }
 doxa_core = { path = "../doxa_core" }
+doxa_auth = { path = "../doxa_auth" }
 # maybe move these types of dependencies (pretty much everything needs them) to doxa_core
 actix-web = "3"
 actix-multipart = "0.3"
 derive_more = "0.99"
 futures = "0.3.1"
-tokio = { version = "1", features = ["fs"] }
+tokio = { version = "1", features = ["fs", "io-util"] }
 diesel = { version = "1.4.4", features = ["postgres", "r2d2"] }
+rand = "0.8.4"

@@ -1,8 +1,10 @@
-mod action;
-mod endpoint;
-mod error;
-mod model;
-mod settings;
+// Maybe rename doxa_agent
 
-pub use model::LocalStorage;
-pub use settings::StorageSettings;
+mod controller;
+mod error;
+mod route;
+mod settings;
+mod storage;
+
+pub use settings::Settings;
+pub use storage::LocalStorage;

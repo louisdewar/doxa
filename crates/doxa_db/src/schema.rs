@@ -1,8 +1,11 @@
 table! {
     agents (id) {
-        id -> Int4,
+        id -> Text,
         owner -> Int4,
         competition -> Int4,
+        uploaded -> Bool,
+        deleted -> Bool,
+        failed -> Bool,
     }
 }
 
@@ -23,6 +26,7 @@ table! {
 table! {
     users (id) {
         id -> Int4,
+        admin -> Bool,
         username -> Text,
         password -> Text,
     }

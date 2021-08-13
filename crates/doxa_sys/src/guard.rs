@@ -22,7 +22,7 @@ pub fn guard_tuples(input: TokenStream) -> TokenStream {
     let GuardTuples { name, count } = parse_macro_input!(input as GuardTuples);
     let count: i32 = count.base10_parse().unwrap();
 
-    todo!();
+    todo!("{}{}", name, count);
 
     //  let output = quote! {
     //      impl crate::error::RespondableError for #name {

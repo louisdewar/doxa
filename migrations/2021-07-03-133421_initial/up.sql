@@ -1,5 +1,6 @@
 CREATE TABLE users(
     id SERIAL PRIMARY KEY,
+    admin boolean NOT NULL default false,
     username TEXT NOT NULL UNIQUE,
     password TEXT NOT NULL
 );
@@ -16,9 +17,11 @@ CREATE TABLE enrollment(
 );
 
 CREATE TABLE agents(
-    id SERIAL PRIMARY KEY,
+    id TEXT PRIMARY KEY,
     owner INT REFERENCES users(id) NOT NULL,
     competition INT references competitions(id) NOT NULL,
-    file_name TEXT, -- This will be NULL when it's not uploaded / deleted
+    uploaded boolean NOT NULL default false,
+    deleted boolean NOT NULL default false,
+    failed boolean NOT NULL default false
 );
 
