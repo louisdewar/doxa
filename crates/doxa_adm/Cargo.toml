@@ -1,0 +1,9 @@
+[package]
+name = "doxa_adm"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+doxa_db = { path = "../doxa_db" }
+clap = { version = "3.0.0-beta.4", features = ["yaml"] }
+dotenv = "0.15.0"

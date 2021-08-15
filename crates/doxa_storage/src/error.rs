@@ -27,9 +27,9 @@ pub struct UploadMultipartError {
 
 impl_respondable_error!(
     UploadMultipartError,
-    INTERNAL_SERVER_ERROR,
+    BAD_REQUEST,
     "COULD_NOT_READ_FILE",
-    "There was an error receiving the artifact"
+    "There was an error receiving the upload"
 );
 
 #[derive(Debug, Display, Error)]

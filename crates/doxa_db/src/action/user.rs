@@ -42,3 +42,13 @@ pub fn set_admin_status(
         .set(s::users::columns::admin.eq(admin))
         .get_result(conn)
 }
+
+pub fn list_users(conn: &PgConnection) -> Result<Vec<model::User>, DieselError> {
+    s::users::table.get_results(conn)
+}
+
+pub fn list_admins(conn: &PgConnection) -> Result<Vec<model::User>, DieselError> {
+    s::users::table
+        .filter(s::users::columns::admin.eq(true))
+        .get_results(conn)
+}

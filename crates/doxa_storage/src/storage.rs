@@ -35,11 +35,15 @@ impl LocalStorage {
     /// The file is opened with write access and it is required that the file was created (so no
     /// file existed there before.
     pub async fn create_file(&self, competition_name: String) -> io::Result<(File, String)> {
+        let folder = self.root.join(competition_name);
+
+        tokio::fs::create_dir_all(&folder).await?;
+
         let file_name = Self::generate_name();
         OpenOptions::new()
             .create_new(true)
             .write(true)
-            .open(self.root.join(competition_name).join(&file_name))
+            .open(folder.join(&file_name))
             .await
             .map(|f| (f, file_name))
     }

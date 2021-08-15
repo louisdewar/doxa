@@ -39,7 +39,7 @@ impl<T: AuthGuardInner> FromRequest for AuthGuard<T> {
             };
 
             let token = handle_doxa_error!(crate::token::parse_token(
-                &auth_header,
+                &auth_header[7..],
                 &settings.jwt_secret
             ));
 

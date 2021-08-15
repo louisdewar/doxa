@@ -66,7 +66,7 @@ impl_respondable_error!(
 #[derive(Debug, Display, Error, RespondableError, From)]
 pub enum CreateUserError {
     #[from]
-    Internal(DieselError),
+    Diesel(DieselError),
     #[from]
     AlreadyExists(UserAlreadyExists),
 }
@@ -94,9 +94,39 @@ impl_respondable_error!(
 #[derive(Debug, Display, Error, RespondableError, From)]
 pub enum LoginError {
     #[from]
-    Internal(DieselError),
+    Diesel(DieselError),
     #[from]
     NotFound(UserNotFound),
     #[from]
     IncorrectPassword(IncorrectPassword),
+}
+
+#[derive(Debug, Display, Error)]
+pub struct CompetitionNotFound;
+
+impl_respondable_error!(
+    CompetitionNotFound,
+    NOT_FOUND,
+    "COMPETITION_NOT_FOUND",
+    "The competition does not exist"
+);
+
+#[derive(Debug, Display, Error)]
+pub struct UserNotEnrolled;
+
+impl_respondable_error!(
+    UserNotEnrolled,
+    UNAUTHORIZED,
+    "NOT_ENROLLED",
+    "You are not enrolled in the competition"
+);
+
+#[derive(Debug, Display, Error, RespondableError, From)]
+pub enum CheckEnrollmentError {
+    #[from]
+    Diesel(DieselError),
+    #[from]
+    NotEnrolled(UserNotEnrolled),
+    #[from]
+    CompetitionNotFound(CompetitionNotFound),
 }

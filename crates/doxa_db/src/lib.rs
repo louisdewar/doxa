@@ -1,5 +1,7 @@
 #[macro_use]
 pub extern crate diesel;
+#[macro_use]
+pub extern crate diesel_migrations;
 
 pub mod action;
 pub mod model;
@@ -15,6 +17,13 @@ pub type PgPool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
 pub use diesel::result::Error as DieselError;
 
+embed_migrations!();
+
+pub fn run_migrations(connection: &PgConnection) {
+    embedded_migrations::run_with_output(connection, &mut std::io::stdout())
+        .expect("Failed to run migrations");
+}
+
 pub fn was_unique_key_violation(error: &DieselError) -> bool {
     matches!(
         error,
@@ -22,8 +31,11 @@ pub fn was_unique_key_violation(error: &DieselError) -> bool {
     )
 }
 
-pub fn establish_connection(database_url: &str) -> PgPool {
-    PgConnection::establish(&database_url).expect(&format!("Error connecting to {}", database_url));
+pub fn establish_connection(database_url: &str) -> PgConnection {
+    PgConnection::establish(&database_url).expect(&format!("Error connecting to {}", database_url))
+}
+
+pub fn establish_pool(database_url: &str) -> PgPool {
     let manager = ConnectionManager::<PgConnection>::new(database_url);
     Pool::builder()
         .build(manager)

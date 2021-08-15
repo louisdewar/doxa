@@ -1,12 +1,15 @@
 use std::time::Duration;
 
 use diesel::PgConnection;
-use doxa_db::was_unique_key_violation;
+use doxa_db::{model::competition::Enrollment, was_unique_key_violation};
 use hmac::Hmac;
 use sha2::Sha256;
 
 use crate::{
-    error::{CreateUserError, IncorrectPassword, LoginError, UserAlreadyExists, UserNotFound},
+    error::{
+        CheckEnrollmentError, CompetitionNotFound, CreateUserError, IncorrectPassword, LoginError,
+        UserAlreadyExists, UserNotEnrolled, UserNotFound,
+    },
     password,
     token::{generate_jwt, Token},
 };
@@ -26,6 +29,9 @@ pub fn create_user(
     username: String,
     password: &str,
 ) -> Result<User, CreateUserError> {
+    // TODO: do some checking of username, e.g. no spaces, certain length, maybe limit characters
+    // to ascii?
+
     let password = password::new_hashed(&password);
     let user = model::user::InsertableUser { username, password };
 
@@ -61,4 +67,18 @@ pub fn login(
         &Token::new_with_duration(user.id, Duration::from_secs(JWT_LIFE)),
         &jwt_key,
     ))
+}
+
+/// If the user is enrolled then this returns `Ok(enrollment)` containing the enrollment
+/// In any other case (including both that the user is not enrolled or there has been
+/// some internal error with the database) an error is returned
+pub fn is_enrolled(
+    conn: &PgConnection,
+    user_id: i32,
+    competition: String,
+) -> Result<Enrollment, CheckEnrollmentError> {
+    action::competition::get_competition_by_name(conn, competition.clone())?
+        .ok_or(CompetitionNotFound)?;
+
+    Ok(action::competition::get_enrollment(conn, user_id, competition)?.ok_or(UserNotEnrolled)?)
 }

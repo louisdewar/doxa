@@ -38,7 +38,7 @@ pub fn parse_token(token_str: &str, key: &Hmac<Sha256>) -> Result<Token, TokenEr
         .unwrap()
         .as_secs();
 
-    if token.expires_at > current_time {
+    if current_time > token.expires_at() {
         return Err(ExpiredToken.into());
     }
 

@@ -5,6 +5,7 @@ use doxa_db::PgPool;
 use crate::{controller, Settings};
 
 mod request;
+mod response;
 
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.route("/auth/login", web::post().to(login))
@@ -30,7 +31,9 @@ async fn login(
         .await
     );
 
-    Ok(HttpResponse::Ok().json(token).into())
+    Ok(HttpResponse::Ok()
+        .json(response::Login { auth_token: token })
+        .into())
 }
 
 async fn register(
