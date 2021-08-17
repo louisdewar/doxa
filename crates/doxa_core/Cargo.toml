@@ -8,3 +8,4 @@ actix-web = "3"
 serde = "1.0"
 doxa_sys = { path = "../doxa_sys" }
 diesel = { version = "1.4.4", features = ["postgres", "r2d2"] }
+tokio = { version = "0.2.25", features = ["fs", "io-util"] }

@@ -679,6 +679,10 @@ dependencies = [
 [[package]]
 name = "doxa_competition"
 version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "doxa_core",
+]
 
 [[package]]
 name = "doxa_core"
@@ -688,6 +692,7 @@ dependencies = [
  "diesel",
  "doxa_sys",
  "serde",
+ "tokio",
 ]
 
 [[package]]
