@@ -4,8 +4,10 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
-actix-web = "3"
+actix-web = "4.0.0-beta.8"
 serde = "1.0"
 doxa_sys = { path = "../doxa_sys" }
 diesel = { version = "1.4.4", features = ["postgres", "r2d2"] }
-tokio = { version = "0.2.25", features = ["fs", "io-util"] }
+tokio = { version = "1.10.0", features = ["fs", "io-util"] }
+deadpool-lapin = { version = "0.8.0", features = ["rt_tokio_1"], default-features = false }
+lapin = "1.7.1"

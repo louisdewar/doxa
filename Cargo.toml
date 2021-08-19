@@ -8,8 +8,17 @@ doxa_storage = { path = "crates/doxa_storage" }
 doxa_auth = { path = "crates/doxa_auth" }
 doxa_competition = { path = "crates/doxa_competition" }
 doxa_db = { path = "crates/doxa_db" }
-actix-web = "3"
+doxa_mq = { path = "crates/doxa_mq" }
+
+actix-web = "4.0.0-beta.8"
 dotenv = "0.15.0"
+tracing-actix-web = "0.4.0-beta.10"
+tracing = "0.1.19"
+opentelemetry = { version = "0.14", features = ["rt-tokio-current-thread"] }
+opentelemetry-jaeger = { version = "0.13", features = ["tokio"] }
+tracing-opentelemetry = { version = "0.13" }
+tracing-subscriber = { version = "0.2.12", features = ["registry", "env-filter"] }
+tracing-bunyan-formatter = "0.1.6"
 
 [workspace]
 members = ["crates/*"]

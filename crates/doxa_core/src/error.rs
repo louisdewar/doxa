@@ -1,13 +1,13 @@
-use std::fmt;
+use std::fmt::{self, Display};
 
-use actix_web::{dev::HttpResponseBuilder, error::BlockingError};
+use actix_web::{error::BlockingError, HttpResponseBuilder};
 
 pub use actix_web::http::StatusCode;
 pub use actix_web::HttpResponse;
 
 use serde::Serialize;
 
-pub type EndpointResult = Result<HttpResponse, HttpResponse>;
+pub type EndpointResult = Result<HttpResponse, RespondableErrorWrapper>;
 
 #[derive(Serialize)]
 struct ErrorResponse {
@@ -16,7 +16,7 @@ struct ErrorResponse {
     error: Option<String>,
 }
 
-pub trait RespondableError: fmt::Debug {
+pub trait RespondableError: fmt::Debug + std::error::Error {
     fn error_code(&self) -> String;
     fn error_message(&self) -> Option<String>;
 
@@ -30,19 +30,50 @@ pub trait RespondableError: fmt::Debug {
             })
             .into()
     }
+}
 
-    fn display_fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if let Some(message) = self.error_message() {
-            write!(f, "({}) {}", self.error_code(), message)
-        } else {
-            write!(f, "{}", self.error_code())
-        }
+pub struct RespondableErrorWrapper(Box<dyn RespondableError>);
+
+impl Display for RespondableErrorWrapper {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        Display::fmt(&self.0, f)
     }
 }
 
+impl fmt::Debug for RespondableErrorWrapper {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Debug::fmt(&self.0, f)
+    }
+}
+
+impl actix_web::ResponseError for RespondableErrorWrapper {
+    fn status_code(&self) -> StatusCode {
+        self.0.status_code()
+    }
+
+    fn error_response(&self) -> HttpResponse {
+        self.0.into_response()
+    }
+}
+
+impl<T: RespondableError + 'static> From<T> for RespondableErrorWrapper {
+    fn from(error: T) -> Self {
+        RespondableErrorWrapper(Box::new(error))
+    }
+}
+
+// impl Responder for RespondableErrorWrapper {
+//     fn respond_to(self, _req: &actix_web::HttpRequest) -> HttpResponse {
+//         println!("respond to");
+//         // TODO: proper logging
+//         println!("[{}:{}] error {}", file!(), line!(), &self.0);
+//         self.0.into_response()
+//     }
+// }
+
 #[macro_export]
 macro_rules! impl_respondable_error {
-    ($struct:ident, $status_code:ident, $error_code:expr, option: $error_message:expr) => {
+    ($struct:ty, $status_code:ident, $error_code:expr, option: $error_message:expr) => {
         impl $crate::RespondableError for $struct {
             fn error_code(&self) -> String {
                 $error_code.into()
@@ -58,77 +89,37 @@ macro_rules! impl_respondable_error {
         }
     };
 
-    ($struct:ident, $status_code:ident, $error_code:expr, $error_message:expr) => {
+    ($struct:ty, $status_code:ident, $error_code:expr, $error_message:expr) => {
         impl_respondable_error!($struct, $status_code, $error_code, option: Some($error_message.into()));
     };
 
-    ($struct:ident, $status_code:ident, $error_code:expr) => {
+    ($struct:ty, $status_code:ident, $error_code:expr) => {
         impl_respondable_error!($struct, $status_code, $error_code, option: None);
     };
 }
 
-impl<I: RespondableError> RespondableError for BlockingError<I> {
-    fn error_code(&self) -> String {
-        match self {
-            BlockingError::Canceled => "INTERNAL_SERVER_ERROR".into(),
-            BlockingError::Error(e) => e.error_code(),
-        }
-    }
+impl_respondable_error!(
+    BlockingError,
+    INTERNAL_SERVER_ERROR,
+    "INTERNAL_SERVER_ERROR"
+);
 
-    fn error_message(&self) -> Option<String> {
-        match self {
-            BlockingError::Canceled => None,
-            BlockingError::Error(e) => e.error_message(),
-        }
-    }
+impl_respondable_error!(
+    diesel::result::Error,
+    INTERNAL_SERVER_ERROR,
+    "INTERNAL_SERVER_ERROR"
+);
 
-    fn status_code(&self) -> StatusCode {
-        match self {
-            BlockingError::Canceled => StatusCode::INTERNAL_SERVER_ERROR,
-            BlockingError::Error(e) => e.status_code(),
-        }
-    }
-}
+impl_respondable_error!(
+    diesel::r2d2::PoolError,
+    INTERNAL_SERVER_ERROR,
+    "INTERNAL_SERVER_ERROR"
+);
 
-impl RespondableError for diesel::result::Error {
-    fn error_code(&self) -> String {
-        "INTERNAL_SERVER_ERROR".to_string()
-    }
+impl_respondable_error!(
+    deadpool_lapin::PoolError,
+    INTERNAL_SERVER_ERROR,
+    "INTERNAL_SERVER_ERROR"
+);
 
-    fn error_message(&self) -> Option<String> {
-        None
-    }
-
-    fn status_code(&self) -> StatusCode {
-        StatusCode::INTERNAL_SERVER_ERROR
-    }
-}
-
-impl RespondableError for diesel::r2d2::PoolError {
-    fn error_code(&self) -> String {
-        "INTERNAL_SERVER_ERROR".to_string()
-    }
-
-    fn error_message(&self) -> Option<String> {
-        None
-    }
-
-    fn status_code(&self) -> StatusCode {
-        StatusCode::INTERNAL_SERVER_ERROR
-    }
-}
-
-#[macro_export]
-macro_rules! handle_doxa_error {
-    ($e:expr) => {
-        match $e {
-            Ok(val) => val,
-            Err(e) => {
-                // TODO: logging
-                println!("[{}:{}] error {}", file!(), line!(), e);
-
-                return Err($crate::error::RespondableError::into_response(&e));
-            }
-        }
-    };
-}
+impl_respondable_error!(lapin::Error, INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR");

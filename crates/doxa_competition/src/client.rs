@@ -5,6 +5,7 @@ use std::{future::Future, pin::Pin, sync::Arc, time::Duration};
 use async_trait::async_trait;
 
 use doxa_core::actix_web;
+use doxa_mq::model::UploadEvent;
 
 // pub trait Callback<T = ()>: Fn() -> Pin<Box<dyn Future<Output = T>>> {}
 // //
@@ -44,12 +45,12 @@ impl<T: Callback> From<T> for Box<dyn Callback> {
     }
 }
 
-// impl<C: Callback + 'static> From<C> for BoxedCallback {
-//     fn from(callback: C) -> Self {
-//         Box::new(callback)
-//     }
-// }
-
+// Maybe rename to BaseContext which contains stuff that can be cloned around then before actually
+// passing it into things such as routes we extract the db_pool and store it in the Context, or we
+// make those kinds of methods take in a DbConnection and provide another method which takes in
+// DbPool and returns DbConnection
+// Maybe context should be an Arc, pub type Context = Arc<Base(or other name)Context>;
+#[derive(Clone)]
 pub struct Context {}
 
 impl Context {
@@ -66,7 +67,7 @@ impl Context {
 }
 
 #[async_trait]
-pub trait Competition {
+pub trait Competition: 'static + Send + Sync {
     // Maybe &mut self could be enforced as startup happens before everything else
     // could also be the case that startup returns Self.
     /// Runs exactly once at startup before all other functions
@@ -81,10 +82,11 @@ pub trait Competition {
 
     /// Runs whenever a new agent has been successfull uploaded.
     /// TODO: upload info
-    async fn on_upload(&self, context: &mut Context);
+    async fn on_upload(&self, context: &mut Context, upload_event: UploadEvent);
 
     /// Runs whenever the result of an execution (commonly called a match) has been completed.
     /// TODO: execution info
+    /// maybe have a `.save(conn)` method to save to the database
     async fn on_execution_result(&self, context: &mut Context);
 
     /// Returns the name of the competition.

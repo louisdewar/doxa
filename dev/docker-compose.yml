@@ -11,6 +11,16 @@ services:
       - pg_data:/var/lib/postgresql/data
     ports:
       - 5432:5432
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+        - 5672:5672
+        - 15672:15672
+    volumes:
+        - rabbitmq_data:/var/lib/rabbitmq/
+        - rabbitmq_log:/var/log/rabbitmq
 
 volumes:
   pg_data:
+  rabbitmq_data:
+  rabbitmq_log:

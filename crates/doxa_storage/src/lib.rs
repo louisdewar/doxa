@@ -6,13 +6,13 @@ mod route;
 mod settings;
 mod storage;
 
+use actix_web::web::Data;
 pub use settings::Settings;
 use storage::LocalStorage;
 
 pub fn config(settings: Settings) -> impl FnOnce(&mut actix_web::web::ServiceConfig) {
     move |cfg| {
-        cfg.data(LocalStorage::from_settings(&settings));
-        cfg.data(settings);
+        cfg.app_data(Data::new(LocalStorage::from_settings(&settings)));
         route::config(cfg);
     }
 }

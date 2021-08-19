@@ -1,0 +1,11 @@
+[package]
+name = "doxa_mq"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+doxa_core = { path = "../doxa_core" }
+
+tokio-amqp = "1.0.0"
+serde = { version = "1.0.127", features = ["derive"] }
+bincode = "1.3.3"

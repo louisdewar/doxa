@@ -7,11 +7,12 @@ pub mod route;
 pub mod settings;
 pub mod token;
 
+use actix_web::web::Data;
 pub use settings::Settings;
 
 pub fn config(settings: Settings) -> impl FnOnce(&mut actix_web::web::ServiceConfig) {
     move |cfg| {
-        cfg.data(settings);
+        cfg.app_data(Data::new(settings));
         route::config(cfg);
     }
 }
