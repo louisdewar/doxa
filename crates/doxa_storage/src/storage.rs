@@ -48,4 +48,11 @@ impl LocalStorage {
             .await
             .map(|f| (f, file_name))
     }
+
+    pub async fn open_file(&self, competition_name: &str, agent_id: &str) -> io::Result<File> {
+        OpenOptions::new()
+            .read(true)
+            .open(self.root.join(&competition_name).join(&agent_id))
+            .await
+    }
 }

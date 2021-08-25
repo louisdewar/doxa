@@ -20,6 +20,7 @@ CREATE TABLE agents(
     id TEXT PRIMARY KEY,
     owner INT REFERENCES users(id) NOT NULL,
     competition INT references competitions(id) NOT NULL,
+    extension TEXT NOT NULL,
     uploaded boolean NOT NULL default false,
     deleted boolean NOT NULL default false,
     failed boolean NOT NULL default false

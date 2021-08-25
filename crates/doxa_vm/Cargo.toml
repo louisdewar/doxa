@@ -1,0 +1,15 @@
+[package]
+name = "doxa_vm"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+tokio-vsock = "0.3.1"
+serde = { version = "1.0.128", features = ["derive"] }
+derive_more = "0.99.16"
+tokio = { version = "1.10.0", features = ["fs", "io-util", "process", "rt", "macros", "net", "io-std"] }
+doxa_firecracker_sdk = { path = "../doxa_firecracker_sdk" }
+tempfile = "3.2.0"
+
+[[bin]]
+name = "vm_executor"

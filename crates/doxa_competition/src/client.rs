@@ -7,6 +7,8 @@ use async_trait::async_trait;
 use doxa_core::actix_web;
 use doxa_mq::model::UploadEvent;
 
+mod executor;
+
 // pub trait Callback<T = ()>: Fn() -> Pin<Box<dyn Future<Output = T>>> {}
 // //
 

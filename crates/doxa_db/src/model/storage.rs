@@ -7,6 +7,7 @@ pub struct AgentUpload {
     pub id: String,
     pub owner: i32,
     pub competition: i32,
+    pub extension: String,
     pub uploaded: bool,
     pub deleted: bool,
     pub failed: bool,
@@ -18,4 +19,5 @@ pub struct InsertableAgentUpload {
     pub id: String,
     pub owner: i32,
     pub competition: i32,
+    pub extension: String,
 }

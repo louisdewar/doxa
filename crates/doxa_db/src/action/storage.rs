@@ -1,6 +1,6 @@
 use crate::model::storage::{AgentUpload, InsertableAgentUpload};
 use crate::{schema as s, DieselError};
-use diesel::{ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
+use diesel::{ExpressionMethods, OptionalExtension, PgConnection, QueryDsl, RunQueryDsl};
 
 pub fn register_upload_start(
     conn: &PgConnection,
@@ -29,4 +29,14 @@ pub fn list_uploads(
         .filter(s::agents::columns::owner.eq(user))
         .filter(s::agents::columns::competition.eq(competition))
         .get_results(conn)
+}
+
+pub fn get_agent(
+    conn: &PgConnection,
+    agent_id: String,
+) -> Result<Option<AgentUpload>, DieselError> {
+    s::agents::table
+        .filter(s::agents::columns::id.eq(agent_id))
+        .first(conn)
+        .optional()
 }

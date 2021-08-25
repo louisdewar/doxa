@@ -10,6 +10,7 @@ pub fn register_upload_start(
     id: String,
     user_id: i32,
     competition: i32,
+    extension: String,
 ) -> Result<AgentUpload, DieselError> {
     action::storage::register_upload_start(
         conn,
@@ -17,6 +18,7 @@ pub fn register_upload_start(
             id,
             owner: user_id,
             competition,
+            extension,
         },
     )
 }

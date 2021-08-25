@@ -15,6 +15,7 @@ use crate::client::{validate_competition_name, BoxedCallback, Competition, Conte
 
 use self::upload::UploadEventManager;
 
+mod executor;
 mod upload;
 
 pub struct Settings {

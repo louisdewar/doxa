@@ -3,6 +3,7 @@ table! {
         id -> Text,
         owner -> Int4,
         competition -> Int4,
+        extension -> Text,
         uploaded -> Bool,
         deleted -> Bool,
         failed -> Bool,

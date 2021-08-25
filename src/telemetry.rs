@@ -11,6 +11,7 @@ pub fn init_telemetry() {
     // Start a new Jaeger trace pipeline.
     // Spans are exported in batch - recommended setup for a production application.
     global::set_text_map_propagator(TraceContextPropagator::new());
+
     let tracer = opentelemetry_jaeger::new_pipeline()
         .with_service_name(app_name)
         .install_batch(TokioCurrentThread)

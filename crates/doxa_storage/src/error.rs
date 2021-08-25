@@ -1,3 +1,4 @@
+use doxa_auth::error::CompetitionNotFound;
 use doxa_core::{impl_respondable_error, RespondableError};
 
 // #[derive(RespondableError)]
@@ -17,7 +18,19 @@ impl_respondable_error!(
     CouldNotWriteFile,
     INTERNAL_SERVER_ERROR,
     "COULD_NOT_WRITE_FILE",
-    "There was an error writing the artifact"
+    "There was an error writing the file"
+);
+
+#[derive(Debug, Display, Error, From)]
+pub struct CouldNotReadFile {
+    reason: std::io::Error,
+}
+
+impl_respondable_error!(
+    CouldNotReadFile,
+    INTERNAL_SERVER_ERROR,
+    "COULD_NOT_READ_FILE",
+    "There was an error reading the file"
 );
 
 #[derive(Debug, Display, Error, From)]
@@ -43,6 +56,18 @@ impl_respondable_error!(
 );
 
 #[derive(Debug, Display, Error)]
+#[display(fmt = "Invalid extension (ext = `{}`)", extension)]
+pub struct InvalidExtension {
+    pub extension: String,
+}
+impl_respondable_error!(
+    InvalidExtension,
+    BAD_REQUEST,
+    "INVALID_FILE_EXTENSION",
+    "The provided file extension is not supported"
+);
+
+#[derive(Debug, Display, Error)]
 pub struct FileMissing;
 
 impl_respondable_error!(
@@ -50,6 +75,26 @@ impl_respondable_error!(
     BAD_REQUEST,
     "FILE_MISSING",
     "The upload did not contain a file"
+);
+
+#[derive(Debug, Display, Error)]
+pub struct ExtensionMissing;
+
+impl_respondable_error!(
+    ExtensionMissing,
+    BAD_REQUEST,
+    "FILE_EXTENSION_MISSING",
+    "Could not find the file name and/or extension"
+);
+
+#[derive(Debug, Display, Error)]
+pub struct AgentNotFound;
+
+impl_respondable_error!(
+    AgentNotFound,
+    NOT_FOUND,
+    "AGENT_NOT_FOUND",
+    "There isn't an agent with that ID within this competition"
 );
 
 #[derive(Debug, Display, Error, RespondableError, From)]
@@ -60,4 +105,18 @@ pub enum AgentUploadError {
     MultipartError(UploadMultipartError),
     #[from]
     FileTooLarge(FileTooLarge),
+    #[from]
+    InvalidExtension(InvalidExtension),
+    #[from]
+    ExtensionMissing(ExtensionMissing),
+}
+
+#[derive(Debug, Display, Error, RespondableError, From)]
+pub enum AgentDownloadError {
+    #[from(forward)]
+    IOError(CouldNotReadFile),
+    #[from]
+    CompetitionNotFound(CompetitionNotFound),
+    #[from]
+    AgentNotFound(AgentNotFound),
 }

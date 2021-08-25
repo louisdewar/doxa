@@ -1,19 +1,71 @@
+use actix_files::NamedFile;
 use actix_multipart::Multipart;
-use actix_web::{web, HttpResponse};
-use doxa_auth::guard::AuthGuard;
+use actix_web::{web, HttpRequest, HttpResponse};
+use doxa_auth::{error::CompetitionNotFound, guard::AuthGuard};
 use doxa_core::tokio::io::AsyncWriteExt;
 use doxa_core::EndpointResult;
 use doxa_db::PgPool;
 use doxa_mq::MQPool;
 use futures::{StreamExt, TryStreamExt};
 
+mod response;
+
 use crate::{
-    error::{CouldNotWriteFile, FileMissing, UploadMultipartError},
+    error::{
+        AgentNotFound, CouldNotReadFile, CouldNotWriteFile, ExtensionMissing, FileMissing,
+        InvalidExtension, UploadMultipartError,
+    },
     LocalStorage,
 };
 
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.route("/storage/upload/{competition}", web::post().to(upload));
+    cfg.route(
+        "/storage/download/{competition}/{agent}",
+        web::get().to(download),
+    );
+}
+
+async fn download(
+    pool: web::Data<PgPool>,
+    storage: web::Data<LocalStorage>,
+    path: web::Path<(String, String)>,
+    req: HttpRequest,
+) -> EndpointResult {
+    let (competition_name, agent_id) = path.into_inner();
+
+    let competition = web::block({
+        let pool = pool.clone();
+        let conn = web::block(move || pool.get()).await??;
+        move || doxa_db::action::competition::get_competition_by_name(&conn, competition_name)
+    })
+    .await??
+    .ok_or(CompetitionNotFound)?;
+
+    let agent = web::block({
+        let pool = pool.clone();
+        let conn = web::block(move || pool.get()).await??;
+        move || doxa_db::action::storage::get_agent(&conn, agent_id)
+    })
+    .await??
+    .ok_or(AgentNotFound)?;
+
+    if agent.competition != competition.id || !agent.uploaded || agent.failed || agent.deleted {
+        return Err(AgentNotFound.into());
+    }
+
+    let file = storage
+        .open_file(&competition.name, &agent.id)
+        .await
+        .map_err(|e| CouldNotReadFile::from(e))?;
+
+    let named_file = NamedFile::from_file(
+        file.into_std().await,
+        format!("{}.{}", agent.id, agent.extension),
+    )
+    .map_err(|e| CouldNotReadFile::from(e))?;
+
+    Ok(named_file.into_response(&req))
 }
 
 async fn upload(
@@ -41,6 +93,19 @@ async fn upload(
         .map_err(UploadMultipartError::from)?
         .ok_or(FileMissing)?;
 
+    let content_disposition = field.content_disposition().ok_or(ExtensionMissing)?;
+    let filename = content_disposition.get_filename().ok_or(ExtensionMissing)?;
+
+    let (_, extension) = filename.split_once('.').ok_or(ExtensionMissing)?;
+    let extension = extension.to_string();
+
+    match extension.as_str() {
+        "tar" | "tar.gz" => {}
+        _ => {
+            return Err(InvalidExtension { extension }.into());
+        }
+    }
+
     let (mut f, id) = storage
         .create_file(competition.clone())
         .await
@@ -51,7 +116,15 @@ async fn upload(
         let pool = pool.clone();
         let id = id.clone();
         let conn = web::block(move || pool.get()).await??;
-        move || crate::controller::register_upload_start(&conn, id, user_id, enrollment.competition)
+        move || {
+            crate::controller::register_upload_start(
+                &conn,
+                id,
+                user_id,
+                enrollment.competition,
+                extension.to_string(),
+            )
+        }
     })
     .await??;
 
@@ -75,11 +148,11 @@ async fn upload(
     doxa_mq::action::emit_upload_event(
         &mq_conn,
         &doxa_mq::model::UploadEvent {
-            competition,
-            agent: id,
+            competition: competition.clone(),
+            agent: id.clone(),
         },
     )
     .await?;
 
-    Ok(HttpResponse::Ok().into())
+    Ok(HttpResponse::Ok().json(response::Upload { id, competition }))
 }
