@@ -1,19 +1,22 @@
 //! Contains methods useful for implementing a new competition
 
-use std::{future::Future, pin::Pin, sync::Arc, time::Duration};
+use std::{future::Future, pin::Pin, sync::Arc};
 
 use async_trait::async_trait;
 
-use doxa_core::actix_web;
+use doxa_core::{actix_web, lapin};
+use doxa_executor::client::GameClient;
 use doxa_mq::model::UploadEvent;
 
-mod executor;
+use crate::{
+    error::ContextError,
+    manager::{executor::ExecutionManager, CompetitionManager},
+    Settings,
+};
 
-// pub trait Callback<T = ()>: Fn() -> Pin<Box<dyn Future<Output = T>>> {}
-// //
+pub use crate::context::Context;
 
 pub type BoxFuture<'a, T> = Pin<Box<dyn Future<Output = T> + Send + 'a>>;
-//pub type BoxedCallback<T = ()> = Box<dyn Fn() -> BoxFuture<'static, T>>;
 pub type BoxedCallback = Box<dyn Callback>;
 
 /// Returns true if the competition name is valid.
@@ -47,34 +50,18 @@ impl<T: Callback> From<T> for Box<dyn Callback> {
     }
 }
 
-// Maybe rename to BaseContext which contains stuff that can be cloned around then before actually
-// passing it into things such as routes we extract the db_pool and store it in the Context, or we
-// make those kinds of methods take in a DbConnection and provide another method which takes in
-// DbPool and returns DbConnection
-// Maybe context should be an Arc, pub type Context = Arc<Base(or other name)Context>;
-#[derive(Clone)]
-pub struct Context {}
-
-impl Context {
-    pub fn mongo(&self) {
-        todo!();
-    }
-
-    // pub fn register_timer<A: Fn(&mut Context) -> B, B: Future<Output = ()>>(
-    //     &self,
-    //     duration: Duration,
-    // ) {
-    //     todo!()
-    // }
-}
-
 #[async_trait]
 pub trait Competition: 'static + Send + Sync {
+    type GameClient: GameClient;
+
+    /// See [`validate_competition_name`] for more info regarding allowed names.
+    const COMPETITION_NAME: &'static str;
+
     // Maybe &mut self could be enforced as startup happens before everything else
     // could also be the case that startup returns Self.
     /// Runs exactly once at startup before all other functions
     // Maybe add StartupContext for things such as registering timers.
-    async fn startup(&self, context: &mut Context);
+    async fn startup(&self, context: &mut Context<Self>) -> Result<(), ContextError>;
 
     /// Sets up routes with an automatic prefix of `/competition/{competition_name}`.
     /// This may run multiple times.
@@ -84,49 +71,67 @@ pub trait Competition: 'static + Send + Sync {
 
     /// Runs whenever a new agent has been successfull uploaded.
     /// TODO: upload info
-    async fn on_upload(&self, context: &mut Context, upload_event: UploadEvent);
+    async fn on_upload(
+        &self,
+        context: &mut Context<Self>,
+        upload_event: UploadEvent,
+    ) -> Result<(), ContextError>;
 
     /// Runs whenever the result of an execution (commonly called a match) has been completed.
     /// TODO: execution info
     /// maybe have a `.save(conn)` method to save to the database
-    async fn on_execution_result(&self, context: &mut Context);
-
-    /// Returns the name of the competition.
-    ///
-    /// See [`validate_competition_name`] for more info.
-    fn name(&self) -> String;
+    async fn on_execution_result(&self, context: &mut Context<Self>) -> Result<(), ContextError>;
 }
 
-// pub struct Competition {
-//     name: String,
-//     on_startup: BoxedCallback,
-//     on_upload: BoxedCallback,
-//     timers: Vec<(Duration, BoxedCallback)>,
-// }
-//
-// impl Competition {
-//     pub fn new(
-//         name: impl Into<String>,
-//         on_startup: impl Callback,
-//         on_upload: impl Callback,
-//     ) -> Self {
-//         Competition {
-//             name: name.into(),
-//             on_startup: on_startup.into(),
-//             on_upload: on_upload.into(),
-//             timers: Vec::new(),
-//         }
-//     }
-// }
+/// A trait that is similar to Competition except it supports dynamic dispatch.
+#[async_trait]
+pub(crate) trait CompetitionInner: 'static + Send + Sync {
+    fn configure_routes(&self, service: &mut actix_web::web::ServiceConfig);
 
-// pub trait Competition {
-//     fn on_startup(&self, context: &mut Context) -> Pin<Box<dyn Future<Output = ()>>> {
-//         // OR
-//         // fn on_startup(&self, context: &mut Context) -> Pin<Box<dyn Future<Output = ()>>> where
-//         // Self: Sized {
-//         // (Could just add trait Competition: Sized at the top)
-//         Box::pin(async {})
-//     }
-//
-//     fn on_upload(&self, context: &mut Context) -> Pin<Box<dyn Future<Output = ()>>>;
-// }
+    // async fn on_upload(&self, context: &mut Context, upload_event: UploadEvent);
+
+    // async fn on_execution_result(&self, context: &mut Context);
+
+    // /// Starts the various competition management systems, e.g. upload and executor
+    // async fn start_execution_manager(
+    //     &self,
+    //     connection: &lapin::Connection,
+    //     executor_settings: Arc<doxa_executor::Settings>,
+    // );
+
+    async fn start_competition_manager(self: Arc<Self>, settings: Arc<Settings>);
+
+    fn name(&self) -> &'static str;
+}
+
+#[async_trait]
+impl<T: Competition> CompetitionInner for T {
+    fn configure_routes(&self, service: &mut actix_web::web::ServiceConfig) {
+        Competition::configure_routes(self, service)
+    }
+
+    // async fn on_upload(&self, context: &mut Context, upload_event: UploadEvent) {
+    //     Competition::on_upload(self, context, upload_event).await
+    // }
+
+    // async fn on_execution_result(&self, context: &mut Context) {
+    //     Competition::on_execution_result(self, context).await
+    // }
+
+    async fn start_competition_manager(self: Arc<Self>, settings: Arc<Settings>) {
+        // TODO: decide whether or not this needs to be async + Error
+        CompetitionManager::start(self, settings).await;
+    }
+
+    // // Maybe take in Arc self so that it can be used in the manager/game client?
+    // /// Start the execution manager then moves itself onto it's own thread for listening to
+    // /// messages after setup
+    // async fn start_execution_manager(&self, settings: Arc<Settings>) {
+    //     let manager = ExecutionManager::<T::GameClient>::new(settings, self.name()).await;
+    //     manager.start(connection, executor_settings).await;
+    // }
+
+    fn name(&self) -> &'static str {
+        T::COMPETITION_NAME
+    }
+}

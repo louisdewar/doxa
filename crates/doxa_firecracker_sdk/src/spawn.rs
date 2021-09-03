@@ -1,11 +1,10 @@
 use std::io::ErrorKind;
 use std::path::PathBuf;
+use std::process::Stdio;
 
 use hyper::Method;
 use tokio::fs::File;
 use tokio::process::{Child, Command};
-
-use tempfile::NamedTempFile;
 
 use crate::error::{InvalidPath, RequestError, ShutdownError, SpawnError, TimeoutWaitingForSocket};
 use crate::net::expect_ok_response;
@@ -35,11 +34,12 @@ impl VMOptions {
     /// If there is an error after the process has been created then this will try to terminate the
     /// process as best as it can although it may fail in which case it will panic.
     pub async fn spawn(self, firecracker_path: PathBuf) -> Result<VM, SpawnError> {
-        // let socket = tokio::task::spawn_blocking(|| NamedTempFile::new()).await??;
-
         let firecracker_process = Command::new(firecracker_path)
             .arg("--api-sock")
             .arg(&self.socket)
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
             .kill_on_drop(true)
             .spawn()?;
 

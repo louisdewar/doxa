@@ -1,20 +1,18 @@
-use std::{env, path::PathBuf};
+use std::{env, path::PathBuf, sync::Arc};
 
 use actix_web::{web, App, HttpServer};
 
-use doxa_competition::{
-    hello_world::HelloWorldCompetiton,
-    manager::{CompetitionManager, CompetitionManagerBuilder},
-};
+use doxa_competition::{hello_world::HelloWorldCompetiton, CompetitionSystem};
+use doxa_storage::AgentRetrieval;
 use tracing_actix_web::TracingLogger;
 mod telemetry;
 
-fn create_competition_manager() -> CompetitionManager {
-    let mut builder = CompetitionManagerBuilder::new();
+fn create_competition_system(settings: doxa_competition::Settings) -> CompetitionSystem {
+    let mut system = CompetitionSystem::new(Arc::new(settings));
 
-    builder.add_competition(HelloWorldCompetiton);
+    system.add_competition(HelloWorldCompetiton);
 
-    builder.build()
+    system
 }
 
 #[actix_web::main]
@@ -33,19 +31,31 @@ async fn main() -> std::io::Result<()> {
     };
 
     let storage_settings = doxa_storage::Settings {
-        root: PathBuf::from("/tmp/doxa_storage"),
+        root: PathBuf::from("dev/doxa_storage"),
+    };
+
+    let executor_settings = doxa_executor::Settings {
+        firecracker_path: PathBuf::from("./dev/firecracker"),
+        kernel_img: PathBuf::from("./dev/vmlinux.bin"),
+        kernel_boot_args: "console=ttyS0 reboot=k panic=1 pci=off".to_string(),
+        rootfs: PathBuf::from("./dev/rootfs.img"),
+        agent_retrieval: AgentRetrieval::new("http://localhost:3001/storage/download/".to_string()),
     };
 
     doxa_db::run_migrations(&doxa_db::establish_connection(&database_url));
-    let mq_conn = doxa_mq::establish_mq_connection(&mq_url)
-        .await
-        .expect("couldn't connect to MQ");
-    let competition_manager = create_competition_manager();
-
-    let configure_competiton_routes = competition_manager.start(mq_conn);
 
     let db_pool = web::Data::new(doxa_db::establish_pool(&database_url));
     let mq_pool = web::Data::new(doxa_mq::establish_pool(mq_url, 25).await);
+
+    let competition_settings = doxa_competition::Settings {
+        executor_settings: Arc::new(executor_settings),
+        mq_pool: Arc::clone(&mq_pool),
+        pg_pool: Arc::clone(&db_pool),
+    };
+    let competition_system = create_competition_system(competition_settings);
+    let configure_competiton_routes = competition_system.generate_configure_fn();
+
+    competition_system.start().await;
 
     println!("Starting at 127.0.0.1:3001");
 

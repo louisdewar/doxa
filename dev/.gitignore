@@ -1,2 +1,5 @@
-rootfs
+firecracker
 rootfs.img
+rootfs
+vmlinux.bin
+doxa_storage

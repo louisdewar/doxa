@@ -9,7 +9,11 @@ serde = { version = "1.0.128", features = ["derive"] }
 derive_more = "0.99.16"
 tokio = { version = "1.10.0", features = ["fs", "io-util", "process", "rt", "macros", "net", "io-std"] }
 doxa_firecracker_sdk = { path = "../doxa_firecracker_sdk" }
+doxa_core = { path = "../doxa_core" }
 tempfile = "3.2.0"
+bytes = "1.1.0"
+futures-util = "0.3.16"
+serde_yaml = "0.8.20"
 
 [[bin]]
 name = "vm_executor"

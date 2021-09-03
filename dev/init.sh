@@ -1,12 +1,6 @@
 #!/bin/sh
 
-echo Hello world
-
-# read x
-# 
-# echo You wrote $x
-# 
-# exec /bin/sh
+echo INIT started
 
 export RUST_BACKTRACE=1
 /sbin/vm_executor

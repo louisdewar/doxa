@@ -62,15 +62,6 @@ impl<T: RespondableError + 'static> From<T> for RespondableErrorWrapper {
     }
 }
 
-// impl Responder for RespondableErrorWrapper {
-//     fn respond_to(self, _req: &actix_web::HttpRequest) -> HttpResponse {
-//         println!("respond to");
-//         // TODO: proper logging
-//         println!("[{}:{}] error {}", file!(), line!(), &self.0);
-//         self.0.into_response()
-//     }
-// }
-
 #[macro_export]
 macro_rules! impl_respondable_error {
     ($struct:ty, $status_code:ident, $error_code:expr, option: $error_message:expr) => {

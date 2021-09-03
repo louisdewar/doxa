@@ -1,14 +1,24 @@
+use std::{error, fmt};
+
+use async_trait::async_trait;
 use serde::{de::DeserializeOwned, Serialize};
 
-/// Maintains the execution state, sending input to agents and handling the output
-pub trait ExecutionClient {
-    /// The type that is created when by the competition for initializing a match.
-    /// This is then recieved by the execution client on match start.
-    type MatchRequest: Serialize + DeserializeOwned;
-    /// The type that is generated when a match is successfully completed and sent back to the
-    /// competition for processing.
-    ///
-    /// TODO: consider changing name to support sending errors back to the main system and using a
-    /// Result enum where the Err type has some common errors with a customisable one.
-    type ExecutionResult: Serialize + DeserializeOwned;
+use crate::{context::GameContext, error::GameError};
+
+/// Maintains the game state, sending input to agents and handling the output.
+#[async_trait]
+pub trait GameClient: Send + Sync + 'static {
+    type Error: error::Error + fmt::Debug + fmt::Display;
+    /// The payload of the match request specific to this competition.
+    /// This is wrapped in the system's own match request that includes information such as the
+    /// agents participating. This is only for extra metadata for the competition, in many cases it
+    /// may not be required and could be set to the unit type `()`.
+    type MatchRequest: Serialize + DeserializeOwned + Send + 'static;
+
+    /// Runs the game until completion.
+    /// TODO: allow this method to take in the competition
+    async fn run<'a>(
+        match_request: Self::MatchRequest,
+        context: &mut GameContext<'a>,
+    ) -> Result<(), GameError<Self::Error>>;
 }

@@ -7,3 +7,5 @@ pub use actix_web;
 pub use deadpool_lapin;
 pub use lapin;
 pub use tokio;
+pub use tracing;
+pub use tracing_futures;

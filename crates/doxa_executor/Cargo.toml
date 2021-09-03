@@ -6,7 +6,13 @@ edition = "2018"
 [dependencies]
 doxa_core = { path = "../doxa_core" }
 doxa_mq = { path = "../doxa_mq" }
+doxa_vm = { path = "../doxa_vm" }
+doxa_storage = { path = "../doxa_storage" }
 
 async-trait = "0.1.51"
-wasmer = "2.0.0"
 serde = { version = "1.0.127", features = ["derive"] }
+derive_more = "0.99.16"
+futures = "0.3.17"
+
+[dev-dependencies]
+tokio = { version = "1.10.0", features = ["fs", "io-util", "process", "rt", "macros", "net", "io-std"] }

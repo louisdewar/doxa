@@ -1,8 +1,8 @@
-use std::path::PathBuf;
+use std::{io, path::PathBuf};
 
+use doxa_core::tracing::{info, trace};
 use doxa_firecracker_sdk::{error::ShutdownError, VMOptions, VM};
 use tokio::{
-    io::AsyncRead,
     net::{UnixListener, UnixStream},
     task,
 };
@@ -54,13 +54,6 @@ impl Manager {
         .spawn(firecracker_path)
         .await?;
 
-        // let mut vm_stdout = vm.firecracker_process().stdout.take().unwrap();
-        // task::spawn(async move {
-        //     tokio::io::copy(&mut vm_stdout, &mut tokio::io::stdout())
-        //         .await
-        //         .unwrap();
-        // });
-
         // Begin listening for connections on port 1001
         let listener = UnixListener::bind(dir.path().join("v.sock_1001")).unwrap();
 
@@ -85,35 +78,49 @@ impl Manager {
         })
     }
 
-    pub async fn send_agent<R: AsyncRead + Unpin>(
+    /// Sends the agent and then waits for the VM to spawn it
+    pub async fn send_agent<S: futures_util::Stream<Item = Result<bytes::Bytes, E>> + Unpin, E>(
         &mut self,
-        agent_name: String,
+        agent_name: &str,
         agent_size: u64,
-        mut agent_stream: R,
-    ) -> Result<(), SendAgentError> {
-        let mut length_message = [0; 9];
-        length_message[0] = b'F';
-        length_message[1..9].copy_from_slice(&u64::to_be_bytes(agent_size));
-        self.stream.send_message(&length_message, false).await?;
-
+        mut agent: S,
+    ) -> Result<(), SendAgentError<E>> {
         self.stream
-            .send_message(format!("N{}", agent_name).as_bytes(), true)
+            .send_full_message(format!("N{}", agent_name).as_bytes())
             .await?;
 
-        tokio::io::copy(&mut agent_stream, self.stream.get_writer()).await?;
+        self.stream
+            .send_stream(&mut agent, agent_size as usize)
+            .await
+            .map_err(|e| SendAgentError::DownloadAgentError(e))?;
 
         self.stream
-            .send_message("FILE ENDS".as_bytes(), true)
+            .send_full_message("FILE ENDS".as_bytes())
             .await?;
 
-        let mut msg = [0; 8];
-        self.stream.read_exact(&mut msg).await?;
+        self.stream.expect_exact_msg(b"RECEIVED").await?;
+        trace!("VM has received agent");
 
-        if &msg != b"RECEIVED" {
-            return Err(SendAgentError::MissingReceivedMessage);
-        }
+        self.stream.expect_exact_msg(b"SPAWNED").await?;
+        info!("VM has spawned agent");
 
         Ok(())
+    }
+
+    /// Sends input to the agent (this will be sent directly to the agent's STDIN).
+    /// This will not append a new line this must be provided in the input message itself.
+    /// It is possible to send part of a line, a full line or multiple lines with this method.
+    pub async fn send_agent_input(&mut self, line: &[u8]) -> Result<(), io::Error> {
+        self.stream
+            .send_prefixed_full_message(b"INPUT_", line)
+            .await
+    }
+
+    /// Get access to the underlying stream
+    /// TODO: in future have an abstraction around this and
+    /// make stream pub(crate)
+    pub fn stream_mut(&mut self) -> &mut Stream<UnixStream> {
+        &mut self.stream
     }
 
     pub async fn shutdown(self) -> Result<(), ShutdownError> {

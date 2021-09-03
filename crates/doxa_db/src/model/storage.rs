@@ -1,6 +1,6 @@
 use crate::schema::agents;
 
-use diesel::{Insertable, Queryable};
+use diesel::{data_types::PgTimestamp, Insertable, Queryable};
 
 #[derive(Debug, Clone, Queryable)]
 pub struct AgentUpload {
@@ -8,6 +8,7 @@ pub struct AgentUpload {
     pub owner: i32,
     pub competition: i32,
     pub extension: String,
+    pub uploaded_at: PgTimestamp,
     pub uploaded: bool,
     pub deleted: bool,
     pub failed: bool,
