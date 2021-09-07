@@ -1,4 +1,4 @@
-use std::{future::Future, marker::PhantomData, sync::Arc};
+use std::{marker::PhantomData, sync::Arc};
 
 use doxa_core::lapin::Channel;
 use doxa_mq::model::MatchRequest;
@@ -14,6 +14,7 @@ pub struct GameManager<C: GameClient> {
     event_queue_name: String,
     event_channel: Channel,
     client_match_request: C::MatchRequest,
+    game_id: i32,
 }
 
 impl<C: GameClient> GameManager<C> {
@@ -43,6 +44,7 @@ impl<C: GameClient> GameManager<C> {
             event_queue_name,
             event_channel,
             client_match_request: match_request.payload,
+            game_id: match_request.game_id,
         })
     }
 
@@ -52,10 +54,23 @@ impl<C: GameClient> GameManager<C> {
             &mut self.agents,
             &self.event_queue_name,
             &self.event_channel,
+            self.game_id,
         );
+
+        context
+            .emit_start_event()
+            .await
+            .map_err(|e| GameManagerError::Runtime(e.into()))?;
 
         C::run(self.client_match_request, &mut context)
             .await
-            .map_err(|e| GameManagerError::Runtime(e))
+            .map_err(|e| GameManagerError::Runtime(e))?;
+
+        context
+            .emit_end_event()
+            .await
+            .map_err(|e| GameManagerError::Runtime(e.into()))?;
+
+        Ok(())
     }
 }

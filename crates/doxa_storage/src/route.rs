@@ -37,7 +37,7 @@ async fn download(
     let competition = web::block({
         let pool = pool.clone();
         let conn = web::block(move || pool.get()).await??;
-        move || doxa_db::action::competition::get_competition_by_name(&conn, competition_name)
+        move || doxa_db::action::competition::get_competition_by_name(&conn, &competition_name)
     })
     .await??
     .ok_or(CompetitionNotFound)?;
@@ -76,10 +76,19 @@ async fn upload(
     path: web::Path<String>,
     auth: AuthGuard<()>,
 ) -> EndpointResult {
+    // TODO:
+    // - Check what the remaining capacity is for the user's upload quota, this will need to be
+    // done before upload begins and then again once it is inserted into the database as it may be
+    // possible for two uploads to occur simulataneously.
+    // - Add an option to delete previous uploads automatically when space is required.
+    // - Maybe figure out a way to ensure there is only one upload at once? Find uploads that are
+    // in the database but not marked uploaded (will need a max timeout at which to consider an
+    // upload failed).
+
     let competition = path.into_inner();
     // Check if the user is enrolled
     let enrollment = web::block({
-        let user_id = auth.user();
+        let user_id = auth.id();
         let competition = competition.clone();
         let pool = pool.clone();
         let conn = web::block(move || pool.get()).await??;
@@ -112,7 +121,7 @@ async fn upload(
         .map_err(CouldNotWriteFile::from)?;
 
     web::block({
-        let user_id = auth.user();
+        let user_id = auth.id();
         let pool = pool.clone();
         let id = id.clone();
         let conn = web::block(move || pool.get()).await??;

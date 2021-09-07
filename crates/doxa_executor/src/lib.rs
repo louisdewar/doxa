@@ -2,6 +2,7 @@ pub mod agent;
 pub mod client;
 pub mod context;
 pub mod error;
+pub mod event;
 pub mod game;
 pub mod settings;
 

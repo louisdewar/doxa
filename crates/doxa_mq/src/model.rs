@@ -1,3 +1,4 @@
+use doxa_core::chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -14,18 +15,22 @@ pub struct MatchRequest<T> {
     pub agents: Vec<String>,
     /// The competition specific payload
     pub payload: T,
+    /// The id of the game
+    pub game_id: i32,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct GameEvent<T> {
-    /// The unix timestamp measured in seconds from the UNIX_EPOCH when the event occured
-    timestamp: u64,
+    /// The timestamp when the event occured
+    pub timestamp: DateTime<Utc>,
     /// System event types such as `_START` and `_END` begin with underscores, competition events
     /// must not
-    event_type: String,
+    pub event_type: String,
     /// Event ID within a particular game that is used for ordering.
     /// The ID must be unique within the game.
-    event_id: u32,
+    pub event_id: u32,
+    /// The id of the game
+    pub game_id: i32,
     /// The event type specific payload
-    payload: T,
+    pub payload: T,
 }

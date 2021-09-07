@@ -8,8 +8,8 @@ use std::{
 use tokio::{
     self,
     fs::{File, OpenOptions},
-    io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt, BufReader, Lines, Stdin, Stdout},
-    process::{self, Child, ChildStdin, ChildStdout},
+    io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt, BufReader},
+    process::{self, Child, ChildStdin},
     task::{self, JoinHandle},
     time::timeout,
 };
@@ -38,9 +38,7 @@ pub const MAX_FILE_NAME_LEN: usize = 300;
 pub struct VMExecutor {
     child_process: Child,
     stdin: ChildStdin,
-    // execution_config: ExecutionConfig,
     stream: Stream<VsockStream>,
-    // stdout_lines: Lines<BufReader<ChildStdout>>,
 }
 
 impl VMExecutor {
@@ -84,9 +82,7 @@ impl VMExecutor {
 
             let mut executor = VMExecutor {
                 child_process,
-                //     execution_config: config,
                 stream,
-                //     stdout_lines:,
                 stdin,
             };
 
@@ -94,7 +90,6 @@ impl VMExecutor {
 
             // Change next_full_message to return a struct that impl's future and is cancellable
             loop {
-                dbg!();
                 tokio::select! {
                     line = stdout_lines.next_line() => {
                         match dbg!(line.unwrap()) {
@@ -110,8 +105,6 @@ impl VMExecutor {
 
                 };
             }
-
-            dbg!();
 
             // The proceses finished
             executor.stream.send_full_message(b"F_").await.unwrap();
@@ -138,8 +131,6 @@ impl VMExecutor {
             b"INPUT" => self.stdin.write_all(msg).await?,
             _ => return Err(HandleMessageError::UnrecognisedPrefix),
         }
-
-        dbg!("wrote to input");
 
         Ok(())
     }
@@ -186,26 +177,11 @@ impl VMExecutor {
 
         println!("Beginning download of agent {}", name);
         // == File data
-        // let mut current_len = 0;
-        // while current_len < file_len {
-        //     let buf = stream.read_until_n(file_len - current_len).await?;
-        //     file.write_all(&buf).await?;
-
-        //     current_len += buf.len();
-        //     println!(
-        //         "receieved {} bytes ({:.2}%)...",
-        //         buf.len(),
-        //         (100 * current_len) as f64 / file_len as f64
-        //     );
-        // }
-
         let file_len = stream
             .next_message_to_writer(&mut file, MAX_AGENT_SIZE)
             .await?;
 
         println!("Downloaded {} bytes", file_len);
-
-        // Reuse name_msg to avoid extra allocations
 
         timeout(
             Duration::from_secs(10),

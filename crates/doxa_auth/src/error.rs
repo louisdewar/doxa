@@ -45,6 +45,16 @@ impl_respondable_error!(
     "The provided token has expired"
 );
 
+#[derive(Debug, Display, Error)]
+pub struct IncorrectTokenGeneration;
+
+impl_respondable_error!(
+    IncorrectTokenGeneration,
+    UNAUTHORIZED,
+    "INCORRECT_TOKEN_GENERATION",
+    "The login token is outdated so you need to login again"
+);
+
 #[derive(Debug, Display, Error, RespondableError, From)]
 pub enum TokenError {
     #[from]

@@ -1,5 +1,5 @@
 use std::{
-    path::{Path, PathBuf},
+    path::{Path},
     process::Stdio,
 };
 
@@ -13,7 +13,7 @@ const PYTHON_BIN: &'static str = "/usr/bin/python";
 
 pub async fn spawn_python(
     root: &Path,
-    options: &Options,
+    _options: &Options,
     entrypoint: &str,
 ) -> Result<Child, ExecutionSpawnError> {
     Ok(Command::new(PYTHON_BIN)

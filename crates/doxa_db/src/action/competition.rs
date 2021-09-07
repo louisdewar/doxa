@@ -23,7 +23,7 @@ pub fn enroll_user(
 
 pub fn get_competition_by_name(
     conn: &PgConnection,
-    name: String,
+    name: &str,
 ) -> Result<Option<Competition>, DieselError> {
     s::competitions::table
         .filter(s::competitions::columns::name.eq(name))

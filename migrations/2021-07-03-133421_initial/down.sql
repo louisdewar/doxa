@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS leaderboard;
 DROP TABLE IF EXISTS game_participants;
 DROP TABLE IF EXISTS game_events;
 DROP TABLE IF EXISTS games;

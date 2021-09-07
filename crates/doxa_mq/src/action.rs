@@ -1,6 +1,3 @@
-use std::future::Future;
-use std::pin::Pin;
-
 use doxa_core::lapin::options::BasicConsumeOptions;
 use doxa_core::lapin::{self, Connection, Consumer};
 
@@ -12,7 +9,7 @@ use lapin::{
 };
 use serde::Serialize;
 
-use crate::model::{GameEvent, MatchRequest, UploadEvent};
+use crate::model::{MatchRequest, UploadEvent};
 
 pub use bincode::Error as BincodeError;
 pub use bincode::{deserialize, serialize};
@@ -151,6 +148,16 @@ pub async fn get_match_request_consumer(
     consume(&channel, &match_request_queue_name(competition_name)).await
 }
 
+/// This declares the correct queue then returns the consumer which can yield messages.
+pub async fn get_game_event_consumer(
+    conn: &Connection,
+    competition_name: &str,
+) -> Result<Consumer, lapin::Error> {
+    let channel = conn.create_channel().await?;
+    declare_game_event_queue(&channel, competition_name).await?;
+
+    consume(&channel, &game_event_queue_name(competition_name)).await
+}
 // pub async fn emit_game_event<T: Serialize>(
 //     conn: &Connection,
 //     game_event: &GameEvent<T>,

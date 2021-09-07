@@ -549,6 +549,7 @@ dependencies = [
  "libc",
  "num-integer",
  "num-traits",
+ "serde",
  "time 0.1.43",
  "winapi",
 ]
@@ -754,6 +755,7 @@ checksum = "bba51ca66f57261fd17cadf8b73e4775cc307d0521d855de3f5de91a8f074e0e"
 dependencies = [
  "bitflags",
  "byteorder",
+ "chrono",
  "diesel_derives",
  "pq-sys",
  "r2d2",
@@ -864,12 +866,14 @@ version = "0.1.0"
 dependencies = [
  "async-trait",
  "derive_more",
+ "doxa_auth",
  "doxa_core",
  "doxa_db",
  "doxa_executor",
  "doxa_mq",
  "futures",
  "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -877,6 +881,7 @@ name = "doxa_core"
 version = "0.1.0"
 dependencies = [
  "actix-web",
+ "chrono",
  "deadpool-lapin",
  "diesel",
  "doxa_sys",
@@ -891,6 +896,7 @@ dependencies = [
 name = "doxa_db"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "diesel",
  "diesel_migrations",
  "serde_json",
@@ -908,6 +914,7 @@ dependencies = [
  "doxa_vm",
  "futures",
  "serde",
+ "serde_json",
  "tokio",
 ]
 
@@ -968,7 +975,6 @@ version = "0.1.0"
 dependencies = [
  "bytes 1.1.0",
  "derive_more",
- "doxa_core",
  "doxa_firecracker_sdk",
  "futures-util",
  "serde",
@@ -976,6 +982,7 @@ dependencies = [
  "tempfile",
  "tokio",
  "tokio-vsock",
+ "tracing",
 ]
 
 [[package]]
@@ -2310,9 +2317,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.66"
+version = "1.0.67"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "336b10da19a12ad094b59d870ebde26a45402e5b470add4b5fd03c5048a32127"
+checksum = "a7f9e390c27c3c0ce8bc5d725f6e4d30a29d26659494aa4b17535f7522c5c950"
 dependencies = [
  "itoa",
  "ryu",

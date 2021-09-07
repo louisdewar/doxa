@@ -47,7 +47,7 @@ impl<T: AsyncRead + AsyncWrite + Unpin> Stream<T> {
     }
 
     fn process_buf_data(&mut self) -> BufData {
-        let mut unprocessed_bytes = self.buf_end - self.buf_offset;
+        let unprocessed_bytes = self.buf_end - self.buf_offset;
 
         if Some(self.message_index) == self.message_len {
             self.message_len = None;
@@ -85,12 +85,7 @@ impl<T: AsyncRead + AsyncWrite + Unpin> Stream<T> {
                 len_bytes.copy_from_slice(&self.buf[self.buf_offset..(self.buf_offset + 4)]);
                 let message_len = u32::from_be_bytes(len_bytes);
                 self.buf_offset += 4;
-                unprocessed_bytes -= 4;
                 self.message_len = Some(message_len as usize);
-
-                if unprocessed_bytes == 0 {
-                    return BufData::WaitingForData;
-                }
 
                 assert_eq!(self.message_index, 0);
 
@@ -99,6 +94,7 @@ impl<T: AsyncRead + AsyncWrite + Unpin> Stream<T> {
         };
 
         assert!(message_len >= self.message_index);
+        // TODO: maybe not needed (replace with assert) see above
         if message_len == self.message_index {
             // We could only get here for 0 length messages, potentially we disallow those
             self.message_len = None;

@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 pub mod error;
 pub mod executor;
 pub mod manager;
+pub mod recorder;
 
 // TODO: make private again once there is a wrapper layer in manager
 pub mod stream;

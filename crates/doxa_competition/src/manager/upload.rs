@@ -17,13 +17,15 @@ use crate::client::{Competition, Context};
 pub(super) struct UploadEventManager<C: Competition> {
     settings: Arc<Settings>,
     competition: Arc<C>,
+    competition_id: i32,
 }
 
 impl<C: Competition> UploadEventManager<C> {
-    pub fn new(settings: Arc<Settings>, competition: Arc<C>) -> Self {
+    pub fn new(settings: Arc<Settings>, competition: Arc<C>, competition_id: i32) -> Self {
         UploadEventManager {
             settings,
             competition,
+            competition_id,
         }
     }
 
@@ -46,8 +48,11 @@ impl<C: Competition> UploadEventManager<C> {
             competition = C::COMPETITION_NAME
         );
         let future = async move {
-            let mut context =
-                Context::new(self.settings.mq_pool.clone(), self.settings.pg_pool.clone());
+            let mut context = Context::new(
+                self.settings.mq_pool.clone(),
+                self.settings.pg_pool.clone(),
+                self.competition_id,
+            );
             // TODO: In future just log error and retry with timeout
             while let Some(message) = consumer.next().await {
                 let (_, delivery) = message.expect("Error connecting to MQ");
@@ -58,7 +63,7 @@ impl<C: Competition> UploadEventManager<C> {
                 event!(Level::INFO, %agent_id, "received upload event for agent");
 
                 if let Err(error) = self.competition.on_upload(&mut context, upload).await {
-                    event!(Level::ERROR, %error, %agent_id, "on_upload failed for agent");
+                    event!(Level::ERROR, %error, debug = ?error, %agent_id, "on_upload failed for agent");
                     continue;
                 }
 

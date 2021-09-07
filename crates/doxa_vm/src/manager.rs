@@ -1,11 +1,12 @@
 use std::{io, path::PathBuf};
 
-use doxa_core::tracing::{info, trace};
 use doxa_firecracker_sdk::{error::ShutdownError, VMOptions, VM};
 use tokio::{
     net::{UnixListener, UnixStream},
     task,
 };
+
+use tracing::{info, trace};
 
 use crate::{
     error::{ManagerError, SendAgentError},
@@ -19,6 +20,8 @@ pub struct Manager {
     vm: VM,
     tempdir: TempDir,
     stream: Stream<UnixStream>,
+    // stdout: ChildStdout,
+    // stderr: ChildStderr,
 }
 
 impl Manager {
@@ -71,10 +74,15 @@ impl Manager {
 
         let stream = Stream::from_socket(stream);
 
+        // let stdout = vm.firecracker_process().stdout.take().unwrap();
+        // let stderr = vm.firecracker_process().stderr.take().unwrap();
+
         Ok(Manager {
             vm,
             tempdir: dir,
             stream,
+            // stdout,
+            // stderr,
         })
     }
 
@@ -123,10 +131,12 @@ impl Manager {
         &mut self.stream
     }
 
+    //pub async fn shutdown(self) -> Result<(ChildStdout, ChildStderr), ShutdownError> {
     pub async fn shutdown(self) -> Result<(), ShutdownError> {
         self.vm.shutdown().await?;
         let tempdir = self.tempdir;
         tokio::task::spawn_blocking(move || tempdir.close()).await??;
+        //Ok((self.stdout, self.stderr))
         Ok(())
     }
 }

@@ -1,4 +1,5 @@
-use doxa_core::error::RespondableErrorWrapper;
+use doxa_core::{error::RespondableErrorWrapper, tokio};
+use doxa_db::PgPool;
 
 use std::future::Future;
 use std::pin::Pin;
@@ -6,7 +7,7 @@ use std::pin::Pin;
 use actix_web::{dev, web, FromRequest, HttpRequest};
 
 use crate::{
-    error::{InvalidAuthenticationHeader, MissingAuthentication},
+    error::{IncorrectTokenGeneration, InvalidAuthenticationHeader, MissingAuthentication},
     guard::AuthGuard,
     settings::Settings,
 };
@@ -17,10 +18,7 @@ impl FromRequest for AuthGuard<()> {
     type Config = ();
 
     fn from_request(req: &HttpRequest, _payload: &mut dev::Payload) -> Self::Future {
-        // TODO: use database to check to see if user still exists.
-        // also maybe use an EPOCH scheme to increment a number if a user requests sign outs on all
-        // devices.
-        // let pool = req.app_data::<web::Data<PgPool>>().unwrap().clone();
+        let pool = req.app_data::<web::Data<PgPool>>().unwrap().clone();
         let settings = req.app_data::<web::Data<Settings>>().unwrap().clone();
 
         let auth_header = req
@@ -42,11 +40,20 @@ impl FromRequest for AuthGuard<()> {
 
             let token = crate::token::parse_token(&auth_header[7..], &settings.jwt_secret)?;
 
-            // In future there will be support for disabling
-            // sessions and the check will be done here (as part of a DB call)
+            let id = token.user();
+            // TODO: Maybe handle case where user ID does not exist as a special case although in
+            // practise this is probably just an INTERNAL_SERVER_ERROR
+            let user = tokio::task::spawn_blocking(move || {
+                let conn = pool.get().unwrap();
+                doxa_db::action::user::get_user_by_id(&conn, id)
+            })
+            .await??;
 
-            // let inner = T::construct(token.user(), pool).await?;
-            Ok(AuthGuard::new(token.user(), ()))
+            if token.generation() != &user.token_generation {
+                return Err(IncorrectTokenGeneration.into());
+            }
+
+            Ok(AuthGuard::new(token.user(), user.admin, ()))
         })
     }
 }

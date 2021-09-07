@@ -4,7 +4,7 @@ table! {
         owner -> Int4,
         competition -> Int4,
         extension -> Text,
-        uploaded_at -> Timestamp,
+        uploaded_at -> Timestamptz,
         uploaded -> Bool,
         deleted -> Bool,
         failed -> Bool,
@@ -29,7 +29,7 @@ table! {
     game_events (event_id, game) {
         event_id -> Int4,
         game -> Int4,
-        event_timestamp -> Timestamp,
+        event_timestamp -> Timestamptz,
         event_type -> Text,
         payload -> Jsonb,
     }
@@ -45,9 +45,16 @@ table! {
 table! {
     games (id) {
         id -> Int4,
-        start_time -> Timestamp,
-        complete_time -> Nullable<Timestamp>,
+        start_time -> Timestamptz,
+        complete_time -> Nullable<Timestamptz>,
         competition -> Int4,
+    }
+}
+
+table! {
+    leaderboard (agent) {
+        agent -> Text,
+        score -> Int4,
     }
 }
 
@@ -57,6 +64,7 @@ table! {
         admin -> Bool,
         username -> Text,
         password -> Text,
+        token_generation -> Text,
     }
 }
 
@@ -68,6 +76,7 @@ joinable!(game_events -> games (game));
 joinable!(game_participants -> agents (agent));
 joinable!(game_participants -> games (game));
 joinable!(games -> competitions (competition));
+joinable!(leaderboard -> agents (agent));
 
 allow_tables_to_appear_in_same_query!(
     agents,
@@ -76,5 +85,6 @@ allow_tables_to_appear_in_same_query!(
     game_events,
     game_participants,
     games,
+    leaderboard,
     users,
 );

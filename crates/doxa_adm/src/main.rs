@@ -1,4 +1,4 @@
-use clap::{App, ArgMatches};
+use clap::ArgMatches;
 use doxa_db::diesel::PgConnection;
 
 use crate::{agent::agent_subcommand, competition::competition_subcommand};

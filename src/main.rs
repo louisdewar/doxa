@@ -4,6 +4,7 @@ use actix_web::{web, App, HttpServer};
 
 use doxa_competition::{hello_world::HelloWorldCompetiton, CompetitionSystem};
 use doxa_storage::AgentRetrieval;
+use tracing::info;
 use tracing_actix_web::TracingLogger;
 mod telemetry;
 
@@ -57,7 +58,7 @@ async fn main() -> std::io::Result<()> {
 
     competition_system.start().await;
 
-    println!("Starting at 127.0.0.1:3001");
+    info!("Starting at 127.0.0.1:3001");
 
     HttpServer::new(move || {
         App::new()

@@ -1,3 +1,5 @@
+# Sets up the dev environment (very obviously not for production)
+
 version: "3"
 
 services:
@@ -19,8 +21,18 @@ services:
     volumes:
         - rabbitmq_data:/var/lib/rabbitmq/
         - rabbitmq_log:/var/log/rabbitmq
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=user@domain.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - 5050:80
+    volumes:
+      - pgadmin:/var/lib/pgadmin
 
 volumes:
   pg_data:
   rabbitmq_data:
   rabbitmq_log:
+  pgadmin:

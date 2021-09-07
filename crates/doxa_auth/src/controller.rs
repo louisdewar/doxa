@@ -19,6 +19,24 @@ use doxa_db::{action, model, model::user::User};
 // 1 week
 pub const JWT_LIFE: u64 = 60 * 60 * 24 * 7;
 
+pub const TOKEN_GENERATION_BYTES: usize = 5;
+
+/// A token generation is a string that is required to be present in auth tokens.
+/// Whenever an auth token is used the token generation must be checked to make sure it matches the
+/// one in the database.
+/// This means that if the token generation is updated to a new value in the database it can be
+/// used to invalidate all active auth tokens.
+fn new_token_generation() -> String {
+    use rand::Rng;
+
+    let generation: Vec<u8> = rand::thread_rng()
+        .sample_iter(rand::distributions::Standard)
+        .take(TOKEN_GENERATION_BYTES)
+        .collect();
+
+    base64::encode(generation)
+}
+
 /// Creates a user with a given username / password, hashing the password before inserting it into
 /// the database.
 ///
@@ -33,7 +51,12 @@ pub fn create_user(
     // to ascii?
 
     let password = password::new_hashed(&password);
-    let user = model::user::InsertableUser { username, password };
+    let token_generation = new_token_generation();
+    let user = model::user::InsertableUser {
+        username,
+        password,
+        token_generation,
+    };
 
     action::user::create_user(conn, &user).map_err(|e| {
         if was_unique_key_violation(&e) {
@@ -64,7 +87,11 @@ pub fn login(
     }
 
     Ok(generate_jwt(
-        &Token::new_with_duration(user.id, Duration::from_secs(JWT_LIFE)),
+        &Token::new_with_duration(
+            user.id,
+            user.token_generation,
+            Duration::from_secs(JWT_LIFE),
+        ),
         &jwt_key,
     ))
 }
@@ -77,8 +104,7 @@ pub fn is_enrolled(
     user_id: i32,
     competition: String,
 ) -> Result<Enrollment, CheckEnrollmentError> {
-    action::competition::get_competition_by_name(conn, competition.clone())?
-        .ok_or(CompetitionNotFound)?;
+    action::competition::get_competition_by_name(conn, &competition)?.ok_or(CompetitionNotFound)?;
 
     Ok(action::competition::get_enrollment(conn, user_id, competition)?.ok_or(UserNotEnrolled)?)
 }

@@ -35,6 +35,8 @@ impl Agent {
         storage: &doxa_storage::AgentRetrieval,
         settings: &Settings,
     ) -> Result<Agent, AgentError> {
+        // TODO: need some way to detect whether the requested agent is the current one as we don't
+        // want to waste time running those matches.
         let agent_response = storage.download_agent(&agent_id, competition).await?;
 
         if agent_response.status() == StatusCode::NOT_FOUND {

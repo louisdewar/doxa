@@ -7,6 +7,7 @@ pub struct User {
     pub admin: bool,
     pub username: String,
     pub password: String,
+    pub token_generation: String,
 }
 
 #[derive(Debug, Clone, Insertable)]
@@ -14,4 +15,5 @@ pub struct User {
 pub struct InsertableUser {
     pub username: String,
     pub password: String,
+    pub token_generation: String,
 }

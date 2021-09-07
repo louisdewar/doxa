@@ -43,6 +43,7 @@ pub enum AgentError {
 pub enum GameContextError {
     /// The provided id did not exist.
     #[display(fmt = "unknown agent with id `{}` the max was `{}`", id, max)]
+    #[from(ignore)]
     UnknownAgent {
         id: usize,
         /// The maximum is the largest allowed agent id
@@ -59,8 +60,19 @@ pub enum GameContextError {
         fmt = "ran out of time while waiting for next message from agent (assigned id={})",
         agent_id
     )]
+    #[from(ignore)]
     TimeoutWaitingForMessage {
         agent_id: usize,
+    },
+    #[display(
+        fmt = "the game expected {} agents when in reality there were {}",
+        expected,
+        actual
+    )]
+    #[from(ignore)]
+    IncorrectNumberAgents {
+        expected: usize,
+        actual: usize,
     },
 }
 

@@ -13,6 +13,7 @@ deadpool-lapin = { version = "0.8.0", features = ["rt_tokio_1"], default-feature
 lapin = { version = "1.7.1", features = ["rustls"] }
 tracing = "0.1.26"
 tracing-futures = "0.2.5"
+chrono = { version = "0.4.19", features = ["serde"] }
 
 [features]
 default = ["lapin/rustls"]

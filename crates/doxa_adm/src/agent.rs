@@ -48,10 +48,9 @@ pub fn list_agents(matches: &ArgMatches, conn: &PgConnection) {
     let user = action::user::get_user_by_username(conn, username)
         .unwrap()
         .expect("User does not exist");
-    let competition =
-        action::competition::get_competition_by_name(conn, competition_name.to_string())
-            .unwrap()
-            .expect("Competition does not exist");
+    let competition = action::competition::get_competition_by_name(conn, competition_name)
+        .unwrap()
+        .expect("Competition does not exist");
 
     let uploads = action::storage::list_uploads(conn, user.id, competition.id).unwrap();
 

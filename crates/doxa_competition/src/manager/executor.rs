@@ -1,13 +1,13 @@
-use std::{collections::HashMap, future::Future, marker::PhantomData, pin::Pin, sync::Arc};
+use std::{marker::PhantomData, sync::Arc};
 
-use doxa_executor::{client::GameClient, context::GameContext, game::GameManager};
+use doxa_executor::{client::GameClient, game::GameManager};
 
 use doxa_core::{
-    lapin::{options::BasicAckOptions, Consumer},
+    lapin::options::BasicAckOptions,
     tokio,
     tracing::{event, span, Instrument, Level},
 };
-use doxa_mq::{model::MatchRequest, Connection};
+use doxa_mq::model::MatchRequest;
 use futures::StreamExt;
 
 use crate::Settings;
@@ -86,7 +86,7 @@ impl<C: GameClient> ExecutionManager<C> {
                             {
                                 Ok(game_manger) => game_manger,
                                 Err(error) => {
-                                    event!(Level::ERROR, %error, "failed to start game manager");
+                                    event!(Level::ERROR, %error, debug = ?error, "failed to start game manager");
                                     return;
                                 }
                             };
@@ -94,12 +94,12 @@ impl<C: GameClient> ExecutionManager<C> {
                             match game_manager.run().await {
                                 Ok(()) => event!(Level::INFO, "game manager succesfully completed"),
                                 Err(error) => {
-                                    event!(Level::ERROR, %error, "error running game manager")
+                                    event!(Level::ERROR, %error, debug = ?error, "error running game manager")
                                 }
                             }
                         }
                         .instrument(span)
-                    });
+                    }).await.unwrap(); // TODO: semaphore then don't need to await for each
 
                     delivery
                         .ack(BasicAckOptions::default())

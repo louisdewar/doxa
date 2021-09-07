@@ -2,18 +2,29 @@ use std::{future::Future, pin::Pin};
 
 use actix_web::{web, HttpResponse};
 
+// TODO: get rid of AuthGuardInner, it was never used and isn't really useful
+
 pub struct AuthGuard<T: AuthGuardInner> {
     user: i32,
+    is_admin: bool,
     inner: T,
 }
 
 impl<T: AuthGuardInner> AuthGuard<T> {
-    pub fn new(user: i32, inner: T) -> Self {
-        AuthGuard { user, inner }
+    pub fn new(user: i32, is_admin: bool, inner: T) -> Self {
+        AuthGuard {
+            user,
+            is_admin,
+            inner,
+        }
     }
 
-    pub fn user(&self) -> i32 {
+    pub fn id(&self) -> i32 {
         self.user
+    }
+
+    pub fn admin(&self) -> bool {
+        self.is_admin
     }
 
     pub fn inner(self) -> T {

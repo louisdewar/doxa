@@ -10,15 +10,20 @@ use crate::error::{ExpiredToken, TokenError};
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Token {
     user: i32,
+    generation: String,
     expires_at: u64,
 }
 
 impl Token {
-    pub fn new_with_duration(user: i32, duration: Duration) -> Token {
+    pub fn new_with_duration(user: i32, generation: String, duration: Duration) -> Token {
         let expires_at =
             (SystemTime::now().duration_since(UNIX_EPOCH).unwrap() + duration).as_secs();
 
-        Token { user, expires_at }
+        Token {
+            user,
+            generation,
+            expires_at,
+        }
     }
 
     pub fn user(&self) -> i32 {
@@ -27,6 +32,10 @@ impl Token {
 
     pub fn expires_at(&self) -> u64 {
         self.expires_at
+    }
+
+    pub fn generation(&self) -> &str {
+        &self.generation
     }
 }
 

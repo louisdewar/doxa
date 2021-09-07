@@ -15,10 +15,17 @@ pub trait GameClient: Send + Sync + 'static {
     /// may not be required and could be set to the unit type `()`.
     type MatchRequest: Serialize + DeserializeOwned + Send + 'static;
 
+    /// The game event that this system emits.
+    /// Note: system events (ones beginning with `_` are not included here).
+    /// These will be stored using JSON in the database.
+    /// It is recommended for this to be an `enum` with `#[serde(tag = "type")]` or similar to make
+    /// deserialization/storage simple.
+    type GameEvent: Serialize + DeserializeOwned + Send + 'static;
+
     /// Runs the game until completion.
     /// TODO: allow this method to take in the competition
     async fn run<'a>(
         match_request: Self::MatchRequest,
-        context: &mut GameContext<'a>,
+        context: &mut GameContext<'a, Self>,
     ) -> Result<(), GameError<Self::Error>>;
 }

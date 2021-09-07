@@ -56,10 +56,9 @@ pub fn enroll(matches: &ArgMatches, conn: &PgConnection) {
     let user = action::user::get_user_by_username(conn, username)
         .unwrap()
         .expect("User does not exist");
-    let competition =
-        action::competition::get_competition_by_name(conn, competition_name.to_string())
-            .unwrap()
-            .expect("Competition does not exist");
+    let competition = action::competition::get_competition_by_name(conn, competition_name)
+        .unwrap()
+        .expect("Competition does not exist");
 
     let enrollment: Enrollment = action::competition::enroll_user(
         conn,
@@ -113,10 +112,9 @@ pub fn list_user_enrollments(matches: &ArgMatches, conn: &PgConnection) {
 
 pub fn list_competition_enrollments(matches: &ArgMatches, conn: &PgConnection) {
     let competition_name = matches.value_of("COMPETITION").unwrap();
-    let competition =
-        action::competition::get_competition_by_name(conn, competition_name.to_owned())
-            .unwrap()
-            .expect("Competition does not exist");
+    let competition = action::competition::get_competition_by_name(conn, competition_name)
+        .unwrap()
+        .expect("Competition does not exist");
 
     let users = action::competition::list_competition_enrollments(conn, competition.id).unwrap();
 

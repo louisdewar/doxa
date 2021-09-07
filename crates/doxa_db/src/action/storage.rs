@@ -1,6 +1,5 @@
 use crate::model::storage::{AgentUpload, InsertableAgentUpload};
 use crate::{schema as s, DieselError};
-use diesel::query_dsl::methods::OrderDsl;
 use diesel::{ExpressionMethods, OptionalExtension, PgConnection, QueryDsl, RunQueryDsl};
 
 pub fn register_upload_start(
@@ -50,7 +49,6 @@ pub fn get_active_agent(
     use s::agents::columns as c;
     s::agents::table
         .filter(c::owner.eq(user))
-        .filter(c::competition.eq(competition))
         .filter(c::competition.eq(competition))
         .filter(c::failed.eq(false))
         .filter(c::uploaded.eq(true))

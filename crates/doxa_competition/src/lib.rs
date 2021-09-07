@@ -13,6 +13,8 @@ pub mod settings;
 
 pub use settings::Settings;
 
+use doxa_core::tracing::{error, info};
+
 pub struct CompetitionSystem {
     competitions: HashMap<String, Arc<dyn CompetitionInner>>,
     settings: Arc<Settings>,
@@ -57,20 +59,27 @@ impl CompetitionSystem {
     pub fn generate_configure_fn(&self) -> impl Fn(&mut web::ServiceConfig) + Clone {
         let competitions = Arc::new(self.competitions.clone());
         move |service| {
-            //service.app_data(web::Data::new(context.clone()));
             for (name, competition) in competitions.iter() {
-                let scoped_service_config =
-                    service.service(web::scope(&format!("/competition/{}/", name)));
-                competition.configure_routes(scoped_service_config);
+                service.service(
+                    web::scope(&format!("/competition/{}/", name))
+                        .configure(|config| competition.configure_routes(config)),
+                );
             }
         }
     }
 
     pub async fn start(self) {
-        for (_, competition) in self.competitions {
-            competition
+        // TODO: try join all
+        for (competition_name, competition) in self.competitions {
+            if let Err(error) = competition
                 .start_competition_manager(self.settings.clone())
-                .await;
+                .await
+            {
+                error!(%competition_name, %error, error_debug=?error, "failed to start competition manager");
+            } else {
+                // TODO: timer for startup
+                info!(%competition_name, "started competition manager");
+            }
         }
     }
 }
