@@ -8,6 +8,7 @@ table! {
         uploaded -> Bool,
         deleted -> Bool,
         failed -> Bool,
+        active -> Bool,
     }
 }
 
@@ -27,8 +28,8 @@ table! {
 
 table! {
     game_events (event_id, game) {
-        event_id -> Int4,
         game -> Int4,
+        event_id -> Int4,
         event_timestamp -> Timestamptz,
         event_type -> Text,
         payload -> Jsonb,
@@ -39,6 +40,14 @@ table! {
     game_participants (agent, game) {
         agent -> Text,
         game -> Int4,
+    }
+}
+
+table! {
+    game_results (agent, game) {
+        agent -> Text,
+        game -> Int4,
+        result -> Int4,
     }
 }
 
@@ -75,6 +84,8 @@ joinable!(enrollment -> users (user_id));
 joinable!(game_events -> games (game));
 joinable!(game_participants -> agents (agent));
 joinable!(game_participants -> games (game));
+joinable!(game_results -> agents (agent));
+joinable!(game_results -> games (game));
 joinable!(games -> competitions (competition));
 joinable!(leaderboard -> agents (agent));
 
@@ -84,6 +95,7 @@ allow_tables_to_appear_in_same_query!(
     enrollment,
     game_events,
     game_participants,
+    game_results,
     games,
     leaderboard,
     users,

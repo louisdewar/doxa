@@ -1,12 +1,11 @@
 use std::convert::Infallible;
 
 use crate::{
-    client::{Competition, Context},
+    client::{Competition, Context, GameEvent},
     error::ContextError,
 };
 use async_trait::async_trait;
 use doxa_executor::{client::GameClient, context::GameContext};
-use doxa_mq::model::UploadEvent;
 
 use serde::{Deserialize, Serialize};
 
@@ -19,35 +18,48 @@ impl Competition for HelloWorldCompetiton {
 
     const COMPETITION_NAME: &'static str = "helloworld";
 
-    async fn startup(&self, _context: &mut Context<Self>) -> Result<(), ContextError> {
+    async fn startup(&self, _context: &Context<Self>) -> Result<(), ContextError> {
         println!("[hello_world] starting up");
 
         Ok(())
     }
 
-    fn configure_routes(&self, _service: &mut doxa_core::actix_web::web::ServiceConfig) {
-        println!("[hello_world] configuring routes");
+    async fn on_agent_activated(
+        &self,
+        context: &Context<Self>,
+        agent_id: String,
+    ) -> Result<(), ContextError> {
+        context.emit_match_request(vec![agent_id], ()).await?;
+
+        Ok(())
     }
 
-    async fn on_upload(
+    async fn on_agent_deactivated(
         &self,
-        context: &mut Context<Self>,
-        upload_event: UploadEvent,
+        context: &Context<Self>,
+        agent_id: String,
     ) -> Result<(), ContextError> {
-        println!("[hello_world] on_upload - agent {}", upload_event.agent);
-        context
-            .emit_match_request(vec![upload_event.agent], ())
-            .await?;
+        context.emit_match_request(vec![agent_id], ()).await?;
 
         Ok(())
     }
 
     async fn on_game_event(
         &self,
-        _context: &mut Context<Self>,
-        event: HelloWorldGameEvent,
+        context: &Context<Self>,
+        event: GameEvent<HelloWorldGameEvent>,
     ) -> Result<(), ContextError> {
-        println!("Received game event: {:?}", event);
+        let mut participants = context
+            .get_game_participants_unordered(event.game_id)
+            .await?;
+        let participant = participants.remove(0);
+
+        let score = match event.payload {
+            HelloWorldGameEvent::RespondedIncorrectly { .. } => -1,
+            HelloWorldGameEvent::RespondedSuccessfully { .. } => 1,
+        };
+
+        context.set_new_score(participant.agent, score).await?;
 
         Ok(())
     }
@@ -92,12 +104,6 @@ impl GameClient for HelloWorldGameClient {
     ) -> Result<(), doxa_executor::error::GameError<Self::Error>> {
         context.expect_n_agents(1)?;
 
-        let message = context.next_message(0).await?;
-        println!(
-            "Got message from agent {}",
-            String::from_utf8_lossy(message)
-        );
-
         context
             .send_message_to_agent(0, b"PLEASE ECHO THIS MESSAGE\n")
             .await?;
@@ -106,20 +112,24 @@ impl GameClient for HelloWorldGameClient {
 
         let message = context.next_message(0).await?;
         if message == expected_output {
-            println!("Agent responded sucessfully ✅");
             context
-                .emit_game_event(HelloWorldGameEvent::RespondedSuccessfully {
-                    output: String::from_utf8_lossy(expected_output).to_string(),
-                })
+                .emit_game_event(
+                    HelloWorldGameEvent::RespondedSuccessfully {
+                        output: String::from_utf8_lossy(expected_output).to_string(),
+                    },
+                    "game",
+                )
                 .await?;
         } else {
             let agent_output = String::from_utf8_lossy(message).to_string();
-            println!("Agent responded incorrectly ❌ ({})", agent_output);
             context
-                .emit_game_event(HelloWorldGameEvent::RespondedIncorrectly {
-                    expected_output: String::from_utf8_lossy(expected_output).to_string(),
-                    agent_output,
-                })
+                .emit_game_event(
+                    HelloWorldGameEvent::RespondedIncorrectly {
+                        expected_output: String::from_utf8_lossy(expected_output).to_string(),
+                        agent_output,
+                    },
+                    "game",
+                )
                 .await?;
         }
 

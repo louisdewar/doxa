@@ -1,6 +1,6 @@
 use actix_web::{web, HttpResponse};
 use doxa_core::EndpointResult;
-use doxa_db::PgPool;
+use doxa_db::{serde_json, PgPool};
 
 use crate::{controller, Settings};
 
@@ -46,5 +46,5 @@ async fn register(
     })
     .await??;
 
-    Ok(HttpResponse::Ok().into())
+    Ok(HttpResponse::Ok().json(serde_json::json!({})).into())
 }

@@ -1,3 +1,6 @@
+DROP VIEW IF EXISTS active_agents;
+
+DROP TABLE IF EXISTS game_results;
 DROP TABLE IF EXISTS leaderboard;
 DROP TABLE IF EXISTS game_participants;
 DROP TABLE IF EXISTS game_events;

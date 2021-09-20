@@ -154,11 +154,12 @@ async fn upload(
     .await??;
 
     let mq_conn = mq_pool.get().await?;
-    doxa_mq::action::emit_upload_event(
+    doxa_mq::action::emit_activation_event(
         &mq_conn,
-        &doxa_mq::model::UploadEvent {
+        &doxa_mq::model::ActivationEvent {
             competition: competition.clone(),
             agent: id.clone(),
+            activating: true,
         },
     )
     .await?;

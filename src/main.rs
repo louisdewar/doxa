@@ -6,12 +6,14 @@ use doxa_competition::{hello_world::HelloWorldCompetiton, CompetitionSystem};
 use doxa_storage::AgentRetrieval;
 use tracing::info;
 use tracing_actix_web::TracingLogger;
+use utt::UTTTCompetition;
 mod telemetry;
 
 fn create_competition_system(settings: doxa_competition::Settings) -> CompetitionSystem {
     let mut system = CompetitionSystem::new(Arc::new(settings));
 
     system.add_competition(HelloWorldCompetiton);
+    system.add_competition(UTTTCompetition);
 
     system
 }
@@ -54,9 +56,8 @@ async fn main() -> std::io::Result<()> {
         pg_pool: Arc::clone(&db_pool),
     };
     let competition_system = create_competition_system(competition_settings);
-    let configure_competiton_routes = competition_system.generate_configure_fn();
 
-    competition_system.start().await;
+    let configure_competition_routes = competition_system.start().await;
 
     info!("Starting at 127.0.0.1:3001");
 
@@ -66,7 +67,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(mq_pool.clone())
             .configure(doxa_auth::config(auth_settings.clone()))
             .configure(doxa_storage::config(storage_settings.clone()))
-            .configure(configure_competiton_routes.clone())
+            .configure(configure_competition_routes.clone())
             .wrap(TracingLogger::default())
     })
     .bind(("127.0.0.1", 3001))?

@@ -5,7 +5,11 @@ use doxa_mq::model::MatchRequest;
 use futures::future::try_join_all;
 
 use crate::{
-    agent::Agent, client::GameClient, context::GameContext, error::GameManagerError, Settings,
+    agent::Agent,
+    client::{ForfeitError, GameClient, GameError},
+    context::GameContext,
+    error::GameManagerError,
+    Settings,
 };
 
 pub struct GameManager<C: GameClient> {
@@ -49,7 +53,7 @@ impl<C: GameClient> GameManager<C> {
     }
 
     /// Runs the game to completion
-    pub async fn run(mut self) -> Result<(), GameManagerError<C::Error>> {
+    pub async fn run(mut self) -> Result<(), GameError<C::Error>> {
         let mut context = GameContext::new(
             &mut self.agents,
             &self.event_queue_name,
@@ -57,20 +61,23 @@ impl<C: GameClient> GameManager<C> {
             self.game_id,
         );
 
-        context
-            .emit_start_event()
-            .await
-            .map_err(|e| GameManagerError::Runtime(e.into()))?;
+        context.emit_start_event().await?;
 
-        C::run(self.client_match_request, &mut context)
-            .await
-            .map_err(|e| GameManagerError::Runtime(e))?;
+        let res = match C::run(self.client_match_request, &mut context).await {
+            Ok(()) => Ok(()),
+            Err(error) => {
+                if let Some(agent_id) = error.forfeit() {
+                    context.forfeit_agent(agent_id).await?;
+                }
 
-        context
-            .emit_end_event()
-            .await
-            .map_err(|e| GameManagerError::Runtime(e.into()))?;
+                context.emit_error_event(&error).await?;
 
-        Ok(())
+                Err(error)
+            }
+        };
+
+        context.emit_end_event().await?;
+
+        res
     }
 }

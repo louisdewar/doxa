@@ -1,5 +1,6 @@
 use crate::model::storage::{AgentUpload, InsertableAgentUpload};
-use crate::{schema as s, DieselError};
+use crate::{schema as s, view, DieselError};
+use chrono::{DateTime, Utc};
 use diesel::{ExpressionMethods, OptionalExtension, PgConnection, QueryDsl, RunQueryDsl};
 
 pub fn register_upload_start(
@@ -11,6 +12,7 @@ pub fn register_upload_start(
         .get_result(conn)
 }
 
+// TODO: To prevent race condition this must be when uploaded_at is set to now()
 pub fn mark_upload_as_complete(
     conn: &PgConnection,
     id: String,
@@ -20,7 +22,7 @@ pub fn mark_upload_as_complete(
         .get_result(conn)
 }
 
-pub fn list_uploads(
+pub fn list_agents(
     conn: &PgConnection,
     user: i32,
     competition: i32,
@@ -41,19 +43,97 @@ pub fn get_agent(
         .optional()
 }
 
+/// Like get_agent but it requires the existance of the agent otherwise it will result in an error.
+pub fn get_agent_required(
+    conn: &PgConnection,
+    agent_id: String,
+) -> Result<AgentUpload, DieselError> {
+    s::agents::table
+        .filter(s::agents::columns::id.eq(agent_id))
+        .first(conn)
+}
+
 pub fn get_active_agent(
     conn: &PgConnection,
     user: i32,
     competition: i32,
 ) -> Result<Option<AgentUpload>, DieselError> {
-    use s::agents::columns as c;
-    s::agents::table
-        .filter(c::owner.eq(user))
+    // use s::agents::columns as c;
+    // s::agents::table
+    //     .filter(c::owner.eq(user))
+    //     .filter(c::competition.eq(competition))
+    //     .filter(c::failed.eq(false))
+    //     .filter(c::uploaded.eq(true))
+    //     .filter(c::deleted.eq(false))
+    //     .order_by(c::uploaded_at.desc())
+    //     .first(conn)
+    //     .optional()
+    //
+    use view::active_agents::columns as c;
+    view::active_agents::table
         .filter(c::competition.eq(competition))
-        .filter(c::failed.eq(false))
-        .filter(c::uploaded.eq(true))
-        .filter(c::deleted.eq(false))
-        .order_by(c::uploaded_at.desc())
+        .filter(c::owner.eq(user))
         .first(conn)
         .optional()
+}
+
+/// Sets the active agent's active flag to false.
+///
+/// If there was no active agent for that user in that competition at the time of
+/// this query `Ok(None)` is returned.
+///
+/// The return value is post update (i.e. active will always be false).
+pub fn deactivate_agent(
+    conn: &PgConnection,
+    competition: i32,
+    user: i32,
+) -> Result<Option<AgentUpload>, DieselError> {
+    use view::active_agents::columns as c;
+    diesel::update(
+        view::active_agents::table
+            .filter(c::owner.eq(user))
+            .filter(c::competition.eq(competition)),
+    )
+    .set(c::active.eq(false))
+    .get_result(conn)
+    .optional()
+}
+
+/// Sets the given agent's active flag to false if it is set to true.
+///
+/// If that agent did not exist or it was not active then `Ok(None)` is returned.
+///
+/// The return value is post update (i.e. active will always be false).
+pub fn deactivate_agent_by_id(
+    conn: &PgConnection,
+    agent_id: String,
+) -> Result<Option<AgentUpload>, DieselError> {
+    use view::active_agents::columns as c;
+    diesel::update(view::active_agents::table.filter(c::id.eq(agent_id)))
+        .set(c::active.eq(false))
+        .get_result(conn)
+        .optional()
+}
+
+/// Sets the active field for this agent to true.
+/// If another agent is currently active this will return an error.
+///
+/// If the agent does not exist this will return an error
+pub fn activate_agent(conn: &PgConnection, agent_id: String) -> Result<AgentUpload, DieselError> {
+    use s::agents::columns as c;
+    diesel::update(s::agents::table.filter(c::id.eq(agent_id)))
+        .set(c::active.eq(true))
+        .get_result(conn)
+}
+
+pub fn get_active_agents_uploaded_before(
+    conn: &PgConnection,
+    competition: i32,
+    before: DateTime<Utc>,
+) -> Result<Vec<AgentUpload>, DieselError> {
+    use view::active_agents::columns as c;
+    view::active_agents::table
+        .filter(c::competition.eq(competition))
+        .filter(c::uploaded_at.lt(before))
+        .get_results(conn)
 }

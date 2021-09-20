@@ -5,15 +5,18 @@ use std::sync::Arc;
 use doxa_core::tokio::{self, join};
 
 use crate::{
-    client::Competition, error::CompetitionManagerError, manager::game_event::GameEventManager,
+    client::{Competition, Context},
+    error::CompetitionManagerError,
+    manager::game_event::GameEventManager,
     Settings,
 };
 
-use self::{executor::ExecutionManager, upload::UploadEventManager};
+use self::{activation::AgentActivationManager, executor::ExecutionManager};
 
+mod activation;
 pub(crate) mod executor;
 mod game_event;
-mod upload;
+// mod upload;
 
 pub struct CompetitionManager<T: Competition> {
     competition: Arc<T>,
@@ -26,7 +29,7 @@ impl<T: Competition> CompetitionManager<T> {
     pub async fn start(
         competition: Arc<T>,
         settings: Arc<Settings>,
-    ) -> Result<(), CompetitionManagerError> {
+    ) -> Result<i32, CompetitionManagerError> {
         let manager = CompetitionManager {
             competition,
             settings,
@@ -44,27 +47,33 @@ impl<T: Competition> CompetitionManager<T> {
         .await??
         .ok_or(CompetitionManagerError::CompetitionNotFound)?;
 
-        let upload_manager = UploadEventManager::new(
+        let context = Arc::new(Context::<T>::new(
+            manager.settings.mq_pool.clone(),
+            manager.settings.pg_pool.clone(),
+            competition.id,
+        ));
+
+        let activation_manager = AgentActivationManager::new(
             manager.settings.clone(),
             manager.competition.clone(),
-            competition.id,
+            context.clone(),
         );
 
         let game_event_manager = GameEventManager::new(
             manager.settings.clone(),
             manager.competition.clone(),
-            competition.id,
+            context.clone(),
         );
 
         let execution_manager =
             ExecutionManager::<T::GameClient>::new(manager.settings, T::COMPETITION_NAME);
 
         join!(
-            upload_manager.start(),
+            activation_manager.start(),
             execution_manager.start(),
             game_event_manager.start(),
         );
 
-        Ok(())
+        Ok(competition.id)
     }
 }

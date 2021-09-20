@@ -1,4 +1,4 @@
-use std::io;
+use std::{convert::Infallible, io};
 
 use derive_more::{Display, Error, From};
 use doxa_core::lapin;
@@ -8,6 +8,11 @@ use doxa_vm::{
     error::{ManagerError, SendAgentError},
     stream::ReadMessageError,
 };
+
+/// A way of indicating whether an error should count as a forfeit for a particular agent
+pub trait ForfeitError {
+    fn forfeit(&self) -> Option<usize>;
+}
 
 #[derive(From, Error, Display, Debug)]
 pub struct Timeout {
@@ -74,6 +79,30 @@ pub enum GameContextError {
         expected: usize,
         actual: usize,
     },
+    #[display(fmt = "the client tried to emit a zero length event type")]
+    ZeroLengthEventType,
+    #[display(
+        fmt = "the client tried to emit an event type that began with an underscore which is reserved for system events"
+    )]
+    ReservedEventType,
+}
+
+impl ForfeitError for GameContextError {
+    fn forfeit(&self) -> Option<usize> {
+        match &self {
+            GameContextError::UnknownAgent { .. } => None,
+            // TODO: next message / send input should both be forfeit errors but we need the agent
+            // id
+            GameContextError::NextMessage(_) => None,
+            GameContextError::SendInput(_) => None,
+            GameContextError::PayloadDeserialize(_) => None,
+            GameContextError::Emit(_) => None,
+            GameContextError::TimeoutWaitingForMessage { agent_id } => Some(*agent_id),
+            GameContextError::IncorrectNumberAgents { .. } => None,
+            GameContextError::ZeroLengthEventType => None,
+            GameContextError::ReservedEventType => None,
+        }
+    }
 }
 
 #[derive(Display, Error, From, Debug)]
@@ -81,6 +110,21 @@ pub enum GameError<E> {
     Context(GameContextError),
     #[from(ignore)]
     Client(E),
+}
+
+impl<E: ForfeitError> ForfeitError for GameError<E> {
+    fn forfeit(&self) -> Option<usize> {
+        match &self {
+            GameError::Context(e) => e.forfeit(),
+            GameError::Client(e) => e.forfeit(),
+        }
+    }
+}
+
+impl ForfeitError for Infallible {
+    fn forfeit(&self) -> Option<usize> {
+        None
+    }
 }
 
 #[derive(Display, Error, From, Debug)]
@@ -101,6 +145,8 @@ pub enum NextMessageError {
     Shutdown(AgentShutdown),
 }
 
+// TODO: either remove entierly or just remove runtime OR change on_game_error to take in
+// GameManagerError and then include startup errors
 #[derive(Display, Error, From, Debug)]
 pub enum GameManagerError<E> {
     #[from(ignore)]

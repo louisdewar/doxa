@@ -52,7 +52,7 @@ pub fn list_agents(matches: &ArgMatches, conn: &PgConnection) {
         .unwrap()
         .expect("Competition does not exist");
 
-    let uploads = action::storage::list_uploads(conn, user.id, competition.id).unwrap();
+    let uploads = action::storage::list_agents(conn, user.id, competition.id).unwrap();
 
     print_agent_table(
         &uploads

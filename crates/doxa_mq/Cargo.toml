@@ -5,6 +5,7 @@ edition = "2018"
 
 [dependencies]
 doxa_core = { path = "../doxa_core" }
+doxa_db = { path = "../doxa_db" }
 
 tokio-amqp = "1.0.0"
 serde = { version = "1.0.127", features = ["derive"] }

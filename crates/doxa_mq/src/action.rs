@@ -9,13 +9,13 @@ use lapin::{
 };
 use serde::Serialize;
 
-use crate::model::{MatchRequest, UploadEvent};
+use crate::model::{ActivationEvent, MatchRequest};
 
 pub use bincode::Error as BincodeError;
 pub use bincode::{deserialize, serialize};
 
-pub fn upload_queue_name(competition_name: &str) -> String {
-    format!("uploadevent.{}", competition_name)
+pub fn activation_queue_name(competition_name: &str) -> String {
+    format!("activationevent.{}", competition_name)
 }
 
 pub fn game_event_queue_name(competition_name: &str) -> String {
@@ -26,11 +26,11 @@ pub fn match_request_queue_name(competition_name: &str) -> String {
     format!("matchrequest.{}", competition_name)
 }
 
-pub async fn declare_upload_queue(
+pub async fn declare_activation_queue(
     channel: &Channel,
     competition_name: &str,
 ) -> Result<lapin::Queue, lapin::Error> {
-    declare(channel, &upload_queue_name(competition_name), true).await
+    declare(channel, &activation_queue_name(competition_name), true).await
 }
 
 pub async fn declare_game_event_queue(
@@ -96,30 +96,30 @@ async fn consume(channel: &Channel, queue_name: &str) -> Result<Consumer, lapin:
 }
 
 /// This declares the correct queue then submits the event.
-pub async fn emit_upload_event(
+pub async fn emit_activation_event(
     conn: &Connection,
-    upload_event: &UploadEvent,
+    upload_event: &ActivationEvent,
 ) -> Result<PublisherConfirm, lapin::Error> {
     let channel = conn.create_channel().await?;
-    declare_upload_queue(&channel, &upload_event.competition).await?;
+    declare_activation_queue(&channel, &upload_event.competition).await?;
 
     publish(
         &channel,
-        &upload_queue_name(&upload_event.competition),
+        &activation_queue_name(&upload_event.competition),
         serialize(upload_event).unwrap(),
     )
     .await
 }
 
 /// This declares the correct queue then returns the consumer which can yield messages.
-pub async fn get_upload_event_consumer(
+pub async fn get_activation_event_consumer(
     conn: &Connection,
     competition_name: &str,
 ) -> Result<Consumer, lapin::Error> {
     let channel = conn.create_channel().await?;
-    declare_upload_queue(&channel, competition_name).await?;
+    declare_activation_queue(&channel, competition_name).await?;
 
-    consume(&channel, &upload_queue_name(competition_name)).await
+    consume(&channel, &activation_queue_name(competition_name)).await
 }
 
 pub async fn emit_match_request<T: Serialize>(

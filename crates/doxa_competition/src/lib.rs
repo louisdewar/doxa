@@ -56,29 +56,33 @@ impl CompetitionSystem {
         }
     }
 
-    pub fn generate_configure_fn(&self) -> impl Fn(&mut web::ServiceConfig) + Clone {
-        let competitions = Arc::new(self.competitions.clone());
-        move |service| {
-            for (name, competition) in competitions.iter() {
-                service.service(
-                    web::scope(&format!("/competition/{}/", name))
-                        .configure(|config| competition.configure_routes(config)),
-                );
-            }
-        }
-    }
-
-    pub async fn start(self) {
+    pub async fn start(self) -> impl Fn(&mut web::ServiceConfig) + Clone {
+        let mut competitions = Vec::with_capacity(self.competitions.len());
         // TODO: try join all
         for (competition_name, competition) in self.competitions {
-            if let Err(error) = competition
+            match competition
+                .clone()
                 .start_competition_manager(self.settings.clone())
                 .await
             {
-                error!(%competition_name, %error, error_debug=?error, "failed to start competition manager");
-            } else {
-                // TODO: timer for startup
-                info!(%competition_name, "started competition manager");
+                Err(error) => {
+                    error!(%competition_name, %error, error_debug=?error, "failed to start competition manager")
+                }
+                Ok(competition_id) => {
+                    // TODO: timer for startup
+                    info!(%competition_name, "started competition manager");
+                    competitions.push((competition_name, competition, competition_id));
+                }
+            }
+        }
+
+        let settings = self.settings.clone();
+
+        move |service| {
+            for (name, competition, competition_id) in competitions.iter() {
+                service.service(web::scope(&format!("/competition/{}", name)).configure(
+                    |config| competition.configure_routes(config, &settings, *competition_id),
+                ));
             }
         }
     }

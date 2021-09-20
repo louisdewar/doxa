@@ -1,0 +1,121 @@
+use std::{io::Bytes, path::PathBuf};
+
+use reqwest::{Client, RequestBuilder, Response, StatusCode};
+use serde::de::DeserializeOwned;
+use serde::Deserialize;
+
+use crate::{
+    config::UserProfile,
+    error::{DoxaError, PlainError, RequestError},
+};
+
+pub struct Settings {
+    pub user_profile: Option<UserProfile>,
+    pub base_url: String,
+    pub config_dir: PathBuf,
+    pub client: Client,
+}
+
+impl Settings {
+    pub fn new(
+        user_profile: Option<UserProfile>,
+        base_url: String,
+        config_dir: PathBuf,
+    ) -> Settings {
+        Settings {
+            user_profile,
+            base_url,
+            client: Client::new(),
+            config_dir,
+        }
+    }
+}
+
+#[derive(Deserialize, Debug, Clone)]
+struct DoxaErrorRaw {
+    error_code: String,
+    error: Option<String>,
+}
+
+impl DoxaErrorRaw {
+    fn to_doxa_error(self, status_code: StatusCode) -> DoxaError {
+        DoxaError {
+            error_code: self.error_code,
+            message: self.error,
+            status_code,
+        }
+    }
+}
+
+fn to_url(settings: &Settings, endpoint: String) -> String {
+    format!("{}{}", settings.base_url, endpoint)
+}
+
+fn maybe_add_auth(
+    settings: &Settings,
+    builder: RequestBuilder,
+    never_auth: bool,
+) -> RequestBuilder {
+    if never_auth {
+        builder
+    } else {
+        if let Some(user) = &settings.user_profile {
+            builder.bearer_auth(user.auth_token.clone())
+        } else {
+            builder
+        }
+    }
+}
+
+pub fn post(settings: &Settings, endpoint: String, never_auth: bool) -> RequestBuilder {
+    maybe_add_auth(
+        settings,
+        settings.client.post(to_url(settings, endpoint)),
+        never_auth,
+    )
+}
+
+pub fn get(settings: &Settings, endpoint: String, never_auth: bool) -> RequestBuilder {
+    maybe_add_auth(
+        settings,
+        settings.client.get(to_url(settings, endpoint)),
+        never_auth,
+    )
+}
+
+/// Sends the request without reading the response or checking the status code
+async fn send_request_raw(builder: RequestBuilder) -> Result<Response, RequestError> {
+    builder.send().await.map_err(|e| e.into())
+}
+
+/// Same as `send_request_and_parse` except if the status code is `OK` it will simply return the
+/// response without parsing.
+pub async fn send_request(builder: RequestBuilder) -> Result<Response, RequestError> {
+    let response = send_request_raw(builder).await?;
+
+    let status = response.status();
+
+    if status.is_success() {
+        return Ok(response);
+    } else {
+        let bytes = response.bytes().await?;
+        match serde_json::from_slice::<DoxaErrorRaw>(&bytes) {
+            Err(_) => Err(PlainError {
+                status_code: status,
+                error_message: String::from_utf8_lossy(&bytes).to_string(),
+            }
+            .into()),
+            Ok(v) => Err(v.to_doxa_error(status).into()),
+        }
+    }
+}
+
+/// Sends a request and serializes the response to `T` if the status code is `OK` otherwise it
+/// treats the response as an error and handles the various cases.
+pub async fn send_request_and_parse<T: DeserializeOwned>(
+    builder: RequestBuilder,
+) -> Result<T, RequestError> {
+    let response = send_request(builder).await?;
+    let bytes = response.bytes().await?;
+    serde_json::from_slice(&bytes).map_err(Into::into)
+}

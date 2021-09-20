@@ -86,6 +86,8 @@ impl<C: GameClient> ExecutionManager<C> {
                             {
                                 Ok(game_manger) => game_manger,
                                 Err(error) => {
+                                    // TODO: What about an error since an agent is no longer active?
+                                    // Should probably emit a game event instead of never ack-ing meaning infinite loop
                                     event!(Level::ERROR, %error, debug = ?error, "failed to start game manager");
                                     return;
                                 }
@@ -97,14 +99,16 @@ impl<C: GameClient> ExecutionManager<C> {
                                     event!(Level::ERROR, %error, debug = ?error, "error running game manager")
                                 }
                             }
+
+                            delivery
+                                .ack(BasicAckOptions::default())
+                                .await
+                                .expect("Failed to acknowledge MQ");
                         }
                         .instrument(span)
                     }).await.unwrap(); // TODO: semaphore then don't need to await for each
 
-                    delivery
-                        .ack(BasicAckOptions::default())
-                        .await
-                        .expect("Failed to acknowledge MQ");
+
                 }
             }
             .instrument(span),

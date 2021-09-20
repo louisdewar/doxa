@@ -1,6 +1,7 @@
 use crate::schema::agents;
 
-use diesel::{data_types::PgTimestamp, Insertable, Queryable};
+use chrono::{DateTime, Utc};
+use diesel::{Insertable, Queryable};
 
 #[derive(Debug, Clone, Queryable)]
 pub struct AgentUpload {
@@ -8,10 +9,11 @@ pub struct AgentUpload {
     pub owner: i32,
     pub competition: i32,
     pub extension: String,
-    pub uploaded_at: PgTimestamp,
+    pub uploaded_at: DateTime<Utc>,
     pub uploaded: bool,
     pub deleted: bool,
     pub failed: bool,
+    pub active: bool,
 }
 
 #[derive(Debug, Clone, Insertable)]

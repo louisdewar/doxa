@@ -1,3 +1,7 @@
+use std::time::Duration;
+
+use doxa_core::tokio;
+
 /// A way for other parts of the system to retrieve the stored agents.
 /// This happens over the public download URL so it is possible for components to run on completely
 /// different servers without access to the same file system.
@@ -23,15 +27,27 @@ impl AgentRetrieval {
         agent_id: &str,
         competition: &str,
     ) -> Result<reqwest::Response, crate::RetrievalError> {
-        let response = self
-            .client
-            .get(format!(
-                "{}{}/{}",
-                self.download_base, competition, agent_id
-            ))
-            .send()
-            .await?;
+        let mut i = 0;
+        loop {
+            match self
+                .client
+                .get(format!(
+                    "{}{}/{}",
+                    self.download_base, competition, agent_id
+                ))
+                .send()
+                .await
+            {
+                Ok(response) => return Ok(response),
+                Err(e) => {
+                    if i == 5 {
+                        return Err(e);
+                    }
 
-        Ok(response)
+                    tokio::time::sleep(Duration::from_secs(i)).await;
+                    i += 1;
+                }
+            };
+        }
     }
 }

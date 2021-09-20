@@ -5,7 +5,12 @@ use doxa_mq::model::GameEvent;
 use serde::{de::DeserializeOwned, Serialize};
 use tokio::time::timeout;
 
-use crate::{agent::Agent, client::GameClient, error::GameContextError, event::StartEvent};
+use crate::{
+    agent::Agent,
+    client::{GameClient, GameError},
+    error::GameContextError,
+    event::{ErrorEvent, ForfeitEvent, StartEvent},
+};
 
 pub const MAX_MESSAGE_TIME: Duration = Duration::from_secs(120);
 
@@ -35,8 +40,15 @@ impl<'a, C: GameClient> GameContext<'a, C> {
         }
     }
 
-    pub async fn emit_game_event(&mut self, event: C::GameEvent) -> Result<(), GameContextError> {
-        self.emit_event_raw(event, "client".to_string()).await
+    /// The EVENT_TYPE must be a non-zero length string and cannot begin with an underscore.
+    /// If you do not need to distinguish between event_types then just use `game` as a
+    /// convention.
+    pub async fn emit_game_event<S: Into<String>>(
+        &mut self,
+        event: C::GameEvent,
+        event_type: S,
+    ) -> Result<(), GameContextError> {
+        self.emit_event_raw(event, event_type.into()).await
     }
 
     async fn emit_event_raw<T: Serialize>(
@@ -80,11 +92,32 @@ impl<'a, C: GameClient> GameContext<'a, C> {
 
     pub(crate) async fn emit_end_event(&mut self) -> Result<(), GameContextError> {
         // TODO: end event data, e.g. total time spent, maybe whether it completed succesfully or
-        // not (maybe also have an `_ERROR` event type).
+        // not
         self.emit_event_raw((), "_END".to_string()).await
     }
 
-    pub fn deserialize_match_request<T: DeserializeOwned>(
+    pub(crate) async fn emit_error_event(
+        &mut self,
+        error: &GameError<C::Error>,
+    ) -> Result<(), GameContextError> {
+        // TODO: end event data, e.g. total time spent, maybe whether it completed succesfully or
+        // not
+        self.emit_event_raw(
+            ErrorEvent {
+                error: format!("{}", error),
+                debug: format!("{:?}", error),
+            },
+            "_ERROR".to_string(),
+        )
+        .await
+    }
+
+    pub async fn forfeit_agent(&mut self, agent_id: usize) -> Result<(), GameContextError> {
+        self.emit_event_raw(ForfeitEvent { agent_id }, "_FORFEIT".to_string())
+            .await
+    }
+
+    pub(crate) fn deserialize_match_request<T: DeserializeOwned>(
         &self,
         payload: &[u8],
     ) -> Result<T, GameContextError> {
@@ -133,6 +166,18 @@ impl<'a, C: GameClient> GameContext<'a, C> {
             .send_agent_input(msg)
             .await
             .map_err(|e| GameContextError::SendInput(e))?;
+
+        Ok(())
+    }
+
+    /// Sends a message to all agents part of this competition.
+    pub async fn broadcast_message_to_agents(
+        &mut self,
+        msg: &[u8],
+    ) -> Result<(), GameContextError> {
+        for i in 0..self.agents() {
+            self.send_message_to_agent(i, msg).await?;
+        }
 
         Ok(())
     }

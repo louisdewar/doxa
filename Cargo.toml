@@ -11,6 +11,8 @@ doxa_db = { path = "crates/doxa_db" }
 doxa_mq = { path = "crates/doxa_mq" }
 doxa_executor = { path = "crates/doxa_executor" }
 
+utt = { path = "competitions/utt" }
+
 actix-web = "4.0.0-beta.8"
 dotenv = "0.15.0"
 tracing-actix-web = "0.4.0-beta.10"
@@ -23,4 +25,4 @@ tracing-bunyan-formatter = "0.1.6"
 bytes = "1.1.0"
 
 [workspace]
-members = ["crates/*"]
+members = ["crates/*", "competitions/*"]

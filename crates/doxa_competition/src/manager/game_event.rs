@@ -6,7 +6,6 @@ use doxa_core::{
     tracing::{error, event, span, warn, Level},
     tracing_futures::Instrument,
 };
-use doxa_executor::client::GameClient;
 
 use crate::Settings;
 use doxa_mq::model::GameEvent;
@@ -18,15 +17,15 @@ use crate::client::{Competition, Context};
 pub(super) struct GameEventManager<C: Competition> {
     settings: Arc<Settings>,
     competition: Arc<C>,
-    competition_id: i32,
+    context: Arc<Context<C>>,
 }
 
 impl<C: Competition> GameEventManager<C> {
-    pub fn new(settings: Arc<Settings>, competition: Arc<C>, competition_id: i32) -> Self {
+    pub fn new(settings: Arc<Settings>, competition: Arc<C>, context: Arc<Context<C>>) -> Self {
         GameEventManager {
             settings,
             competition,
-            competition_id,
+            context,
         }
     }
 
@@ -48,16 +47,16 @@ impl<C: Competition> GameEventManager<C> {
             competition = C::COMPETITION_NAME
         );
         let future = async move {
-            let mut context = Context::new(
-                self.settings.mq_pool.clone(),
-                self.settings.pg_pool.clone(),
-                self.competition_id,
-            );
-
             // NOTE for future self: for concurrency it's better to have multiple game event
             // managers than spawn a task per event.
 
-            // TODO: better error handling with span-
+            // TODO: better error handling with span
+
+            // TODO: Since if there is an error it is possible for events to come in out of order
+            // there should be a system whereby a game has a nullable field "last_handled_event"
+            // and if this event is not `last_handled_event + 1` then we delay handling it
+            // otherwise we check to see if there are any events sequentially after this one and
+            // handle each in turn (including the current)
             while let Some(message) = consumer.next().await {
                 // It might be easier for error handling if this was moved into it's own async fn
                 let (_, delivery) = message.expect("Error getting message");
@@ -124,24 +123,20 @@ impl<C: Competition> GameEventManager<C> {
                                 .unwrap()
                                 .unwrap();
                             }
-                            "_ERROR" => todo!(),
+                            "_ERROR" => {}
+                            "_FORFEIT" => {}
                             _ => {
                                 error!(%event_type, ?game_event, "unknown event type");
                             }
                         }
                     } else {
-                        if event_type != "client" {
-                            error!(%game_event.game_id, %event_type, "unrecognised event type");
-                            return;
-                        }
-
-                        let client_game_event: <C::GameClient as GameClient>::GameEvent =
-                            serde_json::from_value(game_event.payload)
-                                .expect("Improperly formatted client message");
+                        let game_event = game_event
+                            .try_map_payload(|payload| serde_json::from_value(payload))
+                            .expect("Improperly formatted client message");
 
                         if let Err(error) = self
                             .competition
-                            .on_game_event(&mut context, client_game_event)
+                            .on_game_event(&self.context, game_event)
                             .await
                         {
                             event!(Level::ERROR, %error, debug = ?error, "on_game_event failed for agent");

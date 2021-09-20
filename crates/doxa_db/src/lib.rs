@@ -6,6 +6,7 @@ pub extern crate diesel_migrations;
 pub mod action;
 pub mod model;
 pub mod schema;
+pub mod view;
 
 use diesel::Connection;
 pub use diesel::{Insertable, Queryable};
@@ -16,6 +17,8 @@ use diesel::r2d2::{self, ConnectionManager, Pool};
 pub type PgPool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
 pub use diesel::result::Error as DieselError;
+
+pub use serde_json;
 
 embed_migrations!();
 

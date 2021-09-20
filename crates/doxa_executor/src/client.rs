@@ -1,14 +1,16 @@
-use std::{error, fmt};
+use std::error;
 
 use async_trait::async_trait;
 use serde::{de::DeserializeOwned, Serialize};
 
-use crate::{context::GameContext, error::GameError};
+pub use crate::error::ForfeitError;
+pub use crate::{context::GameContext, error::GameError};
 
 /// Maintains the game state, sending input to agents and handling the output.
 #[async_trait]
 pub trait GameClient: Send + Sync + 'static {
-    type Error: error::Error + fmt::Debug + fmt::Display;
+    type Error: error::Error + ForfeitError + Send + Sync + 'static;
+
     /// The payload of the match request specific to this competition.
     /// This is wrapped in the system's own match request that includes information such as the
     /// agents participating. This is only for extra metadata for the competition, in many cases it
