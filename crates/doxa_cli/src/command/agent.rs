@@ -1,12 +1,13 @@
-use std::path::PathBuf;
+use std::{io::Write, path::PathBuf};
 
 use clap::ArgMatches;
+use flate2::{write::GzEncoder, Compression};
 use reqwest::multipart::{Form, Part};
 
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    error::CommandError,
+    error::{CommandError, UploadError},
     request::{post, send_request_and_parse, Settings},
 };
 
@@ -30,13 +31,45 @@ pub async fn upload(
     settings: &Settings,
     competition_name: String,
 ) -> Result<(), CommandError> {
-    let file_path = PathBuf::from(matches.value_of("FILE").unwrap());
+    let agent_path = PathBuf::from(matches.value_of("PATH").unwrap());
+    let meta = tokio::fs::metadata(&agent_path)
+        .await
+        .map_err(|e| UploadError::ReadAgentError(e))?;
 
-    let form = Form::new().part(
-        "file",
-        Part::bytes(tokio::fs::read(file_path.clone()).await?)
-            .file_name(file_path.file_name().unwrap().to_str().unwrap().to_owned()),
-    );
+    let agent_file_name = agent_path.file_name().unwrap().to_str().unwrap().to_owned();
+
+    let (file_name, data) = if meta.is_dir() {
+        tokio::fs::metadata(agent_path.join("doxa.yaml"))
+            .await
+            .map_err(|_| UploadError::MissingExecutionConfig)?;
+        let agent_path = agent_path.clone();
+
+        println!("Creating tar archive of agent");
+        let data = tokio::task::spawn_blocking(move || {
+            let mut tar = tar::Builder::new(Vec::new());
+            tar.append_dir_all(".", agent_path)?;
+            let bytes = tar.into_inner()?;
+
+            let mut e = GzEncoder::new(Vec::new(), Compression::default());
+            e.write_all(&bytes).unwrap();
+
+            e.finish()
+        })
+        .await
+        .unwrap()
+        .map_err(|e| UploadError::ReadAgentError(e))?;
+        println!("Finished creating tar archive of agent");
+
+        (format!("{}.tar.gz", agent_file_name), data)
+    } else {
+        if !(agent_path.ends_with(".tar.gz") || agent_path.ends_with(".tar")) {
+            return Err(UploadError::IncorrectExtension.into());
+        }
+
+        (agent_file_name, tokio::fs::read(agent_path.clone()).await?)
+    };
+
+    let form = Form::new().part("file", Part::bytes(data).file_name(file_name));
 
     let builder = post(
         settings,

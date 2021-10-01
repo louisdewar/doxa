@@ -6,6 +6,9 @@ use derive_more::{Display, Error};
 
 pub use grid::{Player, Winner};
 
+#[cfg(test)]
+mod test;
+
 #[derive(Debug, Display, Error, Clone)]
 pub enum ModelError {
     #[display(fmt = "the game was already over before this turn")]
@@ -22,6 +25,7 @@ pub enum ModelError {
     InvalidIndex,
 }
 
+#[derive(Debug, Clone, PartialEq)]
 pub enum Event {
     SmallGridWon {
         grid: usize,
@@ -66,6 +70,11 @@ impl Model {
             return Err(ModelError::WrongPlayer);
         }
 
+        self.next_player = match player {
+            Player::Red => Player::Blue,
+            Player::Blue => Player::Red,
+        };
+
         if !(grid < 9 && cell < 9) {
             return Err(ModelError::InvalidIndex);
         }
@@ -76,7 +85,7 @@ impl Model {
             }
         }
 
-        let mut small = self.grid[grid];
+        let small = &mut self.grid[grid];
 
         if small.winner().is_some() {
             return Err(ModelError::GridTaken);
@@ -88,7 +97,18 @@ impl Model {
 
         small[cell] = player.into();
 
-        if let Some(small_winner) = small.winner() {
+        if self.grid[cell].winner().is_some() {
+            self.next_grid = None;
+        } else {
+            self.next_grid = Some(cell);
+        }
+
+        if let Some(small_winner) = self.grid[grid].find_winner() {
+            // We've just won this grid so it can't be where the next player plays:
+            if grid == cell {
+                self.next_grid = None;
+            }
+
             if let Some(overall_winner) = self.grid.find_winner() {
                 return Ok(Some(Event::GameOver {
                     overall_winner,

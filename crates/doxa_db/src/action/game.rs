@@ -1,8 +1,10 @@
 use crate::model::game as model;
 
-use crate::{schema as s, DieselError};
+use crate::{schema as s, view, DieselError};
 use chrono::{DateTime, Utc};
-use diesel::{dsl, ExpressionMethods, OptionalExtension, PgConnection, QueryDsl, RunQueryDsl};
+use diesel::{
+    dsl, ExpressionMethods, JoinOnDsl, OptionalExtension, PgConnection, QueryDsl, RunQueryDsl,
+};
 
 pub fn create_game(
     conn: &PgConnection,
@@ -121,6 +123,18 @@ pub fn add_game_result(
         .get_result(conn)
 }
 
+pub fn get_game_result(
+    conn: &PgConnection,
+    game_id: i32,
+    agent_id: String,
+) -> Result<Option<model::GameResult>, DieselError> {
+    s::game_results::table
+        .filter(s::game_results::agent.eq(agent_id))
+        .filter(s::game_results::game.eq(game_id))
+        .get_result(conn)
+        .optional()
+}
+
 pub fn sum_game_results(conn: &PgConnection, agent: String) -> Result<Option<i64>, DieselError> {
     s::game_results::table
         .select(dsl::sum(s::game_results::result))
@@ -136,5 +150,25 @@ pub fn remove_game_result_by_participant(
         .filter(s::game_participants::agent.eq(agent))
         .select(s::game_participants::game);
     diesel::delete(s::game_results::table.filter(s::game_results::game.eq_any(games)))
+        .get_results(conn)
+}
+
+pub fn get_user_active_games(
+    conn: &PgConnection,
+    user_id: i32,
+    competition_id: i32,
+) -> Result<Vec<model::Game>, DieselError> {
+    view::active_agents::table
+        .filter(view::active_agents::competition.eq(competition_id))
+        .filter(view::active_agents::owner.eq(user_id))
+        .inner_join(
+            s::game_participants::table.on(s::game_participants::agent.eq(view::active_agents::id)),
+        )
+        .inner_join(
+            view::active_games::table.on(view::active_games::id.eq(s::game_participants::game)),
+        )
+        .inner_join(s::games::table.on(s::games::id.eq(s::game_participants::game)))
+        .order_by(s::games::columns::start_time.asc())
+        .select(s::games::all_columns)
         .get_results(conn)
 }

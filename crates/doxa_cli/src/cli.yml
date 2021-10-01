@@ -47,7 +47,7 @@ subcommands:
         - upload:
             about: Uploads an agent
             args:
-              - FILE:
-                  about: The location of the tar of the agent
+              - PATH:
+                  about: Either the location of the agent folder (containing a doxa.yaml) or a tar[.gz] file of the agent
                   required: true
                   index: 1

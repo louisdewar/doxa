@@ -1,4 +1,4 @@
-use crate::schema::{agents, leaderboard};
+use crate::schema::{game_participants, games, leaderboard, users};
 
 table! {
     active_agents (id) {
@@ -14,4 +14,16 @@ table! {
     }
 }
 
+table! {
+    active_games (id) {
+        id -> Int4,
+    }
+}
+
 allow_tables_to_appear_in_same_query!(active_agents, leaderboard);
+allow_tables_to_appear_in_same_query!(active_agents, users);
+allow_tables_to_appear_in_same_query!(active_agents, games);
+allow_tables_to_appear_in_same_query!(active_agents, game_participants);
+allow_tables_to_appear_in_same_query!(active_agents, active_games);
+allow_tables_to_appear_in_same_query!(active_games, game_participants);
+allow_tables_to_appear_in_same_query!(active_games, games);

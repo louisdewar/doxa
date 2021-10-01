@@ -6,7 +6,7 @@ use serde::{de::DeserializeOwned, Serialize};
 use tokio::time::timeout;
 
 use crate::{
-    agent::Agent,
+    agent::VMAgent,
     client::{GameClient, GameError},
     error::GameContextError,
     event::{ErrorEvent, ForfeitEvent, StartEvent},
@@ -15,7 +15,7 @@ use crate::{
 pub const MAX_MESSAGE_TIME: Duration = Duration::from_secs(120);
 
 pub struct GameContext<'a, C: GameClient + ?Sized> {
-    agents: &'a mut Vec<Agent>,
+    agents: &'a mut Vec<VMAgent>,
     event_queue_name: &'a str,
     event_channel: &'a Channel,
     client: PhantomData<C>,
@@ -25,7 +25,7 @@ pub struct GameContext<'a, C: GameClient + ?Sized> {
 
 impl<'a, C: GameClient> GameContext<'a, C> {
     pub(crate) fn new(
-        agents: &'a mut Vec<Agent>,
+        agents: &'a mut Vec<VMAgent>,
         event_queue_name: &'a str,
         event_channel: &'a Channel,
         game_id: i32,
@@ -130,7 +130,7 @@ impl<'a, C: GameClient> GameContext<'a, C> {
         self.agents.len()
     }
 
-    fn agent_mut(&mut self, agent_id: usize) -> Result<&mut Agent, GameContextError> {
+    fn agent_mut(&mut self, agent_id: usize) -> Result<&mut VMAgent, GameContextError> {
         if agent_id >= self.agents() {
             return Err(GameContextError::UnknownAgent {
                 id: agent_id,
@@ -149,9 +149,28 @@ impl<'a, C: GameClient> GameContext<'a, C> {
         let msg = timeout(MAX_MESSAGE_TIME, agent.next_message())
             .await
             .map_err(|_| GameContextError::TimeoutWaitingForMessage { agent_id })??;
+
         Ok(msg)
     }
 
+    /// Sends a reboot message to the VM instructing it to restart the agent's process inside the
+    /// VM.
+    pub async fn reboot_agent(&mut self, agent_id: usize) -> Result<(), GameContextError> {
+        let agent = self.agent_mut(agent_id)?;
+
+        agent.reboot().await?;
+
+        Ok(())
+    }
+
+    /// Instructs every agent to reboot and waits until all of them have.
+    pub async fn reboot_all_agents(&mut self) -> Result<(), GameContextError> {
+        for i in 0..self.agents() {
+            self.reboot_agent(i).await?;
+        }
+
+        Ok(())
+    }
     /// Sends a message to a particular agent's STDIN.
     /// This by default will NOT include a new line.
     /// The data will be sent to STDIN as is.

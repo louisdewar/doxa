@@ -53,4 +53,11 @@ pub enum HandleMessageError {
     IO(io::Error),
     MissingSeparator,
     UnrecognisedPrefix,
+    Reboot(ExecutionSpawnError),
+}
+
+#[derive(Debug, Error, From, Display)]
+pub enum RebootAgentError {
+    IO(io::Error),
+    Read(ReadMessageError),
 }

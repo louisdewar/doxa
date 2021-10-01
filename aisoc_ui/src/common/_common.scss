@@ -1,0 +1,24 @@
+$white: #f5f5f5;
+$off-white: #e7e7e7;
+$light-grey: #e3e3e3;
+$grey: #c4c4c4;
+$off-black: #242424;
+$green: #2C8715;
+$blue: #1252B2;
+$red: #B60E0E;
+
+$win: #2ECC71;
+$loss: #E74C3C;
+$draw: #3075DD;
+
+@keyframes start-zero-width {
+    0% {
+        width: 0;
+    }
+}
+
+@keyframes start-zero-opacity {
+    0% {
+        opacity: 0;
+    }
+}

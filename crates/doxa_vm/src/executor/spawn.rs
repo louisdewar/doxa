@@ -1,7 +1,4 @@
-use std::{
-    path::{Path},
-    process::Stdio,
-};
+use std::{path::Path, process::Stdio};
 
 use tokio::process::{Child, Command};
 
@@ -23,5 +20,6 @@ pub async fn spawn_python(
         .gid(DOXA_GID)
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
         .spawn()?)
 }

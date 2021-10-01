@@ -4,8 +4,13 @@ use doxa_core::{
     actix_web::http::header::{ContentDisposition, CONTENT_DISPOSITION},
     error::StatusCode,
     tokio,
+    tracing::info,
 };
-use doxa_vm::{error::ShutdownError, stream::MessageReader, Manager as VM};
+use doxa_vm::{
+    error::{RebootAgentError, ShutdownError},
+    stream::MessageReader,
+    Manager as VM,
+};
 use tokio::time::timeout;
 
 use crate::{
@@ -15,7 +20,13 @@ use crate::{
 
 pub const MAX_MSG_LEN: usize = 5_000;
 
-pub struct Agent {
+// #[async_trait]
+// pub trait Agent {
+//     /// Sends agent input. This does not add a line end.
+//     async fn send_agent_input(&mut self, msg: &[u8]) -> Result<(), std::io::Error>;
+// }
+
+pub struct VMAgent {
     id: String,
     vm_manager: VM,
     message_reader: MessageReader,
@@ -28,13 +39,13 @@ pub enum AgentEvent<'a> {
     Line(&'a [u8]),
 }
 
-impl Agent {
+impl VMAgent {
     pub async fn new(
         competition: &str,
         agent_id: String,
         storage: &doxa_storage::AgentRetrieval,
         settings: &Settings,
-    ) -> Result<Agent, AgentError> {
+    ) -> Result<VMAgent, AgentError> {
         // TODO: need some way to detect whether the requested agent is the current one as we don't
         // want to waste time running those matches.
         let agent_response = storage.download_agent(&agent_id, competition).await?;
@@ -80,7 +91,7 @@ impl Agent {
             during: "send_agent".to_string(),
         })??;
 
-        let agent = Agent {
+        let agent = VMAgent {
             vm_manager: vm,
             id: agent_id,
             message_reader: MessageReader::new(Vec::new(), MAX_MSG_LEN),
@@ -97,6 +108,11 @@ impl Agent {
     /// See [`doxa_vm::Manager::send_agent_input`]
     pub async fn send_agent_input(&mut self, msg: &[u8]) -> Result<(), std::io::Error> {
         self.vm_manager.send_agent_input(msg).await
+    }
+
+    /// See [`doxa_vm::Manager::reboot_agent`]
+    pub async fn reboot(&mut self) -> Result<(), RebootAgentError> {
+        self.vm_manager.reboot_agent().await
     }
 
     /// Retrieves the next event sent by the VMExecutor.
@@ -122,6 +138,7 @@ impl Agent {
             }
             b"F" => {
                 self.finished = true;
+                info!(stderr = %String::from_utf8_lossy(msg), agent_id = %self.id, "agent stderr output");
                 return Ok(AgentEvent::Finished);
             }
             _ => return Err(NextEventError::UnrecognisedPrefix),

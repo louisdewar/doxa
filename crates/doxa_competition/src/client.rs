@@ -7,10 +7,8 @@ use doxa_core::actix_web::{self, web};
 use crate::{
     error::{CompetitionManagerError, ContextError},
     manager::CompetitionManager,
-    Settings,
+    route, Settings,
 };
-
-pub mod route;
 
 pub use crate::context::Context;
 pub use async_trait::async_trait;
@@ -120,7 +118,17 @@ pub trait Competition: 'static + Send + Sync {
     fn configure_game_routes(&self, service: &mut actix_web::web::ServiceConfig) {
         service.route(
             "_game/{game_id}/events",
-            web::get().to(route::game_events::<Self>),
+            web::get().to(route::game::game_events::<Self>),
+        );
+
+        service.route(
+            "_game/{game_id}/players",
+            web::get().to(route::game::game_players::<Self>),
+        );
+
+        service.route(
+            "_game/{game_id}/result/{agent_id}",
+            web::get().to(route::game::game_result_agent::<Self>),
         );
     }
 
@@ -128,12 +136,12 @@ pub trait Competition: 'static + Send + Sync {
     fn configure_agent_routes(&self, service: &mut actix_web::web::ServiceConfig) {
         service.route(
             "_agent/{agent_id}/games",
-            web::get().to(route::agent_games::<Self>),
+            web::get().to(route::agent::agent_games::<Self>),
         );
 
         service.route(
             "_agent/{agent_id}/score",
-            web::get().to(route::agent_score::<Self>),
+            web::get().to(route::agent::agent_score::<Self>),
         );
     }
 
@@ -141,30 +149,44 @@ pub trait Competition: 'static + Send + Sync {
     fn configure_user_routes(&self, service: &mut actix_web::web::ServiceConfig) {
         service.route(
             "_user/{username}/agents",
-            web::get().to(route::user_agents::<Self>),
+            web::get().to(route::user::user_agents::<Self>),
         );
 
         service.route(
             "_user/{username}/active_agent",
-            web::get().to(route::user_active_agent::<Self>),
+            web::get().to(route::user::user_active_agent::<Self>),
         );
 
         service.route(
             "_user/{username}/high_score",
-            web::get().to(route::user_high_score::<Self>),
+            web::get().to(route::user::user_high_score::<Self>),
         );
 
         service.route(
             "_user/{username}/score",
-            web::get().to(route::user_score::<Self>),
+            web::get().to(route::user::user_score::<Self>),
         );
+
+        service.route(
+            "_user/{username}/active_games",
+            web::get().to(route::user::user_active_games::<Self>),
+        );
+
+        // TODO:
+        // service.route(
+        //     "_user/{username}/rank",
+        //     web::get().to(route::user_rank::<Self>),
+        // );
     }
 
     /// This function registers the `/_leaderboard/...` route.
     ///
     /// If you want to customise this or disable this you can overwrite this function.
     fn configure_leaderboard_routes(&self, service: &mut actix_web::web::ServiceConfig) {
-        todo!();
+        service.route(
+            "_leaderboard/active",
+            web::get().to(route::leaderboard::active_leaderboard::<Self>),
+        );
     }
 
     /// Filter maps the events before sending them to a user.
@@ -217,6 +239,8 @@ impl<T: Competition> CompetitionInner for T {
         Competition::configure_game_routes(self, service);
         Competition::configure_agent_routes(self, service);
         Competition::configure_user_routes(self, service);
+        Competition::configure_leaderboard_routes(self, service);
+
         Competition::configure_routes(self, service);
     }
 

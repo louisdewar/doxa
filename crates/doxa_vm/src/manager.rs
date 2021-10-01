@@ -9,7 +9,8 @@ use tokio::{
 use tracing::{info, trace};
 
 use crate::{
-    error::{ManagerError, SendAgentError},
+    error::{ManagerError, RebootAgentError, SendAgentError},
+    executor::MAX_MSG_LEN,
     stream::Stream,
 };
 
@@ -124,6 +125,26 @@ impl Manager {
             .await
     }
 
+    /// Sends a reboot message to the VM instructing it to restart the agent's process inside the
+    /// VM and waits for the response.
+    /// This will discard all other messages until it receives the `REBOOTED` message from the VM.
+    pub async fn reboot_agent(&mut self) -> Result<(), RebootAgentError> {
+        self.stream.send_full_message(b"REBOOT_").await?;
+
+        // TODO: wrap this in an async move then add a 2 min timeout
+        let mut buf = Vec::new();
+
+        loop {
+            self.stream.next_full_message(&mut buf, MAX_MSG_LEN).await?;
+
+            if &buf == b"REBOOTED" {
+                break;
+            }
+        }
+
+        Ok(())
+    }
+
     /// Get access to the underlying stream
     /// TODO: in future have an abstraction around this and
     /// make stream pub(crate)
@@ -131,12 +152,10 @@ impl Manager {
         &mut self.stream
     }
 
-    //pub async fn shutdown(self) -> Result<(ChildStdout, ChildStderr), ShutdownError> {
     pub async fn shutdown(self) -> Result<(), ShutdownError> {
         self.vm.shutdown().await?;
         let tempdir = self.tempdir;
         tokio::task::spawn_blocking(move || tempdir.close()).await??;
-        //Ok((self.stdout, self.stderr))
         Ok(())
     }
 }

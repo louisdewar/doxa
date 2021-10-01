@@ -3,7 +3,7 @@ use doxa_competition::{
     error::ContextError,
 };
 
-use crate::game_client::{UTTTGameClient, UTTTGameEvent};
+use crate::game_client::{UTTTGameClient, UTTTGameEvent, UTTTMatchEvent};
 
 pub struct UTTTCompetition;
 
@@ -35,7 +35,6 @@ impl Competition for UTTTCompetition {
         context
             .remove_game_result_by_participant_and_update_scores_by_sum(agent_id)
             .await?;
-        // context.pair_matching(agent_id, true, || ()).await?;
 
         Ok(())
     }
@@ -43,10 +42,10 @@ impl Competition for UTTTCompetition {
     async fn on_game_event(
         &self,
         context: &Context<Self>,
-        event: GameEvent<UTTTGameEvent>,
+        event: GameEvent<UTTTMatchEvent>,
     ) -> Result<(), ContextError> {
         match event.payload {
-            UTTTGameEvent::Scores {
+            UTTTMatchEvent::Scores {
                 draws,
                 a_wins,
                 b_wins,
@@ -65,31 +64,15 @@ impl Competition for UTTTCompetition {
                         true,
                     )
                     .await?;
-
-                // context
-                //     .add_game_result(agents[0].clone(), game, a_score)
-                //     .await?;
-                // context
-                //     .add_game_result(agents[1].clone(), game, b_score)
-                //     .await?;
-
-                // context
-                //     .set_score_by_game_result_sum(agents[0].clone())
-                //     .await?;
-                // context
-                //     .set_score_by_game_result_sum(agents[1].clone())
-                //     .await?;
             }
             _ => {}
         }
-
-        // context.upsert_score(agent, score);
 
         Ok(())
     }
 
     fn event_filter(
-        game_event: UTTTGameEvent,
+        game_event: UTTTMatchEvent,
         _is_admin: bool,
         _agent: Option<usize>,
     ) -> Option<serde_json::Value> {

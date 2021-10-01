@@ -1,4 +1,5 @@
 use crate::model::storage::{AgentUpload, InsertableAgentUpload};
+use crate::model::user::User;
 use crate::{schema as s, view, DieselError};
 use chrono::{DateTime, Utc};
 use diesel::{ExpressionMethods, OptionalExtension, PgConnection, QueryDsl, RunQueryDsl};
@@ -41,6 +42,14 @@ pub fn get_agent(
         .filter(s::agents::columns::id.eq(agent_id))
         .first(conn)
         .optional()
+}
+
+pub fn get_agent_owner(conn: &PgConnection, agent_id: String) -> Result<User, DieselError> {
+    s::agents::table
+        .filter(s::agents::columns::id.eq(agent_id))
+        .inner_join(s::users::table)
+        .select(s::users::all_columns)
+        .first(conn)
 }
 
 /// Like get_agent but it requires the existance of the agent otherwise it will result in an error.

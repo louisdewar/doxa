@@ -3,10 +3,10 @@ use std::sync::Arc;
 use doxa_core::{
     lapin::{message::Delivery, options::BasicAckOptions},
     tokio,
-    tracing::{error, info, span, Level},
+    tracing::{error, span, Level},
     tracing_futures::Instrument,
 };
-use doxa_db::{diesel::Connection, model::storage::AgentUpload};
+use doxa_db::model::storage::AgentUpload;
 use doxa_mq::model::ActivationEvent;
 
 use crate::{error::ContextError, Settings};

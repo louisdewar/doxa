@@ -8,8 +8,8 @@ use std::{
 use tokio::{
     self,
     fs::{File, OpenOptions},
-    io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt, BufReader},
-    process::{self, Child, ChildStdin},
+    io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt, BufReader, Lines},
+    process::{self, Child, ChildStdin, ChildStdout},
     task::{self, JoinHandle},
     time::timeout,
 };
@@ -39,6 +39,9 @@ pub struct VMExecutor {
     child_process: Child,
     stdin: ChildStdin,
     stream: Stream<VsockStream>,
+    execution_root: PathBuf,
+    execution_config: ExecutionConfig,
+    stdout_lines: Lines<BufReader<ChildStdout>>,
 }
 
 impl VMExecutor {
@@ -78,12 +81,13 @@ impl VMExecutor {
 
             stream.send_full_message(b"SPAWNED").await.unwrap();
 
-            let mut stdout_lines = BufReader::new(stdout).lines();
-
             let mut executor = VMExecutor {
                 child_process,
                 stream,
                 stdin,
+                execution_root: config_dir,
+                execution_config: config,
+                stdout_lines: BufReader::new(stdout).lines(),
             };
 
             let mut message_reader = MessageReader::new(Vec::new(), MAX_MSG_LEN);
@@ -91,8 +95,8 @@ impl VMExecutor {
             // Change next_full_message to return a struct that impl's future and is cancellable
             loop {
                 tokio::select! {
-                    line = stdout_lines.next_line() => {
-                        match dbg!(line.unwrap()) {
+                    line = executor.stdout_lines.next_line() => {
+                        match line.unwrap() {
                             Some(line) => executor.handle_output_line(line).await.unwrap(),
                             None => break,
                         }
@@ -102,12 +106,26 @@ impl VMExecutor {
                         println!("Got line {}", String::from_utf8_lossy(&message).to_string());
                         executor.handle_message(message).await.unwrap();
                     }
-
                 };
             }
+            let mut err_output = String::new();
+            executor
+                .child_process
+                .stderr
+                .take()
+                .unwrap()
+                .take(MAX_MSG_LEN as u64)
+                .read_to_string(&mut err_output)
+                .await
+                .unwrap();
+            executor
+                .stream
+                .send_prefixed_full_message(b"F_", err_output.as_bytes())
+                .await
+                .unwrap();
 
             // The proceses finished
-            executor.stream.send_full_message(b"F_").await.unwrap();
+            // executor.stream.send_full_message(b"F_").await.unwrap();
         })
     }
 
@@ -129,8 +147,19 @@ impl VMExecutor {
 
         match prefix {
             b"INPUT" => self.stdin.write_all(msg).await?,
+            b"REBOOT" => self.reboot().await?,
             _ => return Err(HandleMessageError::UnrecognisedPrefix),
         }
+
+        Ok(())
+    }
+
+    async fn reboot(&mut self) -> Result<(), ExecutionSpawnError> {
+        self.child_process.kill().await?;
+        self.child_process = Self::spawn(&self.execution_config, &self.execution_root).await?;
+        self.stream.send_full_message(b"REBOOTED").await.unwrap();
+        self.stdout_lines = BufReader::new(self.child_process.stdout.take().unwrap()).lines();
+        self.stdin = self.child_process.stdin.take().unwrap();
 
         Ok(())
     }
@@ -219,7 +248,7 @@ impl VMExecutor {
         Ok(())
     }
 
-    /// Returns the directory containing the config (`doxa.toml`) file and the file pointer itself.
+    /// Returns the directory containing the config (`doxa.yaml`) file and the file pointer itself.
     /// At each folder it will check to see if the config file exists.
     /// If there is only a single folder in the directory it will recurse downwards which may be
     /// necessary depending on how the tar file was created.
@@ -229,7 +258,7 @@ impl VMExecutor {
         loop {
             match OpenOptions::new()
                 .read(true)
-                .open(search_path.join("doxa.toml"))
+                .open(search_path.join("doxa.yaml"))
                 .await
             {
                 Ok(file) => return Ok((search_path, file)),

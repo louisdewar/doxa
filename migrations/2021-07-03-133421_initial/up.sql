@@ -79,6 +79,12 @@ SELECT *
 FROM agents
 WHERE active = true;
 
+CREATE VIEW active_games AS
+SELECT game as id from game_participants
+INNER JOIN agents ON agents.id = game_participants.agent
+GROUP BY game
+HAVING COUNT (NOT agents.active OR NULL) = 0;
+
 CREATE TABLE game_results(
     agent TEXT references agents(id) NOT NULL,
     game INT references games(id) NOT NULL,

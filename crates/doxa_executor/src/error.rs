@@ -5,7 +5,7 @@ use doxa_core::lapin;
 use doxa_mq::action::BincodeError;
 use doxa_storage::RetrievalError;
 use doxa_vm::{
-    error::{ManagerError, SendAgentError},
+    error::{ManagerError, RebootAgentError, SendAgentError},
     stream::ReadMessageError,
 };
 
@@ -85,6 +85,8 @@ pub enum GameContextError {
         fmt = "the client tried to emit an event type that began with an underscore which is reserved for system events"
     )]
     ReservedEventType,
+    #[display(fmt = "failed to reboot the agent inside the VM")]
+    RebootError(RebootAgentError),
 }
 
 impl ForfeitError for GameContextError {
@@ -92,7 +94,7 @@ impl ForfeitError for GameContextError {
         match &self {
             GameContextError::UnknownAgent { .. } => None,
             // TODO: next message / send input should both be forfeit errors but we need the agent
-            // id
+            // id - if self.shutdown
             GameContextError::NextMessage(_) => None,
             GameContextError::SendInput(_) => None,
             GameContextError::PayloadDeserialize(_) => None,
@@ -101,6 +103,7 @@ impl ForfeitError for GameContextError {
             GameContextError::IncorrectNumberAgents { .. } => None,
             GameContextError::ZeroLengthEventType => None,
             GameContextError::ReservedEventType => None,
+            GameContextError::RebootError(_) => None,
         }
     }
 }

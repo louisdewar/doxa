@@ -4,6 +4,7 @@ use doxa_core::{chrono::Utc, tokio, tracing::debug};
 use doxa_db::{
     diesel::PgConnection,
     model::{
+        self,
         game::{Game, GameParticipant, GameParticipantUser, GameResult, InsertableGame},
         leaderboard::LeaderboardScore,
         storage::AgentUpload,
@@ -22,18 +23,8 @@ use crate::{
     error::{AgentNotFound, ContextError, ParseSystemMessageError, StartEventNotFound},
 };
 
-// Maybe rename to BaseContext which contains stuff that can be cloned around then before actually
-// passing it into things such as routes we extract the db_pool and store it in the Context, or we
-// make those kinds of methods take in a DbConnection and provide another method which takes in
-// DbPool and returns DbConnection
-//
-// Maybe make context generic over the competition to allow for automatically having the correct
-// type for match request. Build one context per competiton
-//
-// New idea for handling DB stuff:
-// allow clients to build their own db queries maybe with a replacement of action with `controller`
-// apis where a struct has methods that return querys (not results). Then never give the actual db
-// connection and create an exec method that takes in the query, spawns the blocking thread etc..
+// TODO: consider moving context methods in their own folders, this file is getting a bit unwieldy
+
 #[derive(Clone)]
 pub struct Context<C: Competition + ?Sized> {
     mq_pool: Arc<MQPool>,
@@ -250,7 +241,57 @@ impl<C: Competition + ?Sized> Context<C> {
         Ok(start_event.payload.agents)
     }
 
-    pub(crate) async fn get_single_event_by_type(
+    /// Returns a list of the users and their agent in the order that they appear in the game based on the _START event.
+    /// Internally this uses [`get_game_participants_ordered`]
+    pub async fn get_game_players_ordered(
+        &self,
+        game_id: i32,
+    ) -> Result<Vec<(User, String)>, ContextError> {
+        let agents = self.get_game_participants_ordered(game_id).await?;
+
+        let mut players = Vec::with_capacity(agents.len());
+
+        for agent in agents {
+            players.push((self.get_agent_owner(agent.clone()).await?, agent));
+        }
+
+        Ok(players)
+    }
+
+    /// Gets the user that is the owner of the agent.
+    /// This assumes that the agent is supposed to exist, if it doesn't it will return a DieselError which translates to an internal server error.
+    pub async fn get_agent_owner(&self, agent_id: String) -> Result<User, ContextError> {
+        self.run_query(move |conn| doxa_db::action::storage::get_agent_owner(conn, agent_id))
+            .await
+    }
+
+    pub async fn get_user_by_id(&self, user_id: i32) -> Result<User, ContextError> {
+        self.run_query(move |conn| doxa_db::action::user::get_user_by_id(conn, user_id))
+            .await
+    }
+
+    pub async fn get_events(
+        &self,
+        game_id: i32,
+    ) -> Result<Vec<doxa_db::model::game::GameEvent>, ContextError> {
+        self.run_query(move |conn| doxa_db::action::game::get_game_events(conn, game_id))
+            .await
+    }
+
+    pub async fn get_game_events_by_event_type(
+        &self,
+        game_id: i32,
+        event_type: String,
+    ) -> Result<Vec<doxa_db::model::game::GameEvent>, ContextError> {
+        self.run_query(move |conn| {
+            doxa_db::action::game::get_game_events_by_event_type(conn, game_id, event_type)
+        })
+        .await
+    }
+
+    /// If there are more than one events with this event_type in this game, which event is
+    /// returned is undefined.
+    pub async fn get_single_event_by_type(
         &self,
         game_id: i32,
         event_type: String,
@@ -300,6 +341,25 @@ impl<C: Competition + ?Sized> Context<C> {
         .await
     }
 
+    /// Gets a list of games which the user has participated where ALL of the agents involved are active
+    /// This is ordered by game start time ascending.
+    pub async fn get_user_active_games(&self, user_id: i32) -> Result<Vec<Game>, ContextError> {
+        let competition_id = self.competition_id;
+        self.run_query(move |conn| {
+            doxa_db::action::game::get_user_active_games(conn, user_id, competition_id)
+        })
+        .await
+    }
+
+    pub async fn get_game_result(
+        &self,
+        game_id: i32,
+        agent_id: String,
+    ) -> Result<Option<GameResult>, ContextError> {
+        self.run_query(move |conn| doxa_db::action::game::get_game_result(conn, game_id, agent_id))
+            .await
+    }
+
     pub async fn get_active_agent(
         &self,
         user_id: i32,
@@ -319,11 +379,16 @@ impl<C: Competition + ?Sized> Context<C> {
             .await
     }
 
+    pub async fn get_game_by_id(&self, game_id: i32) -> Result<Option<Game>, ContextError> {
+        self.run_query(move |conn| {
+            doxa_db::action::game::get_game_by_id(conn, game_id, C::COMPETITION_NAME)
+        })
+        .await
+    }
+
     /// Returns the list of active agents and their scores in descending order for this competition
     /// (only for those that exist in the leaderboard since an agent could be active but not yet on the leaderboard)
-    pub async fn get_leaderboard(
-        &self,
-    ) -> Result<Vec<(AgentUpload, LeaderboardScore)>, ContextError> {
+    pub async fn get_leaderboard(&self) -> Result<Vec<(User, LeaderboardScore)>, ContextError> {
         let competition_id = self.competition_id;
         self.run_query(move |conn| {
             doxa_db::action::leaderboard::active_leaderboard(conn, competition_id)
@@ -348,6 +413,14 @@ impl<C: Competition + ?Sized> Context<C> {
             )
         })
         .await
+    }
+
+    pub async fn get_user_rank(
+        &self,
+        user_id: i32,
+    ) -> Result<Option<(i32, LeaderboardScore)>, ContextError> {
+        self.run_query(move |conn| doxa_db::action::leaderboard::get_user_rank(conn, user_id))
+            .await
     }
 
     /// Inserts a group of game results at once only if all the agents are currently active.

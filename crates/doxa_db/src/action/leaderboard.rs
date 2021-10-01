@@ -2,7 +2,7 @@ use diesel::JoinOnDsl;
 use diesel::{ExpressionMethods, OptionalExtension, PgConnection, QueryDsl, RunQueryDsl};
 
 use crate::model::leaderboard::LeaderboardScore;
-use crate::model::storage::AgentUpload;
+use crate::model::user::User;
 use crate::schema as s;
 use crate::view;
 use crate::DieselError;
@@ -76,14 +76,27 @@ pub fn get_user_high_score(
         .optional()
 }
 
+pub fn get_user_rank(
+    conn: &PgConnection,
+    user: i32,
+) -> Result<Option<(i32, LeaderboardScore)>, DieselError> {
+    todo!();
+    // s::leaderboard::table
+    //     .filter(s::leaderboard::columns::agent.eq(agent))
+    //     .first(conn)
+    //     .optional()
+}
+
 /// Returns the list of agents in order of score (descending) for all active agents within a particular competition
 pub fn active_leaderboard(
     conn: &PgConnection,
     competition: i32,
-) -> Result<Vec<(AgentUpload, LeaderboardScore)>, DieselError> {
+) -> Result<Vec<(User, LeaderboardScore)>, DieselError> {
     view::active_agents::table
         .filter(view::active_agents::competition.eq(competition))
         .inner_join(s::leaderboard::table.on(s::leaderboard::agent.eq(view::active_agents::id)))
+        .inner_join(s::users::table.on(s::users::id.eq(view::active_agents::owner)))
         .order_by(s::leaderboard::score.desc())
+        .select((s::users::all_columns, s::leaderboard::all_columns))
         .get_results(conn)
 }

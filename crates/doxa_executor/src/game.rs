@@ -5,7 +5,7 @@ use doxa_mq::model::MatchRequest;
 use futures::future::try_join_all;
 
 use crate::{
-    agent::Agent,
+    agent::VMAgent,
     client::{ForfeitError, GameClient, GameError},
     context::GameContext,
     error::GameManagerError,
@@ -14,7 +14,7 @@ use crate::{
 
 pub struct GameManager<C: GameClient> {
     client: PhantomData<C>,
-    agents: Vec<Agent>,
+    agents: Vec<VMAgent>,
     event_queue_name: String,
     event_channel: Channel,
     client_match_request: C::MatchRequest,
@@ -30,7 +30,7 @@ impl<C: GameClient> GameManager<C> {
         match_request: MatchRequest<C::MatchRequest>,
     ) -> Result<Self, GameManagerError<C::Error>> {
         let agents = match_request.agents.into_iter().map(|agent_id| {
-            Agent::new(
+            VMAgent::new(
                 competition_name,
                 agent_id,
                 &settings.agent_retrieval,

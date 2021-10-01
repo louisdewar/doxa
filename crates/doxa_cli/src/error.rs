@@ -7,6 +7,8 @@ pub enum CommandError {
     Request(RequestError),
     #[display(fmt = "io error: {}", _0)]
     IO(std::io::Error),
+    #[display(fmt = "upload error: {}", _0)]
+    Upload(UploadError),
 }
 
 #[derive(Error, Display, From, Debug)]
@@ -39,4 +41,14 @@ pub struct DoxaError {
 pub struct PlainError {
     pub status_code: StatusCode,
     pub error_message: String,
+}
+
+#[derive(Error, Display, Debug)]
+pub enum UploadError {
+    #[display(fmt = "failed to read agent: {}", _0)]
+    ReadAgentError(std::io::Error),
+    #[display(fmt = "the path was a folder but there was no doxa.yaml file")]
+    MissingExecutionConfig,
+    #[display(fmt = "agents must have an extension of either .tar or .tar.gz")]
+    IncorrectExtension,
 }

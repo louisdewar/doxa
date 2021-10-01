@@ -7,27 +7,49 @@ use serde::{Deserialize, Serialize};
 
 pub struct UTTTGameClient;
 
+/// Games per side
+/// In a pairing between A and B there are two matches one where A goes first and one where B goes first,
+/// this number is the number of games played where A goes first and also the number of games where B goes first
+const GAMES_PER_SIDE: u32 = 20;
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(untagged)]
+/// Events that occur within a game
 pub enum UTTTGameEvent {
     TilePlaced {
+        #[serde(rename = "g")]
         grid: usize,
+        #[serde(rename = "t")]
         tile: usize,
-        player: Player,
     },
     SmallGridWon {
+        #[serde(rename = "g")]
         grid: usize,
+        #[serde(rename = "w")]
         winner: Winner,
     },
     GameOver {
-        winner: Winner,
+        #[serde(rename = "overall")]
+        overall_winner: Winner,
+    },
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(tag = "type")]
+pub enum UTTTMatchEvent {
+    GameHistory {
+        events: Vec<UTTTGameEvent>,
+        overall_winner: Winner,
     },
     Scores {
         draws: u32,
         a_wins: u32,
         b_wins: u32,
     },
+    GameWinners {
+        winners: Vec<Winner>,
+    },
 }
-
 // TODO: forfeit for agent with error
 
 #[derive(From, Error, Display, Debug, Clone)]
@@ -51,6 +73,7 @@ impl UTTTError {
 impl ForfeitError for UTTTError {
     fn forfeit(&self) -> Option<usize> {
         match &self {
+            // TODO: figure out forfeits for these, probably add agent_id as an adjacent field
             UTTTError::Model(_) => None,
             UTTTError::ImproperFormat { agent } => Some(*agent),
             UTTTError::NotNumber { agent } => Some(*agent),
@@ -62,7 +85,7 @@ impl UTTTGameClient {
     async fn run_once<'a, E: FnMut(UTTTGameEvent)>(
         context: &mut GameContext<'a, Self>,
         mut on_event: E,
-    ) -> Result<(), GameError<UTTTError>> {
+    ) -> Result<Winner, GameError<UTTTError>> {
         let mut model = Model::new();
 
         context.send_message_to_agent(0, b"S R\n").await?;
@@ -121,21 +144,7 @@ impl UTTTGameClient {
                 .broadcast_message_to_agents(place_msg.as_bytes())
                 .await?;
 
-            on_event(UTTTGameEvent::TilePlaced {
-                grid,
-                tile,
-                player: current_player,
-            });
-            // context
-            //     .emit_game_event(
-            //         UTTGameEvent::TilePlaced {
-            //             grid,
-            //             tile,
-            //             player: current_player,
-            //         },
-            //         event_id.clone(),
-            //     )
-            //     .await?;
+            on_event(UTTTGameEvent::TilePlaced { grid, tile });
 
             if let Some(event) = event {
                 match event {
@@ -148,42 +157,17 @@ impl UTTTGameClient {
                             grid: small_grid,
                             winner: small_winner,
                         });
-                        on_event(UTTTGameEvent::GameOver {
-                            winner: overall_winner,
-                        });
-                        // context
-                        //     .emit_game_event(
-                        //         UTTGameEvent::SmallGridWon {
-                        //             grid: small_grid,
-                        //             winner: small_winner,
-                        //         },
-                        //         event_id.clone(),
-                        //     )
-                        //     .await?;
-                        // context
-                        //     .emit_game_event(
-                        //         UTTGameEvent::GameOver {
-                        //             winner: overall_winner,
-                        //         },
-                        //         event_id.clone(),
-                        //     )
-                        //     .await?;
+                        on_event(UTTTGameEvent::GameOver { overall_winner });
 
-                        return Ok(());
+                        return Ok(overall_winner);
                     }
                     model::Event::SmallGridWon { grid, winner } => {
                         context
                             .broadcast_message_to_agents(
-                                format!("G {}", winner.to_char()).as_bytes(),
+                                format!("G {} {}\n", winner.to_char(), grid).as_bytes(),
                             )
                             .await?;
                         on_event(UTTTGameEvent::SmallGridWon { grid, winner });
-                        // context
-                        //     .emit_game_event(
-                        //         UTTGameEvent::SmallGridWon { grid, winner },
-                        //         event_id.clone(),
-                        //     )
-                        //     .await?;
                     }
                 }
             }
@@ -199,7 +183,7 @@ impl GameClient for UTTTGameClient {
 
     type MatchRequest = ();
 
-    type GameEvent = UTTTGameEvent;
+    type GameEvent = UTTTMatchEvent;
 
     async fn run<'a>(
         _match_request: (),
@@ -210,59 +194,68 @@ impl GameClient for UTTTGameClient {
         let mut a_wins = 0;
         let mut b_wins = 0;
         let mut draws = 0;
+        let mut winners = Vec::with_capacity(GAMES_PER_SIDE as usize);
 
-        let mut events = Vec::new();
-        for game in 0..100 {
-            events.truncate(0);
-            // Game ID are 1 indexed as they are shown to the user
-            let game_id = format!("game_{}", game + 1);
+        for game in 0..GAMES_PER_SIDE {
+            // Reboot all agents to reset each game
+            context.reboot_all_agents().await?;
 
-            if let Err(e) = Self::run_once(context, |event| {
+            let mut events = Vec::new();
+
+            let overall_winner = match Self::run_once(context, |event| {
                 events.push(event);
             })
             .await
             {
-                if let Some(agent) = e.forfeit() {
-                    let remaining = 100 - game;
-                    if agent == 0 {
-                        b_wins += remaining;
-                    } else {
-                        a_wins += remaining;
+                Ok(winner) => winner,
+                Err(e) => {
+                    if let Some(agent) = e.forfeit() {
+                        let remaining = GAMES_PER_SIDE - game;
+                        if agent == 0 {
+                            b_wins += remaining;
+                        } else {
+                            a_wins += remaining;
+                        }
+
+                        context
+                            .emit_game_event(
+                                UTTTMatchEvent::Scores {
+                                    a_wins,
+                                    b_wins,
+                                    draws,
+                                },
+                                "scores",
+                            )
+                            .await?;
                     }
 
-                    context
-                        .emit_game_event(
-                            UTTTGameEvent::Scores {
-                                a_wins,
-                                b_wins,
-                                draws,
-                            },
-                            "scores",
-                        )
-                        .await?;
+                    return Err(e);
                 }
+            };
 
-                return Err(e);
-            }
+            // Game ID are 1 indexed as they are shown to the user
+            let game_id = format!("game_{}", game + 1);
+            context
+                .emit_game_event(
+                    UTTTMatchEvent::GameHistory {
+                        overall_winner,
+                        events,
+                    },
+                    game_id,
+                )
+                .await?;
 
-            for event in &events {
-                if let &UTTTGameEvent::GameOver { winner } = event {
-                    match winner {
-                        Winner::Red => a_wins += 1,
-                        Winner::Blue => b_wins += 1,
-                        Winner::Stalemate => draws += 1,
-                    }
-                }
-
-                context
-                    .emit_game_event(event.clone(), game_id.clone())
-                    .await?;
+            winners.push(overall_winner);
+            match overall_winner {
+                Winner::Red => a_wins += 1,
+                Winner::Blue => b_wins += 1,
+                Winner::Stalemate => draws += 1,
             }
         }
 
         context
             .emit_game_event(
-                UTTTGameEvent::Scores {
+                UTTTMatchEvent::Scores {
                     a_wins,
                     b_wins,
                     draws,
@@ -271,12 +264,9 @@ impl GameClient for UTTTGameClient {
             )
             .await?;
 
-        // Self::run_once(context, |context, event| async move {
-        //     context.emit_game_event(event, "game_1").await?;
-
-        //     Ok(())
-        // })
-        // .await
+        context
+            .emit_game_event(UTTTMatchEvent::GameWinners { winners }, "game_winners")
+            .await?;
 
         Ok(())
     }

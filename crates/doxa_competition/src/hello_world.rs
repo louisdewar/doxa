@@ -104,6 +104,9 @@ impl GameClient for HelloWorldGameClient {
     ) -> Result<(), doxa_executor::error::GameError<Self::Error>> {
         context.expect_n_agents(1)?;
 
+        // Not required just a demonstration of this ability
+        context.reboot_agent(0).await?;
+
         context
             .send_message_to_agent(0, b"PLEASE ECHO THIS MESSAGE\n")
             .await?;

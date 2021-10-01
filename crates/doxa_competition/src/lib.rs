@@ -9,6 +9,7 @@ pub mod context;
 pub mod error;
 pub mod hello_world;
 pub mod manager;
+pub mod route;
 pub mod settings;
 
 pub use settings::Settings;

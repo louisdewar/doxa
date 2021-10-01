@@ -37,9 +37,10 @@ impl VMOptions {
         let firecracker_process = Command::new(firecracker_path)
             .arg("--api-sock")
             .arg(&self.socket)
-            .stdin(Stdio::piped())
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
+            .stdin(Stdio::null())
+            // If this becomes stdio piped and it isn't consumed then the VM can run out of memory
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
             .kill_on_drop(true)
             .spawn()?;
 
