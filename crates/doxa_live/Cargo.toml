@@ -4,3 +4,8 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
+doxa_core = { path = "../doxa_core" }
+doxa_executor = { path = "../doxa_executor" }
+actix-web-actors = "4.0.0-beta.7"
+actix = "0.12.0"
+

@@ -1,5 +1,3 @@
-import { StaticRouter } from 'react-router';
-
 export default class GameState {
   constructor() {
     // List of moves

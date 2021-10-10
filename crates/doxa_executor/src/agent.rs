@@ -20,12 +20,6 @@ use crate::{
 
 pub const MAX_MSG_LEN: usize = 5_000;
 
-// #[async_trait]
-// pub trait Agent {
-//     /// Sends agent input. This does not add a line end.
-//     async fn send_agent_input(&mut self, msg: &[u8]) -> Result<(), std::io::Error>;
-// }
-
 pub struct VMAgent {
     id: String,
     vm_manager: VM,

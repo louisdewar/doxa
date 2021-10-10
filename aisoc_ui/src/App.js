@@ -3,6 +3,7 @@ import Uttt from 'pages/Uttt.js';
 import User from 'pages/User.js';
 import Match from 'pages/Match';
 import Game from 'pages/Game';
+import Live from 'pages/Live';
 
 import './App.scss';
 
@@ -19,6 +20,9 @@ function App() {
       <Switch>
         <Route path="/c/uttt/match/:matchID/game/:gameID">
           <Game />
+        </Route>
+        <Route path="/c/uttt/_agent/:agentID/live">
+          <Live />
         </Route>
         <Route path="/c/uttt/match/:matchID">
           <Match />
