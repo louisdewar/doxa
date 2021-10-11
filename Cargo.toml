@@ -23,6 +23,7 @@ tracing-opentelemetry = { version = "0.13" }
 tracing-subscriber = { version = "0.2.12", features = ["registry", "env-filter"] }
 tracing-bunyan-formatter = "0.1.6"
 bytes = "1.1.0"
+humantime = "2.1.0"
 
 [workspace]
 members = ["crates/*", "competitions/*"]

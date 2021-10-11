@@ -91,3 +91,11 @@ CREATE TABLE game_results(
     result INT NOT NULL,
     PRIMARY KEY (agent, game)
 );
+
+CREATE TABLE invites(
+    id TEXT PRIMARY KEY,
+    username TEXT,
+    enrollments TEXT[] NOT NULL default '{}',
+    expires_at timestamptz
+    -- TODO: add created_at default now()
+);

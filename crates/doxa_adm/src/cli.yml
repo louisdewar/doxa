@@ -9,6 +9,32 @@ args:
         (this search will look for a .env file).
       takes_value: true
 subcommands:
+  - invite:
+      about: For managing invites
+      subcommands:
+        - list:
+            about: Lists all invites
+        - create:
+            about: Creates an invite
+            args:
+              - EXPIRES_AT:
+                  short: e
+                  long: expires
+                  takes_value: true
+                  about: |
+                    When the invite expires. This accepts times in a human friendly format
+                    e.g. "14 days" or "14d" or "14m" (for 14 minutes), "12M10m" (12 months and 10 minutes).
+              - USERNAME:
+                  short: u
+                  long: username
+                  takes_value: true
+                  about: Mandate a particular username
+              - ENROLLMENTS:
+                  short: c
+                  long: enroll
+                  multiple_occurrences: true
+                  takes_value: true
+                  about: Specifies a list of name of competitions to try to enroll the user in when they create an account.
   - user:
       about: Management of users
       subcommands:

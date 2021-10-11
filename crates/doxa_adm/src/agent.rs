@@ -36,11 +36,6 @@ fn print_agent_row((agent, user, competition): &(AgentUpload, User, Competition)
     );
 }
 
-fn print_single_agent(agent: &(AgentUpload, User, Competition)) {
-    print_agent_table_header();
-    print_agent_row(agent);
-}
-
 pub fn list_agents(matches: &ArgMatches, conn: &PgConnection) {
     let username = matches.value_of("USERNAME").unwrap();
     let competition_name = matches.value_of("COMPETITION").unwrap();

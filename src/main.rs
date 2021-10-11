@@ -31,6 +31,7 @@ async fn main() -> std::io::Result<()> {
         // Obviously temporary, in future this should be a paramter that gets passed in maybe as a
         // config file, and the value itself should be a randomly generated string.
         jwt_secret: doxa_auth::settings::generate_jwt_hmac(b"jwt secret password"),
+        allow_registration: false,
     };
 
     let storage_settings = doxa_storage::Settings {

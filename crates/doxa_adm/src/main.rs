@@ -1,10 +1,13 @@
 use clap::ArgMatches;
 use doxa_db::diesel::PgConnection;
 
-use crate::{agent::agent_subcommand, competition::competition_subcommand};
+use crate::{
+    agent::agent_subcommand, competition::competition_subcommand, invite::invite_subcommand,
+};
 
 mod agent;
 mod competition;
+mod invite;
 mod user;
 
 fn get_db_connection(matches: &ArgMatches) -> PgConnection {
@@ -41,6 +44,7 @@ fn main() {
         "user" => user_subcommand(sub_matches, &connection),
         "competition" => competition_subcommand(sub_matches, &connection),
         "agent" => agent_subcommand(sub_matches, &connection),
+        "invite" => invite_subcommand(sub_matches, &connection),
         _ => panic!("unrecognised subcommand"),
     }
 }

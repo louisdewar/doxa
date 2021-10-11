@@ -61,6 +61,15 @@ table! {
 }
 
 table! {
+    invites (id) {
+        id -> Text,
+        username -> Nullable<Text>,
+        enrollments -> Array<Text>,
+        expires_at -> Nullable<Timestamptz>,
+    }
+}
+
+table! {
     leaderboard (agent) {
         agent -> Text,
         score -> Int4,
@@ -97,6 +106,7 @@ allow_tables_to_appear_in_same_query!(
     game_participants,
     game_results,
     games,
+    invites,
     leaderboard,
     users,
 );

@@ -1,4 +1,4 @@
-use crate::model::user as model;
+use crate::model::user::{self as model, Invite};
 use crate::{schema as s, DieselError};
 use diesel::{ExpressionMethods, OptionalExtension, PgConnection, QueryDsl, RunQueryDsl};
 
@@ -51,4 +51,27 @@ pub fn list_admins(conn: &PgConnection) -> Result<Vec<model::User>, DieselError>
     s::users::table
         .filter(s::users::columns::admin.eq(true))
         .get_results(conn)
+}
+
+pub fn create_invite(conn: &PgConnection, invite: Invite) -> Result<Invite, DieselError> {
+    diesel::insert_into(s::invites::table)
+        .values(invite)
+        .get_result(conn)
+}
+
+pub fn remove_invite(conn: &PgConnection, id: String) -> Result<Option<Invite>, DieselError> {
+    diesel::delete(s::invites::table.filter(s::invites::id.eq(id)))
+        .get_result(conn)
+        .optional()
+}
+
+pub fn get_invite(conn: &PgConnection, id: String) -> Result<Option<Invite>, DieselError> {
+    s::invites::table
+        .filter(s::invites::columns::id.eq(id))
+        .first(conn)
+        .optional()
+}
+
+pub fn list_invites(conn: &PgConnection) -> Result<Vec<Invite>, DieselError> {
+    s::invites::table.get_results(conn)
 }

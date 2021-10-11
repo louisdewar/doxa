@@ -1,13 +1,15 @@
 use std::time::Duration;
 
 use diesel::PgConnection;
-use doxa_db::{model::competition::Enrollment, was_unique_key_violation};
+use doxa_core::{chrono::Utc, tracing::warn};
+use doxa_db::{model::competition::Enrollment, was_unique_key_violation, DieselError};
 use hmac::Hmac;
 use sha2::Sha256;
 
 use crate::{
     error::{
-        CheckEnrollmentError, CompetitionNotFound, CreateUserError, IncorrectPassword, LoginError,
+        AcceptInviteError, CheckEnrollmentError, CompetitionNotFound, CreateUserError,
+        IncorrectPassword, InviteExpired, InviteNotFound, LoginError, RegistrationInviteMismatch,
         UserAlreadyExists, UserNotEnrolled, UserNotFound,
     },
     password,
@@ -65,6 +67,84 @@ pub fn create_user(
             e.into()
         }
     })
+}
+
+/// Registers the user using the specific invite, atomically removing the invite when creating the
+/// user.
+///
+/// It checks to make sure that the username matches the invite (if it's specified) and that things
+/// like the expiration are correct.
+pub fn accept_invite(
+    conn: &PgConnection,
+    invite: String,
+    username: String,
+    password: &str,
+) -> Result<User, AcceptInviteError> {
+    // TODO: do some checking of username, e.g. no spaces, certain length, maybe limit characters
+    // to ascii? (same as register)
+    // Maybe use create_user internally?
+
+    let password = password::new_hashed(&password);
+    let token_generation = new_token_generation();
+    let user = model::user::InsertableUser {
+        username,
+        password,
+        token_generation,
+    };
+
+    let (user, invite) = conn
+        .build_transaction()
+        .run::<_, AcceptInviteError, _>(|| {
+            // Throughout this transaction there are two types of error:
+            // 1. An error where we want to rollback the transaction and not remove the invite.
+            //    In this case we return Err(e)
+            // 2. An error where we want to remove the invite and return the error.
+            //    In this case we return Ok(Err(e))
+            let invite = match action::user::remove_invite(conn, invite)? {
+                Some(invite) => invite,
+                // Rollback (note: doesn't actually matter here)
+                None => return Err(InviteNotFound.into()),
+            };
+
+            if let Some(invite_username) = &invite.username {
+                if invite_username != &user.username {
+                    // Rollback transaction
+                    return Err(RegistrationInviteMismatch.into());
+                }
+            }
+
+            if let Some(expires_at) = invite.expires_at {
+                if expires_at < Utc::now() {
+                    // Here we want to delete the invitation and return the error so we don't
+                    // rollback
+                    return Ok(Err(InviteExpired));
+                }
+            }
+
+            let user = action::user::create_user(conn, &user)?;
+
+            Ok(Ok((user, invite)))
+        })??;
+
+    for competition in invite.enrollments {
+        if let Some(competition) = action::competition::get_competition_by_name(conn, &competition)?
+        {
+            action::competition::enroll_user(
+                conn,
+                &Enrollment {
+                    user_id: user.id,
+                    competition: competition.id,
+                },
+            )?;
+        } else {
+            // While this might be a problem, it's not fatal and we deliberately allow the user the
+            // be registered (just without enrollment in all the competiitions that were
+            // specified).
+            warn!(username=%user.username, competition_name=%competition, "competition does not exist when enrolling user");
+        }
+    }
+
+    Ok(user)
 }
 
 /// Verifies the given username / password and returns a JWT if successfull.
