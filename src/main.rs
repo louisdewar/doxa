@@ -51,6 +51,8 @@ async fn main() -> std::io::Result<()> {
     let db_pool = web::Data::new(doxa_db::establish_pool(&database_url));
     let mq_pool = web::Data::new(doxa_mq::establish_pool(mq_url, 25).await);
 
+    doxa_mq::wait_for_mq(&mq_pool).await;
+
     let competition_settings = doxa_competition::Settings {
         executor_settings: Arc::new(executor_settings),
         mq_pool: Arc::clone(&mq_pool),

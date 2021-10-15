@@ -10,3 +10,4 @@ doxa_db = { path = "../doxa_db" }
 tokio-amqp = "1.0.0"
 serde = { version = "1.0.127", features = ["derive"] }
 bincode = "1.3.3"
+deadpool = "0.8.2"
