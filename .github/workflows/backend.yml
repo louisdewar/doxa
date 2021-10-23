@@ -16,14 +16,14 @@ jobs:
       - name: Login to registry
         uses: docker/login-action@v1 
         with:
-          registry: ${{ secrets.DOCKER_HOST }}
-          username: ${{ secrets.DOCKER_USER }}
+          registry: registry.dewardt.uk
+          username: doxa
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: ${{ secrets.DOCKER_USER }}/server:latest
+          tags: registry.dewardt.uk/doxa/server:latest
           file: dev/server/Dockerfile
             # TODO: cache
