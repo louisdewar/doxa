@@ -25,5 +25,11 @@ COPY ./Cargo.lock .
 
 RUN cargo build --release --locked
 
-FROM scratch
-COPY --from=builder /app/target/release/doxa .
+FROM centos
+
+RUN yum install -y postgresql-libs
+
+WORKDIR /app
+COPY --from=builder /app/target/release/doxa /app/doxa
+
+ENTRYPOINT ["/app/doxa"]
