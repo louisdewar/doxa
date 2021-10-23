@@ -3,7 +3,7 @@ name: backend
 on:
   push:
     branches:
-      - 'master'
+      - backend_production
 
 jobs:
   docker:
