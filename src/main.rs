@@ -27,6 +27,8 @@ async fn main() -> std::io::Result<()> {
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let mq_url = env::var("MQ_URL").expect("MQ_URL must be set");
 
+    let doxa_storage_path = env::var("DOXA_STORAGE").unwrap_or("dev/doxa_storage".into());
+
     let auth_settings = doxa_auth::Settings {
         // Obviously temporary, in future this should be a paramter that gets passed in maybe as a
         // config file, and the value itself should be a randomly generated string.
@@ -35,7 +37,7 @@ async fn main() -> std::io::Result<()> {
     };
 
     let storage_settings = doxa_storage::Settings {
-        root: PathBuf::from("dev/doxa_storage"),
+        root: PathBuf::from(doxa_storage_path),
     };
 
     let executor_settings = doxa_executor::Settings {
