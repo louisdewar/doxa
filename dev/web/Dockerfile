@@ -1,0 +1,18 @@
+FROM node AS app
+
+WORKDIR app
+COPY aisoc_ui/package*.json ./
+
+
+RUN npm ci
+
+COPY aisoc_ui .
+
+# TODO: remove DISABLE_ESLINT_PLUGIN in future once the frontend is free of warnings
+RUN DISABLE_ESLINT_PLUGIN=true npm run build
+
+FROM nginx
+
+COPY --from=app /app/build /usr/share/nginx/html
+
+EXPOSE 80
