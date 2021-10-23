@@ -22,3 +22,22 @@ trigger:
   - promote
   target:
   - production
+---
+kind: pipeline
+type: docker
+name: frontend
+
+workspace:
+  path: aisoc_ui
+
+steps:
+- name: test
+  image: node
+  commands:
+  - npm install
+  - npm run build
+
+trigger:
+  event:
+  - push
+  - pull_request
