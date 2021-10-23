@@ -11,8 +11,8 @@ steps:
       from_secret: DOCKER_USER
     password:
       from_secret: DOCKER_PASSWORD
-    password:
-      from_secret: DOCKER_PASSWORD
+    registry:
+      from_secret: DOCKER_HOST
     dockerfile: dev/server/Dockerfile
 
 # https://docs.drone.io/promote/ - NOTE: in future it could be a good idea to always build but only deploy on promote
@@ -31,7 +31,7 @@ workspace:
   path: aisoc_ui
 
 steps:
-- name: test
+- name: install and build
   image: node
   commands:
   - npm install
