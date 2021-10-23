@@ -13,6 +13,7 @@ RUN DISABLE_ESLINT_PLUGIN=true npm run build
 
 FROM nginx
 
+COPY dev/web/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=app /app/build /usr/share/nginx/html
 
 EXPOSE 80

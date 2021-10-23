@@ -75,7 +75,7 @@ async fn main() -> std::io::Result<()> {
             .configure(configure_competition_routes.clone())
             .wrap(TracingLogger::default())
     })
-    .bind(("127.0.0.1", 3001))?
+    .bind(("0.0.0.0", 3001))?
     .run()
     .await
 }
