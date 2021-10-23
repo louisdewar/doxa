@@ -17,16 +17,14 @@ async fn main() {
     let config_dir = config::default_config_dir();
     let profiles = config::load_or_default_profile(&config_dir).await.unwrap();
 
+    let base_url = std::env::var("DOXA_BASE_URL").unwrap_or("https://doxa.dewardt.uk/".to_string());
+
     let user_profile = matches
         .value_of("USER_PROFILE")
         .map(|username| profiles.user_profile(username))
         .unwrap_or_else(|| profiles.default_profile());
 
-    let settings = Settings::new(
-        user_profile.cloned(),
-        "http://localhost:3001/".into(),
-        config_dir,
-    );
+    let settings = Settings::new(user_profile.cloned(), base_url, config_dir);
 
     let subcommand = if let Some(subcommand) = matches.subcommand() {
         subcommand
