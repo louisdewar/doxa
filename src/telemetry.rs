@@ -1,3 +1,5 @@
+use std::env;
+
 use opentelemetry::{
     global, runtime::TokioCurrentThread, sdk::propagation::TraceContextPropagator,
 };
@@ -12,7 +14,10 @@ pub fn init_telemetry() {
     // Spans are exported in batch - recommended setup for a production application.
     global::set_text_map_propagator(TraceContextPropagator::new());
 
+    let jaeger_endpoint = env::var("DOXA_TELEMETRY_ENDPOINT").unwrap_or("localhost:6831".into());
+
     let tracer = opentelemetry_jaeger::new_pipeline()
+        .with_agent_endpoint(jaeger_endpoint)
         .with_service_name(app_name)
         .install_batch(TokioCurrentThread)
         .expect("Failed to install OpenTelemetry tracer.");
