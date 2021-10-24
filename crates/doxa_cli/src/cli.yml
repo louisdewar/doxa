@@ -23,6 +23,11 @@ subcommands:
             about: The user's password
             required: true
             index: 2
+        - INVITE:
+            about: The invite code
+            short: i
+            long: invite
+            takes_value: true
   - login:
       about: Login as new user saving the profile
       args:

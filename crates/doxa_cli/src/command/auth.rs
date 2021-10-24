@@ -42,10 +42,20 @@ pub async fn login(matches: &ArgMatches, settings: &Settings) -> Result<(), Comm
 }
 
 pub async fn register(matches: &ArgMatches, settings: &Settings) -> Result<(), CommandError> {
-    let builder = post(settings, "auth/register".into(), true);
-
     let username: String = matches.value_of("USERNAME").unwrap().into();
     let password = matches.value_of("PASSWORD").unwrap().into();
+
+    let invite_code = matches.value_of("INVITE").map(|s| s.to_string());
+
+    let builder = post(
+        settings,
+        if let Some(invite) = invite_code {
+            format!("auth/invite/accept/{}", invite)
+        } else {
+            "auth/register".into()
+        },
+        true,
+    );
 
     // Register and login currently have the same request params
     let builder = builder.json(&LoginRequest {
