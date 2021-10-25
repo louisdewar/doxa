@@ -17,7 +17,8 @@ async fn main() {
     let config_dir = config::default_config_dir();
     let profiles = config::load_or_default_profile(&config_dir).await.unwrap();
 
-    let base_url = std::env::var("DOXA_BASE_URL").unwrap_or("https://doxa.dewardt.uk/".to_string());
+    let base_url =
+        std::env::var("DOXA_BASE_URL").unwrap_or("https://doxa.uclaisociety.co.uk/".to_string());
 
     let user_profile = matches
         .value_of("USER_PROFILE")

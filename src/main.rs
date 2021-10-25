@@ -33,9 +33,9 @@ async fn main() -> std::io::Result<()> {
         .map(|s| s.into_bytes())
         .unwrap_or_else(doxa_auth::settings::generate_rand_jwt_secret);
 
+    info!("JWT Secret length = {}", jwt_secret.len());
+
     let auth_settings = doxa_auth::Settings {
-        // Obviously temporary, in future this should be a paramter that gets passed in maybe as a
-        // config file, and the value itself should be a randomly generated string.
         jwt_secret: doxa_auth::settings::generate_jwt_hmac(&jwt_secret),
         allow_registration: false,
     };
