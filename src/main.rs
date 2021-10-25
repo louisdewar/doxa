@@ -28,11 +28,15 @@ async fn main() -> std::io::Result<()> {
     let mq_url = env::var("MQ_URL").expect("MQ_URL must be set");
 
     let doxa_storage_path = env::var("DOXA_STORAGE").unwrap_or("dev/doxa_storage".into());
+    let jwt_secret = env::var("DOXA_JWT_SECRET")
+        .ok()
+        .map(|s| s.into_bytes())
+        .unwrap_or_else(doxa_auth::settings::generate_rand_jwt_secret);
 
     let auth_settings = doxa_auth::Settings {
         // Obviously temporary, in future this should be a paramter that gets passed in maybe as a
         // config file, and the value itself should be a randomly generated string.
-        jwt_secret: doxa_auth::settings::generate_jwt_hmac(b"jwt secret password"),
+        jwt_secret: doxa_auth::settings::generate_jwt_hmac(&jwt_secret),
         allow_registration: false,
     };
 

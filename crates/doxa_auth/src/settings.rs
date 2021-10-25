@@ -10,3 +10,10 @@ pub struct Settings {
 pub fn generate_jwt_hmac(secret: &[u8]) -> Hmac<Sha256> {
     Hmac::new_from_slice(secret).unwrap()
 }
+
+pub fn generate_rand_jwt_secret() -> Vec<u8> {
+    use rand::Rng;
+    rand::thread_rng()
+        .sample_iter(rand::distributions::Standard)
+        .collect()
+}
