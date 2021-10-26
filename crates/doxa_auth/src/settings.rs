@@ -15,5 +15,6 @@ pub fn generate_rand_jwt_secret() -> Vec<u8> {
     use rand::Rng;
     rand::thread_rng()
         .sample_iter(rand::distributions::Standard)
+        .take(20)
         .collect()
 }
