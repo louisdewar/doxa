@@ -1,6 +1,6 @@
 # DOXA 🧠
 
-An fully customisable platform for creating automated AI competitions.
+A customisable platform for creating fully automated AI competitions.
 
 Features:
 - 🔐 Secure: every agent in run in a private [firecracker](https://github.com/firecracker-microvm/firecracker/) micro-vm without internet access and limited memory meaning it's possible to securely run user submitted code.
