@@ -1,4 +1,6 @@
-use crate::request::Settings;
+use error::CliError;
+
+use crate::request::{parse_base_url, Settings};
 
 pub mod command;
 pub mod config;
@@ -7,6 +9,12 @@ pub mod request;
 
 #[tokio::main]
 async fn main() {
+    if let Err(e) = run().await {
+        eprintln!("failed: {}", e);
+    }
+}
+
+async fn run() -> Result<(), CliError> {
     let cli_config = clap::load_yaml!("cli.yml");
     let authors = clap::crate_authors!("\n");
     let app = clap::App::from(cli_config)
@@ -15,10 +23,13 @@ async fn main() {
     let matches = app.get_matches();
 
     let config_dir = config::default_config_dir();
+
     let profiles = config::load_or_default_profile(&config_dir).await.unwrap();
 
     let base_url =
         std::env::var("DOXA_BASE_URL").unwrap_or("https://doxa.uclaisociety.co.uk/".to_string());
+
+    let base_url = parse_base_url(&base_url)?;
 
     let user_profile = matches
         .value_of("USER_PROFILE")
@@ -34,14 +45,12 @@ async fn main() {
     };
 
     let sub_matches = subcommand.1;
-    let res = match subcommand.0 {
+    match subcommand.0 {
         "login" => command::auth::login(sub_matches, &settings).await,
         "register" => command::auth::register(sub_matches, &settings).await,
         "agent" => command::agent::subcommand(sub_matches, &settings).await,
         _ => panic!("unrecognised subcommand"),
-    };
+    }?;
 
-    if let Err(e) = res {
-        eprintln!("failed: {}", e);
-    }
+    Ok(())
 }

@@ -4,7 +4,7 @@ use clap::ArgMatches;
 use flate2::{write::GzEncoder, Compression};
 use reqwest::multipart::{Form, Part};
 
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
 use crate::{
     error::{CommandError, UploadError},
@@ -73,7 +73,7 @@ pub async fn upload(
 
     let builder = post(
         settings,
-        format!("storage/upload/{}", competition_name),
+        &format!("storage/upload/{}", competition_name),
         false,
     )
     .multipart(form);

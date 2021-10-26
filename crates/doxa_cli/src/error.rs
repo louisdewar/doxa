@@ -2,6 +2,12 @@ use derive_more::{Display, Error, From};
 use reqwest::StatusCode;
 
 #[derive(Error, Display, From, Debug)]
+pub enum CliError {
+    Command(CommandError),
+    BaseURLFormat(BaseURLFormatError),
+}
+
+#[derive(Error, Display, From, Debug)]
 pub enum CommandError {
     #[display(fmt = "{}", _0)]
     Request(RequestError),
@@ -51,4 +57,9 @@ pub enum UploadError {
     MissingExecutionConfig,
     #[display(fmt = "agents must have an extension of either .tar or .tar.gz")]
     IncorrectExtension,
+}
+
+#[derive(Display, Error, Debug, Clone, From)]
+pub struct BaseURLFormatError {
+    pub source: url::ParseError,
 }

@@ -71,12 +71,19 @@ async fn main() -> std::io::Result<()> {
     info!("Starting at 127.0.0.1:3001");
 
     HttpServer::new(move || {
+        let api_scope = web::scope("/api");
         App::new()
             .app_data(db_pool.clone())
             .app_data(mq_pool.clone())
-            .configure(doxa_auth::config(auth_settings.clone()))
-            .configure(doxa_storage::config(storage_settings.clone()))
-            .configure(configure_competition_routes.clone())
+            .service(
+                api_scope.service(
+                    // The configure happens before the scope is applied so the scope could be set to anything
+                    web::scope("")
+                        .configure(doxa_auth::config(auth_settings.clone()))
+                        .configure(doxa_storage::config(storage_settings.clone()))
+                        .configure(configure_competition_routes.clone()),
+                ),
+            )
             .wrap(TracingLogger::default())
     })
     .bind(("0.0.0.0", 3001))?

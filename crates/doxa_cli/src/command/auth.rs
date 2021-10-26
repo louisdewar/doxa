@@ -49,7 +49,7 @@ pub async fn register(matches: &ArgMatches, settings: &Settings) -> Result<(), C
 
     let builder = post(
         settings,
-        if let Some(invite) = invite_code {
+        &if let Some(invite) = invite_code {
             format!("auth/invite/accept/{}", invite)
         } else {
             "auth/register".into()

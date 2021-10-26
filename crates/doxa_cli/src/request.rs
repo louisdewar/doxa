@@ -1,27 +1,23 @@
 use std::{io::Bytes, path::PathBuf};
 
-use reqwest::{Client, RequestBuilder, Response, StatusCode};
+use reqwest::{Client, RequestBuilder, Response, StatusCode, Url};
 use serde::de::DeserializeOwned;
 use serde::Deserialize;
 
 use crate::{
     config::UserProfile,
-    error::{DoxaError, PlainError, RequestError},
+    error::{BaseURLFormatError, DoxaError, PlainError, RequestError},
 };
 
 pub struct Settings {
     pub user_profile: Option<UserProfile>,
-    pub base_url: String,
+    pub base_url: Url,
     pub config_dir: PathBuf,
     pub client: Client,
 }
 
 impl Settings {
-    pub fn new(
-        user_profile: Option<UserProfile>,
-        base_url: String,
-        config_dir: PathBuf,
-    ) -> Settings {
+    pub fn new(user_profile: Option<UserProfile>, base_url: Url, config_dir: PathBuf) -> Settings {
         Settings {
             user_profile,
             base_url,
@@ -47,8 +43,13 @@ impl DoxaErrorRaw {
     }
 }
 
-fn to_url(settings: &Settings, endpoint: String) -> String {
-    format!("{}{}", settings.base_url, endpoint)
+pub fn parse_base_url(base_url: &str) -> Result<Url, BaseURLFormatError> {
+    let url = Url::parse(base_url)?.join("api/")?;
+    Ok(url)
+}
+
+fn to_url(settings: &Settings, endpoint: &str) -> Url {
+    settings.base_url.join(endpoint).unwrap()
 }
 
 fn maybe_add_auth(
@@ -67,7 +68,7 @@ fn maybe_add_auth(
     }
 }
 
-pub fn post(settings: &Settings, endpoint: String, never_auth: bool) -> RequestBuilder {
+pub fn post(settings: &Settings, endpoint: &str, never_auth: bool) -> RequestBuilder {
     maybe_add_auth(
         settings,
         settings.client.post(to_url(settings, endpoint)),
@@ -75,7 +76,7 @@ pub fn post(settings: &Settings, endpoint: String, never_auth: bool) -> RequestB
     )
 }
 
-pub fn get(settings: &Settings, endpoint: String, never_auth: bool) -> RequestBuilder {
+pub fn get(settings: &Settings, endpoint: &str, never_auth: bool) -> RequestBuilder {
     maybe_add_auth(
         settings,
         settings.client.get(to_url(settings, endpoint)),
