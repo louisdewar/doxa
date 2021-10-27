@@ -5,7 +5,7 @@ A customisable platform for creating fully automated AI competitions.
 Features:
 - 🔐 Secure: every agent in run in a private [firecracker](https://github.com/firecracker-microvm/firecracker/) micro-vm without internet access and limited memory meaning it's possible to securely run user submitted code.
 - 🚀 Fast: the backend is written entirely in rust with a focus on speed, when rate limiting is disabled it's possible for a user's agent to be running in a VM and playing matches within seconds of upload.
-- 🔩 Resiliant: actions such as match requests and agent activations are stored in Rabbit MQ persistant queues 
+- 🔩 Resilient: actions such as match requests and agent activations are stored in Rabbit MQ persistant queues 
 - 🔧 Customisable: the core of DOXA makes very few assumptions about competitions while providing convenience features for common functionality, e.g. if you don't need a leaderboard for a competition you can disable it.
 
 ### Current Status 🚧
