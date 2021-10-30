@@ -17,6 +17,22 @@ Some of these missing features may constitute security concerns.
 Additionally although DOXA is designed to be a generic platform, it's first usecase is for the [UCL AI Society](https://uclaisociety.co.uk).
 Currently some code in the repo is specific to that usecase (primarily the UI and the URL specific in the CLI tool `doxa_cli`).
 
+
+
+## Competition design
+
+Here is a diagram showing how the competition fits into the system (note this is a simplified diagram):
+
+![competition diagram](./docs/competition_diagram.svg)
+
+
+
+
+
+An example hello world competition is in [crates/doxa_competition/src/hello_world.rs](crates/doxa_competition/src/hello_world.rs). You can also view a real world competition by looking in the competitions folder.
+
+
+
 ## Server Components
 
 DOXA (the backend server) is made up of several components (crates) which can be found in the `crates` folder.
