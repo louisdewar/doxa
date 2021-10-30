@@ -4,7 +4,6 @@ use doxa_core::{chrono::Utc, tokio, tracing::debug};
 use doxa_db::{
     diesel::PgConnection,
     model::{
-        self,
         game::{Game, GameParticipant, GameParticipantUser, GameResult, InsertableGame},
         leaderboard::LeaderboardScore,
         storage::AgentUpload,

@@ -72,20 +72,20 @@ pub async fn user_score<C: Competition + ?Sized>(
     Ok(HttpResponse::Ok().json(json!({ "agent": agent.id, "score": score })))
 }
 
-/// The default route for `_user/{username}/rank`.
-pub async fn user_rank<C: Competition + ?Sized>(
-    path: web::Path<String>,
-    context: web::Data<Context<C>>,
-) -> EndpointResult {
-    let username = path.into_inner();
-
-    let user = context
-        .get_user_by_username(username)
-        .await?
-        .ok_or(UserNotFound)?;
-
-    todo!();
-}
+// /// The default route for `_user/{username}/rank`.
+// pub async fn user_rank<C: Competition + ?Sized>(
+//     path: web::Path<String>,
+//     context: web::Data<Context<C>>,
+// ) -> EndpointResult {
+//     let username = path.into_inner();
+//
+//     let user = context
+//         .get_user_by_username(username)
+//         .await?
+//         .ok_or(UserNotFound)?;
+//
+//     todo!();
+// }
 
 /// The default route for `_user/{username}/agents`.
 pub async fn user_agents<C: Competition + ?Sized>(

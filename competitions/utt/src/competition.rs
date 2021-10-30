@@ -3,7 +3,7 @@ use doxa_competition::{
     error::ContextError,
 };
 
-use crate::game_client::{UTTTGameClient, UTTTGameEvent, UTTTMatchEvent};
+use crate::game_client::{UTTTGameClient, UTTTMatchEvent};
 
 pub struct UTTTCompetition;
 

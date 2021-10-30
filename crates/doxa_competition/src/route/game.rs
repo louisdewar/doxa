@@ -5,7 +5,7 @@ use doxa_core::{
     error::HttpResponse,
     EndpointResult,
 };
-use doxa_db::PgPool;
+
 use doxa_executor::{
     client::GameClient,
     event::{ErrorEvent, ForfeitEvent, StartEvent},
@@ -14,10 +14,7 @@ use serde_json::json;
 
 use crate::{
     client::{Competition, Context},
-    error::{
-        GameNotFound, IncorrectEventFormatting, IncorrectEventOrdering, MissingStartEvent,
-        UnknownEventType,
-    },
+    error::{GameNotFound, IncorrectEventFormatting, UnknownEventType},
 };
 
 use serde::{Deserialize, Serialize};

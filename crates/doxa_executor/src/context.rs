@@ -2,7 +2,7 @@ use std::{marker::PhantomData, time::Duration};
 
 use doxa_core::{chrono::Utc, lapin::Channel, tokio};
 use doxa_mq::model::GameEvent;
-use serde::{de::DeserializeOwned, Serialize};
+use serde::Serialize;
 use tokio::time::timeout;
 
 use crate::{
@@ -115,13 +115,6 @@ impl<'a, C: GameClient> GameContext<'a, C> {
     pub async fn forfeit_agent(&mut self, agent_id: usize) -> Result<(), GameContextError> {
         self.emit_event_raw(ForfeitEvent { agent_id }, "_FORFEIT".to_string())
             .await
-    }
-
-    pub(crate) fn deserialize_match_request<T: DeserializeOwned>(
-        &self,
-        payload: &[u8],
-    ) -> Result<T, GameContextError> {
-        doxa_mq::action::deserialize(payload).map_err(|e| GameContextError::PayloadDeserialize(e))
     }
 
     /// Returns the number of agents playing in the game.

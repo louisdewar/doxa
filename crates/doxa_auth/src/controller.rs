@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use diesel::PgConnection;
 use doxa_core::{chrono::Utc, tracing::warn};
-use doxa_db::{model::competition::Enrollment, was_unique_key_violation, DieselError};
+use doxa_db::{model::competition::Enrollment, was_unique_key_violation};
 use hmac::Hmac;
 use sha2::Sha256;
 

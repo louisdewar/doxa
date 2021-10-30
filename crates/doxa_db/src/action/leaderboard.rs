@@ -77,8 +77,8 @@ pub fn get_user_high_score(
 }
 
 pub fn get_user_rank(
-    conn: &PgConnection,
-    user: i32,
+    _conn: &PgConnection,
+    _user: i32,
 ) -> Result<Option<(i32, LeaderboardScore)>, DieselError> {
     todo!();
     // s::leaderboard::table
