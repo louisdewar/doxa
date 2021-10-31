@@ -1,4 +1,4 @@
-use crate::schema::{game_events, game_participants, games, game_results};
+use crate::schema::{game_events, game_participants, game_results, games};
 
 use chrono::{DateTime, Utc};
 use diesel::{Insertable, Queryable};
@@ -50,5 +50,5 @@ pub struct GameEvent {
 pub struct GameResult {
     pub agent: String,
     pub game: i32,
-    pub result: i32
+    pub result: i32,
 }

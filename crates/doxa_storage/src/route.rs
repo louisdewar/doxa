@@ -1,3 +1,5 @@
+use crate::error::AgentGone;
+use crate::route::request::DownloadParams;
 use actix_files::NamedFile;
 use actix_multipart::Multipart;
 use actix_web::{web, HttpRequest, HttpResponse};
@@ -8,6 +10,7 @@ use doxa_db::PgPool;
 use doxa_mq::MQPool;
 use futures::{StreamExt, TryStreamExt};
 
+mod request;
 mod response;
 
 use crate::{
@@ -30,9 +33,12 @@ async fn download(
     pool: web::Data<PgPool>,
     storage: web::Data<LocalStorage>,
     path: web::Path<(String, String)>,
+    query: web::Query<DownloadParams>,
     req: HttpRequest,
 ) -> EndpointResult {
     let (competition_name, agent_id) = path.into_inner();
+
+    let require_active = query.active;
 
     let competition = web::block({
         let pool = pool.clone();
@@ -50,8 +56,13 @@ async fn download(
     .await??
     .ok_or(AgentNotFound)?;
 
-    if agent.competition != competition.id || !agent.uploaded || agent.failed || agent.deleted {
-        return Err(AgentNotFound.into());
+    if agent.competition != competition.id
+        || !agent.uploaded
+        || agent.failed
+        || agent.deleted
+        || (require_active && !agent.active)
+    {
+        return Err(AgentGone.into());
     }
 
     let file = storage

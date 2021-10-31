@@ -22,6 +22,16 @@ impl_respondable_error!(
 );
 
 #[derive(Debug, Display, Error, From)]
+pub struct AgentGone;
+
+impl_respondable_error!(
+    AgentGone,
+    GONE,
+    "AGENT_GONE",
+    "The ID matches an agent that was uploaded but it does not meet the criteria or has been deleted."
+);
+
+#[derive(Debug, Display, Error, From)]
 pub struct CouldNotReadFile {
     reason: std::io::Error,
 }

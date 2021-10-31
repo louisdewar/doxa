@@ -22,8 +22,7 @@ pub struct Timeout {
 #[derive(From, Error, Display, Debug)]
 pub enum AgentError {
     IO(io::Error),
-    /// When downloading the agent 404 was returned this could easily happen in situations where a new
-    /// agent was uploaded since the game was queued.
+    /// The agent ID is not valid
     AgentNotFound,
     /// A retrieval error that occurs before the download begins
     Request(RetrievalError),
@@ -42,6 +41,9 @@ pub enum AgentError {
     Timeout(Timeout),
     /// Failed to read a message across the socket
     Socket(ReadMessageError),
+    /// The agent had a valid ID but is not currently active or has been deleted.
+    /// The appropriate response is to log and skip this match.
+    AgentGone,
 }
 
 #[derive(Display, Error, From, Debug)]

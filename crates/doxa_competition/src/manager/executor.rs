@@ -1,6 +1,6 @@
 use std::{marker::PhantomData, sync::Arc};
 
-use doxa_executor::{client::GameClient, game::GameManager};
+use doxa_executor::{client::GameClient, error::GameManagerError, game::GameManager};
 
 use doxa_core::{
     lapin::options::BasicAckOptions,
@@ -58,9 +58,12 @@ impl<C: GameClient> ExecutionManager<C> {
                     let match_request: MatchRequest<C::MatchRequest> =
                         doxa_mq::action::deserialize(&delivery.data)
                             .expect("Improperly formatted message");
+                    let game_id = match_request.game_id;
+
                     let span = span!(
                         Level::INFO,
                         "handle match request",
+                        game_id = %game_id,
                         agents = ?match_request.agents
                     );
 
@@ -86,9 +89,22 @@ impl<C: GameClient> ExecutionManager<C> {
                             {
                                 Ok(game_manger) => game_manger,
                                 Err(error) => {
-                                    // TODO: What about an error since an agent is no longer active?
+                                    // Between now and when the agent was first queued it is no
+                                    // longer the correct active agent (e.g. because of error or
+                                    // because a new one was uploads or because it was deleted).
+                                    if let GameManagerError::StartAgent(doxa_executor::error::AgentError::AgentGone) = error {
+                                        event!(Level::DEBUG, "not starting game because agent was gone");
+                                    }
                                     // Should probably emit a game event instead of never ack-ing meaning infinite loop
                                     event!(Level::ERROR, %error, debug = ?error, "failed to start game manager");
+
+                                    // Temporary always acknowledge on error to prevent infinite
+                                    // loop, in future there should be a max retry count / max TTL along with some smart decisions about which errors are permanent and which aren't
+                                    // Also look into using NACK instead of just doing nothing
+                                    delivery
+                                        .ack(BasicAckOptions::default())
+                                        .await
+                                        .expect("Failed to acknowledge MQ");
                                     return;
                                 }
                             };

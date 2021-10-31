@@ -13,9 +13,9 @@ pub enum Owner {
 #[repr(u8)]
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]
 pub enum Player {
-    #[serde(rename="R")]
+    #[serde(rename = "R")]
     Red,
-    #[serde(rename="B")]
+    #[serde(rename = "B")]
     Blue,
 }
 
@@ -31,11 +31,11 @@ impl Player {
 #[repr(u8)]
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]
 pub enum Winner {
-    #[serde(rename="R")]
+    #[serde(rename = "R")]
     Red,
-    #[serde(rename="B")]
+    #[serde(rename = "B")]
     Blue,
-    #[serde(rename="S")]
+    #[serde(rename = "S")]
     Stalemate,
 }
 

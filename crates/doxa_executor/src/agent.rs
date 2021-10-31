@@ -44,6 +44,10 @@ impl VMAgent {
         // want to waste time running those matches.
         let agent_response = storage.download_agent(&agent_id, competition).await?;
 
+        if agent_response.status() == StatusCode::GONE {
+            return Err(AgentError::AgentGone);
+        }
+
         if agent_response.status() == StatusCode::NOT_FOUND {
             return Err(AgentError::AgentNotFound);
         }

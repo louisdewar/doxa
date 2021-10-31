@@ -32,7 +32,7 @@ impl AgentRetrieval {
             match self
                 .client
                 .get(format!(
-                    "{}{}/{}",
+                    "{}{}/{}?active=true",
                     self.download_base, competition, agent_id
                 ))
                 .send()
