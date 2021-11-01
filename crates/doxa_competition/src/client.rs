@@ -218,6 +218,7 @@ pub(crate) trait CompetitionInner: 'static + Send + Sync {
     async fn start_competition_manager(
         self: Arc<Self>,
         settings: Arc<Settings>,
+        executor_permits: usize,
     ) -> Result<i32, CompetitionManagerError>;
 
     fn name(&self) -> &'static str;
@@ -247,8 +248,9 @@ impl<T: Competition> CompetitionInner for T {
     async fn start_competition_manager(
         self: Arc<Self>,
         settings: Arc<Settings>,
+        executor_permits: usize,
     ) -> Result<i32, CompetitionManagerError> {
-        CompetitionManager::start(self, settings).await
+        CompetitionManager::start(self, settings, executor_permits).await
     }
 
     fn name(&self) -> &'static str {

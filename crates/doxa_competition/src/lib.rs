@@ -17,8 +17,14 @@ pub use settings::Settings;
 use doxa_core::tracing::{error, info};
 
 pub struct CompetitionSystem {
-    competitions: HashMap<String, Arc<dyn CompetitionInner>>,
+    competitions: HashMap<String, CompetitionRecord>,
     settings: Arc<Settings>,
+}
+
+#[derive(Clone)]
+struct CompetitionRecord {
+    competition: Arc<dyn CompetitionInner>,
+    executor_permits: usize,
 }
 
 impl CompetitionSystem {
@@ -30,10 +36,17 @@ impl CompetitionSystem {
     }
 
     /// Adds the competition to the builder.
+    ///
+    /// `executor_permits` the number of simultaneous executions for this competition.
+    ///
     /// # Panics
     /// - If another competition has already registered a name this will panic.
     /// - If the name does not satisfy [`validate_competition_name`].
-    pub fn add_competition<C: Competition>(&mut self, competition: C) {
+    pub fn add_competition<C: Competition>(&mut self, competition: C, executor_permits: usize) {
+        assert!(
+            executor_permits > 0,
+            "competition must have at least one permit"
+        );
         let competition = Arc::new(competition);
 
         let name = competition.name();
@@ -47,7 +60,13 @@ impl CompetitionSystem {
 
         if self
             .competitions
-            .insert(name.to_string(), competition)
+            .insert(
+                name.to_string(),
+                CompetitionRecord {
+                    competition,
+                    executor_permits,
+                },
+            )
             .is_some()
         {
             panic!(
@@ -60,10 +79,11 @@ impl CompetitionSystem {
     pub async fn start(self) -> impl Fn(&mut web::ServiceConfig) + Clone {
         let mut competitions = Vec::with_capacity(self.competitions.len());
         // TODO: try join all
-        for (competition_name, competition) in self.competitions {
-            match competition
+        for (competition_name, record) in self.competitions {
+            match record
+                .competition
                 .clone()
-                .start_competition_manager(self.settings.clone())
+                .start_competition_manager(self.settings.clone(), record.executor_permits)
                 .await
             {
                 Err(error) => {
@@ -72,7 +92,7 @@ impl CompetitionSystem {
                 Ok(competition_id) => {
                     // TODO: timer for startup
                     info!(%competition_name, "started competition manager");
-                    competitions.push((competition_name, competition, competition_id));
+                    competitions.push((competition_name, record, competition_id));
                 }
             }
         }
@@ -80,9 +100,13 @@ impl CompetitionSystem {
         let settings = self.settings.clone();
 
         move |service| {
-            for (name, competition, competition_id) in competitions.iter() {
+            for (name, record, competition_id) in competitions.iter() {
                 service.service(web::scope(&format!("/competition/{}", name)).configure(
-                    |config| competition.configure_routes(config, &settings, *competition_id),
+                    |config| {
+                        record
+                            .competition
+                            .configure_routes(config, &settings, *competition_id)
+                    },
                 ));
             }
         }

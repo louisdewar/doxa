@@ -29,6 +29,7 @@ impl<T: Competition> CompetitionManager<T> {
     pub async fn start(
         competition: Arc<T>,
         settings: Arc<Settings>,
+        executor_permits: usize,
     ) -> Result<i32, CompetitionManagerError> {
         let manager = CompetitionManager {
             competition,
@@ -65,8 +66,11 @@ impl<T: Competition> CompetitionManager<T> {
             context.clone(),
         );
 
-        let execution_manager =
-            ExecutionManager::<T::GameClient>::new(manager.settings, T::COMPETITION_NAME);
+        let execution_manager = ExecutionManager::<T::GameClient>::new(
+            manager.settings,
+            T::COMPETITION_NAME,
+            executor_permits,
+        );
 
         join!(
             activation_manager.start(),

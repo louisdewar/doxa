@@ -12,8 +12,8 @@ mod telemetry;
 fn create_competition_system(settings: doxa_competition::Settings) -> CompetitionSystem {
     let mut system = CompetitionSystem::new(Arc::new(settings));
 
-    system.add_competition(HelloWorldCompetiton);
-    system.add_competition(UTTTCompetition);
+    system.add_competition(HelloWorldCompetiton, 3);
+    system.add_competition(UTTTCompetition, 10);
 
     system
 }
@@ -49,7 +49,9 @@ async fn main() -> std::io::Result<()> {
         kernel_img: PathBuf::from("./dev/vmlinux.bin"),
         kernel_boot_args: "console=ttyS0 reboot=k panic=1 pci=off".to_string(),
         rootfs: PathBuf::from("./dev/rootfs.img"),
-        agent_retrieval: AgentRetrieval::new("http://localhost:3001/storage/download/".to_string()),
+        agent_retrieval: AgentRetrieval::new(
+            "http://localhost:3001/api/storage/download/".to_string(),
+        ),
     };
 
     doxa_db::run_migrations(&doxa_db::establish_connection(&database_url));
