@@ -1,11 +1,12 @@
-import { BASE_URL, request } from './common';
+import { request } from './common';
+
 
 class CompetitionAPI {
 
   constructor() {
-    this.BASE_URL = BASE_URL;
+    this.BASE_URL = '/api/'; // must end with a '/'
 
-    // this.AGENT_BASE_URL = null;
+    this.AGENT_BASE_URL = null;
     this.GAME_BASE_URL = null;
     this.LEADERBOARD_BASE_URL = null;
     this.USER_BASE_URL = null;
