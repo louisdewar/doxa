@@ -1,9 +1,9 @@
 import api from 'common/api';
-
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-
 import './Matches.scss';
+
+
 
 export default function Matches({ username }) {
   const [filter, setFilter] = useState(null);
@@ -25,10 +25,10 @@ export default function Matches({ username }) {
       <h1>Matches</h1>
       <input type='text' placeholder='filter by username' onChange={e => setFilter(e.target.value)} />
       {/* {matches? matches.filter(players => filter == null || players[0].includes(filter) || players[1].includes(filter)).map(([player1, player2], i) => { */}
-      {matches? matches.map(match => {
-        return <MatchCard key={match.id} matchID={match.id} filter={filter} mainPlayer={username} />;   
-      }): 'Loading matches...'}
-            
+      {matches ? matches.map(match => {
+        return <MatchCard key={match.id} matchID={match.id} filter={filter} mainPlayer={username} />;
+      }) : 'Loading matches...'}
+
     </div>
   );
 }
@@ -47,7 +47,7 @@ function MatchCard({ matchID, mainPlayer, filter }) {
       setOpponent(players[1]);
 
       let mainAgent;
-      if(players[0].username === mainPlayer) {
+      if (players[0].username === mainPlayer) {
         mainAgent = players[0].agent;
       } else if (players[1].username === mainPlayer) {
         mainAgent = players[1].agent;
@@ -64,7 +64,7 @@ function MatchCard({ matchID, mainPlayer, filter }) {
         console.error(err);
       });
   }, [matchID, mainPlayer]);
-    
+
 
   if (!loaded) {
     return null;

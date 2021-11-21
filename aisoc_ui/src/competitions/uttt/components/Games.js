@@ -1,14 +1,14 @@
+import { faFastBackward, faFastForward, faStepBackward, faStepForward } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import classNames from 'classnames';
 import api from 'common/api';
 import GameState from 'common/gameReducer.js';
-
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import classNames from 'classnames';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faStepForward, faFastForward, faStepBackward, faFastBackward } from '@fortawesome/free-solid-svg-icons';
-
 import './Games.scss';
 import Grid from './Grid';
+
+
 
 export default function Games({ matchID, winners }) {
   return (

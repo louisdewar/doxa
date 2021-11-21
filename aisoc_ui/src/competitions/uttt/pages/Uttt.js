@@ -1,13 +1,12 @@
-import Navbar from 'component/NavBar.js';
+import Leaderboard from 'competitions/uttt/components/Leaderboard';
+import Navbar from 'components/NavBar.js';
 import './Uttt.scss';
 
-import React from 'react';
-import Leaderboard from 'component/Leaderboard';
 
 function Uttt() {
   return (
     <div>
-      <Navbar competitionName='Ultimate Tic-Tac-Toe' homepageUrl='/c/uttt/'/>
+      <Navbar competitionName='Ultimate Tic-Tac-Toe' homepageUrl='/c/uttt/' />
       <div className='main'>
         <div className="comp-info">
           <div className="header maxwidth">

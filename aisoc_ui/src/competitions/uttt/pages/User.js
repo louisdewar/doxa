@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-
-import { useParams } from 'react-router-dom';
-import Navbar from 'component/NavBar.js';
-import Matches from 'component/Matches.js';
-import './User.scss';
 import api from 'common/api';
+import Matches from 'competitions/uttt/components/Matches.js';
+import Navbar from 'components/NavBar.js';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import './User.scss';
+
 
 export default function User() {
   let { username } = useParams();
@@ -22,7 +22,7 @@ export default function User() {
 
   return (
     <div>
-      <Navbar competitionName='Ultimate Tic-Tac-Toe' homepageUrl='/c/uttt/'/>
+      <Navbar competitionName='Ultimate Tic-Tac-Toe' homepageUrl='/c/uttt/' />
       <div className="main">
         <div className="user-info">
           <div className="user-header">

@@ -1,12 +1,12 @@
 import api from 'common/api';
-import Navbar from 'component/NavBar.js';
-import Games from 'component/Games.js';
-
-import { useState, useEffect } from 'react';
+import Games from 'competitions/uttt/components/Games.js';
+import Navbar from 'components/NavBar.js';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
-
-import './Match.scss';
 import { Link } from 'react-router-dom';
+import './Match.scss';
+
+
 
 async function loadMatchData(matchID) {
   const winners = await api.game.getUTTTGameWinners(matchID);

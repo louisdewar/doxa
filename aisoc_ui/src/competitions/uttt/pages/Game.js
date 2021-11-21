@@ -1,16 +1,16 @@
+import { faFastBackward, faFastForward, faStepBackward, faStepForward } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import classNames from 'classnames';
 import api from 'common/api';
-import LiveSocketManager from 'common/liveSocketManager';
-import Navbar from 'component/NavBar';
-import Grid from 'component/Grid';
+import GameState from 'common/gameReducer';
+import Grid from 'competitions/uttt/components/Grid';
+import Navbar from 'components/NavBar';
+import React, { useEffect, useRef, useState } from 'react';
+import { useParams } from 'react-router';
+import { Link } from 'react-router-dom';
 import './Game.scss';
 
-import React, { useEffect, useState, useRef } from 'react';
-import { useParams } from 'react-router';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { faStepForward, faFastForward, faStepBackward, faFastBackward } from '@fortawesome/free-solid-svg-icons';
-import { Link } from 'react-router-dom';
-import classNames from 'classnames';
 
 function moveToLabel(move) {
   return `${move.g} ${move.t}`;
@@ -30,65 +30,68 @@ function Moves({ moves, currentMove, goToMove }) {
   );
 }
 
-export default function Live() {
-  const { agentID } = useParams();
+export default function Game() {
+  const { matchID, gameID } = useParams();
+  const [players, setPlayers] = useState(null);
   const [loaded, setLoaded] = useState(false);
   const [grid, setGrid] = useState(null);
   const [moves, setMoves] = useState(null);
 
   const [currentMove, setCurrentMove] = useState(0);
-  
-  const [playerInterval, setPlayerInterval] = useState(0);
-  
-  const socketManager = useRef(new LiveSocketManager());
-  
+
+  const gameState = useRef(new GameState());
+
   const updateCurrentMove = () => {
-    setCurrentMove(socketManager.current.gameState.getPosition() + 1);
+    setCurrentMove(gameState.current.getPosition() + 1);
   };
 
   useEffect(async () => {
-    socketManager.current = new LiveSocketManager();
-    setGrid(socketManager.current.gameState.getGrid());
+    setPlayers(await api.game.getPlayers(matchID));
+    const events = await api.game.getUTTTGameEvents(matchID, gameID);
+
+    gameState.current = new GameState();
+    gameState.current.addManyEvents(events);
+    setGrid(gameState.current.getGrid());
     updateCurrentMove();
-    setMoves(socketManager.current.gameState.toMoveList());
+    setMoves(gameState.current.toMoveList());
 
     setLoaded(true);
-  }, []);
+  }, [matchID, gameID]);
 
-  // const stepForward = e => {
-  //   e.preventDefault();
-  //   gameState.current.next();
-  //   updateCurrentMove();
-  //   setGrid(gameState.current.getGrid());
-  // };
+  const stepForward = e => {
+    e.preventDefault();
+    gameState.current.next();
+    updateCurrentMove();
+    setGrid(gameState.current.getGrid());
+  };
 
-  // const stepBackward = e => {
-  //   e.preventDefault();
-  //   gameState.current.previous();
-  //   updateCurrentMove();
-  //   setGrid(gameState.current.getGrid());
-  // };
+  const stepBackward = e => {
+    e.preventDefault();
+    gameState.current.previous();
+    updateCurrentMove();
+    setGrid(gameState.current.getGrid());
+  };
 
-  // const goToBeginning = e => {
-  //   e.preventDefault();
-  //   gameState.current.goToBeginning();
-  //   updateCurrentMove();
-  //   setGrid(gameState.current.getGrid());
-  // };
+  const goToBeginning = e => {
+    e.preventDefault();
+    gameState.current.goToBeginning();
+    updateCurrentMove();
+    setGrid(gameState.current.getGrid());
+  };
 
-  // const goToEnd = e => {
-  //   e.preventDefault();
-  //   gameState.current.goToEnd();
-  //   updateCurrentMove();
-  //   setGrid(gameState.current.getGrid());
-  // };
+  const goToEnd = e => {
+    e.preventDefault();
+    gameState.current.goToEnd();
+    updateCurrentMove();
+    setGrid(gameState.current.getGrid());
+  };
 
-  // const goToMove = (pos, e) => {
-  //   e.preventDefault();
-  //   gameState.current.goToPosition(pos);
-  //   updateCurrentMove();
-  //   setGrid(gameState.current.getGrid());
-  // };
+  const goToMove = (pos, e) => {
+    e.preventDefault();
+    gameState.current.goToPosition(pos);
+    updateCurrentMove();
+    setGrid(gameState.current.getGrid());
+  };
 
   if (!loaded) {
     return null;
@@ -100,7 +103,9 @@ export default function Live() {
       <div className="maxwidth">
         <div className="game-header">
           <div className="player-versus">
-            <span className="player">Play against agent: {agentID}</span>
+            <Link to={`/c/uttt/user/${players[0].username}`}><span className="player player-1">{players[0].username}</span></Link>
+            <span className="separator">VS</span>
+            <Link to={`/c/uttt/user/${players[1].username}`}><span className="player player-2">{players[1].username}</span></Link>
           </div>
         </div>
         <div className="game-wrapper">

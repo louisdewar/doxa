@@ -1,18 +1,15 @@
 // import Landing from 'pages/Landing.js';
-import Uttt from 'pages/Uttt.js';
-import User from 'pages/User.js';
-import Match from 'pages/Match';
-import Game from 'pages/Game';
-import Live from 'pages/Live';
-
+import Game from 'competitions/uttt/pages/Game';
+import Live from 'competitions/uttt/pages/Live';
+import Match from 'competitions/uttt/pages/Match';
+import User from 'competitions/uttt/pages/User.js';
+import Uttt from 'competitions/uttt/pages/Uttt.js';
+import {
+  BrowserRouter as Router, Redirect, Route, Switch
+} from 'react-router-dom';
 import './App.scss';
 
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Redirect,
-} from 'react-router-dom';
+
 
 function App() {
   return (

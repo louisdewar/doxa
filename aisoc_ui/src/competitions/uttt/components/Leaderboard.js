@@ -1,9 +1,9 @@
 import api from 'common/api';
-
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-
 import './Leaderboard.scss';
+
+
 
 export default function Leaderboard() {
   const [filter, setFilter] = useState(null);
@@ -20,18 +20,17 @@ export default function Leaderboard() {
   return (
     <div className="leaderboard maxwidth">
       <h1>Leaderboard</h1>
-      
+
       <input type='text' placeholder='filter by username' onChange={e => setFilter(e.target.value)} />
-      {leaderboard? leaderboard.map((player, i) => {
-        return <LeaderboardCard key={i} rank={i + 1} username={player.username} score={player.score} filter={filter} />;   
-      }): 'Loading leaderboard...'}
-            
+      {leaderboard ? leaderboard.map((player, i) => {
+        return <LeaderboardCard key={i} rank={i + 1} username={player.username} score={player.score} filter={filter} />;
+      }) : 'Loading leaderboard...'}
+
     </div>
   );
 }
 
-function LeaderboardCard({ rank, username, score, filter }) 
-{
+function LeaderboardCard({ rank, username, score, filter }) {
   if (filter !== null && !username.includes(filter)) {
     return null;
   }
