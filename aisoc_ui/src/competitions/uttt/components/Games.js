@@ -1,10 +1,10 @@
 import { faFastBackward, faFastForward, faStepBackward, faStepForward } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
-import api from 'common/api';
 import GameState from 'common/gameReducer.js';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import UTTTAPI from '../api';
 import './Games.scss';
 import Grid from './Grid';
 
@@ -22,6 +22,8 @@ export default function Games({ matchID, winners }) {
 }
 
 function GameCard({ matchID, gameID, winner }) {
+  const api = new UTTTAPI();
+
   const [loaded, setLoaded] = useState(false);
   const [grid, setGrid] = useState(null);
   const [currentMove, setCurrentMove] = useState(0);
@@ -37,7 +39,7 @@ function GameCard({ matchID, gameID, winner }) {
   // Load player and opponent
   useEffect(() => {
     setLoaded(false);
-    api.game.getUTTTGameEvents(matchID, gameID).then(events => {
+    api.getUTTTGameEvents(matchID, gameID).then(events => {
       gameState.current = new GameState();
       gameState.current.addManyEvents(events);
       setGrid(gameState.current.getGrid());

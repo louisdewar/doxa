@@ -1,6 +1,6 @@
-import api from 'common/api';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import UTTTAPI from '../api';
 import './Leaderboard.scss';
 
 
@@ -9,8 +9,10 @@ export default function Leaderboard() {
   const [filter, setFilter] = useState(null);
   const [leaderboard, setLeaderboard] = useState(null);
 
+  const api = new UTTTAPI();
+
   useEffect(() => {
-    api.leaderboard.getActive().then(leaderboardData => {
+    api.getLeaderboardActive().then(leaderboardData => {
       setLeaderboard(leaderboardData);
     }).catch(err => {
       console.error(err);

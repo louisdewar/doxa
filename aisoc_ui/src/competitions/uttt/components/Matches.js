@@ -1,18 +1,20 @@
-import api from 'common/api';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import UTTTAPI from '../api';
 import './Matches.scss';
 
 
 
 export default function Matches({ username }) {
+  const api = new UTTTAPI();
+
   const [filter, setFilter] = useState(null);
   const [matches, setMatches] = useState(null);
 
   useEffect(() => {
-    api.user.getActiveGames(username)
+    api.getUserActiveGames(username)
       .then(async matches => {
-        // const matchPlayers = await Promise.all(matches.map(match => api.game.getPlayers(match.id)));
+        // const matchPlayers = await Promise.all(matches.map(match => api.getGamePlayers(match.id)));
         setMatches(matches);
       })
       .catch(err => {
@@ -34,6 +36,8 @@ export default function Matches({ username }) {
 }
 
 function MatchCard({ matchID, mainPlayer, filter }) {
+  const api = new UTTTAPI();
+
   const [loaded, setLoaded] = useState(false);
   const [player, setPlayer] = useState(null);
   const [opponent, setOpponent] = useState(null);
@@ -42,7 +46,7 @@ function MatchCard({ matchID, mainPlayer, filter }) {
   // Load player and opponent
   useEffect(() => {
     setLoaded(false);
-    api.game.getPlayers(matchID).then(players => {
+    api.getGamePlayers(matchID).then(players => {
       setPlayer(players[0]);
       setOpponent(players[1]);
 
@@ -55,7 +59,7 @@ function MatchCard({ matchID, mainPlayer, filter }) {
         throw new Error('Neither player 0 nor player 1 was the main player');
       }
 
-      return api.game.getResult(matchID, mainAgent).then(result => {
+      return api.getGameResult(matchID, mainAgent).then(result => {
         setScore(result);
         setLoaded(true);
       });

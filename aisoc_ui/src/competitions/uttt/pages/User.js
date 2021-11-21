@@ -1,18 +1,20 @@
-import api from 'common/api';
 import Matches from 'competitions/uttt/components/Matches.js';
 import Navbar from 'components/NavBar.js';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import UTTTAPI from '../api';
 import './User.scss';
 
 
 export default function User() {
+  const api = new UTTTAPI();
+
   let { username } = useParams();
 
   const [score, setScore] = useState(null);
 
   useEffect(() => {
-    api.user.getScore(username).then(data => {
+    api.getUserScore(username).then(data => {
       // If a score is null the user has not yet had any match results so we default to 0
       setScore(data.score || 0);
     }).catch(err => {

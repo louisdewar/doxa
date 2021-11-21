@@ -1,17 +1,19 @@
-import api from 'common/api';
 import Games from 'competitions/uttt/components/Games.js';
 import Navbar from 'components/NavBar.js';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import { Link } from 'react-router-dom';
+import UTTTAPI from '../api';
 import './Match.scss';
 
 
 
 async function loadMatchData(matchID) {
-  const winners = await api.game.getUTTTGameWinners(matchID);
-  const scores = await api.game.getUTTTGameScores(matchID);
-  const players = await api.game.getPlayers(matchID);
+  const api = new UTTTAPI();
+
+  const winners = await api.getUTTTGameWinners(matchID);
+  const scores = await api.getUTTTGameScores(matchID);
+  const players = await api.getGamePlayers(matchID);
 
   const total = scores.a_wins + scores.b_wins + scores.draws;
   const calcPercentage = number => 100 * number / total;

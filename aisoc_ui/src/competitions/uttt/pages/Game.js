@@ -1,15 +1,14 @@
 import { faFastBackward, faFastForward, faStepBackward, faStepForward } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
-import api from 'common/api';
 import GameState from 'common/gameReducer';
 import Grid from 'competitions/uttt/components/Grid';
 import Navbar from 'components/NavBar';
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router';
 import { Link } from 'react-router-dom';
+import UTTTAPI from '../api';
 import './Game.scss';
-
 
 
 function moveToLabel(move) {
@@ -31,6 +30,8 @@ function Moves({ moves, currentMove, goToMove }) {
 }
 
 export default function Game() {
+  const api = new UTTTAPI();
+
   const { matchID, gameID } = useParams();
   const [players, setPlayers] = useState(null);
   const [loaded, setLoaded] = useState(false);
@@ -46,8 +47,9 @@ export default function Game() {
   };
 
   useEffect(async () => {
-    setPlayers(await api.game.getPlayers(matchID));
-    const events = await api.game.getUTTTGameEvents(matchID, gameID);
+
+    setPlayers(await api.getGamePlayers(matchID));
+    const events = await api.getUTTTGameEvents(matchID, gameID);
 
     gameState.current = new GameState();
     gameState.current.addManyEvents(events);
