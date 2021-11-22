@@ -9,6 +9,7 @@ cp /mnt/vm_executor /sbin/vm_executor
 ln -s /usr/bin/python3.9 /usr/bin/python
 
 apk add python3
+apk add py3-scikit-learn
 
 addgroup -S -g 1000 doxa
 adduser -S -u 1000 -G doxa doxa

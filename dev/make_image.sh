@@ -1,13 +1,17 @@
 #!/bin/bash
 
+set -e
+
 cd "$(dirname "$0")"
 
-umount rootfs
-rm rootfs.img
-rm -rf rootfs
+rm rootfs.img || echo "rootfs.img did not already exist"
+
+# In case there was a failure the last time this was run
+umount rootfs || echo "rootfs was not mounted"
+rm -rf rootfs || echo "couldn't remove rootfs folder (may not have existed)"
 
 # Allocate more space than we need to be sure
-dd if=/dev/zero of=rootfs.img bs=1M count=80
+dd if=/dev/zero of=rootfs.img bs=1M count=500
 mkfs.ext4 rootfs.img
 
 mkdir rootfs
@@ -17,7 +21,6 @@ mount rootfs.img rootfs
 cp ../target/x86_64-unknown-linux-musl/release/vm_executor ./
 
 ./alpine-make-rootfs --branch v3.14 --script-chroot --timezone "Europe/London" rootfs $(pwd)/alpine-install.sh
-# ./alpine-make-rootfs --branch v3.14 --script-chroot --timezone "Europe/London" rootfs.tar $(pwd)/alpine-install.sh
 
 rm ./vm_executor
 
