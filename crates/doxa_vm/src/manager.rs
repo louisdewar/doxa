@@ -1,4 +1,7 @@
+use crate::manager::ManagerError::TimeoutWaitingForVMConnection;
+use std::time::Duration;
 use std::{io, path::PathBuf};
+use tokio::time::timeout;
 
 use doxa_firecracker_sdk::{error::ShutdownError, VMOptions, VM};
 use tokio::{
@@ -70,8 +73,9 @@ impl Manager {
 
         vm.instance_start().await?;
 
-        // TODO: timeout
-        let (stream, _addr) = listener.accept().await?;
+        let (stream, _addr) = timeout(Duration::from_secs(30), listener.accept())
+            .await
+            .map_err(|_| TimeoutWaitingForVMConnection)??;
 
         let stream = Stream::from_socket(stream);
 
