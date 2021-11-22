@@ -4,7 +4,7 @@ import { request } from './common';
 class CompetitionAPI {
 
   constructor() {
-    this.BASE_URL = '/api/'; // must end with a '/'
+    this.BASE_URL = process.env.REACT_APP_API_BASE_URL; // configure in .env, must end with a '/'
 
     this.AGENT_BASE_URL = null;
     this.GAME_BASE_URL = null;
