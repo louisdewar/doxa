@@ -1,8 +1,8 @@
 import { faFastBackward, faFastForward, faStepBackward, faStepForward } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
-import GameState from 'common/gameReducer';
 import Grid from 'competitions/uttt/components/Grid';
+import GameState from 'competitions/uttt/services/gameReducer';
 import Navbar from 'components/NavBar';
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router';

@@ -1,8 +1,8 @@
 import { faFastBackward, faFastForward, faStepBackward, faStepForward } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
-import LiveSocketManager from 'common/liveSocketManager';
 import Grid from 'competitions/uttt/components/Grid';
+import LiveSocketManager from 'competitions/uttt/services/liveSocketManager';
 import Navbar from 'components/NavBar';
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router';

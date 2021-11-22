@@ -1,7 +1,7 @@
 import { faFastBackward, faFastForward, faStepBackward, faStepForward } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
-import GameState from 'common/gameReducer.js';
+import GameState from 'competitions/uttt/services/gameReducer';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import UTTTAPI from '../api';

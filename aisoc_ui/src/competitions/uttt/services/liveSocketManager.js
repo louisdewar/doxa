@@ -24,7 +24,7 @@ export default class LiveSocketManager {
       break;
     case 'R':
       // Request action
-      let availableGrids = message.event.split(' ')[1];
+      //let availableGrids = message.event.split(' ')[1];
       break;
     case 'P':
       // Tile was placed
