@@ -1,9 +1,9 @@
 import Leaderboard from 'competitions/uttt/components/Leaderboard';
 import Navbar from 'components/NavBar.js';
-import './Uttt.scss';
+import './Home.scss';
 
 
-function Uttt() {
+function Home() {
   return (
     <div>
       <Navbar competitionName='Ultimate Tic-Tac-Toe' homepageUrl='/c/uttt/' />
@@ -28,4 +28,4 @@ function Uttt() {
   );
 }
 
-export default Uttt;
+export default Home;

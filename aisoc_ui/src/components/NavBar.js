@@ -6,7 +6,7 @@ export default function Navbar({ competitionName, homepageUrl }) {
     <nav>
       <Link to={homepageUrl}><p className="comp-name">{competitionName}</p></Link>
       <ul className="nav-links">
-        <li><Link to="account">Account</Link></li>
+        <li><Link to="/c/uttt/account">Account</Link></li>
       </ul>
     </nav>
   );
