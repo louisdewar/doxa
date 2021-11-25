@@ -28,7 +28,7 @@ mod spawn;
 pub const DOXA_UID: u32 = 1000;
 pub const DOXA_GID: u32 = 1000;
 
-/// An upper bound on the agent size for sanity reasons, measured in bytes
+/// An upper bound on the agent tar size for sanity reasons, measured in bytes
 pub const MAX_AGENT_SIZE: usize = 50_000_000;
 /// Maximum length for messages other than the agent file in bytes
 pub const MAX_MSG_LEN: usize = 5_000;

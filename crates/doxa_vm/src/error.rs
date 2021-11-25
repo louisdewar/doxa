@@ -12,6 +12,7 @@ pub use doxa_firecracker_sdk::error::ShutdownError;
 pub enum ManagerError {
     #[from(forward)]
     Spawn(SpawnError),
+    TimeoutWaitingForVMConnection,
     IO(io::Error),
     Join(JoinError),
 }
