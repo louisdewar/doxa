@@ -3,10 +3,10 @@ import Navbar from 'components/NavBar.js';
 import './Home.scss';
 
 
-function Home() {
+function Home({ competitionBaseUrl }) {
   return (
     <div>
-      <Navbar competitionName='Ultimate Tic-Tac-Toe' homepageUrl='/c/uttt/' />
+      <Navbar competitionName='Ultimate Tic-Tac-Toe' homepageUrl={competitionBaseUrl} />
       <div className='main'>
         <div className="comp-info">
           <div className="header maxwidth">
@@ -22,7 +22,7 @@ function Home() {
             </form>
           </div>
         </div>
-        <Leaderboard />
+        <Leaderboard competitionBaseUrl={competitionBaseUrl} />
       </div>
     </div>
   );

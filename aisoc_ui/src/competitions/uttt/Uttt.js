@@ -8,22 +8,21 @@ import User from './pages/User';
 
 export default function Uttt() {
   let { path } = useRouteMatch();
-
   return <Switch>
-    <Route path={`${path}/match/:matchID/game/:gameID`}>
-      <Game />
+    <Route path={`${path}match/:matchID/game/:gameID`}>
+      <Game competitionBaseUrl={path} />
     </Route>
-    <Route path={`${path}/_agent/:agentID/live`}>
-      <Live />
+    <Route path={`${path}_agent/:agentID/live`}>
+      <Live competitionBaseUrl={path} />
     </Route>
-    <Route path={`${path}/match/:matchID`}>
-      <Match />
+    <Route path={`${path}match/:matchID`}>
+      <Match competitionBaseUrl={path} />
     </Route>
-    <Route path={`${path}/user/:username`}>
-      <User />
+    <Route path={`${path}user/:username`}>
+      <User competitionBaseUrl={path} />
     </Route>
     <Route path={path}>
-      <Home />
+      <Home competitionBaseUrl={path} />
     </Route>
   </Switch>;
 }

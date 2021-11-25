@@ -6,7 +6,7 @@ import UTTTAPI from '../api';
 import './User.scss';
 
 
-export default function User() {
+export default function User({ competitionBaseUrl }) {
   const api = new UTTTAPI();
 
   let { username } = useParams();
@@ -24,7 +24,7 @@ export default function User() {
 
   return (
     <div>
-      <Navbar competitionName='Ultimate Tic-Tac-Toe' homepageUrl='/c/uttt/' />
+      <Navbar competitionName='Ultimate Tic-Tac-Toe' homepageUrl={competitionBaseUrl} />
       <div className="main">
         <div className="user-info">
           <div className="user-header">
@@ -34,7 +34,7 @@ export default function User() {
             <span className="score">{score} pts</span>
           </div>
         </div>
-        <Matches username={username} />
+        <Matches username={username} competitionBaseUrl={competitionBaseUrl} />
       </div>
     </div>
   );

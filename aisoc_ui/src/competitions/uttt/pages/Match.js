@@ -26,7 +26,7 @@ async function loadMatchData(matchID) {
   return { winners, scores, players };
 }
 
-export default function Match() {
+export default function Match({ competitionBaseUrl }) {
   const { matchID } = useParams();
 
   const [data, setData] = useState(null);
@@ -47,14 +47,14 @@ export default function Match() {
 
   return (
     <div>
-      <Navbar competitionName='Ultimate Tic-Tac-Toe' homepageUrl='/c/uttt/' />
+      <Navbar competitionName='Ultimate Tic-Tac-Toe' homepageUrl={competitionBaseUrl} />
       <div className="match-data">
         <div className="maxwidth">
           <div className="header-wrapper">
             <div className="player-versus">
-              <Link to={`/c/uttt/user/${players[0].username}`}><span className="player player-1">{players[0].username}</span></Link>
+              <Link to={`${competitionBaseUrl}user/${players[0].username}`}><span className="player player-1">{players[0].username}</span></Link>
               <span className="separator">VS</span>
-              <Link to={`/c/uttt/user/${players[1].username}`}><span className="player player-2">{players[1].username}</span></Link>
+              <Link to={`${competitionBaseUrl}user/${players[1].username}`}><span className="player player-2">{players[1].username}</span></Link>
             </div>
             <div className="scores">
               <span>wins</span>
@@ -76,7 +76,7 @@ export default function Match() {
           </div>
         </div>
       </div>
-      <Games matchID={matchID} winners={winners} />
+      <Games matchID={matchID} winners={winners} competitionBaseUrl={competitionBaseUrl} />
     </div>
   );
 }

@@ -10,18 +10,18 @@ import Grid from './Grid';
 
 
 
-export default function Games({ matchID, winners }) {
+export default function Games({ matchID, winners, competitionBaseUrl }) {
   return (
     <div className='games maxwidth'>
       <h2>Showing {winners.length} games</h2>
       {winners.map((winner, i) => {
-        return <GameCard key={i} matchID={matchID} gameID={i + 1} winner={winner} />;
+        return <GameCard key={i} matchID={matchID} gameID={i + 1} winner={winner} competitionBaseUrl={competitionBaseUrl} />;
       })}
     </div>
   );
 }
 
-function GameCard({ matchID, gameID, winner }) {
+function GameCard({ matchID, gameID, winner, competitionBaseUrl }) {
   const api = new UTTTAPI();
 
   const [loaded, setLoaded] = useState(false);
@@ -84,7 +84,7 @@ function GameCard({ matchID, gameID, winner }) {
   }
 
   return (
-    <Link to={`/c/uttt/match/${matchID}/game/${gameID}`}>
+    <Link to={`${competitionBaseUrl}match/${matchID}/game/${gameID}`}>
       <div className={classNames('game-card', { 'won': winner === 'R', 'lost': winner === 'B', 'drawn': winner === 'S' })}>
         <div className="mini-player">
           <Grid gameState={grid} small={true} />

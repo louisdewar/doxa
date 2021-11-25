@@ -5,7 +5,7 @@ import './Matches.scss';
 
 
 
-export default function Matches({ username }) {
+export default function Matches({ username, competitionBaseUrl }) {
   const api = new UTTTAPI();
 
   const [filter, setFilter] = useState(null);
@@ -28,14 +28,14 @@ export default function Matches({ username }) {
       <input type='text' placeholder='filter by username' onChange={e => setFilter(e.target.value)} />
       {/* {matches? matches.filter(players => filter == null || players[0].includes(filter) || players[1].includes(filter)).map(([player1, player2], i) => { */}
       {matches ? matches.map(match => {
-        return <MatchCard key={match.id} matchID={match.id} filter={filter} mainPlayer={username} />;
+        return <MatchCard key={match.id} matchID={match.id} filter={filter} mainPlayer={username} competitionBaseUrl={competitionBaseUrl} />;
       }) : 'Loading matches...'}
 
     </div>
   );
 }
 
-function MatchCard({ matchID, mainPlayer, filter }) {
+function MatchCard({ matchID, mainPlayer, filter, competitionBaseUrl }) {
   const api = new UTTTAPI();
 
   const [loaded, setLoaded] = useState(false);
@@ -80,7 +80,7 @@ function MatchCard({ matchID, mainPlayer, filter }) {
 
 
   return (
-    <Link to={'/c/uttt/match/' + matchID}>
+    <Link to={`${competitionBaseUrl}match/${matchID}`}>
       <div className='match-card'>
         <div className='match-players'>
           <p className='username'>{player.username}</p>

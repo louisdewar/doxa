@@ -5,7 +5,7 @@ import './Leaderboard.scss';
 
 
 
-export default function Leaderboard() {
+export default function Leaderboard({ competitionBaseUrl }) {
   const [filter, setFilter] = useState(null);
   const [leaderboard, setLeaderboard] = useState(null);
 
@@ -25,20 +25,20 @@ export default function Leaderboard() {
 
       <input type='text' placeholder='filter by username' onChange={e => setFilter(e.target.value)} />
       {leaderboard ? leaderboard.map((player, i) => {
-        return <LeaderboardCard key={i} rank={i + 1} username={player.username} score={player.score} filter={filter} />;
+        return <LeaderboardCard key={i} rank={i + 1} username={player.username} score={player.score} filter={filter} competitionBaseUrl={competitionBaseUrl} />;
       }) : 'Loading leaderboard...'}
 
     </div>
   );
 }
 
-function LeaderboardCard({ rank, username, score, filter }) {
+function LeaderboardCard({ rank, username, score, filter, competitionBaseUrl }) {
   if (filter !== null && !username.includes(filter)) {
     return null;
   }
 
   return (
-    <Link to={'/c/uttt/user/' + username}>
+    <Link to={`${competitionBaseUrl}user/${username}`}>
       <div className='leaderboard-card'>
         <p className='rank-username'>#{rank} {username}</p>
         <p className='score'>{score} <span className='points'>points</span></p>

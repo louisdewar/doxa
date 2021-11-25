@@ -1,4 +1,5 @@
 // import Landing from 'pages/Landing.js';
+import ClimateHack from 'competitions/climatehack/ClimateHack';
 import Uttt from 'competitions/uttt/Uttt';
 import {
   BrowserRouter as Router, Redirect, Route, Switch
@@ -6,20 +7,33 @@ import {
 import './App.scss';
 
 
+const COMPETITIONS = {
+  climatehack: ClimateHack,
+  uttt: Uttt,
+};
 
-function App() {
-  return (
+const DEFAULT_COMPETITION = process.env.REACT_APP_DEFAULT_COMPETITION ?? 'uttt';
+
+
+export default function App() {
+  return (process.env.REACT_APP_MULTIPLE_COMPETITIONS != 'false') ? (
     <Router>
       <Switch>
-        <Route path="/c/uttt">
-          <Uttt />
-        </Route>
+        {Object.keys(COMPETITIONS).map(competition => (
+          <Route path={`/c/${competition}/`} key={competition} component={COMPETITIONS[competition]} />
+        ))}
         <Route path="/">
-          <Redirect to='/c/uttt' />
+          <Redirect to={`/c/${DEFAULT_COMPETITION}/`} />
+        </Route>
+      </Switch>
+    </Router>
+  ) : (
+    <Router>
+      <Switch>
+        <Route path="/">
+          {(Competition => <Competition />)(COMPETITIONS[DEFAULT_COMPETITION])}
         </Route>
       </Switch>
     </Router>
   );
 }
-
-export default App;

@@ -29,7 +29,7 @@ function Moves({ moves, currentMove, goToMove }) {
   );
 }
 
-export default function Game() {
+export default function Game({ competitionBaseUrl }) {
   const api = new UTTTAPI();
 
   const { matchID, gameID } = useParams();
@@ -100,12 +100,12 @@ export default function Game() {
   }
 
   return (
-    <Layout>
+    <Layout competitionBaseUrl={competitionBaseUrl}>
       <div className="game-header">
         <div className="player-versus">
-          <Link to={`/c/uttt/user/${players[0].username}`}><span className="player player-1">{players[0].username}</span></Link>
+          <Link to={`${competitionBaseUrl}user/${players[0].username}`}><span className="player player-1">{players[0].username}</span></Link>
           <span className="separator">VS</span>
-          <Link to={`/c/uttt/user/${players[1].username}`}><span className="player player-2">{players[1].username}</span></Link>
+          <Link to={`${competitionBaseUrl}user/${players[1].username}`}><span className="player player-2">{players[1].username}</span></Link>
         </div>
       </div>
       <div className="game-wrapper">

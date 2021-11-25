@@ -28,7 +28,7 @@ function Moves({ moves, currentMove, goToMove }) {
   );
 }
 
-export default function Live() {
+export default function Live({ competitionBaseUrl }) {
   const { agentID } = useParams();
   const [loaded, setLoaded] = useState(false);
   const [grid, setGrid] = useState(null);
@@ -100,7 +100,7 @@ export default function Live() {
   }
 
   return (
-    <Layout>
+    <Layout competitionBaseUrl={competitionBaseUrl}>
       <div className="game-header">
         <div className="player-versus">
           <span className="player">Play against agent: {agentID}</span>
