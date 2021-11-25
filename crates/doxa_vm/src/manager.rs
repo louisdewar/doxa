@@ -38,6 +38,7 @@ impl Manager {
         kernel_img: PathBuf,
         kernel_boot_args: String,
         firecracker_path: PathBuf,
+        memory_size_mib: usize,
     ) -> Result<Self, ManagerError> {
         // TODO: consider that when Drop is called for the tempdir by default it will be blocking,
         // maybe implement a custom Drop for manager that calls spawn_blocking?
@@ -50,7 +51,7 @@ impl Manager {
         tokio::fs::copy(original_rootfs, &rootfs_path).await?;
 
         let vm = VMOptions {
-            memory_size_mib: 128,
+            memory_size_mib,
             vcpus: 1,
             kernel_image_path: kernel_img,
             kernel_boot_args,

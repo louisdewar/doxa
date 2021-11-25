@@ -36,6 +36,7 @@ pub enum AgentEvent<'a> {
 impl VMAgent {
     pub async fn new(
         competition: &str,
+        agent_ram_mb: usize,
         agent_id: String,
         storage: &doxa_storage::AgentRetrieval,
         settings: &Settings,
@@ -77,6 +78,7 @@ impl VMAgent {
             settings.kernel_img.clone(),
             settings.kernel_boot_args.clone(),
             settings.firecracker_path.clone(),
+            agent_ram_mb,
         )
         .await?;
 
