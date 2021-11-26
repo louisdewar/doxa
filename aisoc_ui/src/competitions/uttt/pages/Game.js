@@ -30,8 +30,6 @@ function Moves({ moves, currentMove, goToMove }) {
 }
 
 export default function Game({ competitionBaseUrl }) {
-  const api = new UTTTAPI();
-
   const { matchID, gameID } = useParams();
   const [players, setPlayers] = useState(null);
   const [loaded, setLoaded] = useState(false);
@@ -48,8 +46,8 @@ export default function Game({ competitionBaseUrl }) {
 
   useEffect(async () => {
 
-    setPlayers(await api.getGamePlayers(matchID));
-    const events = await api.getUTTTGameEvents(matchID, gameID);
+    setPlayers(await UTTTAPI.getGamePlayers(matchID));
+    const events = await UTTTAPI.getUTTTGameEvents(matchID, gameID);
 
     gameState.current = new GameState();
     gameState.current.addManyEvents(events);

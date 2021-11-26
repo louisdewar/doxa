@@ -3,24 +3,23 @@ import { request } from './common';
 
 class CompetitionAPI {
 
-  constructor() {
-    this.BASE_URL = process.env.REACT_APP_API_BASE_URL; // configure in .env, must end with a '/'
+  // configure in .env, must end with a '/'
+  static BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
-    this.AGENT_BASE_URL = null;
-    this.GAME_BASE_URL = null;
-    this.LEADERBOARD_BASE_URL = null;
-    this.USER_BASE_URL = null;
-  }
+  static AGENT_BASE_URL = null;
+  static GAME_BASE_URL = null;
+  static LEADERBOARD_BASE_URL = null;
+  static USER_BASE_URL = null;
 
   /* Agent */
 
-  async getAgentGames(agent) {
+  static async getAgentGames(agent) {
     const data = await request({ url: this.AGENT_BASE_URL + agent + '/games', method: 'GET' });
 
     return data.games;
   }
 
-  async getAgentScore(agent) {
+  static async getAgentScore(agent) {
     const data = await request({ url: this.AGENT_BASE_URL + agent + '/score', method: 'GET' });
 
     return data;
@@ -28,7 +27,7 @@ class CompetitionAPI {
 
   /* Game */
 
-  async getGameEvents(game, filter) {
+  static async getGameEvents(game, filter) {
     const data = await request({
       url: this.GAME_BASE_URL + game + '/events',
       method: 'GET',
@@ -38,13 +37,13 @@ class CompetitionAPI {
     return data.events;
   }
 
-  async getSingleGameEvent(game, filter) {
+  static async getSingleGameEvent(game, filter) {
     const events = await this.getGameEvents(game, filter);
 
     return events[0];
   }
 
-  async getGamePlayers(game) {
+  static async getGamePlayers(game) {
     const data = await request({
       url: this.GAME_BASE_URL + game + '/players',
       method: 'GET',
@@ -53,7 +52,7 @@ class CompetitionAPI {
     return data.players;
   }
 
-  async getGameResult(game, agent) {
+  static async getGameResult(game, agent) {
     const data = await request({
       url: this.GAME_BASE_URL + game + '/result/' + agent,
       method: 'GET',
@@ -64,7 +63,7 @@ class CompetitionAPI {
 
   /* Leaderboard */
 
-  async getLeaderboardActive() {
+  static async getLeaderboardActive() {
     const data = await request({ url: this.LEADERBOARD_BASE_URL + 'active', method: 'GET' });
 
     return data.leaderboard;
@@ -72,19 +71,19 @@ class CompetitionAPI {
 
   /* User */
 
-  async getUserActiveAgent(username) {
+  static async getUserActiveAgent(username) {
     const data = await request({ url: this.USER_BASE_URL + username + '/active_agent', method: 'GET' });
 
     return data.active_agent;
   }
 
-  async getUserScore(username) {
+  static async getUserScore(username) {
     const data = await request({ url: this.USER_BASE_URL + username + '/score', method: 'GET' });
 
     return data;
   }
 
-  async getUserActiveGames(username) {
+  static async getUserActiveGames(username) {
     const data = await request({ url: this.USER_BASE_URL + username + '/active_games', method: 'GET' });
 
     return data.games;

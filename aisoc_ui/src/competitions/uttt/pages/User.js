@@ -7,14 +7,12 @@ import './User.scss';
 
 
 export default function User({ competitionBaseUrl }) {
-  const api = new UTTTAPI();
-
   let { username } = useParams();
 
   const [score, setScore] = useState(null);
 
   useEffect(() => {
-    api.getUserScore(username).then(data => {
+    UTTTAPI.getUserScore(username).then(data => {
       // If a score is null the user has not yet had any match results so we default to 0
       setScore(data.score || 0);
     }).catch(err => {

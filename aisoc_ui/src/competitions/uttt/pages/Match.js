@@ -9,11 +9,9 @@ import './Match.scss';
 
 
 async function loadMatchData(matchID) {
-  const api = new UTTTAPI();
-
-  const winners = await api.getUTTTGameWinners(matchID);
-  const scores = await api.getUTTTGameScores(matchID);
-  const players = await api.getGamePlayers(matchID);
+  const winners = await UTTTAPI.getUTTTGameWinners(matchID);
+  const scores = await UTTTAPI.getUTTTGameScores(matchID);
+  const players = await UTTTAPI.getGamePlayers(matchID);
 
   const total = scores.a_wins + scores.b_wins + scores.draws;
   const calcPercentage = number => 100 * number / total;

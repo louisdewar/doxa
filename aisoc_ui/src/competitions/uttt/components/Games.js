@@ -22,8 +22,6 @@ export default function Games({ matchID, winners, competitionBaseUrl }) {
 }
 
 function GameCard({ matchID, gameID, winner, competitionBaseUrl }) {
-  const api = new UTTTAPI();
-
   const [loaded, setLoaded] = useState(false);
   const [grid, setGrid] = useState(null);
   const [currentMove, setCurrentMove] = useState(0);
@@ -39,7 +37,7 @@ function GameCard({ matchID, gameID, winner, competitionBaseUrl }) {
   // Load player and opponent
   useEffect(() => {
     setLoaded(false);
-    api.getUTTTGameEvents(matchID, gameID).then(events => {
+    UTTTAPI.getUTTTGameEvents(matchID, gameID).then(events => {
       gameState.current = new GameState();
       gameState.current.addManyEvents(events);
       setGrid(gameState.current.getGrid());

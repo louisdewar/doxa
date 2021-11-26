@@ -6,13 +6,11 @@ import './Matches.scss';
 
 
 export default function Matches({ username, competitionBaseUrl }) {
-  const api = new UTTTAPI();
-
   const [filter, setFilter] = useState(null);
   const [matches, setMatches] = useState(null);
 
   useEffect(() => {
-    api.getUserActiveGames(username)
+    UTTTAPI.getUserActiveGames(username)
       .then(async matches => {
         // const matchPlayers = await Promise.all(matches.map(match => api.getGamePlayers(match.id)));
         setMatches(matches);
@@ -36,8 +34,6 @@ export default function Matches({ username, competitionBaseUrl }) {
 }
 
 function MatchCard({ matchID, mainPlayer, filter, competitionBaseUrl }) {
-  const api = new UTTTAPI();
-
   const [loaded, setLoaded] = useState(false);
   const [player, setPlayer] = useState(null);
   const [opponent, setOpponent] = useState(null);
@@ -46,7 +42,7 @@ function MatchCard({ matchID, mainPlayer, filter, competitionBaseUrl }) {
   // Load player and opponent
   useEffect(() => {
     setLoaded(false);
-    api.getGamePlayers(matchID).then(players => {
+    UTTTAPI.getGamePlayers(matchID).then(players => {
       setPlayer(players[0]);
       setOpponent(players[1]);
 
@@ -59,7 +55,7 @@ function MatchCard({ matchID, mainPlayer, filter, competitionBaseUrl }) {
         throw new Error('Neither player 0 nor player 1 was the main player');
       }
 
-      return api.getGameResult(matchID, mainAgent).then(result => {
+      return UTTTAPI.getGameResult(matchID, mainAgent).then(result => {
         setScore(result);
         setLoaded(true);
       });

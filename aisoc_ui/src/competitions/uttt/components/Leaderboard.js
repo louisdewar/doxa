@@ -9,10 +9,8 @@ export default function Leaderboard({ competitionBaseUrl }) {
   const [filter, setFilter] = useState(null);
   const [leaderboard, setLeaderboard] = useState(null);
 
-  const api = new UTTTAPI();
-
   useEffect(() => {
-    api.getLeaderboardActive().then(leaderboardData => {
+    UTTTAPI.getLeaderboardActive().then(leaderboardData => {
       setLeaderboard(leaderboardData);
     }).catch(err => {
       console.error(err);
