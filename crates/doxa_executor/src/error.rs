@@ -5,7 +5,10 @@ use doxa_core::lapin;
 use doxa_mq::action::BincodeError;
 use doxa_storage::RetrievalError;
 use doxa_vm::{
-    error::{ManagerError, RebootAgentError, SendAgentError},
+    error::{
+        AgentLifecycleError, AgentLifecycleManagerError, AgentShutdownError, ManagerError,
+        SendAgentError,
+    },
     stream::ReadMessageError,
 };
 
@@ -88,7 +91,7 @@ pub enum GameContextError {
     )]
     ReservedEventType,
     #[display(fmt = "failed to reboot the agent inside the VM")]
-    RebootError(RebootAgentError),
+    RebootError(AgentLifecycleManagerError),
 }
 
 impl ForfeitError for GameContextError {

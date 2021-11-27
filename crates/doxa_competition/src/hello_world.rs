@@ -36,11 +36,9 @@ impl Competition for HelloWorldCompetiton {
 
     async fn on_agent_deactivated(
         &self,
-        context: &Context<Self>,
-        agent_id: String,
+        _context: &Context<Self>,
+        _agent_id: String,
     ) -> Result<(), ContextError> {
-        context.emit_match_request(vec![agent_id], ()).await?;
-
         Ok(())
     }
 
@@ -53,6 +51,12 @@ impl Competition for HelloWorldCompetiton {
             .get_game_participants_unordered(event.game_id)
             .await?;
         let participant = participants.remove(0);
+
+        // Only update score if the agent is active (we may have received a game event after a
+        // significant delay meaning a new agent is now active).
+        if !context.is_agent_active(participant.agent.clone()).await? {
+            return Ok(());
+        }
 
         let score = match event.payload {
             HelloWorldGameEvent::RespondedIncorrectly { .. } => -1,
@@ -104,8 +108,9 @@ impl GameClient for HelloWorldGameClient {
     ) -> Result<(), doxa_executor::error::GameError<Self::Error>> {
         context.expect_n_agents(1)?;
 
-        // Not required just a demonstration of this ability
-        context.reboot_agent(0).await?;
+        // Agents are not booted by default so we call reboot here (with zero arguments) to startup
+        // the agent inside the VM.
+        context.reboot_agent(0, vec![]).await?;
 
         context
             .send_message_to_agent(0, b"PLEASE ECHO THIS MESSAGE\n")

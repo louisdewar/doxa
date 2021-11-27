@@ -7,7 +7,7 @@ use doxa_core::{
     tracing::info,
 };
 use doxa_vm::{
-    error::{RebootAgentError, ShutdownError},
+    error::{AgentLifecycleError, AgentLifecycleManagerError, ShutdownError},
     stream::MessageReader,
     Manager as VM,
 };
@@ -41,8 +41,6 @@ impl VMAgent {
         storage: &doxa_storage::AgentRetrieval,
         settings: &Settings,
     ) -> Result<VMAgent, AgentError> {
-        // TODO: need some way to detect whether the requested agent is the current one as we don't
-        // want to waste time running those matches.
         let agent_response = storage.download_agent(&agent_id, competition).await?;
 
         if agent_response.status() == StatusCode::GONE {
@@ -111,8 +109,8 @@ impl VMAgent {
     }
 
     /// See [`doxa_vm::Manager::reboot_agent`]
-    pub async fn reboot(&mut self) -> Result<(), RebootAgentError> {
-        self.vm_manager.reboot_agent().await
+    pub async fn reboot(&mut self, args: Vec<String>) -> Result<(), AgentLifecycleManagerError> {
+        self.vm_manager.reboot_agent(args).await
     }
 
     /// Retrieves the next event sent by the VMExecutor.

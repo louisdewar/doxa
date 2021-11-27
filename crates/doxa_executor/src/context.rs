@@ -148,18 +148,25 @@ impl<'a, C: GameClient> GameContext<'a, C> {
 
     /// Sends a reboot message to the VM instructing it to restart the agent's process inside the
     /// VM.
-    pub async fn reboot_agent(&mut self, agent_id: usize) -> Result<(), GameContextError> {
+    ///
+    /// If the agent is not currently running then this just spawns the agent.
+    /// It is possible to specify arguments for the agent.
+    pub async fn reboot_agent(
+        &mut self,
+        agent_id: usize,
+        args: Vec<String>,
+    ) -> Result<(), GameContextError> {
         let agent = self.agent_mut(agent_id)?;
 
-        agent.reboot().await?;
+        agent.reboot(args).await?;
 
         Ok(())
     }
 
     /// Instructs every agent to reboot and waits until all of them have.
-    pub async fn reboot_all_agents(&mut self) -> Result<(), GameContextError> {
+    pub async fn reboot_all_agents(&mut self, args: Vec<String>) -> Result<(), GameContextError> {
         for i in 0..self.agents() {
-            self.reboot_agent(i).await?;
+            self.reboot_agent(i, args.clone()).await?;
         }
 
         Ok(())

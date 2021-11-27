@@ -1,3 +1,4 @@
+use crate::error::AgentLifecycleManagerError;
 use crate::manager::ManagerError::TimeoutWaitingForVMConnection;
 use std::time::Duration;
 use std::{io, path::PathBuf};
@@ -12,7 +13,7 @@ use tokio::{
 use tracing::{info, trace};
 
 use crate::{
-    error::{ManagerError, RebootAgentError, SendAgentError},
+    error::{AgentLifecycleError, ManagerError, SendAgentError},
     executor::MAX_MSG_LEN,
     stream::Stream,
 };
@@ -115,8 +116,8 @@ impl Manager {
         self.stream.expect_exact_msg(b"RECEIVED").await?;
         trace!("VM has received agent");
 
-        self.stream.expect_exact_msg(b"SPAWNED").await?;
-        info!("VM has spawned agent");
+        //self.stream.expect_exact_msg(b"SPAWNED").await?;
+        //info!("VM has spawned agent");
 
         Ok(())
     }
@@ -130,22 +131,62 @@ impl Manager {
             .await
     }
 
+    fn map_args(args: Vec<String>) -> Vec<u8> {
+        args.into_iter()
+            .map(|arg| {
+                let mut v = Vec::with_capacity(1 + arg.len());
+                v.push(b'\0');
+                v.extend(arg.as_bytes());
+                v
+            })
+            .flatten()
+            .collect()
+    }
+
+    pub async fn spawn_agent(&mut self, args: Vec<String>) -> Result<(), io::Error> {
+        self.stream
+            .send_prefixed_full_message(b"SPAWN_", Self::map_args(args).as_ref())
+            .await?;
+
+        Ok(())
+    }
+
     /// Sends a reboot message to the VM instructing it to restart the agent's process inside the
     /// VM and waits for the response.
-    /// This will discard all other messages until it receives the `REBOOTED` message from the VM.
-    pub async fn reboot_agent(&mut self) -> Result<(), RebootAgentError> {
-        self.stream.send_full_message(b"REBOOT_").await?;
+    /// This will discard all other messages until it receives the `SHUTDOWN` and then `SPAWNED` messages from the VM.
+    ///
+    /// If an agent is not currently running then this is equivalent to `spawn_agent`
+    pub async fn reboot_agent(
+        &mut self,
+        args: Vec<String>,
+    ) -> Result<(), AgentLifecycleManagerError> {
+        self.stream
+            .send_prefixed_full_message(b"REBOOT_", Self::map_args(args).as_ref())
+            .await?;
 
-        // TODO: wrap this in an async move then add a 2 min timeout
-        let mut buf = Vec::new();
+        timeout(Duration::from_secs(20), async {
+            // The previous agent may have outputted messages that we haven't read yet, we don't
+            // care about them
+            let mut buf = Vec::new();
 
-        loop {
+            loop {
+                self.stream.next_full_message(&mut buf, MAX_MSG_LEN).await?;
+
+                if &buf == b"SHUTDOWN" {
+                    break;
+                }
+            }
+
             self.stream.next_full_message(&mut buf, MAX_MSG_LEN).await?;
 
-            if &buf == b"REBOOTED" {
-                break;
+            if &buf != b"SPAWNED" {
+                return Err(AgentLifecycleManagerError::MissingSpawnedMessage);
             }
-        }
+
+            Result::<(), AgentLifecycleManagerError>::Ok(())
+        })
+        .await
+        .map_err(|_| AgentLifecycleManagerError::Timeout)??;
 
         Ok(())
     }

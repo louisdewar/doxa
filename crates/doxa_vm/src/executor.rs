@@ -1,15 +1,17 @@
 use std::{
+    ffi::OsStr,
     io::{self, ErrorKind},
-    path::{Path, PathBuf},
+    os::unix::prelude::OsStrExt,
+    path::PathBuf,
     str::FromStr,
     time::Duration,
 };
 
+use futures_util::future::OptionFuture;
 use tokio::{
     self,
     fs::{File, OpenOptions},
-    io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt, BufReader, Lines},
-    process::{self, Child, ChildStdin, ChildStdout},
+    io::{AsyncReadExt, AsyncWriteExt},
     task::{self, JoinHandle},
     time::timeout,
 };
@@ -17,11 +19,14 @@ use tokio::{
 use tokio_vsock::VsockStream;
 
 use crate::{
-    error::{ExecutionSpawnError, HandleMessageError, ReceieveAgentError},
+    error::{AgentLifecycleError, AgentShutdownError, HandleMessageError, ReceieveAgentError},
     stream::{MessageReader, Stream},
     ExecutionConfig,
 };
 
+use self::agent::RunningAgent;
+
+mod agent;
 mod spawn;
 
 /// The UID of the unprivileged DOXA user whose home directory is `/home/doxa`
@@ -36,12 +41,10 @@ pub const MAX_FILE_NAME_LEN: usize = 300;
 
 /// This is the server that runs inside of the VM.
 pub struct VMExecutor {
-    child_process: Child,
-    stdin: ChildStdin,
     stream: Stream<VsockStream>,
     execution_root: PathBuf,
     execution_config: ExecutionConfig,
-    stdout_lines: Lines<BufReader<ChildStdout>>,
+    agent: Option<RunningAgent>,
 }
 
 impl VMExecutor {
@@ -70,24 +73,11 @@ impl VMExecutor {
             let config: ExecutionConfig =
                 serde_yaml::from_str(&config).expect("Invalid config file");
 
-            // TODO: canonicalise entrypoint and check it's below /home/doxa
-
-            let mut child_process = Self::spawn(&config, &config_dir)
-                .await
-                .expect("Failed to spawn agent");
-
-            let stdout = child_process.stdout.take().unwrap();
-            let stdin = child_process.stdin.take().unwrap();
-
-            stream.send_full_message(b"SPAWNED").await.unwrap();
-
             let mut executor = VMExecutor {
-                child_process,
                 stream,
-                stdin,
                 execution_root: config_dir,
                 execution_config: config,
-                stdout_lines: BufReader::new(stdout).lines(),
+                agent: None,
             };
 
             let mut message_reader = MessageReader::new(Vec::new(), MAX_MSG_LEN);
@@ -95,8 +85,8 @@ impl VMExecutor {
             // Change next_full_message to return a struct that impl's future and is cancellable
             loop {
                 tokio::select! {
-                    line = executor.stdout_lines.next_line() => {
-                        match line.unwrap() {
+                    Some(result) = OptionFuture::from(executor.agent.as_mut().map(|agent| agent.next_line())) => {
+                        match result.unwrap() {
                             Some(line) => executor.handle_output_line(line).await.unwrap(),
                             None => break,
                         }
@@ -108,24 +98,26 @@ impl VMExecutor {
                     }
                 };
             }
+
             let mut err_output = String::new();
-            executor
-                .child_process
-                .stderr
-                .take()
-                .unwrap()
-                .take(MAX_MSG_LEN as u64)
-                .read_to_string(&mut err_output)
-                .await
-                .unwrap();
+            if let Some(agent) = executor.agent.as_mut() {
+                // NOTE: currently STDERR get's stored in memory until the agent exits.
+                agent
+                    .child_process
+                    .stderr
+                    .take()
+                    .unwrap()
+                    .take(MAX_MSG_LEN as u64)
+                    .read_to_string(&mut err_output)
+                    .await
+                    .unwrap();
+            }
+
             executor
                 .stream
                 .send_prefixed_full_message(b"F_", err_output.as_bytes())
                 .await
                 .unwrap();
-
-            // The proceses finished
-            // executor.stream.send_full_message(b"F_").await.unwrap();
         })
     }
 
@@ -146,32 +138,63 @@ impl VMExecutor {
         let msg = &msg[1..];
 
         match prefix {
-            b"INPUT" => self.stdin.write_all(msg).await?,
-            b"REBOOT" => self.reboot().await?,
+            b"INPUT" => {
+                self.agent
+                    .as_mut()
+                    .expect("Can't send input to dead agent")
+                    .stdin
+                    .write_all(msg)
+                    .await?
+            }
+            // This may not be very useful, there isn't really a good reason to do this
+            b"SHUTDOWN" => self.shutdown(true).await?,
+            b"SPAWN" => self.spawn(msg).await?,
+            b"REBOOT" => self.reboot(msg).await?,
             _ => return Err(HandleMessageError::UnrecognisedPrefix),
         }
 
         Ok(())
     }
 
-    async fn reboot(&mut self) -> Result<(), ExecutionSpawnError> {
-        self.child_process.kill().await?;
-        self.child_process = Self::spawn(&self.execution_config, &self.execution_root).await?;
-        self.stream.send_full_message(b"REBOOTED").await.unwrap();
-        self.stdout_lines = BufReader::new(self.child_process.stdout.take().unwrap()).lines();
-        self.stdin = self.child_process.stdin.take().unwrap();
+    async fn shutdown(&mut self, required: bool) -> Result<(), AgentLifecycleError> {
+        if let Some(agent) = self.agent.as_mut() {
+            agent
+                .child_process
+                .kill()
+                .await
+                .map_err(|e| AgentShutdownError::FailedToKillAgent(e))?;
+        } else if required {
+            return Err(AgentShutdownError::AgentNotRunning.into());
+        }
+
+        self.stream.send_full_message(b"SHUTDOWN").await.unwrap();
 
         Ok(())
     }
 
-    /// The root is the directory of the config.
-    async fn spawn(config: &ExecutionConfig, root: &Path) -> Result<Child, ExecutionSpawnError> {
-        match &config.language {
-            &crate::Language::Python => {
-                spawn::spawn_python(root, &config.options, &config.entrypoint).await
-            }
-            lang => todo!("language {:?}", lang),
-        }
+    async fn spawn(&mut self, arg_msg: &[u8]) -> Result<(), AgentLifecycleError> {
+        // Format of args is \0{arg_1}\0{arg_2} (i.e. \0 then arg, if no args then empty)
+        let args: Vec<_> = arg_msg
+            .split(|b| *b == b'\0')
+            .skip(1)
+            .map(|arg| OsStr::from_bytes(arg))
+            .collect();
+
+        self.agent =
+            Some(RunningAgent::spawn(&self.execution_config, &self.execution_root, args).await?);
+
+        self.stream.send_full_message(b"SPAWNED").await.unwrap();
+
+        Ok(())
+    }
+
+    async fn reboot(&mut self, arg_msg: &[u8]) -> Result<(), AgentLifecycleError> {
+        // Reboot doesn't require that an agent was previously running
+        self.shutdown(false).await?;
+
+        self.spawn(arg_msg).await?;
+
+        Ok(())
     }
 
     /// Download the agent to `{output_dir}/download/agent_name.tar[.gz]`
@@ -224,7 +247,7 @@ impl VMExecutor {
         let agent_output = output_dir.join("agent");
         tokio::fs::create_dir_all(&agent_output).await?;
 
-        let mut tar_process = process::Command::new("tar")
+        let mut tar_process = tokio::process::Command::new("tar")
             .args(&[
                 "xf",
                 download_location.to_str().unwrap(),
