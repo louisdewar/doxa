@@ -1,44 +1,39 @@
 // import Landing from 'pages/Landing.js';
-import Uttt from 'pages/Uttt.js';
-import User from 'pages/User.js';
-import Match from 'pages/Match';
-import Game from 'pages/Game';
-import Live from 'pages/Live';
-
+import ClimateHack from 'competitions/climatehack/ClimateHack';
+import Uttt from 'competitions/uttt/Uttt';
+import {
+  BrowserRouter as Router, Redirect, Route, Switch
+} from 'react-router-dom';
 import './App.scss';
 
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Redirect,
-} from 'react-router-dom';
 
-function App() {
-  return (
+const COMPETITIONS = {
+  climatehack: ClimateHack,
+  uttt: Uttt,
+};
+
+const DEFAULT_COMPETITION = process.env.REACT_APP_DEFAULT_COMPETITION ?? 'uttt';
+
+
+export default function App() {
+  return (process.env.REACT_APP_MULTIPLE_COMPETITIONS != 'false') ? (
     <Router>
       <Switch>
-        <Route path="/c/uttt/match/:matchID/game/:gameID">
-          <Game />
-        </Route>
-        <Route path="/c/uttt/_agent/:agentID/live">
-          <Live />
-        </Route>
-        <Route path="/c/uttt/match/:matchID">
-          <Match />
-        </Route>
-        <Route path="/c/uttt/user/:username">
-          <User />
-        </Route>
-        <Route path="/c/uttt">
-          <Uttt />
-        </Route>
+        {Object.keys(COMPETITIONS).map(competition => (
+          <Route path={`/c/${competition}/`} key={competition} component={COMPETITIONS[competition]} />
+        ))}
         <Route path="/">
-          <Redirect to='/c/uttt' />
+          <Redirect to={`/c/${DEFAULT_COMPETITION}/`} />
+        </Route>
+      </Switch>
+    </Router>
+  ) : (
+    <Router>
+      <Switch>
+        <Route path="/">
+          {(Competition => <Competition />)(COMPETITIONS[DEFAULT_COMPETITION])}
         </Route>
       </Switch>
     </Router>
   );
 }
-
-export default App;

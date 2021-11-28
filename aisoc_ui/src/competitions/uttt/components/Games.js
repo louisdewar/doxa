@@ -1,27 +1,27 @@
-import api from 'common/api';
-import GameState from 'common/gameReducer.js';
-
-import { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import classNames from 'classnames';
+import { faFastBackward, faFastForward, faStepBackward, faStepForward } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faStepForward, faFastForward, faStepBackward, faFastBackward } from '@fortawesome/free-solid-svg-icons';
-
+import classNames from 'classnames';
+import GameState from 'competitions/uttt/services/gameReducer';
+import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import UTTTAPI from '../api';
 import './Games.scss';
 import Grid from './Grid';
 
-export default function Games({ matchID, winners }) {
+
+
+export default function Games({ matchID, winners, competitionBaseUrl }) {
   return (
     <div className='games maxwidth'>
       <h2>Showing {winners.length} games</h2>
       {winners.map((winner, i) => {
-        return <GameCard key={i} matchID={matchID} gameID={i + 1} winner={winner} />;
+        return <GameCard key={i} matchID={matchID} gameID={i + 1} winner={winner} competitionBaseUrl={competitionBaseUrl} />;
       })}
     </div>
   );
 }
 
-function GameCard({ matchID, gameID, winner }) {
+function GameCard({ matchID, gameID, winner, competitionBaseUrl }) {
   const [loaded, setLoaded] = useState(false);
   const [grid, setGrid] = useState(null);
   const [currentMove, setCurrentMove] = useState(0);
@@ -37,7 +37,7 @@ function GameCard({ matchID, gameID, winner }) {
   // Load player and opponent
   useEffect(() => {
     setLoaded(false);
-    api.game.getUTTTGameEvents(matchID, gameID).then(events => {
+    UTTTAPI.getUTTTGameEvents(matchID, gameID).then(events => {
       gameState.current = new GameState();
       gameState.current.addManyEvents(events);
       setGrid(gameState.current.getGrid());
@@ -82,7 +82,7 @@ function GameCard({ matchID, gameID, winner }) {
   }
 
   return (
-    <Link to={`/c/uttt/match/${matchID}/game/${gameID}`}>
+    <Link to={`${competitionBaseUrl}match/${matchID}/game/${gameID}`}>
       <div className={classNames('game-card', { 'won': winner === 'R', 'lost': winner === 'B', 'drawn': winner === 'S' })}>
         <div className="mini-player">
           <Grid gameState={grid} small={true} />

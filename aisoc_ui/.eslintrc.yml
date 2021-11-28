@@ -3,12 +3,13 @@ env:
   es6: true
   node: true
 extends:
-  - 'eslint:recommended'
-  - 'plugin:react/recommended'
-  - 'plugin:react/jsx-runtime'
+  - "eslint:recommended"
+  - "plugin:react/recommended"
+  - "plugin:react/jsx-runtime"
 globals:
   Atomics: readonly
   SharedArrayBuffer: readonly
+parser: babel-eslint
 parserOptions:
   ecmaFeatures:
     jsx: true

@@ -1,16 +1,15 @@
-import api from 'common/api';
-import GameState from 'common/gameReducer';
-import Navbar from 'component/NavBar';
-import Grid from 'component/Grid';
+import { faFastBackward, faFastForward, faStepBackward, faStepForward } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import classNames from 'classnames';
+import Grid from 'competitions/uttt/components/Grid';
+import GameState from 'competitions/uttt/services/gameReducer';
+import React, { useEffect, useRef, useState } from 'react';
+import { useParams } from 'react-router';
+import { Link } from 'react-router-dom';
+import UTTTAPI from '../api';
+import Layout from '../components/Layout';
 import './Game.scss';
 
-import React, { useEffect, useState, useRef } from 'react';
-import { useParams } from 'react-router';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
-import { faStepForward, faFastForward, faStepBackward, faFastBackward } from '@fortawesome/free-solid-svg-icons';
-import { Link } from 'react-router-dom';
-import classNames from 'classnames';
 
 function moveToLabel(move) {
   return `${move.g} ${move.t}`;
@@ -30,7 +29,7 @@ function Moves({ moves, currentMove, goToMove }) {
   );
 }
 
-export default function Game() {
+export default function Game({ competitionBaseUrl }) {
   const { matchID, gameID } = useParams();
   const [players, setPlayers] = useState(null);
   const [loaded, setLoaded] = useState(false);
@@ -38,19 +37,18 @@ export default function Game() {
   const [moves, setMoves] = useState(null);
 
   const [currentMove, setCurrentMove] = useState(0);
-  
-  const [playerInterval, setPlayerInterval] = useState(0);
-  
+
   const gameState = useRef(new GameState());
-  
+
   const updateCurrentMove = () => {
     setCurrentMove(gameState.current.getPosition() + 1);
   };
 
   useEffect(async () => {
-    setPlayers(await api.game.getPlayers(matchID));
-    const events = await api.game.getUTTTGameEvents(matchID, gameID);
-        
+
+    setPlayers(await UTTTAPI.getGamePlayers(matchID));
+    const events = await UTTTAPI.getUTTTGameEvents(matchID, gameID);
+
     gameState.current = new GameState();
     gameState.current.addManyEvents(events);
     setGrid(gameState.current.getGrid());
@@ -100,42 +98,37 @@ export default function Game() {
   }
 
   return (
-    <>
-      <Navbar competitionName='Ultimate Tic-Tac-Toe' homepageUrl='/c/uttt/' />
-      <div className="maxwidth">
-        <div className="game-header">
-          <div className="player-versus">
-            <Link to={`/c/uttt/user/${players[0].username}`}><span className="player player-1">{players[0].username}</span></Link>
-            <span className="separator">VS</span>
-            <Link to={`/c/uttt/user/${players[1].username}`}><span className="player player-2">{players[1].username}</span></Link>
-          </div>
+    <Layout competitionBaseUrl={competitionBaseUrl}>
+      <div className="game-header">
+        <div className="player-versus">
+          <Link to={`${competitionBaseUrl}user/${players[0].username}`}><span className="player player-1">{players[0].username}</span></Link>
+          <span className="separator">VS</span>
+          <Link to={`${competitionBaseUrl}user/${players[1].username}`}><span className="player player-2">{players[1].username}</span></Link>
         </div>
-        <div className="game-wrapper">
-          <div className="game-grid">
-            <Grid gameState={grid} />
-          </div>
-          <div className="move-list">
-            <h2>Move List</h2>
-            <Moves moves={moves} currentMove={currentMove} goToMove={goToMove} />
-            <div className="controls">
-              <div className="move-button" onClick={goToBeginning}>
-                <FontAwesomeIcon icon={faFastBackward} />
-              </div>
-              <div className="move-button" onClick={stepBackward}>
-                <FontAwesomeIcon icon={faStepBackward} />
-              </div>
-              {/* <FontAwesomeIcon icon={faPlay} /> */}
-              <div className="move-button" onClick={stepForward}>
-                <FontAwesomeIcon icon={faStepForward} />
-              </div>
-              <div className="move-button" onClick={goToEnd}>
-                <FontAwesomeIcon icon={faFastForward} />
-              </div>
+      </div>
+      <div className="game-wrapper">
+        <div className="game-grid">
+          <Grid gameState={grid} />
+        </div>
+        <div className="move-list">
+          <h2>Move List</h2>
+          <Moves moves={moves} currentMove={currentMove} goToMove={goToMove} />
+          <div className="controls">
+            <div className="move-button" onClick={goToBeginning}>
+              <FontAwesomeIcon icon={faFastBackward} />
+            </div>
+            <div className="move-button" onClick={stepBackward}>
+              <FontAwesomeIcon icon={faStepBackward} />
+            </div>
+            <div className="move-button" onClick={stepForward}>
+              <FontAwesomeIcon icon={faStepForward} />
+            </div>
+            <div className="move-button" onClick={goToEnd}>
+              <FontAwesomeIcon icon={faFastForward} />
             </div>
           </div>
         </div>
       </div>
-
-    </>
+    </Layout>
   );
 }

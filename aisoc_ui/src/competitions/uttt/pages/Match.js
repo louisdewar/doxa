@@ -1,17 +1,17 @@
-import api from 'common/api';
-import Navbar from 'component/NavBar.js';
-import Games from 'component/Games.js';
-
-import { useState, useEffect } from 'react';
+import Games from 'competitions/uttt/components/Games.js';
+import Navbar from 'components/NavBar.js';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
-
-import './Match.scss';
 import { Link } from 'react-router-dom';
+import UTTTAPI from '../api';
+import './Match.scss';
+
+
 
 async function loadMatchData(matchID) {
-  const winners = await api.game.getUTTTGameWinners(matchID);
-  const scores = await api.game.getUTTTGameScores(matchID);
-  const players = await api.game.getPlayers(matchID);
+  const winners = await UTTTAPI.getUTTTGameWinners(matchID);
+  const scores = await UTTTAPI.getUTTTGameScores(matchID);
+  const players = await UTTTAPI.getGamePlayers(matchID);
 
   const total = scores.a_wins + scores.b_wins + scores.draws;
   const calcPercentage = number => 100 * number / total;
@@ -24,7 +24,7 @@ async function loadMatchData(matchID) {
   return { winners, scores, players };
 }
 
-export default function Match() {
+export default function Match({ competitionBaseUrl }) {
   const { matchID } = useParams();
 
   const [data, setData] = useState(null);
@@ -45,14 +45,14 @@ export default function Match() {
 
   return (
     <div>
-      <Navbar competitionName='Ultimate Tic-Tac-Toe' homepageUrl='/c/uttt/' />
+      <Navbar competitionName='Ultimate Tic-Tac-Toe' homepageUrl={competitionBaseUrl} />
       <div className="match-data">
         <div className="maxwidth">
           <div className="header-wrapper">
             <div className="player-versus">
-              <Link to={`/c/uttt/user/${players[0].username}`}><span className="player player-1">{players[0].username}</span></Link>
+              <Link to={`${competitionBaseUrl}user/${players[0].username}`}><span className="player player-1">{players[0].username}</span></Link>
               <span className="separator">VS</span>
-              <Link to={`/c/uttt/user/${players[1].username}`}><span className="player player-2">{players[1].username}</span></Link>
+              <Link to={`${competitionBaseUrl}user/${players[1].username}`}><span className="player player-2">{players[1].username}</span></Link>
             </div>
             <div className="scores">
               <span>wins</span>
@@ -74,7 +74,7 @@ export default function Match() {
           </div>
         </div>
       </div>
-      <Games matchID={matchID} winners={winners} />
+      <Games matchID={matchID} winners={winners} competitionBaseUrl={competitionBaseUrl} />
     </div>
   );
 }

@@ -1,18 +1,18 @@
-import api from 'common/api';
-
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-
+import UTTTAPI from '../api';
 import './Matches.scss';
 
-export default function Matches({ username }) {
+
+
+export default function Matches({ username, competitionBaseUrl }) {
   const [filter, setFilter] = useState(null);
   const [matches, setMatches] = useState(null);
 
   useEffect(() => {
-    api.user.getActiveGames(username)
+    UTTTAPI.getUserActiveGames(username)
       .then(async matches => {
-        // const matchPlayers = await Promise.all(matches.map(match => api.game.getPlayers(match.id)));
+        // const matchPlayers = await Promise.all(matches.map(match => api.getGamePlayers(match.id)));
         setMatches(matches);
       })
       .catch(err => {
@@ -25,15 +25,15 @@ export default function Matches({ username }) {
       <h1>Matches</h1>
       <input type='text' placeholder='filter by username' onChange={e => setFilter(e.target.value)} />
       {/* {matches? matches.filter(players => filter == null || players[0].includes(filter) || players[1].includes(filter)).map(([player1, player2], i) => { */}
-      {matches? matches.map(match => {
-        return <MatchCard key={match.id} matchID={match.id} filter={filter} mainPlayer={username} />;   
-      }): 'Loading matches...'}
-            
+      {matches ? matches.map(match => {
+        return <MatchCard key={match.id} matchID={match.id} filter={filter} mainPlayer={username} competitionBaseUrl={competitionBaseUrl} />;
+      }) : 'Loading matches...'}
+
     </div>
   );
 }
 
-function MatchCard({ matchID, mainPlayer, filter }) {
+function MatchCard({ matchID, mainPlayer, filter, competitionBaseUrl }) {
   const [loaded, setLoaded] = useState(false);
   const [player, setPlayer] = useState(null);
   const [opponent, setOpponent] = useState(null);
@@ -42,12 +42,12 @@ function MatchCard({ matchID, mainPlayer, filter }) {
   // Load player and opponent
   useEffect(() => {
     setLoaded(false);
-    api.game.getPlayers(matchID).then(players => {
+    UTTTAPI.getGamePlayers(matchID).then(players => {
       setPlayer(players[0]);
       setOpponent(players[1]);
 
       let mainAgent;
-      if(players[0].username === mainPlayer) {
+      if (players[0].username === mainPlayer) {
         mainAgent = players[0].agent;
       } else if (players[1].username === mainPlayer) {
         mainAgent = players[1].agent;
@@ -55,7 +55,7 @@ function MatchCard({ matchID, mainPlayer, filter }) {
         throw new Error('Neither player 0 nor player 1 was the main player');
       }
 
-      return api.game.getResult(matchID, mainAgent).then(result => {
+      return UTTTAPI.getGameResult(matchID, mainAgent).then(result => {
         setScore(result);
         setLoaded(true);
       });
@@ -64,7 +64,7 @@ function MatchCard({ matchID, mainPlayer, filter }) {
         console.error(err);
       });
   }, [matchID, mainPlayer]);
-    
+
 
   if (!loaded) {
     return null;
@@ -76,7 +76,7 @@ function MatchCard({ matchID, mainPlayer, filter }) {
 
 
   return (
-    <Link to={'/c/uttt/match/' + matchID}>
+    <Link to={`${competitionBaseUrl}match/${matchID}`}>
       <div className='match-card'>
         <div className='match-players'>
           <p className='username'>{player.username}</p>

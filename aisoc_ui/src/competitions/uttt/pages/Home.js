@@ -1,13 +1,12 @@
-import Navbar from 'component/NavBar.js';
-import './Uttt.scss';
+import Leaderboard from 'competitions/uttt/components/Leaderboard';
+import Navbar from 'components/NavBar.js';
+import './Home.scss';
 
-import React from 'react';
-import Leaderboard from 'component/Leaderboard';
 
-function Uttt() {
+function Home({ competitionBaseUrl }) {
   return (
     <div>
-      <Navbar competitionName='Ultimate Tic-Tac-Toe' homepageUrl='/c/uttt/'/>
+      <Navbar competitionName='Ultimate Tic-Tac-Toe' homepageUrl={competitionBaseUrl} />
       <div className='main'>
         <div className="comp-info">
           <div className="header maxwidth">
@@ -23,10 +22,10 @@ function Uttt() {
             </form>
           </div>
         </div>
-        <Leaderboard />
+        <Leaderboard competitionBaseUrl={competitionBaseUrl} />
       </div>
     </div>
   );
 }
 
-export default Uttt;
+export default Home;

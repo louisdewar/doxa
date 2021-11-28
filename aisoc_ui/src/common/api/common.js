@@ -1,5 +1,3 @@
-// Must end in a '/'
-export const BASE_URL = '/api/';
 
 class DoxaError extends Error {
   constructor(error_code, error_message) {
