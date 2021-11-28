@@ -332,6 +332,12 @@ impl<C: Competition + ?Sized> Context<C> {
             .await
     }
 
+    pub async fn is_agent_active(&self, agent: String) -> Result<bool, ContextError> {
+        let agent = self.get_agent(agent).await?.ok_or(AgentNotFound)?;
+
+        Ok(agent.active)
+    }
+
     pub async fn get_user_agents(&self, user_id: i32) -> Result<Vec<AgentUpload>, ContextError> {
         let competition_id = self.competition_id;
         self.run_query(move |conn| {

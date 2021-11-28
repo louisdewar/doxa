@@ -38,6 +38,20 @@ pub enum ExecutionSpawnError {
     IO(io::Error),
 }
 
+#[derive(Error, Display, Debug)]
+pub enum AgentShutdownError {
+    FailedToKillAgent(io::Error),
+    AgentNotRunning,
+}
+
+#[derive(From, Error, Display, Debug)]
+pub enum AgentLifecycleError {
+    #[from]
+    Spawn(ExecutionSpawnError),
+    #[from]
+    Shutdown(AgentShutdownError),
+}
+
 #[derive(Debug, Error, From, Display)]
 pub(crate) enum ReceieveAgentError {
     IO(io::Error),
@@ -54,11 +68,13 @@ pub enum HandleMessageError {
     IO(io::Error),
     MissingSeparator,
     UnrecognisedPrefix,
-    Reboot(ExecutionSpawnError),
+    Lifecycle(AgentLifecycleError),
 }
 
 #[derive(Debug, Error, From, Display)]
-pub enum RebootAgentError {
+pub enum AgentLifecycleManagerError {
     IO(io::Error),
     Read(ReadMessageError),
+    Timeout,
+    MissingSpawnedMessage,
 }

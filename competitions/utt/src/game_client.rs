@@ -198,7 +198,7 @@ impl GameClient for UTTTGameClient {
 
         for game in 0..GAMES_PER_SIDE {
             // Reboot all agents to reset each game
-            context.reboot_all_agents().await?;
+            context.reboot_all_agents(vec![]).await?;
 
             let mut events = Vec::new();
 

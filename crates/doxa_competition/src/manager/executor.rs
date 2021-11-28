@@ -89,6 +89,15 @@ impl<C: GameClient> ExecutionManager<C> {
                         let executor_settings = executor_settings.clone();
                         let competition_name = self.competition_name;
                         async move {
+                            // In future there can be some smarter code in the event that the
+                            // code below fails or the server unexpected shutsdown, we need to
+                            // consider that some game events may have been emitted and processed.
+                            // Perhaps it's more correct to only process game events at the end?
+                            delivery
+                                .ack(BasicAckOptions::default())
+                                .await
+                                .expect("Failed to acknowledge MQ");
+
                             let game_manager = match GameManager::<C>::new(
                                 executor_settings,
                                 event_channel,
@@ -103,19 +112,13 @@ impl<C: GameClient> ExecutionManager<C> {
                                     // Between now and when the agent was first queued it is no
                                     // longer the correct active agent (e.g. because of error or
                                     // because a new one was uploads or because it was deleted).
+                                    // This is not a problem, it's good that we don't run the game
+                                    // in the case.
                                     if let GameManagerError::StartAgent(doxa_executor::error::AgentError::AgentGone) = error {
                                         event!(Level::DEBUG, "not starting game because agent was gone");
                                     }
-                                    // Should probably emit a game event instead of never ack-ing meaning infinite loop
+                                    // Should probably emit an error game event
                                     event!(Level::ERROR, %error, debug = ?error, "failed to start game manager");
-
-                                    // Temporary always acknowledge on error to prevent infinite
-                                    // loop, in future there should be a max retry count / max TTL along with some smart decisions about which errors are permanent and which aren't
-                                    // Also look into using NACK instead of just doing nothing
-                                    delivery
-                                        .ack(BasicAckOptions::default())
-                                        .await
-                                        .expect("Failed to acknowledge MQ");
                                     return;
                                 }
                             };
@@ -126,11 +129,6 @@ impl<C: GameClient> ExecutionManager<C> {
                                     event!(Level::ERROR, %error, debug = ?error, "error running game manager")
                                 }
                             }
-
-                            delivery
-                                .ack(BasicAckOptions::default())
-                                .await
-                                .expect("Failed to acknowledge MQ");
                         }
                         .then(|_| async move { drop(permit); })
                         .instrument(span)

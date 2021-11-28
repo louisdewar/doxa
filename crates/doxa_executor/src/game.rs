@@ -32,6 +32,7 @@ impl<C: GameClient> GameManager<C> {
         let agents = match_request.agents.into_iter().map(|agent_id| {
             VMAgent::new(
                 competition_name,
+                C::AGENT_RAM,
                 agent_id,
                 &settings.agent_retrieval,
                 &settings,

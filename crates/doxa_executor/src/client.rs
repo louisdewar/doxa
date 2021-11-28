@@ -6,6 +6,8 @@ use serde::{de::DeserializeOwned, Serialize};
 pub use crate::error::ForfeitError;
 pub use crate::{context::GameContext, error::GameError};
 
+pub const DEFAULT_AGENT_RAM_MB: usize = 128;
+
 /// Maintains the game state, sending input to agents and handling the output.
 #[async_trait]
 pub trait GameClient: Send + Sync + 'static {
@@ -23,6 +25,12 @@ pub trait GameClient: Send + Sync + 'static {
     /// It is recommended for this to be an `enum` with `#[serde(tag = "type")]` or similar to make
     /// deserialization/storage simple.
     type GameEvent: Serialize + DeserializeOwned + Send + 'static;
+
+    /// The amount of ram that an agent's VM is given measured in mega-bytes.
+    /// This defaults to [`DEFAULT_AGENT_RAM_MB`].
+    /// NOTE: this is the total amount of ram including that which is used by the guest OS not just
+    /// the agent.
+    const AGENT_RAM: usize = DEFAULT_AGENT_RAM_MB;
 
     /// Runs the game until completion.
     /// TODO: allow this method to take in the competition

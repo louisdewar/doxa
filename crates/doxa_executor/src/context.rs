@@ -12,7 +12,7 @@ use crate::{
     event::{ErrorEvent, ForfeitEvent, StartEvent},
 };
 
-pub const MAX_MESSAGE_TIME: Duration = Duration::from_secs(120);
+pub const DEFAULT_MAX_MESSAGE_TIME: Duration = Duration::from_secs(120);
 
 pub struct GameContext<'a, C: GameClient + ?Sized> {
     agents: &'a mut Vec<VMAgent>,
@@ -21,6 +21,7 @@ pub struct GameContext<'a, C: GameClient + ?Sized> {
     client: PhantomData<C>,
     event_id: u32,
     game_id: i32,
+    max_message_time: Duration,
 }
 
 impl<'a, C: GameClient> GameContext<'a, C> {
@@ -37,6 +38,7 @@ impl<'a, C: GameClient> GameContext<'a, C> {
             client: PhantomData,
             event_id: 0,
             game_id,
+            max_message_time: DEFAULT_MAX_MESSAGE_TIME,
         }
     }
 
@@ -134,12 +136,21 @@ impl<'a, C: GameClient> GameContext<'a, C> {
         Ok(&mut self.agents[agent_id])
     }
 
+    /// Sets the timeout duration for waiting for the agent's next message.
+    /// If `None` is passed in this becomes the DOXA default (`DEFAULT_MAX_MESSAGE_TIME`).
+    pub fn set_max_message_time(&mut self, time: Option<Duration>) {
+        self.max_message_time = time.unwrap_or(DEFAULT_MAX_MESSAGE_TIME);
+    }
+
     /// Gets the next message from a particular agent.
     /// This method is cancel safe.
+    ///
+    /// This will timeout if it does not receive a message within `max_message_time` which can be
+    /// configured.
     pub async fn next_message(&mut self, agent_id: usize) -> Result<&[u8], GameContextError> {
         let agent = self.agent_mut(agent_id)?;
 
-        let msg = timeout(MAX_MESSAGE_TIME, agent.next_message())
+        let msg = timeout(DEFAULT_MAX_MESSAGE_TIME, agent.next_message())
             .await
             .map_err(|_| GameContextError::TimeoutWaitingForMessage { agent_id })??;
 
@@ -148,18 +159,25 @@ impl<'a, C: GameClient> GameContext<'a, C> {
 
     /// Sends a reboot message to the VM instructing it to restart the agent's process inside the
     /// VM.
-    pub async fn reboot_agent(&mut self, agent_id: usize) -> Result<(), GameContextError> {
+    ///
+    /// If the agent is not currently running then this just spawns the agent.
+    /// It is possible to specify arguments for the agent.
+    pub async fn reboot_agent(
+        &mut self,
+        agent_id: usize,
+        args: Vec<String>,
+    ) -> Result<(), GameContextError> {
         let agent = self.agent_mut(agent_id)?;
 
-        agent.reboot().await?;
+        agent.reboot(args).await?;
 
         Ok(())
     }
 
     /// Instructs every agent to reboot and waits until all of them have.
-    pub async fn reboot_all_agents(&mut self) -> Result<(), GameContextError> {
+    pub async fn reboot_all_agents(&mut self, args: Vec<String>) -> Result<(), GameContextError> {
         for i in 0..self.agents() {
-            self.reboot_agent(i).await?;
+            self.reboot_agent(i, args.clone()).await?;
         }
 
         Ok(())
