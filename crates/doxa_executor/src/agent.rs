@@ -7,7 +7,7 @@ use doxa_core::{
     tracing::info,
 };
 use doxa_vm::{
-    error::{AgentLifecycleError, AgentLifecycleManagerError, ShutdownError},
+    error::{AgentLifecycleManagerError, ShutdownError},
     stream::MessageReader,
     Manager as VM,
 };

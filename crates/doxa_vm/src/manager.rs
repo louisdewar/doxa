@@ -10,10 +10,10 @@ use tokio::{
     task,
 };
 
-use tracing::{info, trace};
+use tracing::{trace};
 
 use crate::{
-    error::{AgentLifecycleError, ManagerError, SendAgentError},
+    error::{ManagerError, SendAgentError},
     executor::MAX_MSG_LEN,
     stream::Stream,
 };

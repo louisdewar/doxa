@@ -78,7 +78,7 @@ pub fn enroll(matches: &ArgMatches, conn: &PgConnection) {
     );
 }
 
-pub fn unenroll(matches: &ArgMatches, conn: &PgConnection) {
+pub fn unenroll(matches: &ArgMatches, _conn: &PgConnection) {
     let username = matches.value_of("USERNAME").unwrap();
     let competition_name = matches.value_of("COMPETITION").unwrap();
 

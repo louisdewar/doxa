@@ -6,7 +6,7 @@ use doxa_mq::action::BincodeError;
 use doxa_storage::RetrievalError;
 use doxa_vm::{
     error::{
-        AgentLifecycleError, AgentLifecycleManagerError, AgentShutdownError, ManagerError,
+        AgentLifecycleManagerError, ManagerError,
         SendAgentError,
     },
     stream::ReadMessageError,
