@@ -1,4 +1,4 @@
-use crate::error::AgentLifecycleManagerError;
+use crate::error::{AgentLifecycleManagerError, TakeFileManagerError};
 use crate::manager::ManagerError::TimeoutWaitingForVMConnection;
 use std::time::Duration;
 use std::{io, path::PathBuf};
@@ -10,7 +10,7 @@ use tokio::{
     task,
 };
 
-use tracing::{trace};
+use tracing::trace;
 
 use crate::{
     error::{ManagerError, SendAgentError},
@@ -189,6 +189,37 @@ impl Manager {
         .map_err(|_| AgentLifecycleManagerError::Timeout)??;
 
         Ok(())
+    }
+
+    pub async fn take_file(&mut self, path: String) -> Result<Vec<u8>, TakeFileManagerError> {
+        self.stream
+            .send_prefixed_full_message(b"TAKEFILE_", path.as_bytes())
+            .await?;
+
+        let mut buf = timeout(Duration::from_secs(120), async {
+            // The previous agent may have outputted messages that we haven't read yet, it's not ideal
+            // but we drop them here.
+            // In future this should be changed to become more reliable.
+            let mut buf = Vec::new();
+
+            loop {
+                self.stream.next_full_message(&mut buf, MAX_MSG_LEN).await?;
+
+                if buf.starts_with(b"FILEDATA_") {
+                    break;
+                }
+            }
+
+            Result::<_, TakeFileManagerError>::Ok(buf)
+        })
+        .await
+        .map_err(|_| TakeFileManagerError::Timeout)??;
+
+        let prefix_len = b"FILEDATA_".len();
+        buf.copy_within(prefix_len.., 0);
+        buf.truncate(buf.len() - prefix_len);
+
+        Ok(buf)
     }
 
     /// Get access to the underlying stream

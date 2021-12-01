@@ -7,7 +7,7 @@ use doxa_core::{
     tracing::info,
 };
 use doxa_vm::{
-    error::{AgentLifecycleManagerError, ShutdownError},
+    error::{AgentLifecycleManagerError, ShutdownError, TakeFileManagerError},
     stream::MessageReader,
     Manager as VM,
 };
@@ -111,6 +111,11 @@ impl VMAgent {
     /// See [`doxa_vm::Manager::reboot_agent`]
     pub async fn reboot(&mut self, args: Vec<String>) -> Result<(), AgentLifecycleManagerError> {
         self.vm_manager.reboot_agent(args).await
+    }
+
+    /// See [`doxa_vm::Manager::reboot_agent`]
+    pub async fn take_file(&mut self, path: String) -> Result<Vec<u8>, TakeFileManagerError> {
+        self.vm_manager.take_file(path).await
     }
 
     /// Retrieves the next event sent by the VMExecutor.

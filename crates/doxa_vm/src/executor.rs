@@ -19,7 +19,10 @@ use tokio::{
 use tokio_vsock::VsockStream;
 
 use crate::{
-    error::{AgentLifecycleError, AgentShutdownError, HandleMessageError, ReceieveAgentError},
+    error::{
+        AgentLifecycleError, AgentShutdownError, HandleMessageError, ReceieveAgentError,
+        TakeFileError,
+    },
     stream::{MessageReader, Stream},
     ExecutionConfig,
 };
@@ -150,8 +153,39 @@ impl VMExecutor {
             b"SHUTDOWN" => self.shutdown(true).await?,
             b"SPAWN" => self.spawn(msg).await?,
             b"REBOOT" => self.reboot(msg).await?,
+            b"TAKEFILE" => self.take_file(msg).await?,
             _ => return Err(HandleMessageError::UnrecognisedPrefix),
         }
+
+        Ok(())
+    }
+
+    async fn take_file(&mut self, msg: &[u8]) -> Result<(), TakeFileError> {
+        let path = PathBuf::from(OsStr::from_bytes(msg));
+
+        let metadata = tokio::fs::metadata(&path)
+            .await
+            .map_err(|e| match e.kind() {
+                io::ErrorKind::NotFound => TakeFileError::FileNotFound,
+                _ => e.into(),
+            })?;
+
+        if !metadata.is_file() {
+            return Err(TakeFileError::NotFile);
+        }
+
+        // In future this could be relaxed, each competition could specify a MAX file size and if a
+        // file exceeds the MAX_MSG_LEN but not the max file size, then it could be sent in chunks.
+        if metadata.len() >= MAX_MSG_LEN as u64 {
+            return Err(TakeFileError::FileTooLarge);
+        }
+
+        let file = tokio::fs::read(&path).await?;
+        tokio::fs::remove_file(&path).await?;
+
+        self.stream
+            .send_prefixed_full_message(b"FILEDATA_", &file)
+            .await?;
 
         Ok(())
     }
