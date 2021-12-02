@@ -93,6 +93,7 @@ pub enum HelloWorldGameEvent {
     RespondedIncorrectly {
         expected_output: String,
         agent_output: String,
+        file_output: String,
     },
 }
 
@@ -118,8 +119,10 @@ impl GameClient for HelloWorldGameClient {
 
         let expected_output = b"echo PLEASE ECHO THIS MESSAGE";
 
-        let message = context.next_message(0).await?;
-        if message == expected_output {
+        let message = context.next_message(0).await?.to_owned();
+        let file = context.take_file(0, "/output/test.txt").await?;
+
+        if &message == expected_output && &file == expected_output {
             context
                 .emit_game_event(
                     HelloWorldGameEvent::RespondedSuccessfully {
@@ -129,12 +132,15 @@ impl GameClient for HelloWorldGameClient {
                 )
                 .await?;
         } else {
-            let agent_output = String::from_utf8_lossy(message).to_string();
+            let agent_output = String::from_utf8_lossy(&message).to_string();
+            let file_output = String::from_utf8_lossy(&file).to_string();
+
             context
                 .emit_game_event(
                     HelloWorldGameEvent::RespondedIncorrectly {
                         expected_output: String::from_utf8_lossy(expected_output).to_string(),
                         agent_output,
+                        file_output,
                     },
                     "game",
                 )

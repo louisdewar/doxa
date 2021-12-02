@@ -1,4 +1,4 @@
-use std::{io::Bytes, path::PathBuf};
+use std::path::PathBuf;
 
 use reqwest::{Client, RequestBuilder, Response, StatusCode, Url};
 use serde::de::DeserializeOwned;

@@ -2,7 +2,7 @@ use clap::ArgMatches;
 use doxa_db::{
     action,
     diesel::PgConnection,
-    model::user::{generate_invite_id, Invite, User},
+    model::user::{generate_invite_id, Invite},
 };
 
 use chrono::Utc;

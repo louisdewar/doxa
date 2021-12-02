@@ -1,5 +1,9 @@
 use std::io;
 
+// TODO: clearly these errors need to be partitioned into host and guest.
+// There are many situations where they is a different but equivalent error for both sides,
+// this may get messy.
+
 use derive_more::{Display, Error, From};
 use doxa_firecracker_sdk::error::SpawnError;
 use tokio::task::JoinError;
@@ -24,6 +28,16 @@ pub enum SendAgentError<E> {
     ReadMessage(ReadMessageError),
     DownloadAgentError(SendStreamError<E>),
     Expect(ExpectMessageError),
+}
+
+#[derive(From, Error, Display, Debug)]
+pub enum TakeFileError {
+    FileNotFound,
+    FileTooLarge,
+    #[display(fmt = "the provided path was not a file")]
+    NotFile,
+    #[from]
+    Other(io::Error),
 }
 
 #[derive(From, Error, Display, Debug)]
@@ -69,6 +83,7 @@ pub enum HandleMessageError {
     MissingSeparator,
     UnrecognisedPrefix,
     Lifecycle(AgentLifecycleError),
+    TakeFile(TakeFileError),
 }
 
 #[derive(Debug, Error, From, Display)]
@@ -77,4 +92,13 @@ pub enum AgentLifecycleManagerError {
     Read(ReadMessageError),
     Timeout,
     MissingSpawnedMessage,
+}
+
+#[derive(From, Error, Display, Debug)]
+pub enum TakeFileManagerError {
+    #[from]
+    ReadMessage(ReadMessageError),
+    Timeout,
+    #[from]
+    IO(io::Error),
 }

@@ -199,6 +199,8 @@ impl<T: AsyncRead + AsyncWrite + Unpin> Stream<T> {
 
     /// Sends a full message from a single slice and a prefix (sends the prefix first then the
     /// message).
+    ///
+    /// TODO: change the error type to a stream specific error.
     pub async fn send_prefixed_full_message(
         &mut self,
         prefix: &[u8],

@@ -5,10 +5,7 @@ use doxa_core::lapin;
 use doxa_mq::action::BincodeError;
 use doxa_storage::RetrievalError;
 use doxa_vm::{
-    error::{
-        AgentLifecycleError, AgentLifecycleManagerError, AgentShutdownError, ManagerError,
-        SendAgentError,
-    },
+    error::{AgentLifecycleManagerError, ManagerError, SendAgentError, TakeFileManagerError},
     stream::ReadMessageError,
 };
 
@@ -92,6 +89,8 @@ pub enum GameContextError {
     ReservedEventType,
     #[display(fmt = "failed to reboot the agent inside the VM")]
     RebootError(AgentLifecycleManagerError),
+    #[display(fmt = "failed to take a file from inside the VM")]
+    TakeFile(TakeFileManagerError),
 }
 
 impl ForfeitError for GameContextError {
@@ -108,7 +107,9 @@ impl ForfeitError for GameContextError {
             GameContextError::IncorrectNumberAgents { .. } => None,
             GameContextError::ZeroLengthEventType => None,
             GameContextError::ReservedEventType => None,
+            // TODO: In future both these errors should probably be forfeits
             GameContextError::RebootError(_) => None,
+            GameContextError::TakeFile(_) => None,
         }
     }
 }

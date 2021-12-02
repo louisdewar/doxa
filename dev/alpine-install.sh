@@ -13,3 +13,8 @@ apk add py3-scikit-learn
 
 addgroup -S -g 1000 doxa
 adduser -S -u 1000 -G doxa doxa
+
+# Create output dir for competitions that use it
+mkdir /output
+chown doxa:doxa /output
+

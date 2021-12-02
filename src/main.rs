@@ -46,7 +46,7 @@ async fn main() -> std::io::Result<()> {
 
     let executor_settings = doxa_executor::Settings {
         firecracker_path: PathBuf::from("./dev/firecracker"),
-        kernel_img: PathBuf::from("./dev/vmlinux.bin"),
+        kernel_img: PathBuf::from("./dev/vmlinux"),
         kernel_boot_args: "console=ttyS0 reboot=k panic=1 pci=off".to_string(),
         rootfs: PathBuf::from("./dev/rootfs.img"),
         agent_retrieval: AgentRetrieval::new(
