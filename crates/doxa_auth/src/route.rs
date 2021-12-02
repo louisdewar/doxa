@@ -40,8 +40,7 @@ async fn login(
     })
     .await??;
 
-    Ok(HttpResponse::Ok()
-        .json(response::Login { auth_token: token }))
+    Ok(HttpResponse::Ok().json(response::Login { auth_token: token }))
 }
 
 async fn register(
@@ -92,10 +91,9 @@ async fn invite_info(db_pool: web::Data<PgPool>, invite_id: web::Path<String>) -
     .await??
     .ok_or(InviteNotFound)?;
 
-    Ok(HttpResponse::Ok()
-        .json(InviteInfo {
-            username: invite.username,
-            expires_at: invite.expires_at,
-            enrollments: invite.enrollments,
-        }))
+    Ok(HttpResponse::Ok().json(InviteInfo {
+        username: invite.username,
+        expires_at: invite.expires_at,
+        enrollments: invite.enrollments,
+    }))
 }

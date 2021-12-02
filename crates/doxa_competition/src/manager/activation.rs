@@ -50,11 +50,9 @@ impl<C: Competition> Context<C> {
         &self,
         agent_id: String,
     ) -> Result<Option<AgentUpload>, ContextError> {
-        self.run_query(move |conn| {
-            doxa_db::action::storage::deactivate_agent_by_id(conn, agent_id)
-        })
-        .await
-        .map_err(|e| e)
+        self.run_query(move |conn| doxa_db::action::storage::deactivate_agent_by_id(conn, agent_id))
+            .await
+            .map_err(|e| e)
     }
 }
 
