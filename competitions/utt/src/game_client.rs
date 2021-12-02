@@ -82,8 +82,8 @@ impl ForfeitError for UTTTError {
 }
 
 impl UTTTGameClient {
-    async fn run_once<'a, E: FnMut(UTTTGameEvent)>(
-        context: &mut GameContext<'a, Self>,
+    async fn run_once<E: FnMut(UTTTGameEvent)>(
+        context: &mut GameContext<'_, Self>,
         mut on_event: E,
     ) -> Result<Winner, GameError<UTTTError>> {
         let mut model = Model::new();

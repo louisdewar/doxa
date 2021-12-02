@@ -34,7 +34,7 @@ struct DoxaErrorRaw {
 }
 
 impl DoxaErrorRaw {
-    fn to_doxa_error(self, status_code: StatusCode) -> DoxaError {
+    fn into_doxa_error(self, status_code: StatusCode) -> DoxaError {
         DoxaError {
             error_code: self.error_code,
             message: self.error,
@@ -59,12 +59,10 @@ fn maybe_add_auth(
 ) -> RequestBuilder {
     if never_auth {
         builder
+    } else if let Some(user) = &settings.user_profile {
+        builder.bearer_auth(user.auth_token.clone())
     } else {
-        if let Some(user) = &settings.user_profile {
-            builder.bearer_auth(user.auth_token.clone())
-        } else {
-            builder
-        }
+        builder
     }
 }
 
@@ -97,7 +95,7 @@ pub async fn send_request(builder: RequestBuilder) -> Result<Response, RequestEr
     let status = response.status();
 
     if status.is_success() {
-        return Ok(response);
+        Ok(response)
     } else {
         let bytes = response.bytes().await?;
         match serde_json::from_slice::<DoxaErrorRaw>(&bytes) {
@@ -106,7 +104,7 @@ pub async fn send_request(builder: RequestBuilder) -> Result<Response, RequestEr
                 error_message: String::from_utf8_lossy(&bytes).to_string(),
             }
             .into()),
-            Ok(v) => Err(v.to_doxa_error(status).into()),
+            Ok(v) => Err(v.into_doxa_error(status).into()),
         }
     }
 }

@@ -41,7 +41,7 @@ impl<C: GameClient> GameManager<C> {
 
         let agents = try_join_all(agents)
             .await
-            .map_err(|e| GameManagerError::StartAgent(e))?;
+            .map_err(GameManagerError::StartAgent)?;
 
         Ok(GameManager {
             agents,

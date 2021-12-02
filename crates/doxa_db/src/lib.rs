@@ -35,7 +35,8 @@ pub fn was_unique_key_violation(error: &DieselError) -> bool {
 }
 
 pub fn establish_connection(database_url: &str) -> PgConnection {
-    PgConnection::establish(&database_url).expect(&format!("Error connecting to {}", database_url))
+    PgConnection::establish(database_url)
+        .unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
 }
 
 pub fn establish_pool(database_url: &str) -> PgPool {

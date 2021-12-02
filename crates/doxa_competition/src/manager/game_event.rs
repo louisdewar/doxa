@@ -107,7 +107,7 @@ impl<C: Competition> GameEventManager<C> {
 
                             "_END" => {
                                 tokio::task::spawn_blocking({
-                                    let complete_time = game_event.timestamp.clone();
+                                    let complete_time = game_event.timestamp;
                                     let game_id = game_event.game_id;
                                     let pool = self.settings.pg_pool.clone();
                                     move || {
@@ -131,7 +131,7 @@ impl<C: Competition> GameEventManager<C> {
                         }
                     } else {
                         let game_event = game_event
-                            .try_map_payload(|payload| serde_json::from_value(payload))
+                            .try_map_payload(serde_json::from_value)
                             .expect("Improperly formatted client message");
 
                         if let Err(error) = self

@@ -6,7 +6,7 @@ use crate::{error::ExecutionSpawnError, Options};
 
 use super::{DOXA_GID, DOXA_UID};
 
-const PYTHON_BIN: &'static str = "/usr/bin/python";
+const PYTHON_BIN: &str = "/usr/bin/python";
 
 // TODO: make this a bit more composable / abstracted, i.e. the parts about current_dir, uid, gid
 // etc... should be abstracted

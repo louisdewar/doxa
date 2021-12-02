@@ -20,7 +20,7 @@ struct LoginResponse {
 }
 
 pub async fn login(matches: &ArgMatches, settings: &Settings) -> Result<(), CommandError> {
-    let builder = post(settings, "auth/login".into(), true);
+    let builder = post(settings, "auth/login", true);
 
     let username: String = matches.value_of("USERNAME").unwrap().into();
     let password = matches.value_of("PASSWORD").unwrap().into();

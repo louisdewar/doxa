@@ -1,7 +1,7 @@
 use clap::ArgMatches;
 use doxa_db::{action, diesel::PgConnection, model::user::User};
 
-pub fn print_user_table(users: &Vec<User>) {
+pub fn print_user_table(users: &[User]) {
     print_user_table_header();
 
     for user in users {

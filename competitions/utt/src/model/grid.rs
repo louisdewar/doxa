@@ -60,10 +60,7 @@ impl Owner {
 
 impl Winner {
     pub fn stalemate(self) -> bool {
-        match self {
-            Winner::Stalemate => true,
-            _ => false,
-        }
+        matches!(self, Winner::Stalemate)
     }
 
     pub fn to_char(self) -> char {
@@ -209,9 +206,7 @@ fn find_winner<W: Winnable>(grid: &[W; 9]) -> Option<Winner> {
             }
 
             // All three were empty
-            if found_player.is_none() {
-                return None;
-            }
+            found_player?;
         }
 
         let a = Winnable::winner(&grid[a])?;

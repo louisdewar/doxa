@@ -44,28 +44,26 @@ impl Competition for UTTTCompetition {
         context: &Context<Self>,
         event: GameEvent<UTTTMatchEvent>,
     ) -> Result<(), ContextError> {
-        match event.payload {
-            UTTTMatchEvent::Scores {
-                draws,
-                a_wins,
-                b_wins,
-            } => {
-                let game = event.game_id;
-                let agents = context.get_game_participants_ordered(game).await?;
+        if let UTTTMatchEvent::Scores {
+            draws,
+            a_wins,
+            b_wins,
+        } = event.payload
+        {
+            let game = event.game_id;
+            let agents = context.get_game_participants_ordered(game).await?;
 
-                let draws = draws as i32;
-                let a_score = a_wins as i32 * 2 + draws;
-                let b_score = b_wins as i32 * 2 + draws;
+            let draws = draws as i32;
+            let a_score = a_wins as i32 * 2 + draws;
+            let b_score = b_wins as i32 * 2 + draws;
 
-                context
-                    .add_game_results_active(
-                        game,
-                        agents.into_iter().zip(vec![a_score, b_score].into_iter()),
-                        true,
-                    )
-                    .await?;
-            }
-            _ => {}
+            context
+                .add_game_results_active(
+                    game,
+                    agents.into_iter().zip(vec![a_score, b_score].into_iter()),
+                    true,
+                )
+                .await?;
         }
 
         Ok(())

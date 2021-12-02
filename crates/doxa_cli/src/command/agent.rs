@@ -21,7 +21,7 @@ pub async fn subcommand(matches: &ArgMatches, settings: &Settings) -> Result<(),
     let subcommand = matches.subcommand().expect("missing agent subcommand");
     let competition_name: String = matches.value_of("COMPETITION_NAME").unwrap().into();
     match subcommand.0 {
-        "upload" => upload(subcommand.1, &settings, competition_name).await,
+        "upload" => upload(subcommand.1, settings, competition_name).await,
         _ => panic!("unrecognised subcommand"),
     }
 }
@@ -34,7 +34,7 @@ pub async fn upload(
     let agent_path = PathBuf::from(matches.value_of("PATH").unwrap());
     let meta = tokio::fs::metadata(&agent_path)
         .await
-        .map_err(|e| UploadError::ReadAgentError(e))?;
+        .map_err(UploadError::ReadAgentError)?;
 
     let agent_file_name = agent_path.file_name().unwrap().to_str().unwrap().to_owned();
 
@@ -57,7 +57,7 @@ pub async fn upload(
         })
         .await
         .unwrap()
-        .map_err(|e| UploadError::ReadAgentError(e))?;
+        .map_err(UploadError::ReadAgentError)?;
         println!("Finished creating tar archive of agent");
 
         (format!("{}.tar.gz", agent_file_name), data)

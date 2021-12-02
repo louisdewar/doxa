@@ -51,7 +51,7 @@ impl CompetitionSystem {
 
         let name = competition.name();
 
-        if !validate_competition_name(&name) {
+        if !validate_competition_name(name) {
             panic!(
                 "The name `{}` does not satisfy the naming constraints",
                 name

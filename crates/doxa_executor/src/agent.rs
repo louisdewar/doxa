@@ -60,7 +60,7 @@ impl VMAgent {
             .get(CONTENT_DISPOSITION)
             .ok_or(AgentError::CouldNotExtractFilename)?;
 
-        let content_disposition = ContentDisposition::from_raw(&content_disposition)
+        let content_disposition = ContentDisposition::from_raw(content_disposition)
             .map_err(|_| AgentError::CouldNotExtractFilename)?;
 
         let agent_name = content_disposition
@@ -120,7 +120,7 @@ impl VMAgent {
 
     /// Retrieves the next event sent by the VMExecutor.
     /// This method is cancel safe.
-    async fn next_event<'a>(&'a mut self) -> Result<AgentEvent<'a>, NextEventError> {
+    async fn next_event(&mut self) -> Result<AgentEvent<'_>, NextEventError> {
         let msg = self
             .message_reader
             .read_full_message(&mut self.vm_manager.stream_mut())
@@ -142,22 +142,22 @@ impl VMAgent {
             b"F" => {
                 self.finished = true;
                 info!(stderr = %String::from_utf8_lossy(msg), agent_id = %self.id, "agent stderr output");
-                return Ok(AgentEvent::Finished);
+                Ok(AgentEvent::Finished)
             }
-            _ => return Err(NextEventError::UnrecognisedPrefix),
+            _ => Err(NextEventError::UnrecognisedPrefix),
         }
     }
 
     /// Retrieves the next message (full line) emitted by the agent inside the VM.
     /// This method is cancel safe.
-    pub async fn next_message<'a>(&'a mut self) -> Result<&'a [u8], NextMessageError> {
+    pub async fn next_message(&mut self) -> Result<&[u8], NextMessageError> {
         if self.finished {
             return Err(NextMessageError::Shutdown(AgentShutdown));
         }
 
         match self.next_event().await? {
-            AgentEvent::Line(msg) => return Ok(msg),
-            AgentEvent::Finished => return Err(NextMessageError::Shutdown(AgentShutdown)),
+            AgentEvent::Line(msg) => Ok(msg),
+            AgentEvent::Finished => Err(NextMessageError::Shutdown(AgentShutdown)),
         }
     }
 

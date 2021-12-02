@@ -46,7 +46,7 @@ impl ProfileConfig {
     pub fn default_profile(&self) -> Option<&UserProfile> {
         self.default
             .as_ref()
-            .and_then(|default| self.user_profile(&default))
+            .and_then(|default| self.user_profile(default))
     }
 
     pub fn upsert_profile(&mut self, user: String, auth_token: String) {

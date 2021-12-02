@@ -2,7 +2,7 @@ use std::{
     ffi::OsStr,
     io::{self, ErrorKind},
     os::unix::prelude::OsStrExt,
-    path::PathBuf,
+    path::{Path, PathBuf},
     str::FromStr,
     time::Duration,
 };
@@ -96,7 +96,7 @@ impl VMExecutor {
                     }
                     message = message_reader.read_full_message(&mut executor.stream) => {
                         let message = message.expect("failed to read message");
-                        println!("Got line {}", String::from_utf8_lossy(&message).to_string());
+                        println!("Got line {}", String::from_utf8_lossy(message).to_string());
                         executor.handle_message(message).await.unwrap();
                     }
                 };
@@ -196,7 +196,7 @@ impl VMExecutor {
                 .child_process
                 .kill()
                 .await
-                .map_err(|e| AgentShutdownError::FailedToKillAgent(e))?;
+                .map_err(AgentShutdownError::FailedToKillAgent)?;
         } else if required {
             return Err(AgentShutdownError::AgentNotRunning.into());
         }
@@ -235,7 +235,7 @@ impl VMExecutor {
     /// Then extract the tar file to `{output_dir}/agent` and delete the downloaded tar.
     async fn receive_agent(
         stream: &mut Stream<VsockStream>,
-        output_dir: &PathBuf,
+        output_dir: &Path,
     ) -> Result<(), ReceieveAgentError> {
         // == Name message
         let mut name_msg = Vec::with_capacity(100);

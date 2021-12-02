@@ -27,7 +27,7 @@ async fn main() -> std::io::Result<()> {
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let mq_url = env::var("MQ_URL").expect("MQ_URL must be set");
 
-    let doxa_storage_path = env::var("DOXA_STORAGE").unwrap_or("dev/doxa_storage".into());
+    let doxa_storage_path = env::var("DOXA_STORAGE").unwrap_or_else(|_| "dev/doxa_storage".into());
     let jwt_secret = env::var("DOXA_JWT_SECRET")
         .ok()
         .map(|s| s.into_bytes())

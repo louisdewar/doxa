@@ -45,7 +45,7 @@ impl Manager {
         // maybe implement a custom Drop for manager that calls spawn_blocking?
         // Also if the executor is typically run as it's own process in future it may not matter,
         // it will probably only be a problem if it's being run on the main webserver process.
-        let dir = task::spawn_blocking(|| tempdir()).await??;
+        let dir = task::spawn_blocking(tempdir).await??;
 
         let rootfs_path = dir.path().join("rootfs");
 
@@ -107,7 +107,7 @@ impl Manager {
         self.stream
             .send_stream(&mut agent, agent_size as usize)
             .await
-            .map_err(|e| SendAgentError::DownloadAgentError(e))?;
+            .map_err(SendAgentError::DownloadAgentError)?;
 
         self.stream
             .send_full_message("FILE ENDS".as_bytes())

@@ -52,14 +52,14 @@ impl<T> GameEvent<T> {
     }
 }
 
-impl Into<GameEvent<doxa_db::serde_json::Value>> for doxa_db::model::game::GameEvent {
-    fn into(self) -> GameEvent<doxa_db::serde_json::Value> {
+impl From<doxa_db::model::game::GameEvent> for GameEvent<doxa_db::serde_json::Value> {
+    fn from(val: doxa_db::model::game::GameEvent) -> Self {
         GameEvent {
-            timestamp: self.event_timestamp,
-            event_type: self.event_type,
-            event_id: self.event_id as u32,
-            game_id: self.game,
-            payload: self.payload,
+            timestamp: val.event_timestamp,
+            event_type: val.event_type,
+            event_id: val.event_id as u32,
+            game_id: val.game,
+            payload: val.payload,
         }
     }
 }
