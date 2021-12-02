@@ -52,7 +52,7 @@ pub fn create_user(
     // TODO: do some checking of username, e.g. no spaces, certain length, maybe limit characters
     // to ascii?
 
-    let password = password::new_hashed(&password);
+    let password = password::new_hashed(password);
     let token_generation = new_token_generation();
     let user = model::user::InsertableUser {
         username,
@@ -84,7 +84,7 @@ pub fn accept_invite(
     // to ascii? (same as register)
     // Maybe use create_user internally?
 
-    let password = password::new_hashed(&password);
+    let password = password::new_hashed(password);
     let token_generation = new_token_generation();
     let user = model::user::InsertableUser {
         username,
@@ -172,7 +172,7 @@ pub fn login(
             user.token_generation,
             Duration::from_secs(JWT_LIFE),
         ),
-        &jwt_key,
+        jwt_key,
     ))
 }
 

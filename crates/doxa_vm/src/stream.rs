@@ -252,7 +252,7 @@ impl<T: AsyncRead + AsyncWrite + Unpin> Stream<T> {
 
         let mut n = 0;
         while let Some(bytes) = stream.next().await {
-            let bytes = bytes.map_err(|e| SendStreamError::Stream(e))?;
+            let bytes = bytes.map_err(SendStreamError::Stream)?;
             n += bytes.len();
             self.stream.write_all(&bytes).await?;
         }
@@ -371,7 +371,7 @@ impl<T: AsyncRead + AsyncWrite + Unpin> Stream<T> {
         if expected_msg != &msg_buf {
             return Err(ExpectMessageError::IncorrectMessage {
                 received_msg: String::from_utf8_lossy(&msg_buf).to_string(),
-                expected: String::from_utf8_lossy(&expected_msg).to_string(),
+                expected: String::from_utf8_lossy(expected_msg).to_string(),
             });
         }
 

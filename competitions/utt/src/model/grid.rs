@@ -209,9 +209,7 @@ fn find_winner<W: Winnable>(grid: &[W; 9]) -> Option<Winner> {
             }
 
             // All three were empty
-            if found_player.is_none() {
-                return None;
-            }
+            found_player?;
         }
 
         let a = Winnable::winner(&grid[a])?;

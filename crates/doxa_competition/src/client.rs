@@ -28,7 +28,7 @@ pub fn validate_competition_name(name: &str) -> bool {
         return false;
     }
 
-    name.chars().find(|c| !c.is_ascii_lowercase()).is_none()
+    !name.chars().any(|c| !c.is_ascii_lowercase())
 }
 
 #[async_trait]

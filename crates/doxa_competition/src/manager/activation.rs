@@ -41,7 +41,7 @@ impl<C: Competition> Context<C> {
             })
         })
         .await
-        .map_err(|e| e.into())
+        .map_err(|e| e)
     }
 
     /// Deactivates the agent if it exists and if it is currently activated.
@@ -51,10 +51,10 @@ impl<C: Competition> Context<C> {
         agent_id: String,
     ) -> Result<Option<AgentUpload>, ContextError> {
         self.run_query(move |conn| {
-            doxa_db::action::storage::deactivate_agent_by_id(conn, agent_id.clone())
+            doxa_db::action::storage::deactivate_agent_by_id(conn, agent_id)
         })
         .await
-        .map_err(|e| e.into())
+        .map_err(|e| e)
     }
 }
 

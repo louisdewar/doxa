@@ -28,7 +28,6 @@ pub trait RespondableError: fmt::Debug + std::error::Error {
                 error_code: self.error_code(),
                 error: self.error_message(),
             })
-            .into()
     }
 }
 

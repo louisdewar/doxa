@@ -39,7 +39,7 @@ fn print_invite_row(invite: &Invite) {
     println!(
         "{} {} {} {:?}",
         invite.id,
-        invite.username.as_ref().map(|s| s.as_str()).unwrap_or("-"),
+        invite.username.as_deref().unwrap_or("-"),
         invite
             .expires_at
             .map(|time| HumanTime::from(time).to_text_en(Accuracy::Rough, Tense::Future))

@@ -41,8 +41,7 @@ async fn login(
     .await??;
 
     Ok(HttpResponse::Ok()
-        .json(response::Login { auth_token: token })
-        .into())
+        .json(response::Login { auth_token: token }))
 }
 
 async fn register(
@@ -62,7 +61,7 @@ async fn register(
     })
     .await??;
 
-    Ok(HttpResponse::Ok().json(serde_json::json!({})).into())
+    Ok(HttpResponse::Ok().json(serde_json::json!({})))
 }
 
 async fn accept_invite(
@@ -79,7 +78,7 @@ async fn accept_invite(
     })
     .await??;
 
-    Ok(HttpResponse::Ok().json(serde_json::json!({})).into())
+    Ok(HttpResponse::Ok().json(serde_json::json!({})))
 }
 
 async fn invite_info(db_pool: web::Data<PgPool>, invite_id: web::Path<String>) -> EndpointResult {
@@ -98,6 +97,5 @@ async fn invite_info(db_pool: web::Data<PgPool>, invite_id: web::Path<String>) -
             username: invite.username,
             expires_at: invite.expires_at,
             enrollments: invite.enrollments,
-        })
-        .into())
+        }))
 }

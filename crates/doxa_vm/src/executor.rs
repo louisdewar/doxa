@@ -96,7 +96,7 @@ impl VMExecutor {
                     }
                     message = message_reader.read_full_message(&mut executor.stream) => {
                         let message = message.expect("failed to read message");
-                        println!("Got line {}", String::from_utf8_lossy(&message).to_string());
+                        println!("Got line {}", String::from_utf8_lossy(message).to_string());
                         executor.handle_message(message).await.unwrap();
                     }
                 };
@@ -196,7 +196,7 @@ impl VMExecutor {
                 .child_process
                 .kill()
                 .await
-                .map_err(|e| AgentShutdownError::FailedToKillAgent(e))?;
+                .map_err(AgentShutdownError::FailedToKillAgent)?;
         } else if required {
             return Err(AgentShutdownError::AgentNotRunning.into());
         }

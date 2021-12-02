@@ -74,7 +74,7 @@ impl<'a, C: GameClient> GameContext<'a, C> {
             serde_json::to_vec(&game_event).unwrap(),
         )
         .await
-        .map_err(|e| GameContextError::Emit(e))
+        .map_err(GameContextError::Emit)
         .map(|_| ())
     }
 
@@ -213,7 +213,7 @@ impl<'a, C: GameClient> GameContext<'a, C> {
         agent
             .send_agent_input(msg)
             .await
-            .map_err(|e| GameContextError::SendInput(e))?;
+            .map_err(GameContextError::SendInput)?;
 
         Ok(())
     }

@@ -68,13 +68,13 @@ async fn download(
     let file = storage
         .open_file(&competition.name, &agent.id)
         .await
-        .map_err(|e| CouldNotReadFile::from(e))?;
+        .map_err(CouldNotReadFile::from)?;
 
     let named_file = NamedFile::from_file(
         file.into_std().await,
         format!("{}.{}", agent.id, agent.extension),
     )
-    .map_err(|e| CouldNotReadFile::from(e))?;
+    .map_err(CouldNotReadFile::from)?;
 
     Ok(named_file.into_response(&req))
 }
@@ -151,10 +151,10 @@ async fn upload(
     // TODO: In future these kinds of errors should result in the file being cleaned up
     // and the database field updated indicating the error
     while let Some(chunk) = field.next().await {
-        let data = chunk.map_err(|e| UploadMultipartError::from(e))?;
+        let data = chunk.map_err(UploadMultipartError::from)?;
         f.write_all(&data)
             .await
-            .map_err(|e| CouldNotWriteFile::from(e))?;
+            .map_err(CouldNotWriteFile::from)?;
     }
 
     web::block({

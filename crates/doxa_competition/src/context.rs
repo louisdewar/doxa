@@ -311,7 +311,7 @@ impl<C: Competition + ?Sized> Context<C> {
             .await?;
 
         Ok(event
-            .map(|event| event.try_map_payload(|payload| serde_json::from_value(payload)))
+            .map(|event| event.try_map_payload(serde_json::from_value))
             .transpose()
             .map_err(|error| ParseSystemMessageError {
                 event_type: "_START".into(),

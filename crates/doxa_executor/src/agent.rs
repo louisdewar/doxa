@@ -60,7 +60,7 @@ impl VMAgent {
             .get(CONTENT_DISPOSITION)
             .ok_or(AgentError::CouldNotExtractFilename)?;
 
-        let content_disposition = ContentDisposition::from_raw(&content_disposition)
+        let content_disposition = ContentDisposition::from_raw(content_disposition)
             .map_err(|_| AgentError::CouldNotExtractFilename)?;
 
         let agent_name = content_disposition
@@ -142,9 +142,9 @@ impl VMAgent {
             b"F" => {
                 self.finished = true;
                 info!(stderr = %String::from_utf8_lossy(msg), agent_id = %self.id, "agent stderr output");
-                return Ok(AgentEvent::Finished);
+                Ok(AgentEvent::Finished)
             }
-            _ => return Err(NextEventError::UnrecognisedPrefix),
+            _ => Err(NextEventError::UnrecognisedPrefix),
         }
     }
 
@@ -156,8 +156,8 @@ impl VMAgent {
         }
 
         match self.next_event().await? {
-            AgentEvent::Line(msg) => return Ok(msg),
-            AgentEvent::Finished => return Err(NextMessageError::Shutdown(AgentShutdown)),
+            AgentEvent::Line(msg) => Ok(msg),
+            AgentEvent::Finished => Err(NextMessageError::Shutdown(AgentShutdown)),
         }
     }
 
