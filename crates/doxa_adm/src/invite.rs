@@ -21,7 +21,7 @@ pub fn invite_subcommand(matches: &ArgMatches, conn: &PgConnection) {
 }
 
 // TODO: turn these print methods into a trait
-pub fn print_invite_table(invites: &Vec<Invite>) {
+pub fn print_invite_table(invites: &[Invite]) {
     print_invite_table_header();
 
     for invite in invites {
@@ -43,7 +43,7 @@ fn print_invite_row(invite: &Invite) {
         invite
             .expires_at
             .map(|time| HumanTime::from(time).to_text_en(Accuracy::Rough, Tense::Future))
-            .unwrap_or("Never".into()),
+            .unwrap_or_else(|| "Never".into()),
         invite.enrollments
     );
 }

@@ -34,7 +34,7 @@ struct DoxaErrorRaw {
 }
 
 impl DoxaErrorRaw {
-    fn to_doxa_error(self, status_code: StatusCode) -> DoxaError {
+    fn into_doxa_error(self, status_code: StatusCode) -> DoxaError {
         DoxaError {
             error_code: self.error_code,
             message: self.error,
@@ -104,7 +104,7 @@ pub async fn send_request(builder: RequestBuilder) -> Result<Response, RequestEr
                 error_message: String::from_utf8_lossy(&bytes).to_string(),
             }
             .into()),
-            Ok(v) => Err(v.to_doxa_error(status).into()),
+            Ok(v) => Err(v.into_doxa_error(status).into()),
         }
     }
 }

@@ -14,7 +14,8 @@ pub fn init_telemetry() {
     // Spans are exported in batch - recommended setup for a production application.
     global::set_text_map_propagator(TraceContextPropagator::new());
 
-    let jaeger_endpoint = env::var("DOXA_TELEMETRY_ENDPOINT").unwrap_or("localhost:6831".into());
+    let jaeger_endpoint =
+        env::var("DOXA_TELEMETRY_ENDPOINT").unwrap_or_else(|_| "localhost:6831".into());
 
     let tracer = opentelemetry_jaeger::new_pipeline()
         .with_agent_endpoint(jaeger_endpoint)
@@ -24,7 +25,7 @@ pub fn init_telemetry() {
 
     // Filter based on level - trace, debug, info, warn, error
     // Tunable via `RUST_LOG` env variable
-    let env_filter = EnvFilter::try_from_default_env().unwrap_or(EnvFilter::new("info"));
+    let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
     // Create a `tracing` layer using the Jaeger tracer
     let telemetry = tracing_opentelemetry::layer().with_tracer(tracer);
     // Create a `tracing` layer to emit spans as structured logs to stdout

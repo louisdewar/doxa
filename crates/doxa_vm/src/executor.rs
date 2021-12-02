@@ -2,7 +2,7 @@ use std::{
     ffi::OsStr,
     io::{self, ErrorKind},
     os::unix::prelude::OsStrExt,
-    path::PathBuf,
+    path::{Path, PathBuf},
     str::FromStr,
     time::Duration,
 };
@@ -235,7 +235,7 @@ impl VMExecutor {
     /// Then extract the tar file to `{output_dir}/agent` and delete the downloaded tar.
     async fn receive_agent(
         stream: &mut Stream<VsockStream>,
-        output_dir: &PathBuf,
+        output_dir: &Path,
     ) -> Result<(), ReceieveAgentError> {
         // == Name message
         let mut name_msg = Vec::with_capacity(100);

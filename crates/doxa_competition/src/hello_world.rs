@@ -122,7 +122,7 @@ impl GameClient for HelloWorldGameClient {
         let message = context.next_message(0).await?.to_owned();
         let file = context.take_file(0, "/output/test.txt").await?;
 
-        if &message == expected_output && &file == expected_output {
+        if message == expected_output && file == expected_output {
             context
                 .emit_game_event(
                     HelloWorldGameEvent::RespondedSuccessfully {

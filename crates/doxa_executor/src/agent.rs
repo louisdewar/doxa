@@ -120,7 +120,7 @@ impl VMAgent {
 
     /// Retrieves the next event sent by the VMExecutor.
     /// This method is cancel safe.
-    async fn next_event<'a>(&'a mut self) -> Result<AgentEvent<'a>, NextEventError> {
+    async fn next_event(&mut self) -> Result<AgentEvent<'_>, NextEventError> {
         let msg = self
             .message_reader
             .read_full_message(&mut self.vm_manager.stream_mut())
@@ -150,7 +150,7 @@ impl VMAgent {
 
     /// Retrieves the next message (full line) emitted by the agent inside the VM.
     /// This method is cancel safe.
-    pub async fn next_message<'a>(&'a mut self) -> Result<&'a [u8], NextMessageError> {
+    pub async fn next_message(&mut self) -> Result<&[u8], NextMessageError> {
         if self.finished {
             return Err(NextMessageError::Shutdown(AgentShutdown));
         }

@@ -120,7 +120,7 @@ impl<T: AsyncRead + AsyncWrite + Unpin> Stream<T> {
     ///
     /// This method is cancel safe, if this is cancelled then the next call will yield the data
     /// that the cancelled one would have.
-    pub async fn next_part<'a>(&'a mut self) -> Result<MessagePart<'a>, ReadPartError> {
+    pub async fn next_part(&mut self) -> Result<MessagePart<'_>, ReadPartError> {
         loop {
             match self.process_buf_data() {
                 BufData::WaitingForData => {}
@@ -368,7 +368,7 @@ impl<T: AsyncRead + AsyncWrite + Unpin> Stream<T> {
         let mut msg_buf = vec![0; expected_msg.len()];
         self.read_exact(&mut msg_buf).await?;
 
-        if expected_msg != &msg_buf {
+        if expected_msg != msg_buf {
             return Err(ExpectMessageError::IncorrectMessage {
                 received_msg: String::from_utf8_lossy(&msg_buf).to_string(),
                 expected: String::from_utf8_lossy(expected_msg).to_string(),

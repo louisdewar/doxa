@@ -49,7 +49,7 @@ impl FromRequest for AuthGuard<()> {
             })
             .await??;
 
-            if token.generation() != &user.token_generation {
+            if token.generation() != user.token_generation {
                 return Err(IncorrectTokenGeneration.into());
             }
 

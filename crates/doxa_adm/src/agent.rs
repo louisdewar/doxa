@@ -17,7 +17,7 @@ pub fn agent_subcommand(matches: &ArgMatches, conn: &PgConnection) {
     }
 }
 
-fn print_agent_table(agents: &Vec<(AgentUpload, User, Competition)>) {
+fn print_agent_table(agents: &[(AgentUpload, User, Competition)]) {
     print_agent_table_header();
 
     for agent in agents {
@@ -53,6 +53,6 @@ pub fn list_agents(matches: &ArgMatches, conn: &PgConnection) {
         &uploads
             .into_iter()
             .map(|agent| (agent, user.clone(), competition.clone()))
-            .collect(),
+            .collect::<Vec<_>>(),
     );
 }

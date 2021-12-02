@@ -22,7 +22,7 @@ pub fn competition_subcommand(matches: &ArgMatches, conn: &PgConnection) {
     }
 }
 
-fn print_competition_table(competitions: &Vec<Competition>) {
+fn print_competition_table(competitions: &[Competition]) {
     print_competition_table_header();
 
     for competition in competitions {

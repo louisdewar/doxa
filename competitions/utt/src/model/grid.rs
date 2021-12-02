@@ -60,10 +60,7 @@ impl Owner {
 
 impl Winner {
     pub fn stalemate(self) -> bool {
-        match self {
-            Winner::Stalemate => true,
-            _ => false,
-        }
+        matches!(self, Winner::Stalemate)
     }
 
     pub fn to_char(self) -> char {

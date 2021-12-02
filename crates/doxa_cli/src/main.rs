@@ -26,8 +26,8 @@ async fn run() -> Result<(), CliError> {
 
     let profiles = config::load_or_default_profile(&config_dir).await.unwrap();
 
-    let base_url =
-        std::env::var("DOXA_BASE_URL").unwrap_or("https://doxa.uclaisociety.co.uk/".to_string());
+    let base_url = std::env::var("DOXA_BASE_URL")
+        .unwrap_or_else(|_| "https://doxa.uclaisociety.co.uk/".to_string());
 
     let base_url = parse_base_url(&base_url)?;
 
