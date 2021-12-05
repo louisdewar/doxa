@@ -1,11 +1,8 @@
-import api from '../../common/api';
+import CompetitionAPI from 'api/competition';
 
-export default class UTTTAPI extends api.CompetitionAPI {
+export default class UTTTAPI extends CompetitionAPI {
 
-  static AGENT_BASE_URL = this.BASE_URL + 'competition/uttt/_agent/';
-  static GAME_BASE_URL = this.BASE_URL + 'competition/uttt/_game/';
-  static LEADERBOARD_BASE_URL = this.BASE_URL + 'competition/uttt/_leaderboard/';
-  static USER_BASE_URL = this.BASE_URL + 'competition/uttt/_user/';
+  static COMPETITION_ID = 'uttt';
 
   static async getUTTTGameWinners(game) {
     const data = await this.getSingleGameEvent(game, 'game_winners');

@@ -1,15 +1,27 @@
 import { request } from './common';
 
 
-class CompetitionAPI {
+export default class CompetitionAPI {
 
-  // configure in .env, must end with a '/'
-  static BASE_URL = process.env.REACT_APP_API_BASE_URL;
+  // NOTE: REACT_APP_API_BASE_URL must end with a '/' and be properly configured in .env
 
-  static AGENT_BASE_URL = null;
-  static GAME_BASE_URL = null;
-  static LEADERBOARD_BASE_URL = null;
-  static USER_BASE_URL = null;
+  static COMPETITION_ID = null;
+
+  static get AGENT_BASE_URL() {
+    return `${process.env.REACT_APP_API_BASE_URL}competition/${this.COMPETITION_ID}/_agent/`;
+  }
+
+  static get GAME_BASE_URL() {
+    return `${process.env.REACT_APP_API_BASE_URL}competition/${this.COMPETITION_ID}/_game/`;
+  }
+
+  static get LEADERBOARD_BASE_URL() {
+    return `${process.env.REACT_APP_API_BASE_URL}competition/${this.COMPETITION_ID}/_leaderboard/`;
+  }
+
+  static get USER_BASE_URL() {
+    return `${process.env.REACT_APP_API_BASE_URL}competition/${this.COMPETITION_ID}/_user/`;
+  }
 
   /* Agent */
 
@@ -90,5 +102,3 @@ class CompetitionAPI {
   }
 
 }
-
-export default { CompetitionAPI };
