@@ -117,4 +117,16 @@ impl_respondable_error!(
     "INTERNAL_SERVER_ERROR"
 );
 
+impl_respondable_error!(
+    crate::redis::RedisError,
+    INTERNAL_SERVER_ERROR,
+    "INTERNAL_SERVER_ERROR"
+);
+
+impl_respondable_error!(
+    crate::redis::RedisPoolError,
+    INTERNAL_SERVER_ERROR,
+    "INTERNAL_SERVER_ERROR"
+);
+
 impl_respondable_error!(lapin::Error, INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR");

@@ -2,14 +2,17 @@ use std::{env, path::PathBuf, sync::Arc};
 
 use actix_web::{web, App, HttpServer};
 
+use doxa_auth::limiter::GenericLimiter;
 use doxa_competition::{hello_world::HelloWorldCompetiton, CompetitionSystem};
 use doxa_storage::AgentRetrieval;
 use tracing::info;
 use tracing_actix_web::TracingLogger;
 use utt::UTTTCompetition;
+
 mod telemetry;
 
 fn create_competition_system(settings: doxa_competition::Settings) -> CompetitionSystem {
+    // TODO: Maybe if competitions don't exist in the DB they should be auto created?
     let mut system = CompetitionSystem::new(Arc::new(settings));
 
     system.add_competition(HelloWorldCompetiton, 3);
@@ -26,6 +29,7 @@ async fn main() -> std::io::Result<()> {
 
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let mq_url = env::var("MQ_URL").expect("MQ_URL must be set");
+    let redis_url = env::var("REDIS_RATE_LIMITER_URL").expect("REDIS_RATE_LIMITER_URL must be set");
 
     let doxa_storage_path = env::var("DOXA_STORAGE").unwrap_or_else(|_| "dev/doxa_storage".into());
     let jwt_secret = env::var("DOXA_JWT_SECRET")
@@ -35,9 +39,14 @@ async fn main() -> std::io::Result<()> {
 
     info!("JWT Secret length = {}", jwt_secret.len());
 
+    let redis_pool = doxa_core::redis::establish_pool(redis_url, 500).await;
+
+    let generic_limiter = Arc::new(GenericLimiter::new(redis_pool));
+
     let auth_settings = doxa_auth::Settings {
         jwt_secret: doxa_auth::settings::generate_jwt_hmac(&jwt_secret),
         allow_registration: false,
+        generic_limiter,
     };
 
     let storage_settings = doxa_storage::Settings {
@@ -80,6 +89,8 @@ async fn main() -> std::io::Result<()> {
             .service(
                 api_scope.service(
                     // The configure happens before the scope is applied so the scope could be set to anything
+                    // TODO: do some more testing with this, this feels a bit hacky, maybe make a
+                    // function to configure these three routes
                     web::scope("")
                         .configure(doxa_auth::config(auth_settings.clone()))
                         .configure(doxa_storage::config(storage_settings.clone()))

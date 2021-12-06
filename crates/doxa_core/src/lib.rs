@@ -1,4 +1,5 @@
 pub mod error;
+pub mod redis;
 
 pub use doxa_sys::RespondableError;
 pub use error::{EndpointResult, RespondableError};
