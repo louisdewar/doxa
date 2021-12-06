@@ -1,6 +1,9 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, sync::Arc};
 
-#[derive(Clone, Debug)]
+use doxa_auth::limiter::GenericLimiter;
+
+#[derive(Clone)]
 pub struct Settings {
     pub root: PathBuf,
+    pub generic_limiter: Arc<GenericLimiter>,
 }

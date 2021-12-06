@@ -4,7 +4,8 @@ use doxa_db::{action, serde_json, PgPool};
 
 use crate::{
     controller,
-    error::{InviteNotFound, RegistrationDisabled},
+    error::{InviteNotFound, RegistrationDisabled, TooManyLoginAttempts},
+    limits::AuthLimits,
     Settings,
 };
 
@@ -27,9 +28,17 @@ async fn login(
     db_pool: web::Data<PgPool>,
     body: web::Json<request::Login>,
     settings: web::Data<Settings>,
+    limiter: web::Data<AuthLimits>,
 ) -> EndpointResult {
+    let request::Login { username, password } = body.0;
+
+    limiter
+        .login_attempts
+        .get_permit(&username)
+        .await?
+        .map_err(TooManyLoginAttempts::from)?;
+
     let token = web::block(move || {
-        let request::Login { username, password } = body.0;
         // In future this needs to be handled properly, perferably where .get is non-blocking
         // so the error can easily be handled by the macro (right either (1) a wrapper error type will
         // be needed or (2) the error needs to be incorporated into the output of create_user - (2) not

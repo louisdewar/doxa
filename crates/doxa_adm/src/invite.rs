@@ -64,7 +64,7 @@ pub fn create_invite(matches: &ArgMatches, conn: &PgConnection) {
     let enrollments = matches
         .values_of_t::<String>("ENROLLMENTS")
         .unwrap_or_default();
-    dbg!(&enrollments);
+
     let expires_at = matches.value_of("EXPIRES_AT");
 
     let expires_at = expires_at.map(|expires| {

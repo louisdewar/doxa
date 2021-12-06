@@ -71,6 +71,9 @@ subcommands:
                   about: The name of the competition to create
                   required: true
                   index: 1
+              - ENSURE_EXISTS:
+                  long: ensure-exists
+                  about: if set, it is not considered an error if the competition already exists
         - enroll:
             about: Enrolls a user in a competition
             args:

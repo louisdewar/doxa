@@ -9,8 +9,8 @@ use sha2::Sha256;
 use crate::{
     error::{
         AcceptInviteError, CheckEnrollmentError, CompetitionNotFound, CreateUserError,
-        IncorrectPassword, InviteExpired, InviteNotFound, LoginError, RegistrationInviteMismatch,
-        UserAlreadyExists, UserNotEnrolled, UserNotFound,
+        IncorrectPassword, InvalidPassword, InviteExpired, InviteNotFound, LoginError,
+        RegistrationInviteMismatch, UserAlreadyExists, UserNotEnrolled, UserNotFound,
     },
     password,
     token::{generate_jwt, Token},
@@ -52,6 +52,10 @@ pub fn create_user(
     // TODO: do some checking of username, e.g. no spaces, certain length, maybe limit characters
     // to ascii?
 
+    if !password::is_allowed(password) {
+        return Err(InvalidPassword.into());
+    }
+
     let password = password::new_hashed(password);
     let token_generation = new_token_generation();
     let user = model::user::InsertableUser {
@@ -83,6 +87,10 @@ pub fn accept_invite(
     // TODO: do some checking of username, e.g. no spaces, certain length, maybe limit characters
     // to ascii? (same as register)
     // Maybe use create_user internally?
+
+    if !password::is_allowed(password) {
+        return Err(InvalidPassword.into());
+    }
 
     let password = password::new_hashed(password);
     let token_generation = new_token_generation();
@@ -156,6 +164,8 @@ pub fn login(
     username: &str,
     password: &str,
 ) -> Result<String, LoginError> {
+    // TODO: is there an attack where we are given a very long password to hash?
+
     let user = if let Some(user) = action::user::get_user_by_username(conn, username)? {
         user
     } else {
