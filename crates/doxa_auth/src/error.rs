@@ -238,7 +238,7 @@ macro_rules! create_rate_limit_error {
     ($name:ident, $error_message:expr) => {
         #[derive(Debug, derive_more::Display, derive_more::Error, derive_more::From)]
         pub struct $name {
-            source: RateLimitReached,
+            source: $crate::error::RateLimitReached,
         }
 
         impl_respondable_error!($name, TOO_MANY_REQUESTS, "NO_PERMITS", $error_message);

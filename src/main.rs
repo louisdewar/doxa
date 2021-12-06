@@ -46,11 +46,12 @@ async fn main() -> std::io::Result<()> {
     let auth_settings = doxa_auth::Settings {
         jwt_secret: doxa_auth::settings::generate_jwt_hmac(&jwt_secret),
         allow_registration: false,
-        generic_limiter,
+        generic_limiter: generic_limiter.clone(),
     };
 
     let storage_settings = doxa_storage::Settings {
         root: PathBuf::from(doxa_storage_path),
+        generic_limiter: generic_limiter.clone(),
     };
 
     let executor_settings = doxa_executor::Settings {

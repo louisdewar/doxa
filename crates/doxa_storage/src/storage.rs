@@ -4,8 +4,6 @@ use doxa_core::tokio;
 use rand::Rng;
 use tokio::fs::{File, OpenOptions};
 
-use crate::Settings;
-
 /// 8 would mean a u64 equivalent of randomness which should be plenty.
 const FILE_NAME_LENGTH: usize = 10;
 
@@ -14,10 +12,8 @@ pub struct LocalStorage {
 }
 
 impl LocalStorage {
-    pub fn from_settings(settings: &Settings) -> Self {
-        LocalStorage {
-            root: settings.root.clone(),
-        }
+    pub fn new(root: PathBuf) -> Self {
+        LocalStorage { root }
     }
 
     /// Generates a new random name for a file with a fixed constant length of bytes that are then
