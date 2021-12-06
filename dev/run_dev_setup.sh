@@ -22,6 +22,10 @@ function login_user {
   cargo run -q -p doxa_cli -- login "$1" "$2"
 }
 
+function make_admin {
+  cargo run -p doxa_adm -- user admin promote $1
+}
+
 echo 'This script will run the appropriate doxa_adm commands for setting up some example users and
 creating the competitions'
 
@@ -58,3 +62,9 @@ for user in "${users[@]}"; do
   login_user $user password
 done
 
+echo 'Creating admin user (admin1)'
+
+invite=$(create_user_invite admin1)
+register_user admin1 password $invite
+login_user admin1 password
+make_admin admin1
