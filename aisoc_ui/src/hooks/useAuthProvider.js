@@ -15,12 +15,22 @@ export function useAuthProvider() {
     return token;
   });
 
+  const updateAuthToken = token => {
+    if (!token) return;
+
+    setAuthToken(token);
+    sessionStorage.setItem('doxa-auth-token', token);
+  };
+
   return {
     loading,
     user,
-    login(username, password) {
-      setAuthToken(login(username, password));
-      setUser({ ...user, username });
+    isLoggedIn() {
+      return !!authToken;
+    },
+    async login(username, password) {
+      updateAuthToken(await login(username, password));
+      setUser({ username });
     }
   };
 }

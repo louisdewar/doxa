@@ -22,12 +22,18 @@ async function requestGet({ url, params = {}, authToken = null }) {
 }
 
 async function requestPost({ url, params = {}, authToken = null }) {
+  const headers = {
+    'Content-Type': 'application/json'
+  };
+
+  if (authToken) {
+    headers['Authorization'] = `Bearer ${authToken}`;
+  }
+
   return await fetch(url, {
     method: 'POST',
     body: JSON.stringify(params),
-    headers: authToken ? {
-      'Authorization': 'Bearer ' + authToken
-    } : undefined,
+    headers: headers,
   });
 }
 

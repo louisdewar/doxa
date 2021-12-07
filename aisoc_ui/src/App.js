@@ -1,4 +1,6 @@
 import { AuthProvider, useAuth } from 'hooks/useAuth';
+import Account from 'pages/Account';
+import Login from 'pages/Login';
 import { lazy, Suspense } from 'react';
 import {
   BrowserRouter as Router, Redirect, Route, Switch
@@ -33,6 +35,10 @@ function Routes() {
   return (process.env.REACT_APP_MULTIPLE_COMPETITIONS != 'false') ? (
     <Router>
       <Switch>
+        <Route path='/login'>
+          {auth.isLoggedIn() ? <Redirect to='/' /> : <Login />}
+        </Route>
+
         {Object.keys(COMPETITIONS).map(competition => (
           <Route path={`/c/${competition}/`} key={competition} component={COMPETITIONS[competition]} />
         ))}
