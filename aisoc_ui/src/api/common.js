@@ -8,15 +8,12 @@ class DoxaError extends Error {
 }
 
 async function requestGet({ url, params = {}, authToken = null }) {
-  let searchParams = new URLSearchParams();
-
-  for (let key of Object.keys(params)) {
-    searchParams.append(key, params[key]);
+  const searchParams = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    searchParams.append(key, value);
   }
 
-  const searchParamsString = searchParams.toString();
-
-  return await fetch(url + (searchParamsString ? ('?' + searchParamsString) : ''), {
+  return await fetch(`${url}?${searchParams}`, {
     method: 'GET',
     headers: authToken ? {
       'Authorization': 'Bearer ' + authToken
@@ -33,7 +30,6 @@ async function requestPost({ url, params = {}, authToken = null }) {
     } : undefined,
   });
 }
-
 
 export async function request({ url, params = {}, authToken = null, method = 'GET' }) {
   let response;

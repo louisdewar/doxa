@@ -1,6 +1,8 @@
 // import Landing from 'pages/Landing.js';
 import ClimateHack from 'competitions/climatehack/ClimateHack';
 import Uttt from 'competitions/uttt/Uttt';
+import { AuthProvider, useAuth } from 'hooks/useAuth';
+import { Suspense } from 'react';
 import {
   BrowserRouter as Router, Redirect, Route, Switch
 } from 'react-router-dom';
@@ -15,7 +17,22 @@ const COMPETITIONS = {
 const DEFAULT_COMPETITION = process.env.REACT_APP_DEFAULT_COMPETITION ?? 'uttt';
 
 
-export default function App() {
+/**
+ * This component only shows momentarily while the rest
+ * of the UI is loading or the login status of the user
+ * is in the process of being determined.
+ */
+function Loading() {
+  return <span>Loading...</span>;
+}
+
+
+function Routes() {
+  const auth = useAuth();
+  if (auth.loading) {
+    return <Loading />;
+  }
+
   return (process.env.REACT_APP_MULTIPLE_COMPETITIONS != 'false') ? (
     <Router>
       <Switch>
@@ -36,4 +53,12 @@ export default function App() {
       </Switch>
     </Router>
   );
+}
+
+export default function App() {
+  return <AuthProvider>
+    <Suspense fallback={Loading()}>
+      <Routes />
+    </Suspense>
+  </AuthProvider>;
 }
