@@ -38,6 +38,9 @@ function Routes() {
         <Route path='/login'>
           {auth.isLoggedIn() ? <Redirect to='/' /> : <Login />}
         </Route>
+        <Route path='/account'>
+          {auth.isLoggedIn() ? <Account /> : <Redirect to='/login' />}
+        </Route>
 
         {Object.keys(COMPETITIONS).map(competition => (
           <Route path={`/c/${competition}/`} key={competition} component={COMPETITIONS[competition]} />
