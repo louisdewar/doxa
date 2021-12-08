@@ -1,4 +1,4 @@
-use doxa_auth::error::CompetitionNotFound;
+use doxa_auth::{create_rate_limit_error, error::CompetitionNotFound};
 use doxa_core::{impl_respondable_error, RespondableError};
 
 // #[derive(RespondableError)]
@@ -130,3 +130,5 @@ pub enum AgentDownloadError {
     #[from]
     AgentNotFound(AgentNotFound),
 }
+
+create_rate_limit_error!(TooManyUploadAttempts, "There have been too many agent upload attempts by your account to this competition, please wait and try again later");

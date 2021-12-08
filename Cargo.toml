@@ -10,6 +10,7 @@ doxa_competition = { path = "crates/doxa_competition" }
 doxa_db = { path = "crates/doxa_db" }
 doxa_mq = { path = "crates/doxa_mq" }
 doxa_executor = { path = "crates/doxa_executor" }
+doxa_core = { path = "crates/doxa_core" }
 
 utt = { path = "competitions/utt" }
 

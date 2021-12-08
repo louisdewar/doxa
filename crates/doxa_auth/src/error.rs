@@ -1,4 +1,8 @@
-use doxa_core::{impl_respondable_error, RespondableError};
+use doxa_core::{
+    impl_respondable_error,
+    redis::{RedisError, RedisPoolError},
+    RespondableError,
+};
 
 use derive_more::{Display, Error, From};
 use doxa_db::DieselError;
@@ -113,12 +117,26 @@ impl_respondable_error!(
     "The fields in the registration does not match those specified as part of the invite"
 );
 
+// TODO: in future this will be an enum as `is_allowed` will do some more advanced checking and
+// return this error.
+#[derive(Debug, Display, Error)]
+pub struct InvalidPassword;
+
+impl_respondable_error!(
+    InvalidPassword,
+    BAD_REQUEST,
+    "INVALID_PASSWORD",
+    "Your password failed to meet the length requirements (not too long and not too short)"
+);
+
 #[derive(Debug, Display, Error, RespondableError, From)]
 pub enum CreateUserError {
     #[from]
     Diesel(DieselError),
     #[from]
     AlreadyExists(UserAlreadyExists),
+    #[from]
+    InvalidPassword(InvalidPassword),
 }
 
 #[derive(Debug, Display, Error, RespondableError, From)]
@@ -133,6 +151,8 @@ pub enum AcceptInviteError {
     Diesel(DieselError),
     #[from]
     AlreadyExists(UserAlreadyExists),
+    #[from]
+    InvalidPassword(InvalidPassword),
 }
 
 #[derive(Debug, Display, Error)]
@@ -194,3 +214,35 @@ pub enum CheckEnrollmentError {
     #[from]
     CompetitionNotFound(CompetitionNotFound),
 }
+
+#[derive(Debug, Display, Error)]
+pub struct RateLimitReached {
+    /// Time until the next permit is available.
+    pub ttl: u64,
+}
+
+#[derive(Debug, Display, Error, RespondableError, From)]
+pub enum GetLimiterPermitError {
+    Redis(RedisError),
+    RedisPool(RedisPoolError),
+}
+
+// TODO: find a way to include the ttl in the error message (some kind of formatting with automatic
+// conversion to a human readable time period), also find a way to include in the HTTP response
+// header (this would allow some more interesting UI stuff probably).
+//
+// Maybe create some optional functions of `impl_respondable_error`, doesn't need to be generic
+// i.e. get_rate_limit_ttl(), or it could be generic e.g. append_http_headers(&mut headers)
+#[macro_export]
+macro_rules! create_rate_limit_error {
+    ($name:ident, $error_message:expr) => {
+        #[derive(Debug, derive_more::Display, derive_more::Error, derive_more::From)]
+        pub struct $name {
+            source: $crate::error::RateLimitReached,
+        }
+
+        impl_respondable_error!($name, TOO_MANY_REQUESTS, "NO_PERMITS", $error_message);
+    };
+}
+
+create_rate_limit_error!(TooManyLoginAttempts, "There have been too many login attempts to your account please wait a while and then try again");

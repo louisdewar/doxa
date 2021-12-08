@@ -14,6 +14,8 @@ lapin = { version = "1.7.1", features = ["rustls"] }
 tracing = "0.1.26"
 tracing-futures = "0.2.5"
 chrono = { version = "0.4.19", features = ["serde"] }
+deadpool-redis = "0.10.1"
+redis = { version = "0.21.4", features = ["tokio-comp"] }
 
 [features]
 default = ["lapin/rustls"]
