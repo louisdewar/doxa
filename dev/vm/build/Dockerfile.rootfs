@@ -1,0 +1,38 @@
+# The VM runs alpine so it's a good idea to use that as the rust base image
+FROM rust:1-alpine as vm_executor
+
+WORKDIR /app
+
+COPY ./crates crates
+COPY ./Cargo.lock .
+# Copy slim Cargo.toml
+COPY ./dev/vm/build/Cargo.toml .
+
+RUN apk add --no-cache musl-dev
+# The target should already be x86_64-unknown-linux-musl but we confirm here
+RUN cargo build -p doxa_vm --bin vm_executor --release --locked --workspace --target x86_64-unknown-linux-musl
+
+RUN cp /app/target/x86_64-unknown-linux-musl/release/vm_executor /
+
+FROM alpine:3 AS rootfs
+
+
+RUN apk add --no-cache e2fsprogs
+
+COPY ./dev/vm/build /app
+COPY --from=vm_executor /vm_executor /app/vm_executor
+
+
+WORKDIR /app
+
+# For some reason the alpine-make-rootfs looks for /etc/alpine-release on the host and tries to install extra packages which causes it to crash
+# This just makes it so that the check fails
+RUN rm /etc/alpine-release
+
+RUN wget https://raw.githubusercontent.com/alpinelinux/alpine-make-rootfs/v0.6.0/alpine-make-rootfs \
+    && echo 'c9cfea712709df162f4dcf26e2b1422aadabad43  alpine-make-rootfs' | sha1sum -c \
+    || exit 1
+RUN chmod +x alpine-make-rootfs
+
+# This requires privileged mode which can't be done at build time.
+CMD ["sh", "/app/make_image.sh"]

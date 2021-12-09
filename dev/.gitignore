@@ -1,2 +1,3 @@
-rootfs
+vm/rootfs
+vm/rootfs.img
 doxa_storage

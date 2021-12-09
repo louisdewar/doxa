@@ -325,6 +325,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "aisoc_server"
+version = "0.1.0"
+dependencies = [
+ "actix-web",
+ "doxa_server",
+ "uttt",
+]
+
+[[package]]
 name = "amq-protocol"
 version = "6.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -940,31 +949,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "77c90badedccf4105eca100756a0b1289e191f6fcbdadd3cee1d2f614f97da8f"
 
 [[package]]
-name = "doxa"
-version = "0.1.0"
-dependencies = [
- "actix-web",
- "bytes 1.1.0",
- "dotenv",
- "doxa_auth",
- "doxa_competition",
- "doxa_core",
- "doxa_db",
- "doxa_executor",
- "doxa_mq",
- "doxa_storage",
- "humantime",
- "opentelemetry",
- "opentelemetry-jaeger",
- "tracing",
- "tracing-actix-web",
- "tracing-bunyan-formatter",
- "tracing-opentelemetry",
- "tracing-subscriber",
- "utt",
-]
-
-[[package]]
 name = "doxa_adm"
 version = "0.1.0"
 dependencies = [
@@ -1105,6 +1089,27 @@ dependencies = [
  "doxa_db",
  "serde",
  "tokio-amqp",
+]
+
+[[package]]
+name = "doxa_server"
+version = "0.1.0"
+dependencies = [
+ "dotenv",
+ "doxa_auth",
+ "doxa_competition",
+ "doxa_core",
+ "doxa_db",
+ "doxa_executor",
+ "doxa_mq",
+ "doxa_storage",
+ "opentelemetry",
+ "opentelemetry-jaeger",
+ "tracing",
+ "tracing-actix-web",
+ "tracing-bunyan-formatter",
+ "tracing-opentelemetry",
+ "tracing-subscriber",
 ]
 
 [[package]]
@@ -1466,12 +1471,6 @@ name = "httpdate"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6456b8a6c8f33fee7d958fcd1b60d55b11940a79e63ae87013e6d22e26034440"
-
-[[package]]
-name = "humantime"
-version = "2.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9a3a5bfb195931eeb336b2a7b4d761daec841b97f947d34394601737a7bba5e4"
 
 [[package]]
 name = "hyper"
@@ -3300,7 +3299,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "utt"
+name = "uttt"
 version = "0.1.0"
 dependencies = [
  "derive_more",
