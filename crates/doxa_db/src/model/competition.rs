@@ -1,6 +1,6 @@
 use crate::schema::{competitions, enrollment};
 
-use diesel::{Insertable, Queryable};
+use diesel::{AsChangeset, Insertable, Queryable};
 
 #[derive(Debug, Clone, Queryable)]
 pub struct Competition {
@@ -8,7 +8,7 @@ pub struct Competition {
     pub name: String,
 }
 
-#[derive(Debug, Clone, Insertable)]
+#[derive(Debug, Clone, Insertable, AsChangeset)]
 #[table_name = "competitions"]
 pub struct InsertableCompetition {
     pub name: String,

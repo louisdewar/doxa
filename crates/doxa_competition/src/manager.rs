@@ -3,6 +3,7 @@
 use std::sync::Arc;
 
 use doxa_core::tokio::{self, join};
+use doxa_db::model::competition::InsertableCompetition;
 
 use crate::{
     client::{Competition, Context},
@@ -43,10 +44,12 @@ impl<T: Competition> CompetitionManager<T> {
         .await??;
 
         let competition = tokio::task::spawn_blocking(move || {
-            doxa_db::action::competition::get_competition_by_name(&db, T::COMPETITION_NAME)
+            let competition = InsertableCompetition {
+                name: T::COMPETITION_NAME.to_string(),
+            };
+            doxa_db::action::competition::get_or_create_competition(&db, competition)
         })
-        .await??
-        .ok_or(CompetitionManagerError::CompetitionNotFound)?;
+        .await??;
 
         let context = Arc::new(Context::<T>::new(
             manager.settings.mq_pool.clone(),

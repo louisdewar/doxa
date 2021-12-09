@@ -30,8 +30,6 @@ pub enum ContextError {
 #[derive(From, Error, Display, Debug)]
 /// Errors that occur from the competition managers
 pub enum CompetitionManagerError {
-    #[display(fmt = "this competition has not been registered in the database")]
-    CompetitionNotFound,
     #[from]
     DatabaseConnection(r2d2::PoolError),
     #[from]

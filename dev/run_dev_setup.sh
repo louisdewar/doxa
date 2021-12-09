@@ -8,10 +8,6 @@ export DOXA_BASE_URL=http://localhost:3001
 cd "$(dirname "$0")"
 cd ..
 
-function create_competition {
-  cargo run -q -p doxa_adm -- competition create "$1" --ensure-exists
-}
-
 function create_user_invite {
   cargo run -q -p doxa_adm -- invite create -u "$1" --enroll "uttt" --enroll "helloworld"  | tail -n1 | awk '{print $1}'
 }
@@ -29,22 +25,20 @@ function make_admin {
 }
 
 echo 'This script will run the appropriate doxa_adm commands for setting up some example users and
-creating the competitions'
+logging them in'
 
-echo 'The docker compose dev environment should be running, but the server **should not** be
-running'
+echo 'Make sure that both docker-compose dev enviornment is running and the test server'
+echo 'To do this run the following commands in the root directory:'
+echo '1. docker-compose docker-compose -f dev/docker-compose.yml up -d'
+echo '2. cargo run -p test_servers --bin simple'
+echo '(step 2 will stay open while the server is running so you will need to run this script in a
+different terminal'
 
 echo 'press [enter] to continue or [ctrl-c] to exit'
 read -r
 
 cargo build -p doxa_adm
 cargo build -p doxa_cli
-
-create_competition uttt
-create_competition helloworld
-
-echo 'please start the main server (press [enter] once done & server routes have been setup)'
-read -r
 
 declare -A invites
 users=("user1" "user2" "user3" "user4")
@@ -70,3 +64,5 @@ invite=$(create_user_invite admin1)
 register_user admin1 password "$invite"
 login_user admin1 password
 make_admin admin1
+
+echo 'Done'
