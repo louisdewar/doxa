@@ -25,4 +25,4 @@
 # tracing-bunyan-formatter = "0.1.6"
 
 [workspace]
-members = ["crates/*", "competitions/*", "aisoc/server"]
+members = ["crates/*", "competitions/*", "aisoc/server", "tests/servers"]
