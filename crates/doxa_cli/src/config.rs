@@ -63,6 +63,10 @@ impl ProfileConfig {
             auth_token,
         });
     }
+
+    pub fn set_default_profile(&mut self, user: String) {
+        self.default = Some(user);
+    }
 }
 
 pub async fn load_or_default_profile(config_dir: &Path) -> io::Result<ProfileConfig> {

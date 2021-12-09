@@ -1,12 +1,38 @@
-use clap::ArgMatches;
+use clap::{AppSettings, Parser, Subcommand};
 
+use dialoguer::{theme::ColorfulTheme, Input, Password};
 use serde::{Deserialize, Serialize};
 
 use crate::{
     config::{load_or_default_profile, save_profile},
     error::CommandError,
     request::{post, send_request, send_request_and_parse, Settings},
+    ui,
 };
+
+#[derive(Subcommand)]
+pub enum AuthCommands {
+    /// Logs in a user and sets the user profile
+    Login(LoginArgs),
+    /// Registers a new user (optionally with an invite code)
+    Register(RegisterArgs),
+}
+
+#[derive(Parser)]
+pub struct LoginArgs {
+    username: Option<String>,
+    password: Option<String>,
+}
+
+#[derive(Parser)]
+pub struct RegisterArgs {
+    #[clap(required = false)]
+    username: Option<String>,
+    #[clap(required = false)]
+    password: Option<String>,
+    #[clap(short, long)]
+    invite: Option<String>,
+}
 
 #[derive(Serialize)]
 struct LoginRequest {
@@ -19,33 +45,68 @@ struct LoginResponse {
     auth_token: String,
 }
 
-pub async fn login(matches: &ArgMatches, settings: &Settings) -> Result<(), CommandError> {
+pub async fn handle_subcommand(
+    command: AuthCommands,
+    settings: &Settings,
+) -> Result<(), CommandError> {
+    match command {
+        AuthCommands::Login(args) => login(args, settings).await,
+        AuthCommands::Register(args) => register(args, settings).await,
+    }
+}
+
+pub async fn login(args: LoginArgs, settings: &Settings) -> Result<(), CommandError> {
     let builder = post(settings, "auth/login", true);
 
-    let username: String = matches.value_of("USERNAME").unwrap().into();
-    let password = matches.value_of("PASSWORD").unwrap().into();
+    let username = args.username.unwrap_or_else(|| {
+        Input::with_theme(&ColorfulTheme::default())
+            .with_prompt("Username")
+            .interact_text()
+            .unwrap()
+    });
+    let password = args.password.unwrap_or_else(|| {
+        Password::with_theme(&ColorfulTheme::default())
+            .with_prompt("Password (hidden)")
+            .interact()
+            .unwrap()
+    });
 
     let builder = builder.json(&LoginRequest {
         username: username.clone(),
         password,
     });
 
+    let total_steps = 3;
+
+    ui::step(
+        1,
+        total_steps,
+        format!("Logging in {}", ui::keyword(&username)),
+    );
     let response: LoginResponse = send_request_and_parse(builder).await?;
 
+    ui::step(
+        2,
+        total_steps,
+        format!("Making {} the default user", ui::keyword(&username)),
+    );
     let mut profiles = load_or_default_profile(&settings.config_dir).await?;
     profiles.upsert_profile(username.clone(), response.auth_token);
+    profiles.set_default_profile(username.clone());
+
+    ui::step(3, total_steps, "Saving the profile");
 
     save_profile(&settings.config_dir, profiles).await?;
-    println!("Successfully logged in `{}`", username);
 
+    ui::success("Done");
     Ok(())
 }
 
-pub async fn register(matches: &ArgMatches, settings: &Settings) -> Result<(), CommandError> {
-    let username: String = matches.value_of("USERNAME").unwrap().into();
-    let password = matches.value_of("PASSWORD").unwrap().into();
+pub async fn register(args: RegisterArgs, settings: &Settings) -> Result<(), CommandError> {
+    let username: String = args.username.unwrap();
+    let password = args.password.unwrap();
 
-    let invite_code = matches.value_of("INVITE").map(|s| s.to_string());
+    let invite_code = args.invite;
 
     let builder = post(
         settings,

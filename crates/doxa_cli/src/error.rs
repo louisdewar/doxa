@@ -13,7 +13,7 @@ pub enum CommandError {
     Request(RequestError),
     #[display(fmt = "io error: {}", _0)]
     IO(std::io::Error),
-    #[display(fmt = "upload error: {}", _0)]
+    #[display(fmt = "{}", _0)]
     Upload(UploadError),
 }
 

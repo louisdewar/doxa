@@ -1,6 +1,5 @@
 use std::{io::Write, path::PathBuf};
 
-use clap::ArgMatches;
 use flate2::{write::GzEncoder, Compression};
 use reqwest::multipart::{Form, Part};
 
@@ -9,7 +8,24 @@ use serde::Deserialize;
 use crate::{
     error::{CommandError, UploadError},
     request::{post, send_request_and_parse, Settings},
+    ui,
 };
+
+use clap::{Parser, Subcommand};
+
+#[derive(Subcommand)]
+pub enum AgentCommands {
+    /// Logs in a user and sets the user profile
+    Upload(UploadArgs),
+}
+
+#[derive(Parser)]
+pub struct UploadArgs {
+    /// The name of the competition to upload the agent to.
+    competition: String,
+    /// The path to the directory of the agent or a tar file (ending with `.tar` or `.tar.gz`) to upload
+    agent_path: PathBuf,
+}
 
 #[derive(Deserialize)]
 struct UploadResponse {
@@ -17,26 +33,26 @@ struct UploadResponse {
     id: String,
 }
 
-pub async fn subcommand(matches: &ArgMatches, settings: &Settings) -> Result<(), CommandError> {
-    let subcommand = matches.subcommand().expect("missing agent subcommand");
-    let competition_name: String = matches.value_of("COMPETITION_NAME").unwrap().into();
-    match subcommand.0 {
-        "upload" => upload(subcommand.1, settings, competition_name).await,
-        _ => panic!("unrecognised subcommand"),
+pub async fn handle_subcommand(
+    command: AgentCommands,
+    settings: &Settings,
+) -> Result<(), CommandError> {
+    match command {
+        AgentCommands::Upload(args) => upload(args, settings).await,
     }
 }
 
-pub async fn upload(
-    matches: &ArgMatches,
-    settings: &Settings,
-    competition_name: String,
-) -> Result<(), CommandError> {
-    let agent_path = PathBuf::from(matches.value_of("PATH").unwrap());
+pub async fn upload(args: UploadArgs, settings: &Settings) -> Result<(), CommandError> {
+    let competition_name = args.competition;
+    let agent_path = args.agent_path;
     let meta = tokio::fs::metadata(&agent_path)
         .await
         .map_err(UploadError::ReadAgentError)?;
 
     let agent_file_name = agent_path.file_name().unwrap().to_str().unwrap().to_owned();
+
+    let total_steps = 4;
+    ui::step(1, total_steps, "Finding the agent");
 
     let (file_name, data) = if meta.is_dir() {
         tokio::fs::metadata(agent_path.join("doxa.yaml"))
@@ -44,7 +60,7 @@ pub async fn upload(
             .map_err(|_| UploadError::MissingExecutionConfig)?;
         let agent_path = agent_path.clone();
 
-        println!("Creating tar archive of agent");
+        ui::step(2, total_steps, "Creating a tar archive of the agent");
         let data = tokio::task::spawn_blocking(move || {
             let mut tar = tar::Builder::new(Vec::new());
             tar.append_dir_all(".", agent_path)?;
@@ -58,7 +74,6 @@ pub async fn upload(
         .await
         .unwrap()
         .map_err(UploadError::ReadAgentError)?;
-        println!("Finished creating tar archive of agent");
 
         (format!("{}.tar.gz", agent_file_name), data)
     } else {
@@ -66,11 +81,13 @@ pub async fn upload(
             return Err(UploadError::IncorrectExtension.into());
         }
 
+        ui::step(2, total_steps, "Reading agent tar file");
         (agent_file_name, tokio::fs::read(agent_path.clone()).await?)
     };
 
     let form = Form::new().part("file", Part::bytes(data).file_name(file_name));
 
+    ui::step(3, total_steps, "Uploading agent");
     let builder = post(
         settings,
         &format!("storage/upload/{}", competition_name),
@@ -80,9 +97,14 @@ pub async fn upload(
 
     let response: UploadResponse = send_request_and_parse(builder).await?;
 
-    println!(
-        "Successfully uploaded agent to competition `{}`, it was given the id `{}`",
-        response.competition, response.id
+    ui::step(
+        4,
+        total_steps,
+        format!(
+            "Successfully uploaded agent to competition {}, it was given the id {}",
+            ui::keyword(response.competition),
+            ui::keyword(response.id)
+        ),
     );
 
     Ok(())
