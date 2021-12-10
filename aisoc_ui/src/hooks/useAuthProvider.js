@@ -16,7 +16,11 @@ export function useAuthProvider() {
   });
 
   const updateAuthToken = token => {
-    if (!token) return;
+    if (!token) {
+      setAuthToken(null);
+      sessionStorage.removeItem('doxa-auth-token');
+      return;
+    }
 
     setAuthToken(token);
     sessionStorage.setItem('doxa-auth-token', token);
@@ -31,6 +35,10 @@ export function useAuthProvider() {
     async login(username, password) {
       updateAuthToken(await login(username, password));
       setUser({ username });
+    },
+    logout() {
+      updateAuthToken(null);
+      setUser(null);
     }
   };
 }

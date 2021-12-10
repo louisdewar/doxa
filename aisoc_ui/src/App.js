@@ -1,6 +1,7 @@
 import { AuthProvider, useAuth } from 'hooks/useAuth';
 import Account from 'pages/Account';
 import Login from 'pages/Login';
+import Logout from 'pages/Logout';
 import { lazy, Suspense } from 'react';
 import {
   BrowserRouter as Router, Redirect, Route, Switch
@@ -32,33 +33,28 @@ function Routes() {
     return <Loading />;
   }
 
-  return (process.env.REACT_APP_MULTIPLE_COMPETITIONS != 'false') ? (
-    <Router>
-      <Switch>
-        <Route path='/login'>
-          {auth.isLoggedIn() ? <Redirect to='/' /> : <Login />}
-        </Route>
-        <Route path='/account'>
-          {auth.isLoggedIn() ? <Account /> : <Redirect to='/login' />}
-        </Route>
+  const multipleCompetitionsAllowed = process.env.REACT_APP_MULTIPLE_COMPETITIONS != 'false';
+  return <Router>
+    <Switch>
+      <Route path='/login'>
+        {auth.isLoggedIn() ? <Redirect to='/' /> : <Login />}
+      </Route>
+      <Route path='/account'>
+        {auth.isLoggedIn() ? <Account /> : <Redirect to='/login' />}
+      </Route>
+      <Route path='/logout'>
+        <Logout />
+      </Route>
 
-        {Object.keys(COMPETITIONS).map(competition => (
-          <Route path={`/c/${competition}/`} key={competition} component={COMPETITIONS[competition]} />
-        ))}
-        <Route path="/">
-          <Redirect to={`/c/${DEFAULT_COMPETITION}/`} />
-        </Route>
-      </Switch>
-    </Router>
-  ) : (
-    <Router>
-      <Switch>
-        <Route path="/">
-          {(Competition => <Competition />)(COMPETITIONS[DEFAULT_COMPETITION])}
-        </Route>
-      </Switch>
-    </Router>
-  );
+      {multipleCompetitionsAllowed && Object.keys(COMPETITIONS).map(competition => (
+        <Route path={`/c/${competition}/`} key={competition} component={COMPETITIONS[competition]} />
+      ))}
+      <Route path="/">
+        {multipleCompetitionsAllowed ? <Redirect to={`/c/${DEFAULT_COMPETITION}/`} />
+          : (Competition => <Competition />)(COMPETITIONS[DEFAULT_COMPETITION])}
+      </Route>
+    </Switch>
+  </Router>;
 }
 
 export default function App() {
