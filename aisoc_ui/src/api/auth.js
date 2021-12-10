@@ -9,3 +9,22 @@ export async function login(username, password) {
 
   return response.auth_token;
 }
+
+export async function getInviteInfo(id) {
+  const response = await request({
+    url: `${process.env.REACT_APP_API_BASE_URL}auth/invite/info/${id}`,
+    method: 'GET'
+  });
+
+  return response;
+}
+
+export async function acceptInvite(id, username, password) {
+  const response = await request({
+    url: `${process.env.REACT_APP_API_BASE_URL}auth/invite/accept/${id}`,
+    method: 'POST',
+    params: { username, password }
+  });
+
+  return response;
+}

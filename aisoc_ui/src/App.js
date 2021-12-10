@@ -1,5 +1,6 @@
 import { AuthProvider, useAuth } from 'hooks/useAuth';
 import Account from 'pages/Account';
+import Invite from 'pages/Invite';
 import Login from 'pages/Login';
 import Logout from 'pages/Logout';
 import { lazy, Suspense } from 'react';
@@ -39,11 +40,14 @@ function Routes() {
       <Route path='/login'>
         {auth.isLoggedIn() ? <Redirect to='/' /> : <Login />}
       </Route>
+      <Route path='/logout'>
+        <Logout />
+      </Route>
       <Route path='/account'>
         {auth.isLoggedIn() ? <Account /> : <Redirect to='/login' />}
       </Route>
-      <Route path='/logout'>
-        <Logout />
+      <Route path='/invite/:id'>
+        <Invite />
       </Route>
 
       {multipleCompetitionsAllowed && Object.keys(COMPETITIONS).map(competition => (

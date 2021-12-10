@@ -1,4 +1,4 @@
-import { login } from 'api/auth';
+import { acceptInvite, getInviteInfo, login } from 'api/auth';
 import { useState } from 'react';
 
 
@@ -39,6 +39,9 @@ export function useAuthProvider() {
     logout() {
       updateAuthToken(null);
       setUser(null);
+    },
+    async acceptInvite(id, username, password) {
+      return await acceptInvite(id, username, password);
     }
   };
 }

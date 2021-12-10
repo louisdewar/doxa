@@ -1,5 +1,5 @@
 
-class DoxaError extends Error {
+export class DoxaError extends Error {
   constructor(error_code, error_message) {
     super(`DOXA ERROR: code=${error_code}, message=${error_message}`);
     this.error_code = error_code;
