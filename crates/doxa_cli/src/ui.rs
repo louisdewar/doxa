@@ -12,12 +12,12 @@ pub fn error<S: Display>(msg: S) {
     println!("{} {}", style("ERROR:").red().bold(), style(msg).red());
 }
 
-pub fn step<A: Display, B: Display, C: Display>(current: A, total: B, msg: C) {
-    println!(
-        "{} {}",
-        style(format!("[{}/{}]", current, total)).bold().dim(),
-        msg
-    );
+pub fn print_step<A: Display, B: Display, C: Display>(current: A, total: B, msg: C) {
+    println!("{} {}", step(current, total), msg);
+}
+
+pub fn step<A: Display, B: Display>(current: A, total: B) -> String {
+    format!("{}", style(format!("[{}/{}]", current, total)).bold().dim())
 }
 
 pub fn keyword<K: Display>(keyword: K) -> String {

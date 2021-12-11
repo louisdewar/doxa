@@ -1,4 +1,4 @@
-use clap::{AppSettings, Parser, Subcommand};
+use clap::{Parser, Subcommand};
 
 use dialoguer::{theme::ColorfulTheme, Input, Password};
 use serde::{Deserialize, Serialize};
@@ -78,14 +78,14 @@ pub async fn login(args: LoginArgs, settings: &Settings) -> Result<(), CommandEr
 
     let total_steps = 3;
 
-    ui::step(
+    ui::print_step(
         1,
         total_steps,
         format!("Logging in {}", ui::keyword(&username)),
     );
     let response: LoginResponse = send_request_and_parse(builder).await?;
 
-    ui::step(
+    ui::print_step(
         2,
         total_steps,
         format!("Making {} the default user", ui::keyword(&username)),
@@ -94,7 +94,7 @@ pub async fn login(args: LoginArgs, settings: &Settings) -> Result<(), CommandEr
     profiles.upsert_profile(username.clone(), response.auth_token);
     profiles.set_default_profile(username.clone());
 
-    ui::step(3, total_steps, "Saving the profile");
+    ui::print_step(3, total_steps, "Saving the profile");
 
     save_profile(&settings.config_dir, profiles).await?;
 
