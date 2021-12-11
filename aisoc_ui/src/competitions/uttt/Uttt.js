@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import Live from './pages/Live';
 import Match from './pages/Match';
 import User from './pages/User';
+import './Uttt.scss';
 
 
 export default function Uttt() {

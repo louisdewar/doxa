@@ -40,6 +40,9 @@ export function useAuthProvider() {
       updateAuthToken(null);
       setUser(null);
     },
+    async getInviteInfo(id) {
+      return await getInviteInfo(id);
+    },
     async acceptInvite(id, username, password) {
       return await acceptInvite(id, username, password);
     }
