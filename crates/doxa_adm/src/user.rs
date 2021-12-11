@@ -82,7 +82,7 @@ pub fn list_admins(conn: &PgConnection) {
 }
 
 pub fn set_admin_status(username: String, conn: &PgConnection, admin_status: bool) {
-    let user = action::user::set_admin_status(conn, username.to_string(), admin_status).unwrap();
+    let user = action::user::set_admin_status(conn, username, admin_status).unwrap();
 
     print_single_user(&user);
 }
