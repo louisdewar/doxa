@@ -1,5 +1,5 @@
 import Leaderboard from 'competitions/uttt/components/Leaderboard';
-import Navbar from 'components/NavBar.js';
+import Navbar from 'competitions/uttt/components/NavBar.js';
 import './Home.scss';
 
 

@@ -1,4 +1,4 @@
-import Navbar from 'components/NavBar';
+import Navbar from 'competitions/uttt/components/NavBar';
 
 export default function Layout({ children, competitionBaseUrl }) {
   return <>

@@ -1,5 +1,5 @@
 import Matches from 'competitions/uttt/components/Matches.js';
-import Navbar from 'components/NavBar.js';
+import Navbar from 'competitions/uttt/components/NavBar.js';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import UTTTAPI from '../api';

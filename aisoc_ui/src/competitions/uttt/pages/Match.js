@@ -1,5 +1,5 @@
 import Games from 'competitions/uttt/components/Games.js';
-import Navbar from 'components/NavBar.js';
+import Navbar from 'competitions/uttt/components/NavBar.js';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import { Link } from 'react-router-dom';
