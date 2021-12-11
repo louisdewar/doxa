@@ -68,7 +68,7 @@ pub async fn upload(args: UploadArgs, settings: &Settings) -> Result<(), Command
         let spinner = ProgressBar::new_spinner();
         spinner.enable_steady_tick(100);
         spinner.set_style(ProgressStyle::default_spinner().template(&format!(
-            "{} {{spinner:.green}} [{{elapsed_precise}}] {{msg}}",
+            "{} {{spinner:.green.dim.bold}} [{{elapsed_precise}}] {{msg}}",
             ui::step(2, total_steps)
         )));
         spinner.set_message("Creating a tar archive of the agent");
