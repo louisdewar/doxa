@@ -1,4 +1,5 @@
 import { Route, Switch, useRouteMatch } from 'react-router-dom';
+import Home from './pages/Home';
 
 
 export default function ClimateHack() {
@@ -6,7 +7,7 @@ export default function ClimateHack() {
 
   return <Switch>
     <Route path={path}>
-      Hi!
+      <Home />
     </Route>
   </Switch>;
 }

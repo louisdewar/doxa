@@ -1,0 +1,62 @@
+@import '../common/colours';
+
+@keyframes committee-background-pulse {
+  100% {
+    background-position: 100%;
+  }
+}
+
+.competitionHeader {
+  position: relative;
+  background-color: #1F2937;
+  color: #fff;
+  border-radius: 3px;
+
+  margin-bottom: 40px;
+  padding: 25px 50px;
+
+  h1 {
+    text-underline-offset: 0.65rem;
+    text-decoration: underline;
+    font-size: 3rem;
+    margin-top: 0;
+  }
+
+  p {
+    line-height: 1.35rem;
+  }
+
+  &::after {
+    position: absolute;
+    content: ' ';
+    display: block;
+    background: linear-gradient(45deg, var(--group-colour) 20%, var(--group-colour-alt-1) 60%, var(--group-colour-alt-2) 80%);
+    animation: 5s ease-in-out 0s infinite alternate committee-background-pulse;
+    background-size: 300% 300%;
+    width: 100%;
+    height: 100%;
+
+    right: -12px;
+    bottom: -12px;
+    z-index: -1;
+
+    border-radius: 3px;
+  }
+
+  $group-colours: #5313DB,
+  #F72585,
+  #00B75F,
+  #E67E22,
+  #30A292,
+  #ee5253;
+
+  @for $i from 1 through length($group-colours) {
+    $colour: nth($group-colours, $i);
+
+    &:nth-child(#{length($group-colours)}n + #{$i}) {
+      --group-colour: #{$colour};
+      --group-colour-alt-1: #{adjust-hue($colour, 30deg)};
+      --group-colour-alt-2: #{adjust-hue($colour, 60deg)};
+    }
+  }
+}

@@ -1,13 +1,14 @@
 import { AuthProvider, useAuth } from 'hooks/useAuth';
 import Account from 'pages/Account';
-import Home from 'pages/Home';
 import Invite from 'pages/Invite';
+import Home from 'pages/Landing';
 import Login from 'pages/Login';
 import Logout from 'pages/Logout';
 import { lazy, Suspense } from 'react';
 import {
   BrowserRouter as Router, Redirect, Route, Switch
 } from 'react-router-dom';
+import './App.scss';
 
 
 const COMPETITIONS = {
@@ -50,9 +51,13 @@ function Routes() {
         <Invite />
       </Route>
 
-      {multipleCompetitionsAllowed && Object.keys(COMPETITIONS).map(competition => (
-        <Route path={`/c/${competition}/`} key={competition} component={COMPETITIONS[competition]} />
-      ))}
+      {multipleCompetitionsAllowed
+        ? Object.keys(COMPETITIONS).map(competition => (
+          <Route path={`/c/${competition}/`} key={competition} component={COMPETITIONS[competition]} />
+        ))
+        : <Route path={`/c/${DEFAULT_COMPETITION}/`}>
+          <Redirect to='/' />
+        </Route>}
       <Route path='/'>
         {multipleCompetitionsAllowed ? <Home />
           : (Competition => <Competition />)(COMPETITIONS[DEFAULT_COMPETITION])}
