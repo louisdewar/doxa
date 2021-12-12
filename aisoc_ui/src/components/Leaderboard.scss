@@ -28,7 +28,8 @@
     margin-bottom: 10px;
 
     .leaderboard-position {
-      flex: 1 1 auto;
+      flex: 0 0 auto;
+      width: 2rem;
     }
 
     .leaderboard-username {
@@ -41,7 +42,8 @@
     }
 
     .leaderboard-score {
-      flex: 1 1 auto;
+      flex: 0 0 auto;
+      width: 4rem;
     }
   }
 }

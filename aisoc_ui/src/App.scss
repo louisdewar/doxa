@@ -2,7 +2,7 @@
   margin-top: 100px;
   margin-left: auto;
   margin-right: auto;
-  width: 100%;
+  width: calc(100% - 2rem);
 }
 
 @media screen and (min-width: 640px) {
