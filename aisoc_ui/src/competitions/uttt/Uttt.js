@@ -8,7 +8,7 @@ import './Uttt.scss';
 
 
 export default function Uttt() {
-  let { path } = useRouteMatch();
+  const { path } = useRouteMatch();
   return <Switch>
     <Route path={`${path}match/:matchID/game/:gameID`}>
       <Game competitionBaseUrl={path} />

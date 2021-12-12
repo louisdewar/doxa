@@ -1,0 +1,47 @@
+.leaderboard {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  .leaderboard-filter {
+    border: 0;
+    border-radius: 3px;
+    margin-bottom: 20px;
+    padding: 10px;
+    font-family: inherit;
+    width: 100%;
+
+    box-shadow: 0 0 #0000, 0 0 #0000, 8px 8px #1F2937;
+
+    &:focus,
+    &:focus-visible {
+      outline: none;
+    }
+  }
+
+
+  .leaderboard-card-header {
+    font-weight: bold;
+    font-style: italic;
+  }
+
+  .leaderboard-card {
+    display: flex;
+    margin-bottom: 10px;
+
+    .leaderboard-position {
+      flex: 1 1 auto;
+    }
+
+    .leaderboard-username {
+      flex: 4 1 auto;
+
+      a {
+        color: #fff;
+        text-underline-offset: 0.2rem;
+      }
+    }
+
+    .leaderboard-score {
+      flex: 1 1 auto;
+    }
+  }
+}

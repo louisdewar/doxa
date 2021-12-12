@@ -3,11 +3,11 @@ import Home from './pages/Home';
 
 
 export default function ClimateHack() {
-  let { path } = useRouteMatch();
+  const { path } = useRouteMatch();
 
   return <Switch>
     <Route path={path}>
-      <Home />
+      <Home baseUrl={path} />
     </Route>
   </Switch>;
 }

@@ -1,8 +1,9 @@
 import CompetitionHeader from 'components/CompetitionHeader';
 import CompetitionTabs from 'components/CompetitionTabs';
+import Leaderboard from 'components/Leaderboard';
 import Navbar from 'components/Navbar';
 
-export default function Home() {
+export default function Home({ baseUrl }) {
 
   const tabs = [
     {
@@ -45,6 +46,13 @@ export default function Home() {
       name: 'LEADERBOARD',
       tab: <div>
         <h2>Leaderboard</h2>
+        <Leaderboard baseUrl={baseUrl} />
+      </div>
+    },
+    {
+      name: 'SUBMISSION GUIDE',
+      tab: <div>
+        <h2>Submission Guide</h2>
       </div>
     },
   ];
