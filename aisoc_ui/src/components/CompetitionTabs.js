@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Card from './Card';
 import './CompetitionTabs.scss';
 
 export default function CompetitionTabs({ tabs }) {
@@ -13,9 +14,9 @@ export default function CompetitionTabs({ tabs }) {
         onClick={() => setActiveTabIndex(i)}
       >{tab.name}</a>)}
     </div>
-    <div className="competitionTab">
+    <Card>
       {tabs[activeTabIndex].tab}
-    </div>
+    </Card>
 
   </section>;
 }
