@@ -1,6 +1,6 @@
 @import '../common/colours';
 
-@keyframes committee-background-pulse {
+@keyframes card-background-pulse {
   100% {
     background-position: 100%;
   }
@@ -31,7 +31,7 @@
     content: ' ';
     display: block;
     background: linear-gradient(45deg, var(--group-colour) 20%, var(--group-colour-alt-1) 60%, var(--group-colour-alt-2) 80%);
-    animation: 5s ease-in-out 0s infinite alternate committee-background-pulse;
+    animation: 5s ease-in-out 0s infinite alternate card-background-pulse;
     background-size: 300% 300%;
     width: 100%;
     height: 100%;
@@ -42,13 +42,6 @@
 
     border-radius: 3px;
   }
-
-  $group-colours: #5313DB,
-  #F72585,
-  #00B75F,
-  #E67E22,
-  #30A292,
-  #ee5253;
 
   @for $i from 1 through length($group-colours) {
     $colour: nth($group-colours, $i);
