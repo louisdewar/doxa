@@ -1,7 +1,6 @@
 import CompetitionHeader from 'components/CompetitionHeader';
 import CompetitionTabs from 'components/CompetitionTabs';
 import Leaderboard from 'components/Leaderboard';
-import Navbar from 'components/Navbar';
 
 export default function Home({ baseUrl }) {
 
@@ -59,14 +58,11 @@ export default function Home({ baseUrl }) {
 
 
   return <>
-    <Navbar competition="climatehack" competitionName="Climate Hack" />
-    <div className='container'>
-      <CompetitionHeader
-        competitionName="Climate Hack"
-        description="Climate Hack is an alliance between the artificial intelligence societies of some of the world's best universities in the fight against climate change. Your challenge is to beat current UK cloud coverage forecasts so that predictions of future solar photovoltaic power production may be improved. This could allow National Grid to minimise the use of idling natural gas turbines, saving potentially up to 100 kilotonnes in carbon emissions per year in the process."
-        participantCount={0}
-      />
-      <CompetitionTabs tabs={tabs} />
-    </div>
+    <CompetitionHeader
+      competitionName="Climate Hack"
+      description="Climate Hack is an alliance between the artificial intelligence societies of some of the world's best universities in the fight against climate change. Your challenge is to beat current UK cloud coverage forecasts so that predictions of future solar photovoltaic power production may be improved. This could allow National Grid to minimise the use of idling natural gas turbines, saving potentially up to 100 kilotonnes in carbon emissions per year in the process."
+      participantCount={0}
+    />
+    <CompetitionTabs tabs={tabs} />
   </>;
 }
