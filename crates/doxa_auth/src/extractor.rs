@@ -15,7 +15,6 @@ use crate::{
 impl FromRequest for AuthGuard<()> {
     type Error = RespondableErrorWrapper;
     type Future = Pin<Box<dyn Future<Output = Result<Self, Self::Error>>>>;
-    type Config = ();
 
     fn from_request(req: &HttpRequest, _payload: &mut dev::Payload) -> Self::Future {
         let pool = req.app_data::<web::Data<PgPool>>().unwrap().clone();

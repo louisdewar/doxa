@@ -12,7 +12,7 @@ doxa_mq = { path = "../doxa_mq" }
 doxa_executor = { path = "../doxa_executor" }
 doxa_core = { path = "../doxa_core" }
 
-tracing-actix-web = "0.4.0-beta.10"
+tracing-actix-web = "0.5.0-beta.5"
 tracing = "0.1.19"
 opentelemetry = { version = "0.14", features = ["rt-tokio-current-thread"] }
 opentelemetry-jaeger = { version = "0.13", features = ["tokio"] }

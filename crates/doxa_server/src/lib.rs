@@ -112,6 +112,7 @@ pub async fn setup_server(
 
     HttpServer::new(move || {
         let api_scope = web::scope("/api");
+
         App::new()
             .app_data(db_pool.clone())
             .app_data(mq_pool.clone())
