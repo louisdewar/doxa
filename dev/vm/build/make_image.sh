@@ -16,7 +16,7 @@ mkfs.ext4 rootfs.img
 
 mkdir rootfs
 
-mount rootfs.img rootfs
+mount rootfs.img rootfs || { ls; exit 1; }
 
 ./alpine-make-rootfs --branch v3.15 --script-chroot --timezone "Europe/London" rootfs "$(pwd)/alpine-install.sh"
 

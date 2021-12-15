@@ -7,8 +7,9 @@ COPY ./migrations migrations
 COPY ./Cargo.toml .
 COPY ./Cargo.lock .
 COPY ./aisoc/server aisoc/server
+COPY ./tests tests
 
-RUN cargo build -p aisoc_server --release --locked --workspace
+RUN cargo build --release --locked --workspace
 
 FROM archlinux:base
 
@@ -18,11 +19,11 @@ RUN yes | pacman -S postgresql-libs
 WORKDIR /app
 
 RUN mkdir -p dev/vm
-COPY dev/vm/firecracker dev/vm/firecracker
-COPY dev/vm/rootfs.img dev/vm/rootfs.img
-COPY dev/vm/vmlinux.bin dev/vm/vmlinux.bin
+COPY ./dev/vm/firecracker dev/vm/firecracker
+COPY ./dev/vm/rootfs.img dev/vm/rootfs.img
+COPY ./dev/vm/vmlinux dev/vm/vmlinux
 
-COPY --from=server_builder /app/target/release/doxa /app/doxa
+COPY --from=server_builder /app/target/release/aisoc_server /app/doxa
 COPY --from=server_builder /app/target/release/doxa_adm /app/doxa_adm
 
 EXPOSE 3001
