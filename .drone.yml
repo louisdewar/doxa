@@ -29,8 +29,6 @@ steps:
         path: /var/run/docker.sock
     commands:
       - docker build -t registry.dewardt.uk/doxa/web:drone-build-"$DRONE_BUILD_NUMBER" -f aisoc/deploy/Dockerfile.web .
-    depends_on:
-      - rootfs
   - name: publish
     image: docker:dind
     privileged: true
@@ -63,3 +61,35 @@ volumes:
   host:
     path: /var/run/docker.sock
 
+---
+kind: pipeline
+name: server_check
+
+steps:
+  - name: clippy
+    image: rust:latest
+    commands:
+      - rustup add component clippy
+      - cargo clippy --workspace
+
+trigger:
+  event:
+    - push
+    - pull_request
+
+---
+kind: pipeline
+name: client_check
+
+steps:
+  - name: install packages and lint
+    image: node:lts
+    commands:
+      - cd aisoc_ui
+      - npm install
+      - npm build
+
+trigger:
+  event:
+    - push
+    - pull_request
