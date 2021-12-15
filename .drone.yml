@@ -66,11 +66,13 @@ kind: pipeline
 name: server_check
 
 steps:
-  - name: clippy
+  - name: clippy/fmt
     image: rust:latest
     commands:
       - rustup component add clippy
+      - rustup component add rustfmt
       - cargo clippy --workspace
+      - cargo fmt --all -- --check
 
 trigger:
   event:
