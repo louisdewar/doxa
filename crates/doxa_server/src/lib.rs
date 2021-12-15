@@ -124,6 +124,7 @@ pub async fn setup_server(
                     web::scope("")
                         .configure(doxa_auth::config(auth_settings.clone()))
                         .configure(doxa_storage::config(storage_settings.clone()))
+                        .configure(doxa_user::config())
                         .configure(configure_competition_routes.clone()),
                 ),
             )

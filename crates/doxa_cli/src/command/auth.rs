@@ -63,6 +63,7 @@ pub async fn info(settings: &Settings) -> Result<(), CommandError> {
     struct Info {
         username: String,
         admin: bool,
+        competitions: Vec<String>,
     }
 
     let total_steps = 2;
@@ -75,16 +76,18 @@ pub async fn info(settings: &Settings) -> Result<(), CommandError> {
         ),
     );
 
-    let info: Info = send_request_and_parse(post(settings, "auth/info", false)).await?;
+    let info: Info = send_request_and_parse(post(settings, "user/info", false)).await?;
 
     ui::print_step(1, total_steps, "Showing user information");
 
     println!(
-        "{}: `{}`\n{}: `{}`",
+        "{}: `{}`\n{}: `{}`\n{}: {}",
         ui::keyword("username"),
         ui::keyword(info.username),
         ui::keyword("admin"),
-        ui::keyword(info.admin)
+        ui::keyword(info.admin),
+        ui::keyword("competitions"),
+        ui::keyword(format!("{:?}", info.competitions))
     );
 
     Ok(())

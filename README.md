@@ -46,6 +46,10 @@ DOXA (the backend server) is made up of several components (crates) which can be
 The root crate. This is an example implementation of the components of DOXA into a server. This is the current deployment for the UCL AI Society. In future this will be moved out of this crate, especially once the boilerplate for creating a DOXA server is reduced.
 
 
+### `doxa_server`
+
+Provides useful methods to easily setup a new deployment of DOXA.
+
 
 ### `utt`
 
@@ -69,6 +73,10 @@ Contains common trait definitions particularly with regards to error handling. F
 
 Provides HTTP routes and common util code for authenticating users.
 
+
+### `doxa_user`
+
+Provides HTTP routes endpoints useful to managing users.
 
 
 ### `doxa_storage`
@@ -128,3 +136,4 @@ Provides the definition of a `Competition` trait that can be implemented. This a
 ### `doxa_live` 🚧
 
 This is a WIP component which should allow for users to play against a particular agent using a websocket.
+

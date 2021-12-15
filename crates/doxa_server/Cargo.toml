@@ -11,6 +11,7 @@ doxa_db = { path = "../doxa_db" }
 doxa_mq = { path = "../doxa_mq" }
 doxa_executor = { path = "../doxa_executor" }
 doxa_core = { path = "../doxa_core" }
+doxa_user = { path = "../doxa_user" }
 
 tracing-actix-web = "0.5.0-beta.5"
 tracing = "0.1.19"
