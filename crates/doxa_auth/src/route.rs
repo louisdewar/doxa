@@ -5,11 +5,12 @@ use doxa_db::{action, serde_json, PgPool};
 use crate::{
     controller,
     error::{InviteNotFound, RegistrationDisabled, TooManyLoginAttempts},
+    guard::AuthGuard,
     limits::AuthLimits,
     Settings,
 };
 
-use self::response::InviteInfo;
+use self::response::{InviteInfo, UserInfo};
 
 mod request;
 mod response;
@@ -21,6 +22,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
             "/auth/invite/accept/{invite_id}",
             web::post().to(accept_invite),
         )
+        .route("/auth/info", web::post().to(info))
         .route("/auth/invite/info/{invite_id}", web::get().to(invite_info));
 }
 
@@ -50,6 +52,18 @@ async fn login(
     .await??;
 
     Ok(HttpResponse::Ok().json(response::Login { auth_token: token }))
+}
+
+async fn info(db_pool: web::Data<PgPool>, user: AuthGuard<()>) -> EndpointResult {
+    let conn = web::block(move || db_pool.get()).await??;
+
+    let user_id = user.id();
+    let user = web::block(move || doxa_db::action::user::get_user_by_id(&conn, user_id)).await??;
+
+    Ok(HttpResponse::Ok().json(UserInfo {
+        username: user.username,
+        admin: user.admin,
+    }))
 }
 
 async fn register(

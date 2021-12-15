@@ -53,7 +53,13 @@ pub async fn upload(args: UploadArgs, settings: &Settings) -> Result<(), Command
         .await
         .map_err(UploadError::ReadAgentError)?;
 
-    let agent_file_name = agent_path.file_name().unwrap().to_str().unwrap().to_owned();
+    let agent_file_name = agent_path
+        .canonicalize()?
+        .file_name()
+        .unwrap()
+        .to_str()
+        .unwrap()
+        .to_owned();
 
     let total_steps = 4;
     ui::print_step(1, total_steps, "Finding the agent");

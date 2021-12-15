@@ -5,6 +5,9 @@ use reqwest::StatusCode;
 pub enum CliError {
     Command(CommandError),
     BaseURLFormat(BaseURLFormatError),
+    #[display(fmt = "failed to load user profiles: {}", _0)]
+    LoadProfileConfig(LoadProfileConfigError),
+    UserNotLoggedIn(UserNotLoggedIn),
 }
 
 #[derive(Error, Display, From, Debug)]
@@ -15,6 +18,12 @@ pub enum CommandError {
     IO(std::io::Error),
     #[display(fmt = "{}", _0)]
     Upload(UploadError),
+    #[display(fmt = "{}", _0)]
+    /// Only commands that require authentication will use this error
+    NoUserProfile(NoDefaultUserProfile),
+    /// This also exists here (and in CLI error) because some commands modify the profile
+    #[display(fmt = "failed to load user profiles: {}", _0)]
+    LoadProfileConfig(LoadProfileConfigError),
 }
 
 #[derive(Error, Display, From, Debug)]
@@ -62,4 +71,20 @@ pub enum UploadError {
 #[derive(Display, Error, Debug, Clone, From)]
 pub struct BaseURLFormatError {
     pub source: url::ParseError,
+}
+
+#[derive(Display, Error, Debug, Clone, From)]
+#[display(fmt = "there is no default user profile, either log a user in or set a default profile")]
+pub struct NoDefaultUserProfile;
+
+#[derive(Display, Error, Debug, From)]
+pub enum LoadProfileConfigError {
+    IO(std::io::Error),
+    Format(serde_json::Error),
+}
+
+#[derive(Display, Error, Debug, From)]
+#[display(fmt = "user `{}` not logged in", username)]
+pub struct UserNotLoggedIn {
+    pub username: String,
 }

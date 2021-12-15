@@ -13,11 +13,11 @@ function create_user_invite {
 }
 
 function register_user {
-  cargo run -q -p doxa_cli -- register "$1" "$2" -i "$3"
+  cargo run -q -p doxa_cli -- user register "$1" "$2" -i "$3"
 }
 
 function login_user {
-  cargo run -q -p doxa_cli -- login "$1" "$2"
+  cargo run -q -p doxa_cli -- user login "$1" "$2"
 }
 
 function make_admin {

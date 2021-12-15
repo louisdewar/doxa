@@ -16,6 +16,8 @@ pub enum AuthCommands {
     Login(LoginArgs),
     /// Registers a new user (optionally with an invite code)
     Register(RegisterArgs),
+    /// Shows info about the currently logged in user
+    Info,
 }
 
 #[derive(Parser)]
@@ -52,7 +54,40 @@ pub async fn handle_subcommand(
     match command {
         AuthCommands::Login(args) => login(args, settings).await,
         AuthCommands::Register(args) => register(args, settings).await,
+        AuthCommands::Info => info(settings).await,
     }
+}
+
+pub async fn info(settings: &Settings) -> Result<(), CommandError> {
+    #[derive(Deserialize)]
+    struct Info {
+        username: String,
+        admin: bool,
+    }
+
+    let total_steps = 2;
+    ui::print_step(
+        1,
+        total_steps,
+        format!(
+            "Asking server for information about {}",
+            ui::keyword(settings.user_profile.clone()?.name)
+        ),
+    );
+
+    let info: Info = send_request_and_parse(post(settings, "auth/info", false)).await?;
+
+    ui::print_step(1, total_steps, "Showing user information");
+
+    println!(
+        "{}: `{}`\n{}: `{}`",
+        ui::keyword("username"),
+        ui::keyword(info.username),
+        ui::keyword("admin"),
+        ui::keyword(info.admin)
+    );
+
+    Ok(())
 }
 
 pub async fn login(args: LoginArgs, settings: &Settings) -> Result<(), CommandError> {

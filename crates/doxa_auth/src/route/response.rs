@@ -12,3 +12,9 @@ pub struct InviteInfo {
     pub expires_at: Option<DateTime<Utc>>,
     pub enrollments: Vec<String>,
 }
+
+#[derive(Serialize)]
+pub struct UserInfo {
+    pub username: String,
+    pub admin: bool,
+}

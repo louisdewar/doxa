@@ -8,12 +8,14 @@ use crate::command::{agent::AgentCommands, auth::AuthCommands};
 pub struct Cli {
     #[clap(subcommand)]
     pub command: MainCommands,
+    #[clap(short, long, global = true)]
+    pub verbose: bool,
 }
 
 #[derive(Subcommand)]
 pub enum MainCommands {
-    #[clap(flatten)]
-    Auth(AuthCommands),
+    #[clap(subcommand)]
+    User(AuthCommands),
     #[clap(subcommand)]
     Agent(AgentCommands),
 }
