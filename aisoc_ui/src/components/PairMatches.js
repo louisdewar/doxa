@@ -3,11 +3,11 @@ import { Link } from 'react-router-dom';
 import './Leaderboard.scss';
 
 
-export default function Matches({ baseUrl }) {
-  const matches = [
-    { player1: 'louisdewardt', player2: 'testaccount', score: 21 },
-    { player1: 'testaccount', player2: 'louisdewardt', score: 20 }
-  ];
+export default function PairMatches({ baseUrl, matches }) {
+  // const matches = [
+  //   { player1: 'louisdewardt', player2: 'testaccount', score: 21 },
+  //   { player1: 'testaccount', player2: 'louisdewardt', score: 20 }
+  // ];
 
   const [filter, setFilter] = useState('');
   const handleFilterChange = e => {

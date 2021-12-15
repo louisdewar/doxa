@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './Leaderboard.scss';
+import TextBox from './TextBox';
 
 
 export default function Matches({ baseUrl }) {
@@ -10,18 +11,13 @@ export default function Matches({ baseUrl }) {
   ];
 
   const [filter, setFilter] = useState('');
-  const handleFilterChange = e => {
-    setFilter(e.target.value);
-  };
-
 
   return <div className="leaderboard">
-    <input
+    <TextBox
       type="text"
-      className='leaderboard-filter'
-      placeholder='Filter by username'
+      placeholder="Filter by username"
       value={filter}
-      onChange={handleFilterChange}
+      setValue={setFilter}
     />
 
     <div className='leaderboard-card leaderboard-card-header'>

@@ -1,23 +1,6 @@
 .leaderboard {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
-  .leaderboard-filter {
-    border: 0;
-    border-radius: 3px;
-    margin-bottom: 20px;
-    padding: 10px;
-    font-family: inherit;
-    width: calc(100% - 20px);
-
-    box-shadow: 0 0 #0000, 0 0 #0000, 8px 8px #1F2937;
-
-    &:focus,
-    &:focus-visible {
-      outline: none;
-    }
-  }
-
-
   .leaderboard-card-header {
     font-weight: bold;
     font-style: italic;

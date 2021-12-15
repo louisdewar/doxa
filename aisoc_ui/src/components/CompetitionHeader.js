@@ -7,8 +7,8 @@ export default function CompetitionHeader({ competitionName, description, partic
     <p>
       {description}
     </p>
-    <p>
+    {participantCount !== undefined && <p>
       {participantCount} participating
-    </p>
+    </p>}
   </Card>;
 }

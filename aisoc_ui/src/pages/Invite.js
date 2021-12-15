@@ -1,6 +1,10 @@
+import Button from 'components/Button';
+import Card from 'components/Card';
+import Navbar from 'components/Navbar';
+import TextBox from 'components/TextBox';
 import { useAuth } from 'hooks/useAuth';
 import { useEffect, useState } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { Link, useHistory, useParams } from 'react-router-dom';
 
 
 export default function Invite() {
@@ -9,22 +13,22 @@ export default function Invite() {
   const { id } = useParams();
   const [invite, setInvite] = useState(null);
   const [notFound, setNotFound] = useState(false);
-
   const [username, setUsername] = useState('');
-  const handleUsernameChange = e => {
-    setUsername(e.target.value);
-  };
-
   const [password, setPassword] = useState('');
-  const handlePasswordChange = e => {
-    setPassword(e.target.value);
-  };
+  const [showError, setShowError] = useState(false);
 
   const handleAccept = async e => {
     e.preventDefault();
-    await auth.acceptInvite(id, username, password);
-    // TODO: handle error
-    history.push('/');
+    if (password.length < 8) {
+      return;
+    }
+
+    try {
+      await auth.acceptInvite(id, username, password);
+      history.push('/');
+    } catch {
+      setShowError(true);
+    }
   };
 
   useEffect(async () => {
@@ -38,24 +42,86 @@ export default function Invite() {
   }, [setInvite]);
 
   if (notFound) {
-    return <>Invite not found.</>;
+    return <>
+      <Navbar />
+      <div className='container'>
+        <Card>
+          Sorry — we could not find that invite token.
+        </Card>
+
+        <Link to="/">
+          <Button>Return to the hompage</Button>
+        </Link>
+      </div>
+    </>;
   }
 
   if (!invite) {
-    // TODO: display an error here
-    return <></>;
+    return <>
+      <Navbar />
+      <div className='container'>
+        <Card>
+          Sorry — something has gone wrong!
+        </Card>
+
+        <Link to="/">
+          <Button>Return to the hompage</Button>
+        </Link>
+      </div>
+    </>;
   }
 
   return <>
-    <strong>Invite ID: </strong>{id}<br /><br />
-    <strong>Username: </strong>{invite.username}<br /><br />
-    <strong>Expiration time: </strong>{invite.expires_at}<br /><br />
-    <strong>Enrollments: </strong>{invite.enrollments && invite.enrollments.join(', ')}<br /><br />
+    <Navbar />
+    <div className='container'>
+      {showError && <Card>
+        Sorry — we could not process the invite acceptance at this time.
+      </Card>}
 
-    <form onSubmit={handleAccept}>
-      Username: <input type="text" value={username} onChange={handleUsernameChange} disabled={!!invite.username} /><br />
-      Password: <input type="text" value={password} onChange={handlePasswordChange} /><br />
-      <input type="submit" value="Accept" />
-    </form>
+      <Card>
+        <h1>Invitation</h1>
+        <p>
+          Hi,
+        </p>
+        <p>
+          You have been invited to join Doxa.
+        </p>
+
+        {invite.expires_at && <><strong>Invitation expiration time: </strong>{new Date(invite.expires_at).toLocaleString()}<br /><br /></>}
+        {invite.enrollments && invite.enrollments.length > 0 && <><strong>Competition enrolments: </strong>{invite.enrollments && invite.enrollments.join(', ')}<br /><br /></>}
+
+        <form onSubmit={handleAccept}>
+          <TextBox
+            value={username}
+            setValue={setUsername}
+            placeholder="Username"
+            type="text"
+            disabled={!!invite.username}
+          />
+
+          <TextBox
+            value={password}
+            setValue={setPassword}
+            placeholder="Password (minimum 8 characters)"
+            type="password"
+          />
+
+          <Button
+            buttonProps={{
+              onClick: handleAccept
+            }}
+            success
+            disabled={password.length < 8}
+          >Accept invite & join</Button>
+
+          <Link to="/">
+            <Button failure>Return to the hompage</Button>
+          </Link>
+        </form>
+      </Card>
+    </div>
+
+
+
   </>;
 }
