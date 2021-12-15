@@ -69,7 +69,7 @@ steps:
   - name: clippy
     image: rust:latest
     commands:
-      - rustup add component clippy
+      - rustup component add clippy
       - cargo clippy --workspace
 
 trigger:
@@ -87,7 +87,7 @@ steps:
     commands:
       - cd aisoc_ui
       - npm install
-      - npm build
+      - npm run build
 
 trigger:
   event:
