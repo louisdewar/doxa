@@ -1,6 +1,6 @@
 ---
 kind: pipeline
-name: default
+name: deploy
 
 steps:
   - name: rootfs
@@ -44,19 +44,15 @@ steps:
       - docker tag registry.dewardt.uk/doxa/web:drone-build-"$DRONE_BUILD_NUMBER" registry.dewardt.uk/doxa/web:production
       - docker push registry.dewardt.uk/doxa/server:production
       - docker push registry.dewardt.uk/doxa/web:production
-    trigger:
-      event:
-        - promote
-      target:
-        - production
     depends_on:
       - build_server
       - build_web
 
 trigger:
   event:
-    - push
-    - pull_request
+    - promote
+  target:
+    - production
 
 volumes:
 - name: dockersock
