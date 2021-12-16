@@ -1,0 +1,24 @@
+[package]
+name = "doxa_server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+doxa_storage = { path = "../doxa_storage" }
+doxa_auth = { path = "../doxa_auth" }
+doxa_competition = { path = "../doxa_competition" }
+doxa_db = { path = "../doxa_db" }
+doxa_mq = { path = "../doxa_mq" }
+doxa_executor = { path = "../doxa_executor" }
+doxa_core = { path = "../doxa_core" }
+doxa_user = { path = "../doxa_user" }
+
+tracing-actix-web = "0.5.0-beta.5"
+tracing = "0.1.19"
+opentelemetry = { version = "0.14", features = ["rt-tokio-current-thread"] }
+opentelemetry-jaeger = { version = "0.13", features = ["tokio"] }
+tracing-opentelemetry = { version = "0.13" }
+tracing-subscriber = { version = "0.2.12", features = ["registry", "env-filter"] }
+tracing-bunyan-formatter = "0.1.6"
+
+dotenv = "0.15.0"

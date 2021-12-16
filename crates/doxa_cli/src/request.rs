@@ -6,23 +6,30 @@ use serde::Deserialize;
 
 use crate::{
     config::UserProfile,
-    error::{BaseURLFormatError, DoxaError, PlainError, RequestError},
+    error::{BaseURLFormatError, DoxaError, NoDefaultUserProfile, PlainError, RequestError},
 };
 
 pub struct Settings {
-    pub user_profile: Option<UserProfile>,
+    pub user_profile: Result<UserProfile, NoDefaultUserProfile>,
     pub base_url: Url,
     pub config_dir: PathBuf,
     pub client: Client,
+    pub verbose: bool,
 }
 
 impl Settings {
-    pub fn new(user_profile: Option<UserProfile>, base_url: Url, config_dir: PathBuf) -> Settings {
+    pub fn new(
+        user_profile: Result<UserProfile, NoDefaultUserProfile>,
+        base_url: Url,
+        config_dir: PathBuf,
+        verbose: bool,
+    ) -> Settings {
         Settings {
             user_profile,
             base_url,
             client: Client::new(),
             config_dir,
+            verbose,
         }
     }
 }
@@ -59,7 +66,7 @@ fn maybe_add_auth(
 ) -> RequestBuilder {
     if never_auth {
         builder
-    } else if let Some(user) = &settings.user_profile {
+    } else if let Ok(user) = &settings.user_profile {
         builder.bearer_auth(user.auth_token.clone())
     } else {
         builder

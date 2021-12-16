@@ -31,6 +31,26 @@ pub fn get_competition_by_name(
         .optional()
 }
 
+/// Atomically tries to get the competition by name or creates it if it does not exist.
+/// If there is already a competition inserted it will update the fields (NOTE: currently
+/// competitions have no other fields than their name, but in future in there are more settings
+/// this would be the behaviour).
+///
+/// TODO: in future it might be nice for logging purposes to get whether we created, updated, or
+/// just retrieved the competition.
+pub fn get_or_create_competition(
+    conn: &PgConnection,
+    competition: InsertableCompetition,
+) -> Result<Competition, DieselError> {
+    diesel::insert_into(s::competitions::table)
+        .values(&competition)
+        .on_conflict(s::competitions::name)
+        .do_update()
+        .set(&competition)
+        .returning(s::competitions::all_columns)
+        .get_result(conn)
+}
+
 pub fn get_enrollment(
     conn: &PgConnection,
     user_id: i32,

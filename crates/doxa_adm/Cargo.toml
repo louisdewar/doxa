@@ -5,7 +5,7 @@ edition = "2018"
 
 [dependencies]
 doxa_db = { path = "../doxa_db" }
-clap = { version = "3.0.0-beta.4", features = ["yaml"] }
+clap = { version = "3.0.0-rc.0", features = ["derive"] }
 dotenv = "0.15.0"
 parse_duration = "2.1.1"
 chrono-humanize = "0.2.1"

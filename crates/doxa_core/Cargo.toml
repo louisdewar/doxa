@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
-actix-web = "4.0.0-beta.8"
+actix-web = "4.0.0-beta.14"
 serde = "1.0"
 doxa_sys = { path = "../doxa_sys" }
 diesel = { version = "1.4.4", features = ["postgres", "r2d2"] }

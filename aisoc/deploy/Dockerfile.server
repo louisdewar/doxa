@@ -1,0 +1,31 @@
+FROM rust:latest as server_builder
+WORKDIR /app
+
+COPY ./crates crates
+COPY ./competitions competitions
+COPY ./migrations migrations
+COPY ./Cargo.toml .
+COPY ./Cargo.lock .
+COPY ./aisoc/server aisoc/server
+COPY ./tests tests
+
+RUN cargo build --release --locked --workspace
+
+FROM archlinux:base
+
+RUN yes | pacman -Syu
+RUN yes | pacman -S postgresql-libs
+
+WORKDIR /app
+
+RUN mkdir -p dev/vm
+COPY ./dev/vm/firecracker dev/vm/firecracker
+COPY ./dev/vm/rootfs.img dev/vm/rootfs.img
+COPY ./dev/vm/vmlinux dev/vm/vmlinux
+
+COPY --from=server_builder /app/target/release/aisoc_server /app/doxa
+COPY --from=server_builder /app/target/release/doxa_adm /app/doxa_adm
+
+EXPOSE 3001
+
+ENTRYPOINT ["/app/doxa"]

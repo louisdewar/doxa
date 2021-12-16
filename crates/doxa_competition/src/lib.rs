@@ -18,7 +18,6 @@ use doxa_core::tracing::{error, info};
 
 pub struct CompetitionSystem {
     competitions: HashMap<String, CompetitionRecord>,
-    settings: Arc<Settings>,
 }
 
 #[derive(Clone)]
@@ -28,10 +27,9 @@ struct CompetitionRecord {
 }
 
 impl CompetitionSystem {
-    pub fn new(settings: Arc<Settings>) -> Self {
+    pub fn new() -> Self {
         CompetitionSystem {
             competitions: Default::default(),
-            settings,
         }
     }
 
@@ -76,14 +74,14 @@ impl CompetitionSystem {
         }
     }
 
-    pub async fn start(self) -> impl Fn(&mut web::ServiceConfig) + Clone {
+    pub async fn start(self, settings: Arc<Settings>) -> impl Fn(&mut web::ServiceConfig) + Clone {
         let mut competitions = Vec::with_capacity(self.competitions.len());
         // TODO: try join all
         for (competition_name, record) in self.competitions {
             match record
                 .competition
                 .clone()
-                .start_competition_manager(self.settings.clone(), record.executor_permits)
+                .start_competition_manager(settings.clone(), record.executor_permits)
                 .await
             {
                 Err(error) => {
@@ -97,7 +95,7 @@ impl CompetitionSystem {
             }
         }
 
-        let settings = self.settings.clone();
+        let settings = settings.clone();
 
         move |service| {
             for (name, record, competition_id) in competitions.iter() {
@@ -110,5 +108,11 @@ impl CompetitionSystem {
                 ));
             }
         }
+    }
+}
+
+impl Default for CompetitionSystem {
+    fn default() -> Self {
+        Self::new()
     }
 }

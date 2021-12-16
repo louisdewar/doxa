@@ -16,11 +16,9 @@ mkfs.ext4 rootfs.img
 
 mkdir rootfs
 
-mount rootfs.img rootfs
+mount rootfs.img rootfs || { ls; exit 1; }
 
-cp ../target/x86_64-unknown-linux-musl/release/vm_executor ./
-
-./alpine-make-rootfs --branch v3.14 --script-chroot --timezone "Europe/London" rootfs $(pwd)/alpine-install.sh
+./alpine-make-rootfs --branch v3.15 --script-chroot --timezone "Europe/London" rootfs "$(pwd)/alpine-install.sh"
 
 rm ./vm_executor
 
