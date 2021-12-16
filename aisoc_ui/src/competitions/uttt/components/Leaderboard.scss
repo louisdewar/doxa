@@ -9,7 +9,7 @@
     }
 
 
-    .leaderboard-card{
+    .leaderboard-entry{
         padding: 10px;
         color: $off-black;
         box-shadow: 0 4px 4px $grey;
@@ -29,18 +29,18 @@
 
     input[type='text'] {
         width: 350px;
-    
+
         outline: none;
-        
+
         border: none;
         border-bottom: 3px solid #7c7c7c;
-        
+
         background-color: transparent;
         color: $off-black;
-    
+
         font-size: 38px;
         font-family: 'Montserrat', sans-serif;
-    
+
         padding: 5px 0;
         margin: 20px;
         margin-left: 0;

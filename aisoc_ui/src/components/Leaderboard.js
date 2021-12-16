@@ -15,13 +15,13 @@ export default function Leaderboard({ baseUrl, leaderboard }) {
       setValue={setFilter}
     />
 
-    <div className='leaderboard-card leaderboard-card-header'>
+    <div className='leaderboard-entry leaderboard-entry-header'>
       <span className="leaderboard-position">#</span>
       <span className="leaderboard-username">User</span>
       <span className="leaderboard-score">Score</span>
     </div>
 
-    {leaderboard.map((entry, i) => entry.username.includes(filter) && <div key={i} className='leaderboard-card'>
+    {leaderboard.map((entry, i) => entry.username.includes(filter) && <div key={i} className='leaderboard-entry'>
       <span className="leaderboard-position">{i + 1}</span>
       <span className="leaderboard-username"><Link to={`${baseUrl}user/${entry.username}`}>{entry.username}</Link></span>
       <span className="leaderboard-score">{entry.score}</span>

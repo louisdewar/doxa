@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './Leaderboard.scss';
+import TextBox from './TextBox';
 
 
 export default function PairMatches({ baseUrl, matches }) {
@@ -10,27 +11,22 @@ export default function PairMatches({ baseUrl, matches }) {
   // ];
 
   const [filter, setFilter] = useState('');
-  const handleFilterChange = e => {
-    setFilter(e.target.value);
-  };
-
 
   return <div className="leaderboard">
-    <input
+    <TextBox
       type="text"
-      className='leaderboard-filter'
-      placeholder='Filter by username'
+      placeholder="Filter by username"
       value={filter}
-      onChange={handleFilterChange}
+      setValue={setFilter}
     />
 
-    <div className='leaderboard-card leaderboard-card-header'>
+    <div className='leaderboard-entry leaderboard-entry-header'>
       <span className="leaderboard-position">#</span>
       <span className="leaderboard-username">Users</span>
       <span className="leaderboard-score">Score</span>
     </div>
 
-    {matches.map((entry, i) => (entry.player1.includes(filter) || entry.player2.includes(filter)) && <div key={i} className='leaderboard-card'>
+    {matches.map((entry, i) => (entry.player1.includes(filter) || entry.player2.includes(filter)) && <div key={i} className='leaderboard-entry'>
       <span className="leaderboard-position">{i + 1}</span>
       <span className="leaderboard-username"><Link to={`${baseUrl}user/${entry.player1}`}>{entry.player1}</Link> vs <Link to={`${baseUrl}user/${entry.player2}`}>{entry.player2}</Link></span>
       <span className="leaderboard-score">{entry.score}</span>

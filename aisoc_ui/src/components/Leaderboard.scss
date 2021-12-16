@@ -1,12 +1,12 @@
 .leaderboard {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
-  .leaderboard-card-header {
+  .leaderboard-entry-header {
     font-weight: bold;
     font-style: italic;
   }
 
-  .leaderboard-card {
+  .leaderboard-entry {
     display: flex;
     margin-bottom: 10px;
 

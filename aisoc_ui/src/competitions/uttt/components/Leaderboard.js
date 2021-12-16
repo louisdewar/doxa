@@ -37,7 +37,7 @@ function LeaderboardCard({ rank, username, score, filter, competitionBaseUrl }) 
 
   return (
     <Link to={`${competitionBaseUrl}user/${username}`}>
-      <div className='leaderboard-card'>
+      <div className='leaderboard-entry'>
         <p className='rank-username'>#{rank} {username}</p>
         <p className='score'>{score} <span className='points'>points</span></p>
       </div>
