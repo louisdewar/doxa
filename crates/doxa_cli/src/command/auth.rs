@@ -78,7 +78,7 @@ pub async fn info(settings: &Settings) -> Result<(), CommandError> {
 
     let info: Info = send_request_and_parse(post(settings, "user/info", false)).await?;
 
-    ui::print_step(1, total_steps, "Showing user information");
+    ui::print_step(2, total_steps, "Showing user information");
 
     println!(
         "{}: `{}`\n{}: `{}`\n{}: {}",
