@@ -1,5 +1,6 @@
 import { AuthProvider, useAuth } from 'hooks/useAuth';
 import Account from 'pages/Account';
+import Error404 from 'pages/Error404';
 import Invite from 'pages/Invite';
 import Landing from 'pages/Landing';
 import Login from 'pages/Login';
@@ -53,9 +54,13 @@ function Routes() {
         : <Route path={`/c/${DEFAULT_COMPETITION}/`}>
           <Redirect to='/' />
         </Route>}
-      <Route path='/'>
-        {multipleCompetitionsAllowed ? <Landing competitions={COMPETITIONS} />
-          : (Competition => <Competition />)(COMPETITIONS[DEFAULT_COMPETITION].competition)}
+      {multipleCompetitionsAllowed ? <Route exact path='/'>
+        <Landing competitions={COMPETITIONS} />
+      </Route> : <Route path='/'>
+        {(Competition => <Competition />)(COMPETITIONS[DEFAULT_COMPETITION].competition)}
+      </Route>}
+      <Route>
+        <Error404 />
       </Route>
     </Switch>
   </Router>;

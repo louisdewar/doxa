@@ -20,7 +20,7 @@ export default function Matches({ baseUrl }) {
       setValue={setFilter}
     />
 
-    <div className='leaderboard-entry leaderboard-entry-header'>
+    <div className='leaderboard-entry leaderboard-header'>
       <span className="leaderboard-position">#</span>
       <span className="leaderboard-username">User</span>
       <span className="leaderboard-score">Score</span>
