@@ -41,17 +41,13 @@ DOXA (the backend server) is made up of several components (crates) which can be
 
 ![DOXA crate graph](./docs/depgraph.png)
 
-### `doxa`
-
-The root crate. This is an example implementation of the components of DOXA into a server. This is the current deployment for the UCL AI Society. In future this will be moved out of this crate, especially once the boilerplate for creating a DOXA server is reduced.
-
 
 ### `doxa_server`
 
-Provides useful methods to easily setup a new deployment of DOXA.
+Provides useful boilerplate to easily setup a new deployment of DOXA.
 
 
-### `utt`
+### `uttt`
 
 An implementation of an ulimate tic tac toe competition for UCL AI Society, which is in the `competitions` folder.
 
