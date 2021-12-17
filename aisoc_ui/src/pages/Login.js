@@ -5,6 +5,7 @@ import Navbar from 'components/Navbar';
 import TextBox from 'components/TextBox';
 import { useAuth } from 'hooks/useAuth';
 import { useState } from 'react';
+import { Redirect } from 'react-router-dom';
 
 
 export default function Login() {
@@ -23,9 +24,11 @@ export default function Login() {
     } catch {
       setShowError(true);
     }
-
-
   };
+
+  if (auth.isLoggedIn()) {
+    return <Redirect to="/" />;
+  }
 
   return <>
     <Navbar />

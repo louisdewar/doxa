@@ -1,16 +1,14 @@
 import { useAuth } from 'hooks/useAuth';
-import { useHistory } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Redirect } from 'react-router-dom';
 
 
 export default function Logout() {
   const auth = useAuth();
-  const history = useHistory();
 
   if (auth.isLoggedIn()) {
-    auth.logout();
+    useEffect(auth.logout, []);
   }
 
-  history.push('/');
-
-  return <></>;
+  return <Redirect to='/' />;
 }

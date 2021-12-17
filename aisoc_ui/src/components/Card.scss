@@ -13,6 +13,11 @@
   color: #fff;
   border-radius: 3px;
 
+  a {
+    color: #fff;
+    text-underline-offset: 0.2rem;
+  }
+
   &.card-darker {
     background-color: #1F2937;
   }

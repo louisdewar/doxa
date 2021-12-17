@@ -1,5 +1,5 @@
-import { acceptInvite, getInviteInfo, login } from 'api/auth';
-import { useState } from 'react';
+import { acceptInvite, getInviteInfo, getUserInfo, login } from 'api/auth';
+import { useEffect, useState } from 'react';
 
 
 /**
@@ -25,6 +25,29 @@ export function useAuthProvider() {
     setAuthToken(token);
     sessionStorage.setItem('doxa-auth-token', token);
   };
+
+  const refresh = async () => {
+    if (!authToken && user) {
+      setAuthToken(null);
+      return;
+    }
+
+    try {
+      const info = await getUserInfo(authToken);
+      setUser({
+        username: info.username,
+        admin: info.admin ?? false,
+        competitions: info.competitions ?? []
+      });
+    } catch {
+      setAuthToken(null);
+      setUser(null);
+    }
+  };
+
+  useEffect(async () => {
+    await refresh();
+  }, []);
 
   return {
     loading,
