@@ -13,7 +13,7 @@ export default function User({ baseUrl }) {
       </h2>
     </Card>
     <Card>
-      <h2>Matches</h2>
+      <h2>Submissions</h2>
       <Matches baseUrl={baseUrl} />
     </Card>
   </>;

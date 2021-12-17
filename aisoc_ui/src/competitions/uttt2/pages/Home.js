@@ -1,7 +1,10 @@
 import CompetitionHeader from 'components/CompetitionHeader';
 import CompetitionTabs from 'components/CompetitionTabs';
+import CodeTab from '../tabs/CodeTab';
 import LeaderboardTab from '../tabs/LeaderboardTab';
 import OverviewTab from '../tabs/OverviewTab';
+import RulesTab from '../tabs/RulesTab';
+import SubmissionGuideTab from '../tabs/SubmissionGuideTab';
 
 export default function Home({ baseUrl }) {
   const tabs = [
@@ -11,21 +14,11 @@ export default function Home({ baseUrl }) {
     },
     {
       name: 'RULES',
-      tab: <div>
-        <h2>Rules</h2>
-      </div>
-    },
-    {
-      name: 'DATA',
-      tab: <div>
-        <h2>Data</h2>
-      </div>
+      tab: <RulesTab />
     },
     {
       name: 'CODE',
-      tab: <div>
-        <h2>Code</h2>
-      </div>
+      tab: <CodeTab />
     },
     {
       name: 'LEADERBOARD',
@@ -33,9 +26,7 @@ export default function Home({ baseUrl }) {
     },
     {
       name: 'SUBMISSION GUIDE',
-      tab: <div>
-        <h2>Submission Guide</h2>
-      </div>
+      tab: <SubmissionGuideTab />
     },
   ];
 
