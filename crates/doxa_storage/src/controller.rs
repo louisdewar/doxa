@@ -29,3 +29,7 @@ pub fn mark_upload_as_complete(
 ) -> Result<AgentUpload, DieselError> {
     action::storage::mark_upload_as_complete(conn, id)
 }
+
+pub fn mark_upload_as_failed(conn: &PgConnection, id: String) -> Result<AgentUpload, DieselError> {
+    action::storage::mark_upload_as_failed(conn, id)
+}

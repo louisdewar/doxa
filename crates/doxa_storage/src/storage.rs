@@ -45,6 +45,12 @@ impl LocalStorage {
             .map(|f| (f, file_name))
     }
 
+    pub async fn delete_file(&self, competition_name: &str, agent_id: &str) -> io::Result<()> {
+        let path = self.root.join(&competition_name).join(&agent_id);
+
+        tokio::fs::remove_file(path).await
+    }
+
     pub async fn open_file(&self, competition_name: &str, agent_id: &str) -> io::Result<File> {
         OpenOptions::new()
             .read(true)
