@@ -1,5 +1,6 @@
 import Button from 'components/Button';
 import Card from 'components/Card';
+import Container from 'components/Container';
 import Navbar from 'components/Navbar';
 import { Link } from 'react-router-dom';
 
@@ -7,7 +8,7 @@ import { Link } from 'react-router-dom';
 export default function Error404() {
   return <>
     <Navbar />
-    <div className='container'>
+    <Container>
       <Card>
         <h1>Error 404</h1>
         <p>
@@ -18,6 +19,6 @@ export default function Error404() {
       <Link to="/">
         <Button success>Return to the home page</Button>
       </Link>
-    </div>
+    </Container>
   </>;
 }

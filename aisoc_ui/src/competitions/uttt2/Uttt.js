@@ -1,3 +1,4 @@
+import Container from 'components/Container';
 import Navbar from 'components/Navbar';
 import { Route, Switch, useRouteMatch } from 'react-router-dom';
 import Game from './pages/Game';
@@ -9,7 +10,7 @@ import User from './pages/User';
 function Layout({ children }) {
   return <>
     <Navbar competition="uttt2" competitionName="Ultimate Tic-Tac-Toe v2" />
-    <div className='container'>{children}</div>
+    <Container>{children}</Container>
   </>;
 }
 

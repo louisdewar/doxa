@@ -1,5 +1,6 @@
 import Button from 'components/Button';
 import Card from 'components/Card';
+import Container from 'components/Container';
 import Navbar from 'components/Navbar';
 import TextBox from 'components/TextBox';
 import { useAuth } from 'hooks/useAuth';
@@ -28,7 +29,7 @@ export default function Login() {
 
   return <>
     <Navbar />
-    <div className='container'>
+    <Container>
       {showError && <Card>
         Sorry — we could not log you in with those credentials! Double-check and try again.
       </Card>}
@@ -43,6 +44,6 @@ export default function Login() {
           </Button>
         </form>
       </Card>
-    </div>
+    </Container>
   </>;
 }

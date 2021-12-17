@@ -1,5 +1,6 @@
 import Button from 'components/Button';
 import Card from 'components/Card';
+import Container from 'components/Container';
 import Navbar from 'components/Navbar';
 import { useAuth } from 'hooks/useAuth';
 import { Link } from 'react-router-dom';
@@ -10,7 +11,7 @@ export default function Account() {
 
   return <>
     <Navbar />
-    <div className='container'>
+    <Container>
       <Card>
         {auth.user && auth.user.username && `Hi, ${auth.user.username}!`}
 
@@ -20,6 +21,6 @@ export default function Account() {
       <Link to="/logout">
         <Button>Log out</Button>
       </Link>
-    </div>
+    </Container>
   </>;
 }

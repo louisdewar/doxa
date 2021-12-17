@@ -1,5 +1,6 @@
 import Button from 'components/Button';
 import Card from 'components/Card';
+import Container from 'components/Container';
 import Navbar from 'components/Navbar';
 import TextBox from 'components/TextBox';
 import { useAuth } from 'hooks/useAuth';
@@ -44,7 +45,7 @@ export default function Invite() {
   if (notFound) {
     return <>
       <Navbar />
-      <div className='container'>
+      <Container>
         <Card>
           Sorry — we could not find that invite token.
         </Card>
@@ -52,14 +53,14 @@ export default function Invite() {
         <Link to="/">
           <Button>Return to the hompage</Button>
         </Link>
-      </div>
+      </Container>
     </>;
   }
 
   if (!invite) {
     return <>
       <Navbar />
-      <div className='container'>
+      <Container>
         <Card>
           Sorry — something has gone wrong!
         </Card>
@@ -67,13 +68,13 @@ export default function Invite() {
         <Link to="/">
           <Button>Return to the hompage</Button>
         </Link>
-      </div>
+      </Container>
     </>;
   }
 
   return <>
     <Navbar />
-    <div className='container'>
+    <Container>
       {showError && <Card>
         Sorry — we could not process the invite acceptance at this time.
       </Card>}
@@ -119,7 +120,7 @@ export default function Invite() {
           </Link>
         </form>
       </Card>
-    </div>
+    </Container>
 
 
 

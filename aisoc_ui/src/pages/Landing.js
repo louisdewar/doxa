@@ -1,4 +1,5 @@
 import Card from 'components/Card';
+import Container from 'components/Container';
 import Navbar from 'components/Navbar';
 import { Link } from 'react-router-dom';
 import './Landing.scss';
@@ -8,7 +9,7 @@ import './Landing.scss';
 export default function Landing({ competitions }) {
   return <>
     <Navbar />
-    <div className='container'>
+    <Container>
       <Card darker>
         <h1 style={{
           'textUnderlineOffset': '0.65rem',
@@ -29,6 +30,6 @@ export default function Landing({ competitions }) {
           >{competitions[competition].name}</Link>
         </h2>
       </Card>)}
-    </div>
+    </Container>
   </>;
 }
