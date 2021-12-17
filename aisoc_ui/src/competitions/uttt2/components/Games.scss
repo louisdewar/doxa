@@ -1,0 +1,117 @@
+@import 'src/common/_common.scss';
+// @keyframes control-hover-over {
+//   0% {
+//     transform: scale(0.5);
+//   }
+
+//   35% {
+//     transform: scale(1.1);
+//   }
+
+//   100% {
+//     transform: scale(1.0);
+//   }
+// }
+
+.games-showing-n-label {
+  font-style: italic;
+}
+
+.games {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  a {
+    text-decoration: none;
+  }
+
+  h1 {
+    margin: 20px;
+  }
+
+  h2 {
+    color: #323232;
+  }
+
+  .game-card {
+    background-color: #e2e8f0;
+    color: $off-black;
+    border-radius: 3px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 5px 5px 5px 20px;
+    margin-bottom: 23px;
+
+    transition: transform 200ms ease-in-out, box-shadow 200ms linear;
+
+    box-shadow: 0 0 #0000, 0 0 #0000, 6px 6px #64748b;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 #0000, 0 0 #0000, 6px 6px #475569;
+    }
+
+    .mini-player {
+      display: flex;
+      align-items: center;
+
+
+      &> :not(:last-child) {
+        margin-right: 20px;
+      }
+    }
+
+    .controls {
+      svg {
+        padding: 10px;
+        cursor: pointer;
+
+        backface-visibility: hidden;
+
+        &:hover {
+          background-color: #f1f5f9;
+          border-radius: 100%;
+          animation: control-hover-over 1.0s forwards;
+        }
+
+        &:active {
+          background-color: #cbd5e1;
+        }
+      }
+    }
+
+    .move-number {
+      color: #323232;
+      // font-weight: bold;
+      text-align: center;
+    }
+
+    .labeled-value {
+      text-align: center;
+
+      .main {
+        font-weight: bold;
+        font-size: 30px;
+        display: block;
+      }
+
+      .label {
+        color: #646464;
+      }
+    }
+  }
+
+  .won {
+    border-left: 20px solid $win;
+  }
+
+  .drawn {
+    border-left: 20px solid $draw;
+  }
+
+  .lost {
+    border-left: 20px solid $loss;
+  }
+}

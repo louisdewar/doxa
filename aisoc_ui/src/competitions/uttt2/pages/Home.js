@@ -4,8 +4,6 @@ import LeaderboardTab from '../tabs/LeaderboardTab';
 import OverviewTab from '../tabs/OverviewTab';
 
 export default function Home({ baseUrl }) {
-
-
   const tabs = [
     {
       name: 'OVERVIEW',

@@ -1,6 +1,8 @@
 import Navbar from 'components/Navbar';
 import { Route, Switch, useRouteMatch } from 'react-router-dom';
+import Game from './pages/Game';
 import Home from './pages/Home';
+import Match from './pages/Match';
 import User from './pages/User';
 
 
@@ -19,6 +21,16 @@ export default function Uttt() {
     <Route path={`${path}user/:user`}>
       <Layout>
         <User baseUrl={path} />
+      </Layout>
+    </Route>
+    <Route path={`${path}match/:matchID/game/:gameID`}>
+      <Layout>
+        <Game baseUrl={path} />
+      </Layout>
+    </Route>
+    <Route path={`${path}match/:id`}>
+      <Layout>
+        <Match baseUrl={path} />
       </Layout>
     </Route>
     <Route path={path}>
