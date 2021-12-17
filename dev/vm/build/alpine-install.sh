@@ -18,3 +18,4 @@ adduser -S -u 1000 -G doxa doxa
 mkdir /output
 chown doxa:doxa /output
 
+echo "Done setup"

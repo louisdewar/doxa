@@ -1,4 +1,3 @@
-use clap::ArgMatches;
 use doxa_db::{
     action,
     diesel::PgConnection,
@@ -7,16 +6,35 @@ use doxa_db::{
 
 use chrono::Utc;
 
-pub fn invite_subcommand(matches: &ArgMatches, conn: &PgConnection) {
-    let subcommand = matches
-        .subcommand()
-        .expect("missing competition subcommand");
-    let sub_matches = subcommand.1;
+use clap::{Parser, Subcommand};
 
-    match subcommand.0 {
-        "list" => list_invites(sub_matches, conn),
-        "create" => create_invite(sub_matches, conn),
-        _ => panic!("unrecognised user subcommand"),
+#[derive(Subcommand)]
+pub enum InviteCommands {
+    /// Lists all invites
+    List {},
+    /// Creates a new invite
+    Create(CreateInviteArgs),
+}
+
+#[derive(Parser)]
+pub struct CreateInviteArgs {
+    /// You can optionally specify a required username when creating an account with this invite
+    #[clap(short, long)]
+    username: Option<String>,
+    /// When the invite expires. This accepts times in a human friendly format
+    /// e.g. "14 days" or "14d" or "14m" (for 14 minutes), "12M10m" (12 months and 10 minutes).
+    #[clap(long)]
+    expires: Option<String>,
+    /// Specifies a list of competitions that the system will enroll the user in when the invite is
+    /// accepted.
+    #[clap(long = "enroll", multiple_values = true)]
+    enrollments: Option<Vec<String>>,
+}
+
+pub fn handle_subcommand(command: InviteCommands, conn: &PgConnection) {
+    match command {
+        InviteCommands::List {} => list_invites(conn),
+        InviteCommands::Create(args) => create_invite(args, conn),
     }
 }
 
@@ -53,21 +71,19 @@ fn print_single_invite(invite: &Invite) {
     print_invite_row(invite);
 }
 
-pub fn list_invites(_matches: &ArgMatches, conn: &PgConnection) {
+pub fn list_invites(conn: &PgConnection) {
     let invites = action::user::list_invites(conn).unwrap();
 
     print_invite_table(&invites);
 }
 
-pub fn create_invite(matches: &ArgMatches, conn: &PgConnection) {
-    let username = matches.value_of("USERNAME").map(|s| s.to_string());
-    let enrollments = matches
-        .values_of_t::<String>("ENROLLMENTS")
-        .unwrap_or_default();
+pub fn create_invite(args: CreateInviteArgs, conn: &PgConnection) {
+    let username = args.username;
+    let enrollments = args.enrollments.unwrap_or_default();
 
-    let expires_at = matches.value_of("EXPIRES_AT");
+    let expires_at = args.expires;
 
-    let expires_at = expires_at.map(|expires| {
+    let expires_at = expires_at.as_ref().map(|expires| {
         Utc::now()
             .checked_add_signed(
                 chrono::Duration::from_std(parse_duration::parse(expires).unwrap()).unwrap(),

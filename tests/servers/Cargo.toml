@@ -1,0 +1,11 @@
+[package]
+name = "test_servers"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+doxa_server = { path = "../../crates/doxa_server" }
+uttt = { path = "../../competitions/uttt" }
+doxa_competition = { path = "../../crates/doxa_competition" }
+
+actix-web = "4.0.0-beta.14"

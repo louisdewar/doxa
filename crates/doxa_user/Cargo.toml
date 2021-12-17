@@ -1,0 +1,11 @@
+[package]
+name = "doxa_user"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+doxa_core = { path = "../doxa_core" }
+doxa_auth = { path = "../doxa_auth" }
+doxa_db = { path = "../doxa_db" }
+serde = { version = "1.0.131", features = ["derive"] }

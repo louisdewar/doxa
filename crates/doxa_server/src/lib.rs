@@ -1,31 +1,33 @@
+//! This crate enables conveniently setting up a new deployment of DOXA with specified
+//! competitions.
+
 use std::{env, path::PathBuf, sync::Arc};
 
-use actix_web::{web, App, HttpServer};
-
 use doxa_auth::limiter::GenericLimiter;
-use doxa_competition::{hello_world::HelloWorldCompetiton, CompetitionSystem};
+use doxa_core::actix_web::{web, App, HttpServer};
 use doxa_storage::AgentRetrieval;
 use tracing::info;
 use tracing_actix_web::TracingLogger;
-use utt::UTTTCompetition;
 
 mod telemetry;
 
-fn create_competition_system(settings: doxa_competition::Settings) -> CompetitionSystem {
-    // TODO: Maybe if competitions don't exist in the DB they should be auto created?
-    let mut system = CompetitionSystem::new(Arc::new(settings));
+pub use doxa_competition::CompetitionSystem;
 
-    system.add_competition(HelloWorldCompetiton, 3);
-    system.add_competition(UTTTCompetition, 10);
-
-    system
-}
-
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
-    dotenv::dotenv().ok();
-
-    telemetry::init_telemetry();
+/// Uses well known environment variables for configuring the various parameters of the server
+/// (e.g. database urls).
+///
+/// If `dotenv` is set to true then this will load the environment variables from a `.env` in the
+/// current directory or parents (if it exists).
+///
+/// Once the parameters are loaded this calls [`setup_server`].
+pub async fn setup_server_from_env(
+    use_dotenv: bool,
+    competition_system: CompetitionSystem,
+) -> std::io::Result<()> {
+    if use_dotenv {
+        // TODO: do not panic when dotenv doesn't exist
+        dotenv::dotenv().expect("failed to load .env vars");
+    }
 
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let mq_url = env::var("MQ_URL").expect("MQ_URL must be set");
@@ -55,19 +57,44 @@ async fn main() -> std::io::Result<()> {
     };
 
     let executor_settings = doxa_executor::Settings {
-        firecracker_path: PathBuf::from("./dev/firecracker"),
-        kernel_img: PathBuf::from("./dev/vmlinux"),
+        firecracker_path: PathBuf::from("./dev/vm/firecracker"),
+        kernel_img: PathBuf::from("./dev/vm/vmlinux"),
         kernel_boot_args: "console=ttyS0 reboot=k panic=1 pci=off".to_string(),
-        rootfs: PathBuf::from("./dev/rootfs.img"),
+        rootfs: PathBuf::from("./dev/vm/rootfs.img"),
         agent_retrieval: AgentRetrieval::new(
             "http://localhost:3001/api/storage/download/".to_string(),
         ),
     };
 
-    doxa_db::run_migrations(&doxa_db::establish_connection(&database_url));
+    setup_server(
+        &database_url,
+        &mq_url,
+        auth_settings,
+        storage_settings,
+        executor_settings,
+        competition_system,
+    )
+    .await
+}
 
-    let db_pool = web::Data::new(doxa_db::establish_pool(&database_url));
-    let mq_pool = web::Data::new(doxa_mq::establish_pool(mq_url, 25).await);
+/// Sets up server based on the given settings for each system.
+/// This will start the server and run until exit.
+///
+/// This will also automatically initialize telemetry and run database migrations.
+pub async fn setup_server(
+    database_url: &str,
+    mq_url: &str,
+    auth_settings: doxa_auth::Settings,
+    storage_settings: doxa_storage::Settings,
+    executor_settings: doxa_executor::Settings,
+    competition_system: CompetitionSystem,
+) -> std::io::Result<()> {
+    telemetry::init_telemetry();
+
+    doxa_db::run_migrations(&doxa_db::establish_connection(database_url));
+
+    let db_pool = web::Data::new(doxa_db::establish_pool(database_url));
+    let mq_pool = web::Data::new(doxa_mq::establish_pool(mq_url.to_string(), 25).await);
 
     doxa_mq::wait_for_mq(&mq_pool).await;
 
@@ -76,14 +103,16 @@ async fn main() -> std::io::Result<()> {
         mq_pool: Arc::clone(&mq_pool),
         pg_pool: Arc::clone(&db_pool),
     };
-    let competition_system = create_competition_system(competition_settings);
 
-    let configure_competition_routes = competition_system.start().await;
+    let configure_competition_routes = competition_system
+        .start(Arc::new(competition_settings))
+        .await;
 
     info!("Starting at 127.0.0.1:3001");
 
     HttpServer::new(move || {
         let api_scope = web::scope("/api");
+
         App::new()
             .app_data(db_pool.clone())
             .app_data(mq_pool.clone())
@@ -95,6 +124,7 @@ async fn main() -> std::io::Result<()> {
                     web::scope("")
                         .configure(doxa_auth::config(auth_settings.clone()))
                         .configure(doxa_storage::config(storage_settings.clone()))
+                        .configure(doxa_user::config())
                         .configure(configure_competition_routes.clone()),
                 ),
             )

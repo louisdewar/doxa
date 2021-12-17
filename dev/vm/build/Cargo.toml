@@ -1,0 +1,4 @@
+# Slimmed down Cargo.toml for use in the VM when building the rootfs
+
+[workspace]
+members = ["crates/*"]

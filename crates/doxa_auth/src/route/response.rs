@@ -2,12 +2,12 @@ use doxa_core::chrono::{DateTime, Utc};
 use serde::Serialize;
 
 #[derive(Serialize)]
-pub struct Login {
+pub(crate) struct Login {
     pub auth_token: String,
 }
 
 #[derive(Serialize)]
-pub struct InviteInfo {
+pub(crate) struct InviteInfo {
     pub username: Option<String>,
     pub expires_at: Option<DateTime<Utc>>,
     pub enrollments: Vec<String>,

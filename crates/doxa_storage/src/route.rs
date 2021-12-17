@@ -125,7 +125,7 @@ async fn upload(
         .map_err(UploadMultipartError::from)?
         .ok_or(FileMissing)?;
 
-    let content_disposition = field.content_disposition().ok_or(ExtensionMissing)?;
+    let content_disposition = field.content_disposition();
     let filename = content_disposition.get_filename().ok_or(ExtensionMissing)?;
 
     let (_, extension) = filename.split_once('.').ok_or(ExtensionMissing)?;

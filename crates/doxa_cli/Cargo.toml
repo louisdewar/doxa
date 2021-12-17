@@ -4,13 +4,21 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
-clap = { version = "3.0.0-beta.4", features = ["yaml"] }
+async-stream = "0.3.2"
+# async-tar = "0.4.2"
+clap = { version = "3.0.0-rc.0", features = ["derive", "cargo", "wrap_help", "unicode"] }
+console = "0.15.0"
 derive_more = "0.99.16"
+dialoguer = "0.9.0"
 dirs = "4.0.0"
 flate2 = "1.0.22"
-reqwest = { version = "0.11.4", features = ["json", "multipart"] }
+futures-util = "0.3.17"
+indicatif = "0.16.2"
+reqwest = { version = "0.11.4", features = ["json", "multipart", "stream"] }
 serde = { version = "1.0.130", features = ["derive"] }
 serde_json = "1.0.68"
 tar = "0.4.37"
+tempfile = "3.2.0"
 tokio = { version = "1.11.0", features = ["rt-multi-thread", "rt", "macros", "fs"] }
+tokio-util = "0.6.9"
 url = "2.2.2"
