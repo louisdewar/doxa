@@ -6,10 +6,10 @@ export const COMPETITIONS = {
     name: 'Climate Hack',
     competition: lazy(() => import('competitions/climatehack/ClimateHack'))
   },
-  uttt2: {
+  uttt: {
     name: 'Ultimate Tic-Tac-Toe',
-    competition: lazy(() => import('competitions/uttt2/Uttt'))
+    competition: lazy(() => import('competitions/uttt/Uttt'))
   }
 };
 
-export const DEFAULT_COMPETITION = process.env.REACT_APP_DEFAULT_COMPETITION ?? 'uttt2';
+export const DEFAULT_COMPETITION = process.env.REACT_APP_DEFAULT_COMPETITION ?? 'uttt';

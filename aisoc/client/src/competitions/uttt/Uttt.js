@@ -9,7 +9,7 @@ import User from './pages/User';
 
 function Layout({ children }) {
   return <>
-    <Navbar competition="uttt2" competitionName="Ultimate Tic-Tac-Toe v2" />
+    <Navbar competition="uttt" competitionName="Ultimate Tic-Tac-Toe" />
     <Container>{children}</Container>
   </>;
 }
