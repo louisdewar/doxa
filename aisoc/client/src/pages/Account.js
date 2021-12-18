@@ -13,8 +13,6 @@ export default function Account() {
   if (!auth.isLoggedIn()) { return <Redirect to='/' />; }
   if (!auth.user) { return <></>; }
 
-  console.log(auth.user);
-
   return <>
     <Navbar />
     <Container>

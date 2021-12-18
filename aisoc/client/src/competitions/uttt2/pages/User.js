@@ -30,7 +30,7 @@ export default function User({ baseUrl }) {
         score
       });
     }
-    console.log('Matches', matches);
+
     setMatches(matches);
   }, [user]);
 

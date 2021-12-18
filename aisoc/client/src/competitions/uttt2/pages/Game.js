@@ -1,4 +1,4 @@
-import { faFastBackward, faFastForward, faStepBackward, faStepForward } from '@fortawesome/free-solid-svg-icons';
+import { faFastBackward, faFastForward, faSquare, faStepBackward, faStepForward } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
 import Card from 'components/Card';
@@ -18,8 +18,9 @@ function moveToLabel(move) {
 function Moves({ moves, currentMove, goToMove }) {
   return (
     <div className="game-move-list">
-      {/* <span className="number">#</span>
-      <span></span><span></span> */}
+      <span className="number">#</span>
+      <span className="game-move-header-item">[<FontAwesomeIcon icon={faSquare} size='lg' />, <FontAwesomeIcon icon={faSquare} size='xs' />]</span>
+      <span className="game-move-header-item">[<FontAwesomeIcon icon={faSquare} size='lg' />, <FontAwesomeIcon icon={faSquare} size='xs' />]</span>
       {moves.map((move, i) => {
         let output;
         if (i % 2 == 0) {
