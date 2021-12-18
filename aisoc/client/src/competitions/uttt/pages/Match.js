@@ -44,9 +44,9 @@ export default function Match({ baseUrl }) {
         {data.scores.a_wins} wins | {data.scores.draws} draws | {data.scores.b_wins} losses
       </h2>
       <div className='match-score-bar'>
-        <div className='match-score-bar-wins' style={{ width: data.scores.percentages.a_wins + '%' }}></div>
-        <div className='match-score-bar-draws' style={{ width: data.scores.percentages.draws + '%' }}></div>
-        <div className='match-score-bar-losses' style={{ width: data.scores.percentages.b_wins + '%' }}></div>
+        {data.scores.percentages.a_wins > 0 && <div className='match-score-bar-wins' style={{ width: data.scores.percentages.a_wins + '%' }}></div>}
+        {data.scores.percentages.draws > 0 && <div className='match-score-bar-draws' style={{ width: data.scores.percentages.draws + '%' }}></div>}
+        {data.scores.percentages.b_wins > 0 && <div className='match-score-bar-losses' style={{ width: data.scores.percentages.b_wins + '%' }}></div>}
       </div>
     </Card>
 
