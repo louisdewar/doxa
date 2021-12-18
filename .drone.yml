@@ -37,7 +37,7 @@ steps:
         path: /var/run/docker.sock
     environment:
       DOCKER_PASSWORD:
-            from_secret: DOCKER_PASSWORD
+        from_secret: DOCKER_PASSWORD
     commands:
       - echo $DOCKER_PASSWORD | docker login https://registry.dewardt.uk --username doxa --password-stdin
       - docker tag registry.dewardt.uk/doxa/server:drone-build-"$DRONE_BUILD_NUMBER" registry.dewardt.uk/doxa/server:production
@@ -55,9 +55,9 @@ trigger:
     - production
 
 volumes:
-- name: dockersock
-  host:
-    path: /var/run/docker.sock
+  - name: dockersock
+    host:
+      path: /var/run/docker.sock
 
 ---
 kind: pipeline
@@ -85,7 +85,7 @@ steps:
   - name: install packages and lint
     image: node:lts
     commands:
-      - cd aisoc_ui
+      - cd aisoc/client
       - npm install
       - npm run build
 
