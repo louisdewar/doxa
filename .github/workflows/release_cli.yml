@@ -3,22 +3,22 @@ on: push
 #    types: [created]
 
 jobs:
-  release-example-agent:
-    name: release-example-agent
-    runs-on: ubuntu-latest
-    - name: Checkout repository
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 1
-    - name: zip
-      shell: bash
-      run: |
-        zip -r uttt_example_agent.zip competitions/uttt/example_agent
-    - name: Release
-      uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/')
-      with:
-        files: uttt_example_agent.zip
+  #  release-example-agent:
+  #    name: release-example-agent
+  #    runs-on: ubuntu-latest
+  #    - name: Checkout repository
+  #      uses: actions/checkout@v2
+  #      with:
+  #        fetch-depth: 1
+  #    - name: zip
+  #      shell: bash
+  #      run: |
+  #        zip -r uttt_example_agent.zip competitions/uttt/example_agent
+  #    - name: Release
+  #      uses: softprops/action-gh-release@v1
+  #      if: startsWith(github.ref, 'refs/tags/')
+  #      with:
+  #        files: uttt_example_agent.zip
   build-release-cli:
     name: build-release-cli
     runs-on: ${{ matrix.os }}
