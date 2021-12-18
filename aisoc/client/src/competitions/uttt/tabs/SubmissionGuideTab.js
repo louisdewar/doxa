@@ -4,6 +4,9 @@ export default function SubmissionGuideTab() {
   return <div className="submission-guide-tab">
     <h2>Submission Guide</h2>
     <p>
+      Ensure you have Python 3.7+ installed on your computer before you begin.
+    </p>
+    <p>
       To get started, download the example agent project from <a href="https://github.com/louisdewar/doxa/releases/download/0.0.1/uttt_example_agent.zip">GitHub</a>.
     </p>
     <h3>Using the Doxa CLI</h3>
