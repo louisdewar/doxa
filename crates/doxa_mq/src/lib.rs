@@ -6,7 +6,7 @@ pub use tokio_amqp;
 
 pub use lapin::Connection;
 
-use doxa_core::{deadpool_lapin::Manager, tokio};
+use doxa_core::{deadpool_lapin::Manager, tokio, tracing::info};
 use lapin::ConnectionProperties;
 use tokio_amqp::LapinTokioExt;
 
@@ -49,6 +49,8 @@ pub async fn wait_for_mq(pool: &MQPool) {
                 if i == 4 {
                     panic!("failed to connect to rabbit mq: {}", e);
                 }
+
+                info!(attempt=%i, "failed to connect to rabbit mq, trying again");
 
                 tokio::time::sleep(Duration::from_millis(750)).await;
             }

@@ -6,6 +6,8 @@ use std::{
 use serde::{Deserialize, Serialize};
 use tokio::io::AsyncWriteExt;
 
+use crate::error::{LoadProfileConfigError, NoDefaultUserProfile, UserNotLoggedIn};
+
 pub fn default_config_dir() -> PathBuf {
     dirs::config_dir()
         .expect("Cannot determine the system's preferred config directory for this user")
@@ -33,20 +35,27 @@ pub struct ProfileConfig {
 }
 
 impl ProfileConfig {
-    pub fn user_profile(&self, user: &str) -> Option<&UserProfile> {
+    pub fn user_profile(&self, user: &str) -> Result<UserProfile, UserNotLoggedIn> {
         for profile in &self.profiles {
             if profile.name == user {
-                return Some(profile);
+                return Ok(profile.clone());
             }
         }
 
-        None
+        Err(UserNotLoggedIn {
+            username: user.to_string(),
+        })
     }
 
-    pub fn default_profile(&self) -> Option<&UserProfile> {
-        self.default
-            .as_ref()
-            .and_then(|default| self.user_profile(default))
+    pub fn default_profile(
+        &self,
+    ) -> Result<Result<UserProfile, NoDefaultUserProfile>, UserNotLoggedIn> {
+        let default_user = match &self.default {
+            Some(user) => user,
+            None => return Ok(Err(NoDefaultUserProfile)),
+        };
+
+        self.user_profile(default_user).map(Ok)
     }
 
     pub fn upsert_profile(&mut self, user: String, auth_token: String) {
@@ -63,17 +72,22 @@ impl ProfileConfig {
             auth_token,
         });
     }
+
+    pub fn set_default_profile(&mut self, user: String) {
+        self.default = Some(user);
+    }
 }
 
-pub async fn load_or_default_profile(config_dir: &Path) -> io::Result<ProfileConfig> {
+pub async fn load_or_default_profile(
+    config_dir: &Path,
+) -> Result<ProfileConfig, LoadProfileConfigError> {
     let profiles = match tokio::fs::read_to_string(profiles_file(config_dir)).await {
         Ok(v) => v,
         Err(e) if e.kind() == ErrorKind::NotFound => return Ok(ProfileConfig::default()),
-        Err(e) => return Err(e),
+        Err(e) => return Err(e.into()),
     };
 
-    let profiles: ProfileConfig =
-        serde_json::from_str(&profiles).expect("improperly formatted profiles file");
+    let profiles: ProfileConfig = serde_json::from_str(&profiles)?;
 
     Ok(profiles)
 }
