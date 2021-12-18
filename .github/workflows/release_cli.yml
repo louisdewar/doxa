@@ -1,6 +1,6 @@
 on: push
-  #  release:
-  #    types: [created]
+#  release:
+#    types: [created]
 
 jobs:
   release-example-agent:
@@ -19,7 +19,6 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/')
       with:
         files: uttt_example_agent.zip
-
   build-release-cli:
     name: build-release-cli
     runs-on: ${{ matrix.os }}
