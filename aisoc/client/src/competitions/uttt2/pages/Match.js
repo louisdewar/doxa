@@ -1,7 +1,7 @@
-import UTTTAPI from 'competitions/uttt/api';
 import Card from 'components/Card';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import UTTTAPI from '../api';
 import Games from '../components/Games';
 import './Match.scss';
 
