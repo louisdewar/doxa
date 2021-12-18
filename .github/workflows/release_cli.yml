@@ -14,7 +14,11 @@ jobs:
     - name: zip
       shell: bash
       run: |
-        zip -r uttt_example_agent.zip competitions/uttt/example_agent
+        cd competitions/uttt
+        # Rename the agent for the zip file
+        mv example_agent uttt_example_agent
+        zip -r uttt_example_agent.zip uttt_example_agent
+        mv uttt_example_agent.zip ../../
     - name: Release
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
@@ -62,19 +66,17 @@ jobs:
       shell: bash
       run: |
         release_dir="./target/${{ matrix.target }}/release"
-        staging="doxa_cli-${{ matrix.target }}"
+        release_name="doxa_cli-${{ matrix.target }}"
 
-        mkdir -p $staging
-
-
+        bin_name=doxa_cli
         if [ "${{ matrix.os }}" = "windows-2019" ]; then
-          cp "${release_dir}/doxa_cli.exe" "${staging}/doxa_cli.exe"
-        else
-          cp "${release_dir}/doxa_cli" "${staging}/doxa_cli"
+          bin_name=doxa_cli.exe
         fi
 
-        tar czf "$staging.tar.gz" "$staging"
-        echo "ASSET=$staging.tar.gz" >> $GITHUB_ENV
+        cp "${release_dir}/${bin_name}" .
+
+        tar czf "${release_name}.tar.gz" "${bin_name}"
+        echo "ASSET=${release_name}.tar.gz" >> $GITHUB_ENV
     - name: Release
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
