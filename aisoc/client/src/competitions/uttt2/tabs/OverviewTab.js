@@ -11,8 +11,5 @@ export default function OverviewTab() {
     <p>
       Cupcake danish soufflé marzipan I love jelly-o. Jelly beans pudding pastry chocolate bar marshmallow toffee chocolate cake cupcake caramels. I love marzipan chocolate chocolate pastry ice cream donut cake I love.
     </p>
-    <p>
-      Dessert dragée cheesecake biscuit marshmallow cake. Dessert macaroon I love chupa chups biscuit jelly oat cake sesame snaps marshmallow. I love marshmallow shortbread biscuit jelly-o. Danish brownie macaroon topping donut cake caramels cake.
-    </p>
   </div>;
 }
