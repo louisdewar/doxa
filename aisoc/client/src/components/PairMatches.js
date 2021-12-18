@@ -24,14 +24,12 @@ export default function PairMatches({ baseUrl, matches }) {
       <span className="leaderboard-position">#</span>
       <span className="leaderboard-username">Users</span>
       <span className="leaderboard-match-link">Match</span>
-      <span className="leaderboard-score">Score</span>
     </div>
 
     {matches.map((entry, i) => (entry.player1.includes(filter) || entry.player2.includes(filter)) && <div key={i} className='leaderboard-entry'>
       <span className="leaderboard-position">{i + 1}</span>
-      <span className="leaderboard-username"><Link to={`${baseUrl}user/${entry.player1}`}>{entry.player1}</Link> vs <Link to={`${baseUrl}user/${entry.player2}`}>{entry.player2}</Link></span>
+      <span className="leaderboard-username"><Link to={`${baseUrl}user/${entry.player1}`}>{entry.player1}</Link> ({entry.score1}) vs <Link to={`${baseUrl}user/${entry.player2}`}>{entry.player2}</Link> ({entry.score2})</span>
       <span className="leaderboard-match-link"><Link to={`${baseUrl}match/${entry.id}`}>View match</Link></span>
-      <span className="leaderboard-score">{entry.score}</span>
     </div>)}
   </div>;
 }

@@ -21,13 +21,16 @@ export default function User({ baseUrl }) {
     for (const activeGame of activeGames) {
       const players = await UTTTAPI.getGamePlayers(activeGame.id);
       const mainAgent = (players[0].username == user ? players[0] : players[1]).agent;
-      const score = await UTTTAPI.getGameResult(activeGame.id, mainAgent);
+      const otherAgent = (players[0].username != user ? players[0] : players[1]).agent;
+      const score1 = await UTTTAPI.getGameResult(activeGame.id, mainAgent);
+      const score2 = await UTTTAPI.getGameResult(activeGame.id, otherAgent);
 
       matches.push({
         id: activeGame.id,
         player1: players[0].username,
         player2: players[1].username,
-        score
+        score1,
+        score2
       });
     }
 

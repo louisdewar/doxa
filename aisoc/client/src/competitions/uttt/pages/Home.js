@@ -1,6 +1,5 @@
 import CompetitionHeader from 'components/CompetitionHeader';
 import CompetitionTabs from 'components/CompetitionTabs';
-import CodeTab from '../tabs/CodeTab';
 import LeaderboardTab from '../tabs/LeaderboardTab';
 import OverviewTab from '../tabs/OverviewTab';
 import RulesTab from '../tabs/RulesTab';
@@ -17,10 +16,6 @@ export default function Home({ baseUrl }) {
       tab: <RulesTab />
     },
     {
-      name: 'CODE',
-      tab: <CodeTab />
-    },
-    {
       name: 'LEADERBOARD',
       tab: <LeaderboardTab baseUrl={baseUrl} />
     },
@@ -30,11 +25,10 @@ export default function Home({ baseUrl }) {
     },
   ];
 
-
   return <>
     <CompetitionHeader
       competitionName="Ultimate Tic-Tac-Toe"
-      description="It is what it is."
+      description="The aim of the game is to win a tic-tac-toe grid of tac-tac-toe grids!"
     />
     <CompetitionTabs tabs={tabs} />
   </>;

@@ -1,18 +1,35 @@
+import './SubmissionGuideTab.scss';
 
 export default function SubmissionGuideTab() {
-  return <div>
+  return <div className="submission-guide-tab">
     <h2>Submission Guide</h2>
     <p>
-      Cupcake ipsum dolor sit amet I love macaroon dessert I love. Gingerbread wafer wafer I love oat cake jelly ice cream. Sesame snaps topping I love candy danish I love sesame snaps I love tootsie roll. Candy canes chocolate cake jelly-o pudding soufflé lollipop icing.
+      To get started, download the example agent project from <a href="https://github.com/louisdewar/doxa/releases/download/0.0.1/uttt_example_agent.zip">GitHub</a>.
+    </p>
+    <h3>Using the Doxa CLI</h3>
+    <p>
+      To use the Doxa CLI, run the following command:
+    </p>
+    <pre>
+      python doxa_cli.py [ARGS]
+    </pre>
+    <p>
+      If you do not have the relevant Doxa CLI binary for your operating system, it will be downloaded into the {'"bin"'} folder.
     </p>
     <p>
-      Gingerbread carrot cake jujubes croissant icing sweet. Fruitcake brownie cookie I love sesame snaps bear claw cotton candy lemon drops sugar plum. Lollipop tart brownie pudding oat cake halvah cake carrot cake caramels. Carrot cake I love I love pastry cake.
+      Before you can submit your agent code, you must first login using the following command:
     </p>
+    <pre>
+      python doxa_cli.py user login
+    </pre>
     <p>
-      Cupcake danish soufflé marzipan I love jelly-o. Jelly beans pudding pastry chocolate bar marshmallow toffee chocolate cake cupcake caramels. I love marzipan chocolate chocolate pastry ice cream donut cake I love.
+      When you want to submit, run the following command from the root of your agent folder:
     </p>
+    <pre>
+      python doxa_cli.py agent upload uttt .
+    </pre>
     <p>
-      Dessert dragée cheesecake biscuit marshmallow cake. Dessert macaroon I love chupa chups biscuit jelly oat cake sesame snaps marshmallow. I love marshmallow shortbread biscuit jelly-o. Danish brownie macaroon topping donut cake caramels cake.
+      Here, {'"."'} refers to the folder containing the agent code you wish to submit.
     </p>
   </div>;
 }
