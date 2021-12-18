@@ -1,27 +1,72 @@
 on:
-  release:
-    types: [created]
+  push
+  #  release:
+  #    types: [created]
 
 jobs:
-  release:
-    name: release ${{ matrix.target }}
-    runs-on: ubuntu-latest
+  build-release:
+    name: build-release
+    runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false
       matrix:
+        build: [linux, macos, win-gnu]
         include:
-          - target: x86_64-pc-windows-gnu
-            archive: tar.gz
-          - target: x86_64-unknown-linux-musl
-            archive: tar.gz
-          - target: x86_64-apple-darwin
-            archive: tar.gz
+        - build: linux
+          os: ubuntu-latest
+          rust: stable
+          target: x86_64-unknown-linux-gnu
+        - build: macos
+          os: macos-latest
+          rust: stable
+          target: x86_64-apple-darwin
+        - build: win-gnu
+          os: windows-latest
+          rust: nightly-x86_64-gnu
+          target: x86_64-pc-windows-gnu
     steps:
-      - uses: actions/checkout@master
-      - name: Compile and release
-        uses: rust-build/rust-build.action@latest
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RUSTTARGET: ${{ matrix.target }}
-          ARCHIVE_TYPES: ${{ matrix.archive }}
-          SRC_DIR: "crates/doxa_cli"
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: ${{ matrix.rust }}
+        profile: minimal
+        override: true
+        target: ${{ matrix.target }}
+    - name: Build release binary
+      run: cargo build -p doxa_cli --verbose --release
+
+    - name: Strip release binary (linux and macos)
+      if: matrix.build == 'linux' || matrix.build == 'macos'
+      run: strip "target/${{ matrix.target }}/release/doxa_cli"
+    - name: Build archive
+      shell: bash
+      run: |
+        release_dir="./target/${{ matrix.target }}/release"
+        staging="doxa_cli-${{ matrix.target }}"
+
+        mkdir -p $staging
+
+
+        if [ "${{ matrix.os }}" = "windows-2019" ]; then
+          cp "${release_dir}/doxa_cli.exe" "${staging}/doxa_cli.exe"
+        else
+          cp "${release_dir}/doxa_cli" "${staging}/doxa_cli"
+        fi
+
+        tar czf "$staging.tar.gz" "$staging"
+        echo "ASSET=$staging.tar.gz" >> $GITHUB_ENV
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+        # - name: Upload release archive
+        #   uses: actions/upload-release-asset@v1.0.1
+        #   env:
+        #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        #   with:
+        #     upload_url: ${{ needs.create-release.outputs.upload_url }}
+        #     asset_path: ${{ env.ASSET }}
+        #     asset_name: ${{ env.ASSET }}
+        #     asset_content_type: application/octet-stream
