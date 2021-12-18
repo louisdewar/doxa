@@ -6,7 +6,13 @@ import UTTTAPI from '../api';
 
 export default function User({ baseUrl }) {
   const { user } = useParams();
+  const [score, setScore] = useState(0);
   const [matches, setMatches] = useState(null);
+
+  useEffect(async () => {
+    const data = await UTTTAPI.getUserScore(user);
+    setScore(data.score || 0);
+  }, [user]);
 
   useEffect(async () => {
     const activeGames = await UTTTAPI.getUserActiveGames(user);
@@ -32,7 +38,7 @@ export default function User({ baseUrl }) {
     <Card darker className='competitionHeader'>
       <h1>{user}</h1>
       <h2>
-        0 points
+        {score} points
       </h2>
     </Card>
     {matches && <Card>
