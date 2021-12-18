@@ -33,3 +33,7 @@ pub fn mark_upload_as_complete(
 pub fn mark_upload_as_failed(conn: &PgConnection, id: String) -> Result<AgentUpload, DieselError> {
     action::storage::mark_upload_as_failed(conn, id)
 }
+
+/// Finds all the agents marked with uploaded: true AND deleted: false, that were uploaded before
+/// the currently active agent and deletes each from the disk in turn, setting deleted to false
+pub async fn delete_old_uploads(pool: web::Data<PgPool>, user_id: i32) -> Result<()> {}
