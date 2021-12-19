@@ -3,7 +3,7 @@ use std::sync::Arc;
 use doxa_core::{
     lapin::{message::Delivery, options::BasicAckOptions},
     tokio,
-    tracing::{error, span, Level},
+    tracing::{error, info, span, Level},
     tracing_futures::Instrument,
 };
 use doxa_db::model::storage::AgentUpload;
@@ -75,7 +75,22 @@ impl<C: Competition> AgentActivationManager<C> {
     /// Activates the agent and then calls the `on_agent_activated` event if it is successful.
     /// If this required deactivating an agent then the `on_agent_deactivated` will be called
     /// first.
+    ///
+    /// This will first check to make sure the agent has not been deleted (e.g. by a subsequent
+    /// upload).
+    /// In this case the method silently does nothing.
     async fn activate_agent(&self, agent_id: String) -> Result<(), ContextError> {
+        // This isn't atomic, but this isn't a big deal since it's okay to delete an active agent
+        // (it just means it won't play future) matches.
+        // The only utility of this is to prevent wasting time queueing matches we know are going
+        // to be skipped because the agent doesn't exist.
+        let agent = self.context.get_agent_required(agent_id.clone()).await?;
+
+        if agent.deleted {
+            info!(%agent_id, "not activating agent because it was deleted");
+            return Ok(());
+        }
+
         if let Some(deactivated_agent) = self.context.activate_agent(agent_id.clone()).await? {
             let span = span!(Level::INFO, "deactiving agent before activating new one", old_agent = %deactivated_agent.id);
             self.competition
@@ -120,14 +135,6 @@ impl<C: Competition> AgentActivationManager<C> {
             self.activate_agent(event.agent).await?;
         } else {
             self.deactivate_agent(event.agent).await?;
-            // if let Err(error) = self
-            //     .competition
-            //     .on_agent_deactivated(&self.context, event.agent)
-            //     .await
-            // {
-            //     event!(Level::ERROR, %error, debug = ?error, "on_agent_deactivated failed for agent");
-            //     return Err(error);
-            // }
         }
 
         delivery

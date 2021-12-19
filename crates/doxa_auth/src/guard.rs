@@ -1,10 +1,11 @@
 use std::{future::Future, pin::Pin};
 
 use actix_web::{web, HttpResponse};
+use doxa_core::RespondableError;
 
-// TODO: get rid of AuthGuardInner, it was never used and isn't really useful
+use crate::error::UserNotAdmin;
 
-pub struct AuthGuard<T: AuthGuardInner> {
+pub struct AuthGuard<T: AuthGuardInner = ()> {
     user: i32,
     is_admin: bool,
     inner: T,
@@ -36,6 +37,7 @@ impl<T: AuthGuardInner> AuthGuard<T> {
 pub trait AuthGuardInner: Sized {
     fn construct(
         user: i32,
+        is_admin: bool,
         connnection: web::Data<doxa_db::PgPool>,
     ) -> Pin<Box<dyn Future<Output = Result<Self, HttpResponse>>>>;
 }
@@ -43,8 +45,28 @@ pub trait AuthGuardInner: Sized {
 impl AuthGuardInner for () {
     fn construct(
         _user: i32,
+        _is_admin: bool,
         _connnection: web::Data<doxa_db::PgPool>,
     ) -> Pin<Box<dyn Future<Output = Result<Self, HttpResponse>>>> {
         Box::pin(async { Ok(()) })
+    }
+}
+
+/// Guard that requires the user to be an admin
+pub struct Admin;
+
+impl AuthGuardInner for Admin {
+    fn construct(
+        _user: i32,
+        is_admin: bool,
+        _connnection: web::Data<doxa_db::PgPool>,
+    ) -> Pin<Box<dyn Future<Output = Result<Self, HttpResponse>>>> {
+        Box::pin(async move {
+            if is_admin {
+                Ok(Admin)
+            } else {
+                Err(UserNotAdmin.as_response())
+            }
+        })
     }
 }
