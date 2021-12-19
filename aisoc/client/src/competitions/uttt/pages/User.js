@@ -79,15 +79,23 @@ function MatchRow({ filter, matchID, baseUrl, i }) {
 
 export default function User({ baseUrl }) {
   const { user } = useParams();
-  const [score, setScore] = useState(0);
-  const [matchIDs, setMatchIDs] = useState(null);
+  const [score, setScore] = useState(null);
+  const [matchIDs, setMatchIDs] = useState([]);
 
   useEffect(async () => {
+    if (score !== null) {
+      setScore(null);
+    }
+
     const data = await UTTTAPI.getUserScore(user);
     setScore(data.score || 0);
   }, [user]);
 
   useEffect(async () => {
+    if (matchIDs !== []) {
+      setMatchIDs([]);
+    }
+
     const activeGames = await UTTTAPI.getUserActiveGames(user);
     setMatchIDs(activeGames.map(game => game.id));
   }, [user]);
@@ -96,12 +104,12 @@ export default function User({ baseUrl }) {
     <Card darker className='competitionHeader'>
       <h1>{user}</h1>
       <h2>
-        {score} points
+        {score === null? <LoadingPlaceholder height={25} width={35} />: score} points
       </h2>
     </Card>
-    {matchIDs && <Card>
+    <Card>
       <h2>Matches</h2>
-      <PairMatches baseUrl={baseUrl} matchIDs={matchIDs} matchComponent={MatchRow} />
-    </Card>}
+      <PairMatches baseUrl={baseUrl} matchIDs={matchIDs} MatchComponent={MatchRow} />
+    </Card>
   </>;
 }

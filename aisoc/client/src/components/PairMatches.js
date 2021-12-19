@@ -2,7 +2,7 @@ import { useState, Fragment } from 'react';
 import './Leaderboard.scss';
 import TextBox from './TextBox';
 
-export default function PairMatches({ baseUrl, matchIDs, matchComponent }) {
+export default function PairMatches({ baseUrl, matchIDs, MatchComponent }) {
   const [filter, setFilter] = useState('');
 
   return <div className="leaderboard">
@@ -19,7 +19,6 @@ export default function PairMatches({ baseUrl, matchIDs, matchComponent }) {
       <span className="leaderboard-match-link">Match</span>
     </div>
 
-
-    {matchIDs.map((matchID, i) => <Fragment key={i}>{matchComponent({ matchID, filter, baseUrl, i })}</Fragment>)}
+    {matchIDs.map((matchID, i) => <Fragment key={i}><MatchComponent matchID={matchID} filter={filter} baseUrl={baseUrl} i={i} /></Fragment>)}
   </div>;
 }
