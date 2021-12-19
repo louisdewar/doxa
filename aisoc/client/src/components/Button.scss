@@ -1,0 +1,68 @@
+.button {
+  border: 0;
+  border-radius: 3px;
+  margin-bottom: 20px;
+  margin-right: 10px;
+  padding: 10px 20px;
+  font-family: inherit;
+
+  color: #fff;
+  background-color: #94a3b8;
+  box-shadow: 0 0 #0000, 0 0 #0000, 5px 5px #1F2937;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #64748b;
+  }
+
+  &:active {
+    background-color: #475569;
+  }
+
+  &.button-success {
+    background-color: #30A292;
+
+    &:hover {
+      background-color: darken(#30A292, 5%);
+    }
+
+    &:active {
+      background-color: darken(#30A292, 10%);
+    }
+  }
+
+  &.button-failure {
+    background-color: #ee5253;
+
+    &:hover {
+      background-color: darken(#ee5253, 5%);
+    }
+
+    &:active {
+      background-color: darken(#ee5253, 10%);
+    }
+  }
+
+  &.button-disabled {
+    background-color: #71717a;
+    cursor: default;
+
+    &:hover {
+      background-color: #71717a;
+    }
+
+    &:active {
+      background-color: #71717a;
+    }
+  }
+
+  &:focus,
+  &:focus-visible {
+    outline: none;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}

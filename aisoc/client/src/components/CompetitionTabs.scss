@@ -1,0 +1,26 @@
+@import '../common/colours';
+
+.competitionTabs {
+  .competitionTabSelector {
+    margin-bottom: 10px;
+
+    a {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      text-decoration: none;
+      text-underline-offset: 0.2rem;
+      color: #1F2937;
+
+      &.activeTab {
+        text-decoration: underline;
+      }
+    }
+
+    a+a::before {
+      content: '|';
+      padding-left: 10px;
+      padding-right: 10px;
+      text-decoration: none;
+      display: inline-block;
+    }
+  }
+}
