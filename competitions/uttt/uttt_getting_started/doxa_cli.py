@@ -11,8 +11,8 @@ if sys.version_info[0] != 3:
 import json
 import os
 import platform
-import shutil
 import stat
+import subprocess
 import tarfile
 import urllib.error
 import urllib.request
@@ -140,8 +140,7 @@ def run_command(args):
 
     if not os.path.exists(bin_path):
         install_binary()
-
-    os.execvp(bin_path, [bin_path] + args)
+    subprocess.call([bin_path] + args)
 
 
 if __name__ == "__main__":
