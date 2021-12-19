@@ -1,0 +1,28 @@
+@keyframes loading-placeholder-fade-in {
+  0% {
+    width: 0%;
+    opacity: 0.0;
+  }
+  30% {
+    width: 0%;
+    opacity: 0.0;
+  }
+  100% {
+    opacity: 0.9;
+  }
+}
+
+.LoadingPlaceholder {
+  display: inline-block;
+  border-radius: 2px;
+  vertical-align: middle;
+
+  &::after {
+    content: ' ';
+    display: block;
+    background-color: #fafafa;
+    animation: 1.5s loading-placeholder-fade-in;
+    height: 100%;
+    width: 100%;
+  }
+}
