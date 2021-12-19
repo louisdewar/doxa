@@ -1,7 +1,7 @@
 # An example agent for UTTT competition.
 # It's designed to keep playing valid moves without any thought to strategy beyond that
 
-import sys, random
+import random
 
 # Runs at startup to determine which player the current user is
 def get_player():
