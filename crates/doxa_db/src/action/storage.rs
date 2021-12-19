@@ -31,6 +31,12 @@ pub fn mark_upload_as_failed(conn: &PgConnection, id: String) -> Result<AgentUpl
         .get_result(conn)
 }
 
+pub fn mark_agent_as_deleted(conn: &PgConnection, id: String) -> Result<AgentUpload, DieselError> {
+    diesel::update(s::agents::dsl::agents.filter(s::agents::columns::id.eq(id)))
+        .set(s::agents::columns::deleted.eq(true))
+        .get_result(conn)
+}
+
 pub fn list_agents(
     conn: &PgConnection,
     user: i32,
@@ -140,6 +146,24 @@ pub fn get_active_agents_uploaded_before(
     use view::active_agents::columns as c;
     view::active_agents::table
         .filter(c::competition.eq(competition))
+        .filter(c::uploaded_at.lt(before))
+        .get_results(conn)
+}
+
+// Returns agents were uploaded: true and deleted: false (this includes active agents).
+// Just because an agent is uploaded but not active doesn't mean it is deletable (it
+// may be in the queue for activation), therefore you should make sure the before is less than or
+// equal to the upload time of a known active / in activation queue agent.
+pub fn get_deletable_agents_uploaded_before(
+    conn: &PgConnection,
+    competition: i32,
+    user: i32,
+    before: DateTime<Utc>,
+) -> Result<Vec<AgentUpload>, DieselError> {
+    use s::agents::columns as c;
+    s::agents::table
+        .filter(c::competition.eq(competition))
+        .filter(c::owner.eq(user))
         .filter(c::uploaded_at.lt(before))
         .get_results(conn)
 }

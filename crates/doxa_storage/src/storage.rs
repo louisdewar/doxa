@@ -45,10 +45,14 @@ impl LocalStorage {
             .map(|f| (f, file_name))
     }
 
-    pub async fn delete_file(&self, competition_name: &str, agent_id: &str) -> io::Result<()> {
+    /// Returns the size of the deleted file in bytes
+    pub async fn delete_file(&self, competition_name: &str, agent_id: &str) -> io::Result<u64> {
         let path = self.root.join(&competition_name).join(&agent_id);
 
-        tokio::fs::remove_file(path).await
+        let size = tokio::fs::metadata(&path).await?.len();
+        tokio::fs::remove_file(path).await?;
+
+        Ok(size)
     }
 
     pub async fn open_file(&self, competition_name: &str, agent_id: &str) -> io::Result<File> {

@@ -332,6 +332,12 @@ impl<C: Competition + ?Sized> Context<C> {
             .await
     }
 
+    // Gets an agent returning an error if it doesn't exist
+    pub async fn get_agent_required(&self, agent: String) -> Result<AgentUpload, ContextError> {
+        self.run_query(move |conn| doxa_db::action::storage::get_agent_required(conn, agent))
+            .await
+    }
+
     pub async fn is_agent_active(&self, agent: String) -> Result<bool, ContextError> {
         let agent = self.get_agent(agent).await?.ok_or(AgentNotFound)?;
 

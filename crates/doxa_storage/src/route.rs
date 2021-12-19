@@ -116,15 +116,6 @@ async fn upload(
     auth: AuthGuard<()>,
     limiter: web::Data<UploadLimits>,
 ) -> EndpointResult {
-    // TODO:
-    // - Check what the remaining capacity is for the user's upload quota, this will need to be
-    // done before upload begins and then again once it is inserted into the database as it may be
-    // possible for two uploads to occur simulataneously.
-    // - Add an option to delete previous uploads automatically when space is required.
-    // - Maybe figure out a way to ensure there is only one upload at once? Find uploads that are
-    // in the database but not marked uploaded (will need a max timeout at which to consider an
-    // upload failed).
-
     let competition = path.into_inner();
     // Check if the user is enrolled
     let enrollment = web::block({
@@ -135,6 +126,8 @@ async fn upload(
         move || doxa_auth::controller::is_enrolled(&conn, user_id, competition)
     })
     .await??;
+
+    let competition_id = enrollment.competition;
 
     if !auth.admin() {
         limiter
@@ -178,7 +171,7 @@ async fn upload(
                 &conn,
                 id,
                 user_id,
-                enrollment.competition,
+                competition_id,
                 extension.to_string(),
             )
         }
@@ -208,7 +201,8 @@ async fn upload(
         }
     }
 
-    web::block({
+    let uploaded_agent = web::block({
+        let pool = pool.clone();
         let conn = web::block(move || pool.get()).await??;
         let id = id.clone();
         move || crate::controller::mark_upload_as_complete(&conn, id)
@@ -226,5 +220,20 @@ async fn upload(
     )
     .await?;
 
+    if let Err(e) = crate::controller::delete_old_uploads(
+        storage,
+        pool,
+        &competition,
+        enrollment.competition,
+        auth.id(),
+        uploaded_agent.uploaded_at,
+    )
+    .await
+    {
+        error!(error=%e, "failed to delete old uploads");
+    }
+
     Ok(HttpResponse::Ok().json(response::Upload { id, competition }))
 }
+
+// async fn cleanup(user: AuthGuard<Admin>) -> EndpointResult {}
