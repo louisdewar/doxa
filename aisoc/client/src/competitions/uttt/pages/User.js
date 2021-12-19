@@ -15,7 +15,7 @@ async function fetchMatchRow(setPlayers, setScores, matchID) {
   setPlayers(players.map(player => player.username));
 
   const score1 = await UTTTAPI.getGameResult(matchID, players[0].agent);
-  const score2 = await UTTTAPI.getGameResult(matchID, players[0].agent);
+  const score2 = await UTTTAPI.getGameResult(matchID, players[1].agent);
 
   setScores([score1, score2]);
 }
