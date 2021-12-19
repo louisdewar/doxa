@@ -1,4 +1,6 @@
-# DOXA 🧠
+# DOXA 🧠 
+
+[![Build Status](https://drone.dewardt.uk/api/badges/louisdewar/doxa/status.svg)](https://drone.dewardt.uk/louisdewar/doxa)
 
 A customisable platform for creating fully automated AI competitions.
 
