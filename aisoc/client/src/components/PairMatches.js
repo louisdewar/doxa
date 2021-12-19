@@ -5,11 +5,6 @@ import TextBox from './TextBox';
 
 
 export default function PairMatches({ baseUrl, matches }) {
-  // const matches = [
-  //   { player1: 'louisdewardt', player2: 'testaccount', score: 21 },
-  //   { player1: 'testaccount', player2: 'louisdewardt', score: 20 }
-  // ];
-
   const [filter, setFilter] = useState('');
 
   return <div className="leaderboard">
@@ -28,7 +23,9 @@ export default function PairMatches({ baseUrl, matches }) {
 
     {matches.map((entry, i) => (entry.player1.includes(filter) || entry.player2.includes(filter)) && <div key={i} className='leaderboard-entry'>
       <span className="leaderboard-position">{i + 1}</span>
-      <span className="leaderboard-username"><Link to={`${baseUrl}user/${entry.player1}`}>{entry.player1}</Link> ({entry.score1}) vs <Link to={`${baseUrl}user/${entry.player2}`}>{entry.player2}</Link> ({entry.score2})</span>
+      <span className="leaderboard-username">
+        <Link to={`${baseUrl}user/${entry.player1}`}>{entry.player1}</Link> {entry.score1 && `(${entry.score1})`} vs <Link to={`${baseUrl}user/${entry.player2}`}>{entry.player2}</Link> {entry.score2 && `(${entry.score2})`}
+      </span>
       <span className="leaderboard-match-link"><Link to={`${baseUrl}match/${entry.id}`}>View match</Link></span>
     </div>)}
   </div>;

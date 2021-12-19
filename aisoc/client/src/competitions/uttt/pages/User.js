@@ -7,11 +7,12 @@ import UTTTAPI from '../api';
 export default function User({ baseUrl }) {
   const { user } = useParams();
   const [score, setScore] = useState(0);
-  const [matches, setMatches] = useState(null);
+  const [matches, setMatches] = useState([]);
 
   useEffect(async () => {
     const data = await UTTTAPI.getUserScore(user);
     setScore(data.score || 0);
+    setMatches([]);
   }, [user]);
 
   useEffect(async () => {
@@ -20,17 +21,13 @@ export default function User({ baseUrl }) {
 
     for (const activeGame of activeGames) {
       const players = await UTTTAPI.getGamePlayers(activeGame.id);
-      const mainAgent = (players[0].username == user ? players[0] : players[1]).agent;
-      const otherAgent = (players[0].username != user ? players[0] : players[1]).agent;
-      const score1 = await UTTTAPI.getGameResult(activeGame.id, mainAgent);
-      const score2 = await UTTTAPI.getGameResult(activeGame.id, otherAgent);
 
       matches.push({
         id: activeGame.id,
         player1: players[0].username,
         player2: players[1].username,
-        score1,
-        score2
+        score1: await UTTTAPI.getGameResult(activeGame.id, players[0].agent),
+        score2: await UTTTAPI.getGameResult(activeGame.id, players[1].agent)
       });
     }
 
