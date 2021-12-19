@@ -8,6 +8,16 @@ use derive_more::{Display, Error, From};
 use doxa_db::DieselError;
 
 #[derive(Debug, Display, Error)]
+pub struct UserNotAdmin;
+
+impl_respondable_error!(
+    UserNotAdmin,
+    UNAUTHORIZED,
+    "USER_NOT_ADMIN",
+    "You must be an admin to perform this action."
+);
+
+#[derive(Debug, Display, Error)]
 pub struct InvalidAuthenticationHeader;
 
 impl_respondable_error!(

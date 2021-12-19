@@ -1,0 +1,14 @@
+@import '../common/colours';
+
+.competitionHeader {
+  h1 {
+    text-underline-offset: 0.65rem;
+    text-decoration: underline;
+    font-size: 3rem;
+    margin-top: 0;
+  }
+
+  p {
+    line-height: 1.35rem;
+  }
+}

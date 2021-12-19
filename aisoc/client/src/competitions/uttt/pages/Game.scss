@@ -1,0 +1,143 @@
+@import 'src/common/_common.scss';
+
+// @keyframes control-hover-over {
+//   0% {
+//     transform: scale(0.9);
+//   }
+
+//   35% {
+//     transform: scale(1.1);
+//   }
+
+//   100% {
+//     transform: scale(1.0);
+//   }
+// }
+
+.game-page-header {
+  h1 {
+    text-underline-offset: 0.65rem;
+    text-decoration: none;
+    font-size: 2rem;
+    margin-top: 0;
+    line-height: 1.5;
+
+    a {
+      text-decoration: underline;
+      color: #fff;
+
+      &.game-page-main-player-link {
+        text-decoration-color: #00B75F;
+      }
+
+      &.game-page-opposing-player-link {
+        text-decoration-color: #ee5253;
+      }
+    }
+  }
+
+  h2 {
+    margin-bottom: 0;
+  }
+
+  p {
+    line-height: 1.35rem;
+  }
+}
+
+@media screen and (min-width: 640px) {
+  .game-container {
+    display: flex;
+
+    .game-grid {
+      margin-right: 2rem;
+    }
+
+    .game-moves {
+      width: 15rem;
+    }
+  }
+}
+
+.game-container {
+  align-items: stretch;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  margin-bottom: 2rem;
+
+  .game-grid {
+    flex: 4 1 auto;
+    margin-bottom: 1rem;
+  }
+
+  .game-moves {
+    flex: 0 0 auto;
+
+    background-color: #374151;
+    color: #fff;
+    border-radius: 3px;
+    padding: 1rem 1rem 0rem 1rem;
+
+    h3 {
+      margin: 0 0 0.5rem 0;
+    }
+
+    .game-move-list {
+      display: grid;
+      grid-template-columns: 2rem 1fr 1fr;
+
+      .move {
+        cursor: pointer;
+        text-align: center;
+      }
+
+      .move:hover {
+        background-color: #94a3b8;
+        border-radius: 3px;
+      }
+
+      .number {
+        font-style: italic;
+      }
+
+      .current {
+        background-color: #64748b;
+        border-radius: 3px;
+      }
+
+      .game-move-header-item {
+        text-align: center;
+      }
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-around;
+
+      .move-button {
+        padding: 10px;
+        cursor: pointer;
+        color: #fff;
+
+        margin: 10px;
+        font-size: 24px;
+        width: 100%;
+        text-align: center;
+        // box-shadow: 0 4px 4px #9a9a9a;
+
+        backface-visibility: hidden;
+
+        &:hover {
+          background-color: #64748b;
+          border-radius: 100%;
+          animation: control-hover-over 1.0s forwards;
+        }
+
+        &:active {
+          background-color: #475569;
+        }
+
+      }
+    }
+
+  }
+}

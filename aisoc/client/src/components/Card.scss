@@ -1,0 +1,58 @@
+@import '../common/colours';
+
+
+@keyframes card-background-pulse {
+  100% {
+    background-position: 100%;
+  }
+}
+
+.card {
+  position: relative;
+  background-color: #374151;
+  color: #fff;
+  border-radius: 3px;
+
+  a {
+    color: #fff;
+    text-underline-offset: 0.2rem;
+  }
+
+  &.card-darker {
+    background-color: #1F2937;
+  }
+
+  &.card-lighter {
+    background-color: #374151;
+  }
+
+  margin-bottom: 40px;
+  padding: 25px 50px;
+
+  &::after {
+    position: absolute;
+    content: ' ';
+    display: block;
+    background: linear-gradient(45deg, var(--group-colour) 20%, var(--group-colour-alt-1) 60%, var(--group-colour-alt-2) 80%);
+    animation: 5s ease-in-out 0s infinite alternate card-background-pulse;
+    background-size: 300% 300%;
+    width: 100%;
+    height: 100%;
+
+    right: -12px;
+    bottom: -12px;
+    z-index: -1;
+
+    border-radius: 3px;
+  }
+
+  @for $i from 1 through length($group-colours) {
+    $colour: nth($group-colours, $i);
+
+    &:nth-child(#{length($group-colours)}n + #{$i}) {
+      --group-colour: #{$colour};
+      --group-colour-alt-1: #{adjust-hue($colour, 30deg)};
+      --group-colour-alt-2: #{adjust-hue($colour, 60deg)};
+    }
+  }
+}

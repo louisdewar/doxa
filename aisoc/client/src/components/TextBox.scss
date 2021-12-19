@@ -1,0 +1,19 @@
+.textbox {
+  border: 0;
+  border-radius: 3px;
+  margin-bottom: 20px;
+  padding: 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  width: calc(100% - 20px);
+
+  box-shadow: 0 0 #0000, 0 0 #0000, 8px 8px #1F2937;
+
+  &:focus,
+  &:focus-visible {
+    outline: none;
+  }
+
+  &:disabled {
+    background-color: #cbd5e1;
+  }
+}

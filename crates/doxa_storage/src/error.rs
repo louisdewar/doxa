@@ -1,3 +1,5 @@
+use actix_web::error::BlockingError;
+use diesel::r2d2::PoolError;
 use doxa_auth::{create_rate_limit_error, error::CompetitionNotFound};
 use doxa_core::{impl_respondable_error, RespondableError};
 
@@ -8,6 +10,7 @@ use doxa_core::{impl_respondable_error, RespondableError};
 
 use actix_multipart::MultipartError;
 use derive_more::{Display, Error, From};
+use doxa_db::DieselError;
 
 #[derive(Debug, Display, Error, From)]
 pub struct CouldNotWriteFile {
@@ -129,6 +132,13 @@ pub enum AgentDownloadError {
     CompetitionNotFound(CompetitionNotFound),
     #[from]
     AgentNotFound(AgentNotFound),
+}
+
+#[derive(Debug, Display, Error, RespondableError, From)]
+pub enum DeleteOldAgentsError {
+    Diesel(DieselError),
+    Block(BlockingError),
+    Pool(PoolError),
 }
 
 create_rate_limit_error!(TooManyUploadAttempts, "There have been too many agent upload attempts by your account to this competition, please wait and try again later");

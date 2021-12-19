@@ -1,0 +1,42 @@
+.leaderboard {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  .leaderboard-header {
+    font-weight: bold;
+    font-style: italic;
+  }
+
+  .leaderboard-entry {
+    display: flex;
+    margin-bottom: 10px;
+
+    .leaderboard-position {
+      flex: 0 0 auto;
+      width: 2rem;
+    }
+
+    .leaderboard-username {
+      flex: 4 1 auto;
+
+      a {
+        color: #fff;
+        text-underline-offset: 0.2rem;
+      }
+    }
+
+    .leaderboard-match-link {
+      flex: 0 0 auto;
+      width: 8rem;
+
+      a {
+        color: #fff;
+        text-underline-offset: 0.2rem;
+      }
+    }
+
+    .leaderboard-score {
+      flex: 0 0 auto;
+      width: 4rem;
+    }
+  }
+}

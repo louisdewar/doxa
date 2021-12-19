@@ -1,13 +1,16 @@
+use crate::error::{AgentUploadError, FileTooLarge};
 use crate::route::request::DownloadParams;
 use crate::{
     error::{AgentGone, TooManyUploadAttempts},
     limits::UploadLimits,
 };
 use actix_files::NamedFile;
-use actix_multipart::Multipart;
+use actix_multipart::{Field, Multipart};
 use actix_web::{web, HttpRequest, HttpResponse};
 use doxa_auth::{error::CompetitionNotFound, guard::AuthGuard};
+use doxa_core::tokio::fs::File;
 use doxa_core::tokio::io::AsyncWriteExt;
+use doxa_core::tracing::error;
 use doxa_core::EndpointResult;
 use doxa_db::PgPool;
 use doxa_mq::MQPool;
@@ -82,6 +85,28 @@ async fn download(
     Ok(named_file.into_response(&req))
 }
 
+async fn process_field_upload(
+    file: &mut File,
+    mut field: Field,
+    max_size: usize,
+) -> Result<(), AgentUploadError> {
+    let mut total = 0;
+    while let Some(chunk) = field.next().await {
+        let data = chunk.map_err(UploadMultipartError::from)?;
+        total += data.len();
+
+        if total > max_size {
+            return Err(FileTooLarge.into());
+        }
+
+        file.write_all(&data)
+            .await
+            .map_err(CouldNotWriteFile::from)?;
+    }
+
+    Ok(())
+}
+
 async fn upload(
     pool: web::Data<PgPool>,
     mq_pool: web::Data<MQPool>,
@@ -91,15 +116,6 @@ async fn upload(
     auth: AuthGuard<()>,
     limiter: web::Data<UploadLimits>,
 ) -> EndpointResult {
-    // TODO:
-    // - Check what the remaining capacity is for the user's upload quota, this will need to be
-    // done before upload begins and then again once it is inserted into the database as it may be
-    // possible for two uploads to occur simulataneously.
-    // - Add an option to delete previous uploads automatically when space is required.
-    // - Maybe figure out a way to ensure there is only one upload at once? Find uploads that are
-    // in the database but not marked uploaded (will need a max timeout at which to consider an
-    // upload failed).
-
     let competition = path.into_inner();
     // Check if the user is enrolled
     let enrollment = web::block({
@@ -111,6 +127,8 @@ async fn upload(
     })
     .await??;
 
+    let competition_id = enrollment.competition;
+
     if !auth.admin() {
         limiter
             .upload_attempts
@@ -119,7 +137,7 @@ async fn upload(
             .map_err(TooManyUploadAttempts::from)?;
     }
 
-    let mut field = payload
+    let field = payload
         .try_next()
         .await
         .map_err(UploadMultipartError::from)?
@@ -153,21 +171,38 @@ async fn upload(
                 &conn,
                 id,
                 user_id,
-                enrollment.competition,
+                competition_id,
                 extension.to_string(),
             )
         }
     })
     .await??;
 
-    // TODO: In future these kinds of errors should result in the file being cleaned up
-    // and the database field updated indicating the error
-    while let Some(chunk) = field.next().await {
-        let data = chunk.map_err(UploadMultipartError::from)?;
-        f.write_all(&data).await.map_err(CouldNotWriteFile::from)?;
+    // TODO: get max size from competition
+    let max_size = 50_000_000;
+
+    match process_field_upload(&mut f, field, max_size).await {
+        Ok(()) => {}
+        Err(e) => {
+            web::block({
+                let pool = pool.clone();
+                let id = id.clone();
+                let conn = web::block(move || pool.get()).await??;
+                move || crate::controller::mark_upload_as_failed(&conn, id)
+            })
+            .await??;
+
+            drop(f);
+            if let Err(delete_error) = storage.delete_file(&competition, &id).await {
+                error!(upload_error=%e, %delete_error, "error when deleting upload file during a failed upload");
+            }
+
+            return Err(e.into());
+        }
     }
 
-    web::block({
+    let uploaded_agent = web::block({
+        let pool = pool.clone();
         let conn = web::block(move || pool.get()).await??;
         let id = id.clone();
         move || crate::controller::mark_upload_as_complete(&conn, id)
@@ -185,5 +220,20 @@ async fn upload(
     )
     .await?;
 
+    if let Err(e) = crate::controller::delete_old_uploads(
+        storage,
+        pool,
+        &competition,
+        enrollment.competition,
+        auth.id(),
+        uploaded_agent.uploaded_at,
+    )
+    .await
+    {
+        error!(error=%e, "failed to delete old uploads");
+    }
+
     Ok(HttpResponse::Ok().json(response::Upload { id, competition }))
 }
+
+// async fn cleanup(user: AuthGuard<Admin>) -> EndpointResult {}

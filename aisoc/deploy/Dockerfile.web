@@ -1,12 +1,12 @@
 FROM node:lts AS app
 
 WORKDIR app
-COPY aisoc_ui/package*.json ./
+COPY aisoc/client/package*.json ./
 
 
 RUN npm ci
 
-COPY aisoc_ui .
+COPY aisoc/client .
 
 # TODO: remove DISABLE_ESLINT_PLUGIN in future once the frontend is free of warnings
 RUN DISABLE_ESLINT_PLUGIN=true npm run build
