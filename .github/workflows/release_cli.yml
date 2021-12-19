@@ -1,6 +1,7 @@
-on: push
-#  release:
-#    types: [created]
+on:  
+  push:
+    tags:
+    - '*'
 
 jobs:
   release-example-agent:
@@ -57,7 +58,7 @@ jobs:
         override: true
         target: ${{ matrix.target }}
     - name: Build release binary
-      run: cargo build -p doxa_cli --release --target ${{ matrix.target }}
+      run: cargo build -p doxa_cli --release --target ${{ matrix.target }} --verbose
 
     - name: Strip release binary (linux and macos)
       if: matrix.build == 'linux' || matrix.build == 'macos'
@@ -69,11 +70,11 @@ jobs:
         release_name="doxa_cli-${{ matrix.target }}"
 
         bin_name=doxa_cli
-        if [ "${{ matrix.os }}" = "windows-2019" ]; then
+        if [ "${{ matrix.os }}" = "windows-latest" ]; then
           bin_name=doxa_cli.exe
         fi
 
-        cp "${release_dir}/${bin_name}" .
+        cp "${release_dir}/doxa_cli" "${bin_name}"
 
         tar czf "${release_name}.tar.gz" "${bin_name}"
         echo "ASSET=${release_name}.tar.gz" >> $GITHUB_ENV
