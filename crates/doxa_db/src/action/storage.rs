@@ -164,6 +164,8 @@ pub fn get_deletable_agents_uploaded_before(
     s::agents::table
         .filter(c::competition.eq(competition))
         .filter(c::owner.eq(user))
+        .filter(c::uploaded.eq(true))
+        .filter(c::deleted.eq(false))
         .filter(c::uploaded_at.lt(before))
         .get_results(conn)
 }
