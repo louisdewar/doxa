@@ -1,11 +1,14 @@
-import { useState, Fragment } from 'react';
-import './Leaderboard.scss';
+import { faClock } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useState } from 'react';
+import './PairMatches.scss';
 import TextBox from './TextBox';
 
-export default function PairMatches({ baseUrl, matchIDs, MatchComponent }) {
+
+export default function PairMatches({ baseUrl, matches, MatchComponent }) {
   const [filter, setFilter] = useState('');
 
-  return <div className="leaderboard">
+  return <div className="pair-matches">
     <TextBox
       type="text"
       placeholder="Filter by username"
@@ -13,12 +16,13 @@ export default function PairMatches({ baseUrl, matchIDs, MatchComponent }) {
       setValue={setFilter}
     />
 
-    <div className='leaderboard-entry leaderboard-header'>
-      <span className="leaderboard-position">#</span>
-      <span className="leaderboard-username">Users</span>
-      <span className="leaderboard-match-link">Match</span>
+    <div className='pair-matches-entry pair-matches-header'>
+      <span className="pair-matches-position">#</span>
+      <span className="pair-matches-username">Users</span>
+      <span className="pair-matches-time">Completed <FontAwesomeIcon icon={faClock} size="sm" /></span>
+      <span className="pair-matches-match-link">Match</span>
     </div>
 
-    {matchIDs.map((matchID, i) => <Fragment key={i}><MatchComponent matchID={matchID} filter={filter} baseUrl={baseUrl} i={i} /></Fragment>)}
+    {matches.map((match, i) => <MatchComponent match={match} filter={filter} baseUrl={baseUrl} i={i} key={i} />)}
   </div>;
 }
