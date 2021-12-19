@@ -16,15 +16,13 @@ jobs:
       shell: bash
       run: |
         cd competitions/uttt
-        # Rename the agent for the zip file
-        mv example_agent uttt_example_agent
-        zip -r uttt_example_agent.zip uttt_example_agent
-        mv uttt_example_agent.zip ../../
+        sh ./build_getting_started_zip.sh
+        mv uttt_getting_started.zip ../../
     - name: Release
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
       with:
-        files: uttt_example_agent.zip
+        files: uttt_getting_started.zip
   build-release-cli:
     name: build-release-cli
     runs-on: ${{ matrix.os }}
