@@ -7,14 +7,14 @@ export default function SubmissionGuideTab() {
       Ensure you have Python 3.7+ installed on your computer before you begin.
     </p>
     <p>
-      To get started, download the example agent project from <a href="https://github.com/louisdewar/doxa/releases/download/0.0.1/uttt_example_agent.zip">GitHub</a>.
+      To get started, download the example agent project from <a href="https://github.com/louisdewar/doxa/releases/download/0.0.1/uttt_getting_started.zip">GitHub</a>.
     </p>
     <h3>Using the Doxa CLI</h3>
     <p>
       To use the Doxa CLI, run the following command:
     </p>
     <pre>
-      python doxa_cli.py [ARGS]
+      python doxa_cli.py --help
     </pre>
     <p>
       If you do not have the relevant Doxa CLI binary for your operating system, it will be downloaded into the {'"bin"'} folder.
@@ -29,10 +29,10 @@ export default function SubmissionGuideTab() {
       When you want to submit, run the following command from the root of your agent folder:
     </p>
     <pre>
-      python doxa_cli.py agent upload uttt .
+      python doxa_cli.py agent upload uttt ./agent
     </pre>
     <p>
-      Here, {'"."'} refers to the folder containing the agent code you wish to submit.
+      Here, {'"./agent"'} refers to the folder containing the agent code you wish to submit.
     </p>
   </div>;
 }
