@@ -1,21 +1,21 @@
-.leaderboard {
+.pair-matches {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
-  .leaderboard-header {
+  .pair-matches-header {
     font-weight: bold;
     font-style: italic;
   }
 
-  .leaderboard-entry {
+  .pair-matches-entry {
     display: flex;
     margin-bottom: 10px;
 
-    .leaderboard-position {
+    .pair-matches-position {
       flex: 0 0 auto;
       width: 2rem;
     }
 
-    .leaderboard-username {
+    .pair-matches-username {
       flex: 4 1 auto;
 
       a {
@@ -24,7 +24,17 @@
       }
     }
 
-    .leaderboard-match-link {
+    .pair-matches-time {
+      flex: 0 0 auto;
+      width: 8rem;
+
+      a {
+        color: #fff;
+        text-underline-offset: 0.2rem;
+      }
+    }
+
+    .pair-matches-match-link {
       flex: 0 0 auto;
       width: 3rem;
 
@@ -34,7 +44,7 @@
       }
     }
 
-    .leaderboard-score {
+    .pair-matches-score {
       flex: 0 0 auto;
       width: 4rem;
     }
