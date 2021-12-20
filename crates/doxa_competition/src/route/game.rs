@@ -138,7 +138,12 @@ pub async fn game_events<C: Competition + ?Sized>(
                         event_id,
                     }
                 })?;
-                event.payload = json!({ "agent": payload.agent_id });
+
+                if is_admin {
+                    event.payload = json!({ "agent": payload.agent_id, "stderr": payload.stderr });
+                } else {
+                    event.payload = json!({ "agent": payload.agent_id });
+                }
 
                 event
             }

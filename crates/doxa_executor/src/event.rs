@@ -21,5 +21,6 @@ pub struct ErrorEvent {
 /// A forfeit does not necessarily mean the end of the game.
 pub struct ForfeitEvent {
     pub agent_id: usize,
+    pub stderr: Option<String>,
     // TODO: maybe an enum of reasons?
 }

@@ -4,7 +4,6 @@ use doxa_core::{
     actix_web::http::header::{ContentDisposition, CONTENT_DISPOSITION},
     error::StatusCode,
     tokio,
-    tracing::info,
 };
 use doxa_vm::{
     error::{AgentLifecycleManagerError, ShutdownError, TakeFileManagerError},
@@ -14,7 +13,7 @@ use doxa_vm::{
 use tokio::time::timeout;
 
 use crate::{
-    error::{AgentError, AgentShutdown, NextEventError, NextMessageError, Timeout},
+    error::{AgentError, NextEventError, NextMessageError, Timeout},
     Settings,
 };
 
@@ -24,12 +23,12 @@ pub struct VMAgent {
     id: String,
     vm_manager: VM,
     message_reader: MessageReader,
-    /// Whether the process has finished or not
-    finished: bool,
+    /// Whether the process is running or not
+    running: bool,
 }
 
 pub enum AgentEvent<'a> {
-    Finished,
+    Finished { stderr: &'a [u8] },
     Line(&'a [u8]),
 }
 
@@ -93,7 +92,7 @@ impl VMAgent {
             vm_manager: vm,
             id: agent_id,
             message_reader: MessageReader::new(Vec::new(), MAX_MSG_LEN),
-            finished: false,
+            running: false,
         };
 
         Ok(agent)
@@ -110,7 +109,9 @@ impl VMAgent {
 
     /// See [`doxa_vm::Manager::reboot_agent`]
     pub async fn reboot(&mut self, args: Vec<String>) -> Result<(), AgentLifecycleManagerError> {
-        self.vm_manager.reboot_agent(args).await
+        self.vm_manager.reboot_agent(args).await?;
+        self.running = true;
+        Ok(())
     }
 
     /// See [`doxa_vm::Manager::reboot_agent`]
@@ -123,7 +124,7 @@ impl VMAgent {
     async fn next_event(&mut self) -> Result<AgentEvent<'_>, NextEventError> {
         let msg = self
             .message_reader
-            .read_full_message(&mut self.vm_manager.stream_mut())
+            .read_full_message(self.vm_manager.stream_mut())
             .await?;
 
         let split_location = msg
@@ -140,9 +141,8 @@ impl VMAgent {
                 return Ok(AgentEvent::Line(msg));
             }
             b"F" => {
-                self.finished = true;
-                info!(stderr = %String::from_utf8_lossy(msg), agent_id = %self.id, "agent stderr output");
-                Ok(AgentEvent::Finished)
+                self.running = false;
+                Ok(AgentEvent::Finished { stderr: msg })
             }
             _ => Err(NextEventError::UnrecognisedPrefix),
         }
@@ -150,14 +150,19 @@ impl VMAgent {
 
     /// Retrieves the next message (full line) emitted by the agent inside the VM.
     /// This method is cancel safe.
+    ///
+    /// If the we just received the shutdown message then the error will contain the stderr from
+    /// the agent.
     pub async fn next_message(&mut self) -> Result<&[u8], NextMessageError> {
-        if self.finished {
-            return Err(NextMessageError::Shutdown(AgentShutdown));
+        if !self.running {
+            return Err(NextMessageError::Terminated { stderr: None });
         }
 
         match self.next_event().await? {
             AgentEvent::Line(msg) => Ok(msg),
-            AgentEvent::Finished => Err(NextMessageError::Shutdown(AgentShutdown)),
+            AgentEvent::Finished { stderr } => Err(NextMessageError::Terminated {
+                stderr: Some(String::from_utf8_lossy(stderr).to_string()),
+            }),
         }
     }
 

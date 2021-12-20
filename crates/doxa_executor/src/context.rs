@@ -2,13 +2,14 @@ use std::{marker::PhantomData, time::Duration};
 
 use doxa_core::{chrono::Utc, lapin::Channel, tokio};
 use doxa_mq::model::GameEvent;
+use futures::TryFutureExt;
 use serde::Serialize;
 use tokio::time::timeout;
 
 use crate::{
     agent::VMAgent,
     client::{GameClient, GameError},
-    error::GameContextError,
+    error::{AgentTerminated, GameContextError, NextMessageError},
     event::{ErrorEvent, ForfeitEvent, StartEvent},
 };
 
@@ -114,8 +115,12 @@ impl<'a, C: GameClient> GameContext<'a, C> {
         .await
     }
 
-    pub async fn forfeit_agent(&mut self, agent_id: usize) -> Result<(), GameContextError> {
-        self.emit_event_raw(ForfeitEvent { agent_id }, "_FORFEIT".to_string())
+    pub async fn forfeit_agent(
+        &mut self,
+        agent_id: usize,
+        stderr: Option<String>,
+    ) -> Result<(), GameContextError> {
+        self.emit_event_raw(ForfeitEvent { agent_id, stderr }, "_FORFEIT".to_string())
             .await
     }
 
@@ -150,9 +155,17 @@ impl<'a, C: GameClient> GameContext<'a, C> {
     pub async fn next_message(&mut self, agent_id: usize) -> Result<&[u8], GameContextError> {
         let agent = self.agent_mut(agent_id)?;
 
-        let msg = timeout(DEFAULT_MAX_MESSAGE_TIME, agent.next_message())
-            .await
-            .map_err(|_| GameContextError::TimeoutWaitingForMessage { agent_id })??;
+        let msg = timeout(
+            DEFAULT_MAX_MESSAGE_TIME,
+            agent.next_message().map_err(|e| match e {
+                NextMessageError::NextEvent(e) => GameContextError::NextEvent(e),
+                NextMessageError::Terminated { stderr } => {
+                    GameContextError::AgentTerminated(AgentTerminated { stderr, agent_id })
+                }
+            }),
+        )
+        .await
+        .map_err(|_| GameContextError::TimeoutWaitingForMessage { agent_id })??;
 
         Ok(msg)
     }

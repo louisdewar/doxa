@@ -26,22 +26,16 @@ impl<C: Competition> Context<C> {
     ///
     /// This action is performed atomically.
     async fn activate_agent(&self, agent_id: String) -> Result<Option<AgentUpload>, ContextError> {
+        let agent = self.get_agent_required(agent_id).await?;
         self.run_query(move |conn| {
-            conn.build_transaction().repeatable_read().run(move || {
-                let agent = doxa_db::action::storage::get_agent_required(conn, agent_id.clone())?;
-                let deactivated_agent = doxa_db::action::storage::deactivate_agent(
-                    conn,
-                    agent.competition,
-                    agent.owner,
-                )?;
+            let deactivated_agent =
+                doxa_db::action::storage::deactivate_agent(conn, agent.competition, agent.owner)?;
 
-                doxa_db::action::storage::activate_agent(conn, agent_id)?;
+            doxa_db::action::storage::activate_agent(conn, agent.id)?;
 
-                Ok(deactivated_agent)
-            })
+            Ok(deactivated_agent)
         })
         .await
-        .map_err(|e| e)
     }
 
     /// Deactivates the agent if it exists and if it is currently activated.
@@ -52,7 +46,6 @@ impl<C: Competition> Context<C> {
     ) -> Result<Option<AgentUpload>, ContextError> {
         self.run_query(move |conn| doxa_db::action::storage::deactivate_agent_by_id(conn, agent_id))
             .await
-            .map_err(|e| e)
     }
 }
 

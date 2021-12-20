@@ -8,7 +8,7 @@ use crate::{
     agent::VMAgent,
     client::{ForfeitError, GameClient, GameError},
     context::GameContext,
-    error::GameManagerError,
+    error::{AgentTerminated, GameContextError, GameManagerError},
     Settings,
 };
 
@@ -66,9 +66,16 @@ impl<C: GameClient> GameManager<C> {
 
         let res = match C::run(self.client_match_request, &mut context).await {
             Ok(()) => Ok(()),
-            Err(error) => {
+            Err(mut error) => {
                 if let Some(agent_id) = error.forfeit() {
-                    context.forfeit_agent(agent_id).await?;
+                    let stderr = match &mut error {
+                        GameError::Context(GameContextError::AgentTerminated(
+                            AgentTerminated { stderr, .. },
+                            // The stderr isn't needed again
+                        )) => stderr.take(),
+                        _ => None,
+                    };
+                    context.forfeit_agent(agent_id, stderr).await?;
                 }
 
                 context.emit_error_event(&error).await?;

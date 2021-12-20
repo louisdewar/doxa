@@ -91,7 +91,8 @@ impl VMExecutor {
                     Some(result) = OptionFuture::from(executor.agent.as_mut().map(|agent| agent.next_line())) => {
                         match result.unwrap() {
                             Some(line) => executor.handle_output_line(line).await.unwrap(),
-                            None => break,
+                            // Agent proecss finished
+                            None => executor.handle_agent_terminated().await.unwrap(),
                         }
                     }
                     message = message_reader.read_full_message(&mut executor.stream) => {
@@ -101,27 +102,28 @@ impl VMExecutor {
                     }
                 };
             }
-
-            let mut err_output = String::new();
-            if let Some(agent) = executor.agent.as_mut() {
-                // NOTE: currently STDERR get's stored in memory until the agent exits.
-                agent
-                    .child_process
-                    .stderr
-                    .take()
-                    .unwrap()
-                    .take(MAX_MSG_LEN as u64)
-                    .read_to_string(&mut err_output)
-                    .await
-                    .unwrap();
-            }
-
-            executor
-                .stream
-                .send_prefixed_full_message(b"F_", err_output.as_bytes())
-                .await
-                .unwrap();
         })
+    }
+
+    async fn handle_agent_terminated(&mut self) -> io::Result<()> {
+        let mut err_output = String::new();
+        if let Some(mut agent) = self.agent.take() {
+            // NOTE: currently STDERR get's stored in memory until the agent exits.
+            agent
+                .child_process
+                .stderr
+                .take()
+                .unwrap()
+                .take(MAX_MSG_LEN as u64)
+                .read_to_string(&mut err_output)
+                .await?;
+        }
+
+        self.stream
+            .send_prefixed_full_message(b"F_", err_output.as_bytes())
+            .await?;
+
+        Ok(())
     }
 
     async fn handle_output_line(&mut self, line: String) -> io::Result<()> {
@@ -211,7 +213,7 @@ impl VMExecutor {
         let args: Vec<_> = arg_msg
             .split(|b| *b == b'\0')
             .skip(1)
-            .map(|arg| OsStr::from_bytes(arg))
+            .map(OsStr::from_bytes)
             .collect();
 
         self.agent =

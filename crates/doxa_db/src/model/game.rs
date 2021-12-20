@@ -38,8 +38,8 @@ pub struct GameParticipantUser {
 #[derive(Debug, Clone, Queryable, Insertable)]
 #[table_name = "game_events"]
 pub struct GameEvent {
-    pub event_id: i32,
     pub game: i32,
+    pub event_id: i32,
     pub event_timestamp: DateTime<Utc>,
     pub event_type: String,
     pub payload: JsonValue,

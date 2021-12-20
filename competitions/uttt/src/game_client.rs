@@ -50,7 +50,6 @@ pub enum UTTTMatchEvent {
         winners: Vec<Winner>,
     },
 }
-// TODO: forfeit for agent with error
 
 #[derive(From, Error, Display, Debug, Clone)]
 pub enum UTTTError {
@@ -73,7 +72,6 @@ impl UTTTError {
 impl ForfeitError for UTTTError {
     fn forfeit(&self) -> Option<usize> {
         match &self {
-            // TODO: figure out forfeits for these, probably add agent_id as an adjacent field
             UTTTError::Model(_) => None,
             UTTTError::ImproperFormat { agent } => Some(*agent),
             UTTTError::NotNumber { agent } => Some(*agent),
@@ -211,6 +209,7 @@ impl GameClient for UTTTGameClient {
                 Err(e) => {
                     if let Some(agent) = e.forfeit() {
                         let remaining = GAMES_PER_SIDE - game;
+
                         if agent == 0 {
                             b_wins += remaining;
                         } else {
@@ -225,6 +224,13 @@ impl GameClient for UTTTGameClient {
                                     draws,
                                 },
                                 "scores",
+                            )
+                            .await?;
+
+                        context
+                            .emit_game_event(
+                                UTTTMatchEvent::GameWinners { winners },
+                                "game_winners",
                             )
                             .await?;
                     }
