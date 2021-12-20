@@ -140,7 +140,7 @@ pub async fn game_events<C: Competition + ?Sized>(
                 })?;
 
                 // Admins or the owner of the agent
-                if is_admin || agent_id == payload.agent_id {
+                if is_admin || agent_id == Some(payload.agent_id) {
                     event.payload = json!({ "agent": payload.agent_id, "stderr": payload.stderr });
                 } else {
                     event.payload = json!({ "agent": payload.agent_id });
