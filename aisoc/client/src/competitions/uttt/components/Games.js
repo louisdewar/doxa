@@ -10,13 +10,14 @@ import Grid from './Grid';
 
 
 
-export default function Games({ matchID, winners, competitionBaseUrl }) {
+export default function Games({ matchID, winners, competitionBaseUrl, extra = null }) {
   return <>
     <h3 className="games-showing-n-label">Showing {winners.length} games</h3>
     <div className='games'>
       {winners.map((winner, i) => {
         return <GameCard key={i} matchID={matchID} gameID={i + 1} winner={winner} competitionBaseUrl={competitionBaseUrl} />;
       })}
+      {extra}
     </div>
   </>;
 }
@@ -91,10 +92,10 @@ function GameCard({ matchID, gameID, winner, competitionBaseUrl }) {
           <div className="move-number">
             {currentMove}/{gameState.current.getLength()}
             <div className="controls">
-              <a onClick={goToBeginning}><FontAwesomeIcon icon={faFastBackward} fixedWidth /></a>
-              <a onClick={stepBackward}><FontAwesomeIcon icon={faStepBackward} fixedWidth /></a>
-              <a onClick={stepForward}><FontAwesomeIcon icon={faStepForward} fixedWidth /></a>
-              <a onClick={goToEnd}><FontAwesomeIcon icon={faFastForward} fixedWidth /></a>
+              <button onClick={goToBeginning}><FontAwesomeIcon icon={faFastBackward} fixedWidth /></button>
+              <button onClick={stepBackward}><FontAwesomeIcon icon={faStepBackward} fixedWidth /></button>
+              <button onClick={stepForward}><FontAwesomeIcon icon={faStepForward} fixedWidth /></button>
+              <button onClick={goToEnd}><FontAwesomeIcon icon={faFastForward} fixedWidth /></button>
             </div>
           </div>
           <Grid gameState={grid} small={true} />

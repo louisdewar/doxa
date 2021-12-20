@@ -1,17 +1,4 @@
 @import 'src/common/_common.scss';
-// @keyframes control-hover-over {
-//   0% {
-//     transform: scale(0.5);
-//   }
-
-//   35% {
-//     transform: scale(1.1);
-//   }
-
-//   100% {
-//     transform: scale(1.0);
-//   }
-// }
 
 .games-showing-n-label {
   font-style: italic;
@@ -20,7 +7,7 @@
 .games {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
-  a {
+  & > a {
     text-decoration: none;
   }
 
@@ -64,6 +51,16 @@
     }
 
     .controls {
+      button {
+        background: none;
+	color: inherit;
+	border: none;
+	padding: 0;
+	font: inherit;
+	cursor: pointer;
+	outline: inherit;
+      }
+
       svg {
         padding: 10px;
         cursor: pointer;
@@ -101,6 +98,19 @@
         color: #646464;
       }
     }
+  }
+
+  .game-card.forfeit {
+    display: block;
+    text-align: center;
+
+    .forfeit-icon {
+      color: $error;
+      font-size: 50px;
+      margin: 30px 0;
+    }
+
+
   }
 
   .won {

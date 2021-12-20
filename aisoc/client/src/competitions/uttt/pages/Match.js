@@ -5,12 +5,22 @@ import UTTTAPI from '../api';
 import Games from '../components/Games';
 import './Match.scss';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
+import PlayerLink from '../components/PlayerLink';
+
+const PLAYER_CLASS = ['main', 'opposing'];
+
 async function loadMatchData(matchID) {
   const winners = await UTTTAPI.getUTTTGameWinners(matchID);
   const scores = await UTTTAPI.getUTTTGameScores(matchID);
   const players = await UTTTAPI.getGamePlayers(matchID);
 
   const total = scores.a_wins + scores.b_wins + scores.draws;
+
+  const forfeit = await UTTTAPI.getSingleGameEvent(matchID, '_FORFEIT');
+  forfeit.payload.remaining = total - winners.length;
+
   const calculatePercentage = number => 100 * number / total;
   scores.percentages = {
     a_wins: calculatePercentage(scores.a_wins),
@@ -18,8 +28,26 @@ async function loadMatchData(matchID) {
     draws: calculatePercentage(scores.draws)
   };
 
-  return { winners, scores, players };
+  return { winners, scores, players, forfeit };
 }
+
+
+function ForfeitCard({ stderr = null, players, forfeiter, remaining, baseUrl }) {
+  const other = forfeiter === 0? 1: 0;
+
+  return (
+    <div className="game-card forfeit">
+      <div className="forfeit-icon"><FontAwesomeIcon icon={faExclamationTriangle} /></div>
+      <p><PlayerLink username={players[forfeiter].username} baseUrl={baseUrl} playerClass={PLAYER_CLASS[forfeiter]} />&apos;s agent forfeit the match!</p>
+      <p>
+        This means that <PlayerLink username={players[other].username} baseUrl={baseUrl} playerClass={PLAYER_CLASS[other]} /> wins
+        the remaining {remaining} {remaining > 1? 'games': 'game'} by default.
+      </p>
+      {stderr}
+    </div>
+  );
+}
+
 
 export default function Match({ baseUrl }) {
   const { id } = useParams();
@@ -33,12 +61,17 @@ export default function Match({ baseUrl }) {
     return <></>;
   }
 
+  let extraCards = null;
+
+  if (data.forfeit) {
+    extraCards = <ForfeitCard players={data.players} forfeiter={data.forfeit.payload.agent} remaining={data.forfeit.payload.remaining}/>;
+  }
+
   return <>
     <span></span><span></span><span></span><span></span> {/* a fun hack just to get a better outline colour below! */}
 
     <Card darker className="match-page-header">
-      <h1>
-        <Link to={`${baseUrl}user/${data.players[0].username}`} className="match-page-main-player-link">{data.players[0].username}</Link> vs <Link to={`${baseUrl}user/${data.players[1].username}`} className="match-page-opposing-player-link">{data.players[1].username}</Link>
+      <h1><PlayerLink username={data.players[0].username} baseUrl={baseUrl} playerClass={'main'} /> vs <PlayerLink username={data.players[1].username} baseUrl={baseUrl} playerClass={'opposing'} />
       </h1>
       <h2>
         {data.scores.a_wins} wins | {data.scores.draws} draws | {data.scores.b_wins} losses
@@ -50,6 +83,6 @@ export default function Match({ baseUrl }) {
       </div>
     </Card>
 
-    <Games matchID={id} winners={data.winners} competitionBaseUrl={baseUrl} />
+    <Games matchID={id} winners={data.winners} competitionBaseUrl={baseUrl} extra={extraCards} />
   </>;
 }
