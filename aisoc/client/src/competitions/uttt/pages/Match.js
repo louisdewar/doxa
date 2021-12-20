@@ -17,6 +17,10 @@ async function loadMatchData(matchID, authToken) {
   const scores = await UTTTAPI.getUTTTGameScores(matchID);
   const players = await UTTTAPI.getGamePlayers(matchID);
 
+  if (!winners || !scores || !players) {
+    return null;
+  }
+
   const total = scores.a_wins + scores.b_wins + scores.draws;
 
   const forfeit = await UTTTAPI.getSingleGameEvent(matchID, '_FORFEIT', authToken);

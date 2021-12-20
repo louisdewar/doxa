@@ -216,6 +216,13 @@ pub async fn game_players<C: Competition + ?Sized>(
         return Err(GameNotFound { game_id }.into());
     }
 
+    // get_game_participants_ordered currently requires the start event to exist and it
+    // will cause an internal server error otherwise.
+    // TODO: once there are improvements in get_game_participants_ordered, remove this.
+    if context.get_start_event(game_id).await?.is_none() {
+        return Err(GameNotFound { game_id }.into());
+    }
+
     let players = context
         .get_game_players_ordered(game_id)
         .await?

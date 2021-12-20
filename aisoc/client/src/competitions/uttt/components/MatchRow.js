@@ -18,9 +18,14 @@ async function fetchMatchRow(setPlayers, setScores, matchID) {
   setScores([score1, score2]);
 }
 
+function Score({ val }) {
+  return (<>{typeof val === 'number'? `(${val}) `: null}</>);
+}
+
 export default function MatchRow({ filter, match, baseUrl, i }) {
   const [players, setPlayers] = useState(null);
   const [scores, setScores] = useState(null);
+
 
   useEffect(async () => {
     await fetchMatchRow(setPlayers, setScores, match.id);
@@ -40,10 +45,10 @@ export default function MatchRow({ filter, match, baseUrl, i }) {
       username = (
         <>
           <Link to={`${baseUrl}user/${player1}`}>{player1}</Link> {' '}
-          ({score1})
+          <Score val={score1} />
           vs {' '}
           <Link to={`${baseUrl}user/${player2}`}>{player2}</Link> {' '}
-          ({score2})
+          <Score val={score2} />
         </>
       );
     } else {
@@ -60,7 +65,7 @@ export default function MatchRow({ filter, match, baseUrl, i }) {
   } else {
     username = (
       <>
-        <LoadingPlaceholder height={15} width={'100%'} />
+        <LoadingPlaceholder height={15} width={'80%'} />
       </>
     );
   }
