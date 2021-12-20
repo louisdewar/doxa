@@ -50,7 +50,6 @@ impl Competition for UTTTCompetition {
             b_wins,
         } = event.payload
         {
-            println!("on game event, scores");
             let game = event.game_id;
             let agents = context.get_game_participants_ordered(game).await?;
 
