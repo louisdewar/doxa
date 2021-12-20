@@ -27,8 +27,8 @@ export function useAuthProvider() {
   };
 
   const refresh = async () => {
-    if (!authToken && user) {
-      setAuthToken(null);
+    if (!authToken) {
+      setUser(null);
       return;
     }
 
@@ -68,6 +68,7 @@ export function useAuthProvider() {
     },
     async acceptInvite(id, username, password) {
       return await acceptInvite(id, username, password);
-    }
+    },
+    token: authToken
   };
 }

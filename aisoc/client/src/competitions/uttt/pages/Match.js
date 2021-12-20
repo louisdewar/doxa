@@ -1,6 +1,7 @@
 import Card from 'components/Card';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useAuth } from 'hooks/useAuth';
 import UTTTAPI from '../api';
 import Games from '../components/Games';
 import './Match.scss';
@@ -11,15 +12,17 @@ import PlayerLink from '../components/PlayerLink';
 
 const PLAYER_CLASS = ['main', 'opposing'];
 
-async function loadMatchData(matchID) {
+async function loadMatchData(matchID, authToken) {
   const winners = await UTTTAPI.getUTTTGameWinners(matchID);
   const scores = await UTTTAPI.getUTTTGameScores(matchID);
   const players = await UTTTAPI.getGamePlayers(matchID);
 
   const total = scores.a_wins + scores.b_wins + scores.draws;
 
-  const forfeit = await UTTTAPI.getSingleGameEvent(matchID, '_FORFEIT');
-  forfeit.payload.remaining = total - winners.length;
+  const forfeit = await UTTTAPI.getSingleGameEvent(matchID, '_FORFEIT', authToken);
+  if (forfeit) {
+    forfeit.payload.remaining = total - winners.length;
+  }
 
   const calculatePercentage = number => 100 * number / total;
   scores.percentages = {
@@ -32,8 +35,19 @@ async function loadMatchData(matchID) {
 }
 
 
-function ForfeitCard({ stderr = null, players, forfeiter, remaining, baseUrl }) {
+function ForfeitCard({ stderr, players, forfeiter, remaining, baseUrl }) {
   const other = forfeiter === 0? 1: 0;
+
+  let extraInfo;
+
+  if (stderr) {
+    extraInfo = (
+      <>
+        <p className="stderr-message">You have permission to view the <code>stderr</code> output of <PlayerLink username={players[forfeiter].username} baseUrl={baseUrl} playerClass={PLAYER_CLASS[forfeiter]} />&apos;s agent (max 50mb):</p>
+        <pre className="stderr">{stderr}</pre>
+      </>
+    );
+  }
 
   return (
     <div className="game-card forfeit">
@@ -43,7 +57,7 @@ function ForfeitCard({ stderr = null, players, forfeiter, remaining, baseUrl }) 
         This means that <PlayerLink username={players[other].username} baseUrl={baseUrl} playerClass={PLAYER_CLASS[other]} /> wins
         the remaining {remaining} {remaining > 1? 'games': 'game'} by default.
       </p>
-      {stderr}
+      {extraInfo}
     </div>
   );
 }
@@ -52,9 +66,10 @@ function ForfeitCard({ stderr = null, players, forfeiter, remaining, baseUrl }) 
 export default function Match({ baseUrl }) {
   const { id } = useParams();
   const [data, setData] = useState(null);
+  const auth = useAuth();
 
   useEffect(async () => {
-    setData(await loadMatchData(id));
+    setData(await loadMatchData(id, auth.token));
   }, []);
 
   if (!data) {
@@ -64,7 +79,8 @@ export default function Match({ baseUrl }) {
   let extraCards = null;
 
   if (data.forfeit) {
-    extraCards = <ForfeitCard players={data.players} forfeiter={data.forfeit.payload.agent} remaining={data.forfeit.payload.remaining}/>;
+    const { agent, remaining, stderr } = data.forfeit.payload;
+    extraCards = <ForfeitCard players={data.players} forfeiter={agent} remaining={remaining} stderr={stderr} />;
   }
 
   return <>

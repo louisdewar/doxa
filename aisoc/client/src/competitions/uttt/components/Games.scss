@@ -110,7 +110,30 @@
       margin: 30px 0;
     }
 
+    pre.stderr {
+      text-align: left;
 
+      margin: 30px;
+      margin-top: 0;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid $off-black;
+
+      max-height: 500px;
+      max-width: 100%;
+      overflow: auto;
+    }
+
+    .stderr-message {
+      text-align: left;
+      margin: 30px;
+      margin-bottom: 10px;
+
+      code {
+        color: $error;
+        font-weight: bold;
+      }
+    }
   }
 
   .won {

@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use doxa_competition::client::{async_trait, ForfeitError, GameClient, GameContext, GameError};
 
 use crate::model::{self, Model, Player, Winner};
@@ -85,6 +87,9 @@ impl UTTTGameClient {
         mut on_event: E,
     ) -> Result<Winner, GameError<UTTTError>> {
         let mut model = Model::new();
+
+        // 20 seconds to return a move
+        context.set_max_message_time(Some(Duration::from_secs(20)));
 
         context.send_message_to_agent(0, b"S R\n").await?;
         context.send_message_to_agent(1, b"S B\n").await?;
