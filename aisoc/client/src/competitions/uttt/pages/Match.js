@@ -84,7 +84,7 @@ export default function Match({ baseUrl }) {
 
   if (data.forfeit) {
     const { agent, remaining, stderr } = data.forfeit.payload;
-    extraCards = <ForfeitCard players={data.players} forfeiter={agent} remaining={remaining} stderr={stderr} />;
+    extraCards = <ForfeitCard players={data.players} forfeiter={agent} remaining={remaining} stderr={stderr} baseUrl={baseUrl} />;
   }
 
   return <>
