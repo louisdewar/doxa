@@ -16,7 +16,7 @@ use crate::{
 pub const DEFAULT_MAX_MESSAGE_TIME: Duration = Duration::from_secs(120);
 
 pub struct GameContext<'a, C: GameClient + ?Sized> {
-    agents: &'a mut Vec<VMAgent>,
+    pub(crate) agents: &'a mut Vec<VMAgent>,
     event_queue_name: &'a str,
     event_channel: &'a Channel,
     client: PhantomData<C>,
@@ -102,6 +102,7 @@ impl<'a, C: GameClient> GameContext<'a, C> {
     pub(crate) async fn emit_error_event(
         &mut self,
         error: &GameError<C::Error>,
+        vm_logs: Vec<Option<String>>,
     ) -> Result<(), GameContextError> {
         // TODO: end event data, e.g. total time spent, maybe whether it completed succesfully or
         // not
@@ -109,6 +110,7 @@ impl<'a, C: GameClient> GameContext<'a, C> {
             ErrorEvent {
                 error: format!("{}", error),
                 debug: format!("{:?}", error),
+                vm_logs,
             },
             "_ERROR".to_string(),
         )

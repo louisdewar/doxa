@@ -9,6 +9,7 @@ pub struct StartEvent {
 pub struct ErrorEvent {
     pub error: String,
     pub debug: String,
+    pub vm_logs: Vec<Option<String>>,
 }
 
 // TODO: consider making _ERROR only occur for internal errors?

@@ -13,12 +13,18 @@ import PlayerLink from '../components/PlayerLink';
 const PLAYER_CLASS = ['main', 'opposing'];
 
 async function loadMatchData(matchID, authToken) {
-  const winners = await UTTTAPI.getUTTTGameWinners(matchID);
+  const winners = await UTTTAPI.getUTTTGameWinners(matchID) || [];
   const scores = await UTTTAPI.getUTTTGameScores(matchID);
   const players = await UTTTAPI.getGamePlayers(matchID);
 
-  if (!winners || !scores || !players) {
+  if (!players) {
     return null;
+  }
+
+  const error = await UTTTAPI.getSingleGameEvent(matchID, '_ERROR', authToken);
+
+  if (!scores) {
+    return { winners, players, error };
   }
 
   const total = scores.a_wins + scores.b_wins + scores.draws;
@@ -35,37 +41,106 @@ async function loadMatchData(matchID, authToken) {
     draws: calculatePercentage(scores.draws)
   };
 
-  return { winners, scores, players, forfeit };
+  return { winners, scores, players, forfeit, error };
 }
 
 
-function ForfeitCard({ stderr, players, forfeiter, remaining, baseUrl }) {
-  const other = forfeiter === 0? 1: 0;
+function ErrorCard({ forfeit, error, players,  baseUrl }) {
+
+  let errorMessage;
 
   let extraInfo;
 
-  if (stderr) {
-    extraInfo = (
+  if (forfeit) {
+    const forfeiter = forfeit.payload.agent;
+    const other = forfeiter === 0? 1: 0;
+    const stderr = forfeit.payload.stderr;
+    const remaining = forfeit.payload.remaining;
+
+    errorMessage = (
       <>
-        <p className="stderr-message">You have permission to view the <code>stderr</code> output of <PlayerLink username={players[forfeiter].username} baseUrl={baseUrl} playerClass={PLAYER_CLASS[forfeiter]} />&apos;s agent (max 50mb):</p>
-        <pre className="stderr">{stderr}</pre>
+        <p><PlayerLink username={players[forfeiter].username} baseUrl={baseUrl} playerClass={PLAYER_CLASS[forfeiter]} />&apos;s agent forfeit the match!</p>
+        <p>
+        This means that <PlayerLink username={players[other].username} baseUrl={baseUrl} playerClass={PLAYER_CLASS[other]} /> wins
+        the remaining {remaining} {remaining > 1? 'games': 'game'} by default.
+        </p>
       </>
     );
+
+    if (stderr) {
+      extraInfo = (
+        <>
+          <p className="logs-message">You have permission to view the <code>stderr</code> output of <PlayerLink username={players[forfeiter].username} baseUrl={baseUrl} playerClass={PLAYER_CLASS[forfeiter]} />&apos;s agent (max 50mb):</p>
+          <pre className="logs">{stderr}</pre>
+        </>
+      );
+    }
+  }
+
+  if (error) {
+    // If the error was not a forfeit it represents an internal error
+    if (!forfeit) {
+      errorMessage = (
+        <>
+          <p>An internal error occured when running this match that meant it couldn&apos;t continue.</p>
+          <p>
+            The match can be re-rescheduled by either <PlayerLink username={players[0].username} baseUrl={baseUrl} playerClass={'main'} /> {' '}
+            or <PlayerLink username={players[1].username} baseUrl={baseUrl} playerClass={'opposing'} /> re-uploading their agent.
+          </p>
+        </>
+      );
+    }
+
+    if (error.payload.vm_logs) {
+      const vm_logs = error.payload.vm_logs;
+      extraInfo = <>
+        {extraInfo}
+        <p className="logs-message">VM logs for <PlayerLink username={players[0].username} baseUrl={baseUrl} playerClass={'main'} /></p>
+        <pre className="logs">
+          {vm_logs[0]}
+        </pre>
+
+        <p className="logs-message">VM logs for <PlayerLink username={players[1].username} baseUrl={baseUrl} playerClass={'opposing'} /></p>
+        <pre className="logs">
+          {vm_logs[1]}
+        </pre>
+      </>;
+    }
   }
 
   return (
-    <div className="game-card forfeit">
-      <div className="forfeit-icon"><FontAwesomeIcon icon={faExclamationTriangle} /></div>
-      <p><PlayerLink username={players[forfeiter].username} baseUrl={baseUrl} playerClass={PLAYER_CLASS[forfeiter]} />&apos;s agent forfeit the match!</p>
-      <p>
-        This means that <PlayerLink username={players[other].username} baseUrl={baseUrl} playerClass={PLAYER_CLASS[other]} /> wins
-        the remaining {remaining} {remaining > 1? 'games': 'game'} by default.
-      </p>
+    <div className="game-card error">
+      <div className="error-icon"><FontAwesomeIcon icon={faExclamationTriangle} /></div>
+      {errorMessage}
       {extraInfo}
     </div>
   );
 }
 
+function TitleCard({ players, scores, baseUrl }) {
+
+  let scoresSection;
+  if (scores) {
+    scoresSection = <>
+      <h2>
+        {scores.a_wins} wins | {scores.draws} draws | {scores.b_wins} losses
+      </h2>
+      <div className='match-score-bar'>
+        {scores.percentages.a_wins > 0 && <div className='match-score-bar-wins' style={{ width: scores.percentages.a_wins + '%' }}></div>}
+        {scores.percentages.draws > 0 && <div className='match-score-bar-draws' style={{ width: scores.percentages.draws + '%' }}></div>}
+        {scores.percentages.b_wins > 0 && <div className='match-score-bar-losses' style={{ width: scores.percentages.b_wins + '%' }}></div>}
+      </div>
+    </>;
+  } else {
+    scoresSection = <h2>No scores</h2>;
+  }
+
+  return <Card darker className="match-page-header">
+    <h1><PlayerLink username={players[0].username} baseUrl={baseUrl} playerClass={'main'} /> vs <PlayerLink username={players[1].username} baseUrl={baseUrl} playerClass={'opposing'} />
+    </h1>
+    {scoresSection}
+  </Card>;
+}
 
 export default function Match({ baseUrl }) {
   const { id } = useParams();
@@ -82,26 +157,15 @@ export default function Match({ baseUrl }) {
 
   let extraCards = null;
 
-  if (data.forfeit) {
-    const { agent, remaining, stderr } = data.forfeit.payload;
-    extraCards = <ForfeitCard players={data.players} forfeiter={agent} remaining={remaining} stderr={stderr} baseUrl={baseUrl} />;
+  if (data.forfeit || data.error) {
+    extraCards = <ErrorCard error={data.error} forfeit={data.forfeit} players={data.players} baseUrl={baseUrl} />;
+    //const { agent, remaining, stderr } = data.forfeit.payload;
+    //extraCards = <ErrorCard players={data.players} forfeiter={agent} remaining={remaining} stderr={stderr} baseUrl={baseUrl} />;
   }
 
   return <>
     <span></span><span></span><span></span><span></span> {/* a fun hack just to get a better outline colour below! */}
-
-    <Card darker className="match-page-header">
-      <h1><PlayerLink username={data.players[0].username} baseUrl={baseUrl} playerClass={'main'} /> vs <PlayerLink username={data.players[1].username} baseUrl={baseUrl} playerClass={'opposing'} />
-      </h1>
-      <h2>
-        {data.scores.a_wins} wins | {data.scores.draws} draws | {data.scores.b_wins} losses
-      </h2>
-      <div className='match-score-bar'>
-        {data.scores.percentages.a_wins > 0 && <div className='match-score-bar-wins' style={{ width: data.scores.percentages.a_wins + '%' }}></div>}
-        {data.scores.percentages.draws > 0 && <div className='match-score-bar-draws' style={{ width: data.scores.percentages.draws + '%' }}></div>}
-        {data.scores.percentages.b_wins > 0 && <div className='match-score-bar-losses' style={{ width: data.scores.percentages.b_wins + '%' }}></div>}
-      </div>
-    </Card>
+    <TitleCard players={data.players} scores={data.scores} baseUrl={baseUrl} />
 
     <Games matchID={id} winners={data.winners} competitionBaseUrl={baseUrl} extra={extraCards} />
   </>;

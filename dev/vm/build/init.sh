@@ -1,6 +1,7 @@
 #!/bin/sh
 
-echo INIT started
+# This string is searched for by the recorder system to know when bootup is complete (for log truncating)
+echo "DOXA INIT started"
 
 export RUST_BACKTRACE=1
 /sbin/vm_executor

@@ -6,7 +6,7 @@ use doxa_core::{
     tokio,
 };
 use doxa_vm::{
-    error::{AgentLifecycleManagerError, ShutdownError, TakeFileManagerError},
+    error::{AgentLifecycleManagerError, TakeFileManagerError, VMShutdownError},
     stream::MessageReader,
     Manager as VM,
 };
@@ -166,7 +166,7 @@ impl VMAgent {
         }
     }
 
-    pub async fn shutdown(self) -> Result<(), ShutdownError> {
+    pub async fn shutdown(self) -> Result<String, VMShutdownError> {
         self.vm_manager.shutdown().await
     }
 }

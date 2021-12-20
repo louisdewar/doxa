@@ -1,10 +1,11 @@
-use crate::error::{AgentLifecycleManagerError, TakeFileManagerError};
+use crate::error::{AgentLifecycleManagerError, TakeFileManagerError, VMShutdownError};
 use crate::manager::ManagerError::TimeoutWaitingForVMConnection;
+use crate::recorder::VMRecorder;
 use std::time::Duration;
 use std::{io, path::PathBuf};
 use tokio::time::timeout;
 
-use doxa_firecracker_sdk::{error::ShutdownError, VMOptions, VM};
+use doxa_firecracker_sdk::{VMOptions, VM};
 use tokio::{
     net::{UnixListener, UnixStream},
     task,
@@ -20,13 +21,14 @@ use crate::{
 
 use tempfile::{tempdir, TempDir};
 
+const MAX_LOGS_LEN: usize = 50_000_000;
+
 /// Manages lifecycle of and communciation with a single VM.
 pub struct Manager {
     vm: VM,
     tempdir: TempDir,
     stream: Stream<UnixStream>,
-    // stdout: ChildStdout,
-    // stderr: ChildStderr,
+    recorder: VMRecorder,
 }
 
 impl Manager {
@@ -51,7 +53,7 @@ impl Manager {
 
         tokio::fs::copy(original_rootfs, &rootfs_path).await?;
 
-        let vm = VMOptions {
+        let mut vm = VMOptions {
             memory_size_mib,
             vcpus: 1,
             kernel_image_path: kernel_img,
@@ -62,6 +64,11 @@ impl Manager {
         }
         .spawn(firecracker_path)
         .await?;
+
+        let stdout = vm.firecracker_process().stdout.take().unwrap();
+        let stderr = vm.firecracker_process().stderr.take().unwrap();
+
+        let recorder = VMRecorder::start(stdout, stderr, MAX_LOGS_LEN);
 
         // Begin listening for connections on port 1001
         let listener = UnixListener::bind(dir.path().join("v.sock_1001")).unwrap();
@@ -81,15 +88,11 @@ impl Manager {
 
         let stream = Stream::from_socket(stream);
 
-        // let stdout = vm.firecracker_process().stdout.take().unwrap();
-        // let stderr = vm.firecracker_process().stderr.take().unwrap();
-
         Ok(Manager {
             vm,
             tempdir: dir,
             stream,
-            // stdout,
-            // stderr,
+            recorder,
         })
     }
 
@@ -229,10 +232,13 @@ impl Manager {
         &mut self.stream
     }
 
-    pub async fn shutdown(self) -> Result<(), ShutdownError> {
+    /// Shutdown the VM and retrieve the logs
+    pub async fn shutdown(self) -> Result<String, VMShutdownError> {
         self.vm.shutdown().await?;
         let tempdir = self.tempdir;
         tokio::task::spawn_blocking(move || tempdir.close()).await??;
-        Ok(())
+
+        let logs = self.recorder.retrieve_logs().await?;
+        Ok(logs)
     }
 }

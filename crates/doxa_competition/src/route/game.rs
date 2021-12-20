@@ -158,7 +158,7 @@ pub async fn game_events<C: Competition + ?Sized>(
                                 event_id,
                             }
                         })?;
-                    event.payload = json!({ "error": payload.error, "debug": payload.debug });
+                    event.payload = json!({ "error": payload.error, "debug": payload.debug, "vm_logs": payload.vm_logs });
                 } else {
                     event.payload = serde_json::Value::Null;
                 }

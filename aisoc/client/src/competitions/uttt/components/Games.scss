@@ -81,7 +81,6 @@
 
     .move-number {
       color: #323232;
-      // font-weight: bold;
       text-align: center;
     }
 
@@ -100,17 +99,17 @@
     }
   }
 
-  .game-card.forfeit {
+  .game-card.error {
     display: block;
     text-align: center;
 
-    .forfeit-icon {
+    .error-icon {
       color: $error;
       font-size: 50px;
       margin: 30px 0;
     }
 
-    pre.stderr {
+    pre.logs {
       text-align: left;
 
       margin: 30px;
@@ -124,7 +123,7 @@
       overflow: auto;
     }
 
-    .stderr-message {
+    .logs-message {
       text-align: left;
       margin: 30px;
       margin-bottom: 10px;
