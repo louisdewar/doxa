@@ -30,7 +30,7 @@ async function loadMatchData(matchID, authToken) {
   const total = scores.a_wins + scores.b_wins + scores.draws;
 
   const forfeit = await UTTTAPI.getSingleGameEvent(matchID, '_FORFEIT', authToken);
-  if (forfeit) {
+  if (forfeit && forfeit.payload) {
     forfeit.payload.remaining = total - winners.length;
   }
 
@@ -51,7 +51,7 @@ function ErrorCard({ forfeit, error, players,  baseUrl }) {
 
   let extraInfo;
 
-  if (forfeit) {
+  if (forfeit && forfeit.payload) {
     const forfeiter = forfeit.payload.agent;
     const other = forfeiter === 0? 1: 0;
     const stderr = forfeit.payload.stderr;
@@ -91,7 +91,7 @@ function ErrorCard({ forfeit, error, players,  baseUrl }) {
       );
     }
 
-    if (error.payload.vm_logs) {
+    if (error.payload && error.payload.vm_logs) {
       const vm_logs = error.payload.vm_logs;
       extraInfo = <>
         {extraInfo}
