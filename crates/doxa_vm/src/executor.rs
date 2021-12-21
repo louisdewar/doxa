@@ -146,7 +146,11 @@ impl VMExecutor {
         match prefix {
             b"INPUT" => {
                 if let Some(agent) = self.agent.as_mut() {
-                    agent.stdin.write_all(msg).await?
+                    // This could happen legitimately if the agent crashes between when we detect
+                    // it
+                    if let Err(e) = agent.stdin.write_all(msg).await {
+                        println!("failed to send input to agent due to: {}", e);
+                    }
                 } else {
                     println!("Tried to send input to dead agent (ignoring)");
                 }

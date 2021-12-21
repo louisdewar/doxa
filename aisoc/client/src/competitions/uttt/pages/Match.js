@@ -46,9 +46,7 @@ async function loadMatchData(matchID, authToken) {
 
 
 function ErrorCard({ forfeit, error, players,  baseUrl }) {
-
   let errorMessage;
-
   let extraInfo;
 
   if (forfeit && forfeit.payload) {
@@ -91,20 +89,44 @@ function ErrorCard({ forfeit, error, players,  baseUrl }) {
       );
     }
 
-    if (error.payload && error.payload.vm_logs) {
-      const vm_logs = error.payload.vm_logs;
-      extraInfo = <>
-        {extraInfo}
-        <p className="logs-message">VM logs for <PlayerLink username={players[0].username} baseUrl={baseUrl} playerClass={'main'} /></p>
-        <pre className="logs">
-          {vm_logs[0]}
-        </pre>
+    if (error.payload) {
+      if (error.payload.error) {
+        extraInfo = <>
+          {extraInfo}
+          <p className="logs-message">Error message:</p>
+          <pre className="logs">
+            {error.payload.error}
+          </pre>
+        </>;
+      }
 
-        <p className="logs-message">VM logs for <PlayerLink username={players[1].username} baseUrl={baseUrl} playerClass={'opposing'} /></p>
-        <pre className="logs">
-          {vm_logs[1]}
-        </pre>
-      </>;
+      if (error.payload.debug) {
+        extraInfo = <>
+          {extraInfo}
+          <p className="logs-message">Debug error message:</p>
+          <pre className="logs">
+            {error.payload.debug}
+          </pre>
+        </>;
+      }
+
+      if (error.payload.vm_logs) {
+        const vm_logs = error.payload.vm_logs;
+        extraInfo = <>
+          {extraInfo}
+          <p className="logs-message">VM logs for <PlayerLink username={players[0].username} baseUrl={baseUrl} playerClass={'main'} /></p>
+          <pre className="logs">
+            {vm_logs[0]}
+          </pre>
+
+          <p className="logs-message">VM logs for <PlayerLink username={players[1].username} baseUrl={baseUrl} playerClass={'opposing'} /></p>
+          <pre className="logs">
+            {vm_logs[1]}
+          </pre>
+        </>;
+      }
+
+
     }
   }
 
