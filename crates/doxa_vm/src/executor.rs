@@ -106,6 +106,7 @@ impl VMExecutor {
     }
 
     async fn handle_agent_terminated(&mut self) -> io::Result<()> {
+        println!("Agent terminated");
         let mut err_output = String::new();
         if let Some(mut agent) = self.agent.take() {
             // NOTE: currently STDERR get's stored in memory until the agent exits.
@@ -144,12 +145,11 @@ impl VMExecutor {
 
         match prefix {
             b"INPUT" => {
-                self.agent
-                    .as_mut()
-                    .expect("Can't send input to dead agent")
-                    .stdin
-                    .write_all(msg)
-                    .await?
+                if let Some(agent) = self.agent.as_mut() {
+                    agent.stdin.write_all(msg).await?
+                } else {
+                    println!("Tried to send input to dead agent (ignoring)");
+                }
             }
             // This may not be very useful, there isn't really a good reason to do this
             b"SHUTDOWN" => self.shutdown(true).await?,
@@ -164,6 +164,7 @@ impl VMExecutor {
 
     async fn take_file(&mut self, msg: &[u8]) -> Result<(), TakeFileError> {
         let path = PathBuf::from(OsStr::from_bytes(msg));
+        println!("take file {:?}", path);
 
         let metadata = tokio::fs::metadata(&path)
             .await
