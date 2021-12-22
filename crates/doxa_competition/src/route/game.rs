@@ -138,7 +138,13 @@ pub async fn game_events<C: Competition + ?Sized>(
                         event_id,
                     }
                 })?;
-                event.payload = json!({ "agent": payload.agent_id });
+
+                // Admins or the owner of the agent
+                if is_admin || agent_id == Some(payload.agent_id) {
+                    event.payload = json!({ "agent": payload.agent_id, "stderr": payload.stderr });
+                } else {
+                    event.payload = json!({ "agent": payload.agent_id });
+                }
 
                 event
             }
@@ -152,7 +158,7 @@ pub async fn game_events<C: Competition + ?Sized>(
                                 event_id,
                             }
                         })?;
-                    event.payload = json!({ "error": payload.error, "debug": payload.debug });
+                    event.payload = json!({ "error": payload.error, "debug": payload.debug, "vm_logs": payload.vm_logs });
                 } else {
                     event.payload = serde_json::Value::Null;
                 }
@@ -207,6 +213,13 @@ pub async fn game_players<C: Competition + ?Sized>(
     let game_id = path.into_inner();
 
     if context.get_game_by_id(game_id).await?.is_none() {
+        return Err(GameNotFound { game_id }.into());
+    }
+
+    // get_game_participants_ordered currently requires the start event to exist and it
+    // will cause an internal server error otherwise.
+    // TODO: once there are improvements in get_game_participants_ordered, remove this.
+    if context.get_start_event(game_id).await?.is_none() {
         return Err(GameNotFound { game_id }.into());
     }
 

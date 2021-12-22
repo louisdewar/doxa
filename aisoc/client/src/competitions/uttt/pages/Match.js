@@ -1,16 +1,43 @@
 import Card from 'components/Card';
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import { useAuth } from 'hooks/useAuth';
 import UTTTAPI from '../api';
 import Games from '../components/Games';
 import './Match.scss';
+import human from 'human-time';
 
-async function loadMatchData(matchID) {
-  const winners = await UTTTAPI.getUTTTGameWinners(matchID);
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faExclamationTriangle, faClock } from '@fortawesome/free-solid-svg-icons';
+import PlayerLink from '../components/PlayerLink';
+
+const PLAYER_CLASS = ['main', 'opposing'];
+
+async function loadMatchData(matchID, authToken) {
+  const winners = await UTTTAPI.getUTTTGameWinners(matchID) || [];
   const scores = await UTTTAPI.getUTTTGameScores(matchID);
   const players = await UTTTAPI.getGamePlayers(matchID);
 
+  if (!players) {
+    return null;
+  }
+
+  const error = await UTTTAPI.getSingleGameEvent(matchID, '_ERROR', authToken);
+
+  if (!scores) {
+    return { winners, players, error };
+  }
+
   const total = scores.a_wins + scores.b_wins + scores.draws;
+
+  const forfeit = await UTTTAPI.getSingleGameEvent(matchID, '_FORFEIT', authToken);
+  if (forfeit && forfeit.payload) {
+    forfeit.payload.remaining = total - winners.length;
+  }
+
+  const end = await UTTTAPI.getSingleGameEvent(matchID, '_END', authToken);
+
+
   const calculatePercentage = number => 100 * number / total;
   scores.percentages = {
     a_wins: calculatePercentage(scores.a_wins),
@@ -18,38 +45,169 @@ async function loadMatchData(matchID) {
     draws: calculatePercentage(scores.draws)
   };
 
-  return { winners, scores, players };
+  const completeTime = end ? new Date(end.timestamp) : null;
+
+  return { winners, scores, players, forfeit, error, completeTime };
+}
+
+
+function ErrorCard({ forfeit, error, players,  baseUrl }) {
+  let errorMessage;
+  let extraInfo;
+
+  if (forfeit && forfeit.payload) {
+    const forfeiter = forfeit.payload.agent;
+    const other = forfeiter === 0? 1: 0;
+    const stderr = forfeit.payload.stderr;
+    const remaining = forfeit.payload.remaining;
+
+    errorMessage = (
+      <>
+        <p><PlayerLink username={players[forfeiter].username} baseUrl={baseUrl} playerClass={PLAYER_CLASS[forfeiter]} />&apos;s agent forfeit the match!</p>
+        <p>
+        This means that <PlayerLink username={players[other].username} baseUrl={baseUrl} playerClass={PLAYER_CLASS[other]} /> wins
+        the remaining {remaining} {remaining > 1? 'games': 'game'} by default.
+        </p>
+      </>
+    );
+
+    if (stderr) {
+      extraInfo = (
+        <>
+          <p className="logs-message">You have permission to view the <code>stderr</code> output of <PlayerLink username={players[forfeiter].username} baseUrl={baseUrl} playerClass={PLAYER_CLASS[forfeiter]} />&apos;s agent (max 50mb):</p>
+          <pre className="logs">{stderr}</pre>
+        </>
+      );
+    }
+  }
+
+  if (error) {
+    // If the error was not a forfeit it represents an internal error
+    if (!forfeit) {
+      errorMessage = (
+        <>
+          <p>An internal error occured when running this match that meant it couldn&apos;t continue.</p>
+          <p>
+            The match can be re-rescheduled by either <PlayerLink username={players[0].username} baseUrl={baseUrl} playerClass={'main'} /> {' '}
+            or <PlayerLink username={players[1].username} baseUrl={baseUrl} playerClass={'opposing'} /> re-uploading their agent.
+          </p>
+        </>
+      );
+    }
+
+    if (error.payload) {
+      if (error.payload.error) {
+        extraInfo = <>
+          {extraInfo}
+          <p className="logs-message">Error message:</p>
+          <pre className="logs">
+            {error.payload.error}
+          </pre>
+        </>;
+      }
+
+      if (error.payload.debug) {
+        extraInfo = <>
+          {extraInfo}
+          <p className="logs-message">Debug error message:</p>
+          <pre className="logs">
+            {error.payload.debug}
+          </pre>
+        </>;
+      }
+
+      if (error.payload.vm_logs) {
+        const vm_logs = error.payload.vm_logs;
+        extraInfo = <>
+          {extraInfo}
+          <p className="logs-message">VM logs for <PlayerLink username={players[0].username} baseUrl={baseUrl} playerClass={'main'} /></p>
+          <pre className="logs">
+            {vm_logs[0]}
+          </pre>
+
+          <p className="logs-message">VM logs for <PlayerLink username={players[1].username} baseUrl={baseUrl} playerClass={'opposing'} /></p>
+          <pre className="logs">
+            {vm_logs[1]}
+          </pre>
+        </>;
+      }
+    }
+  }
+
+  return (
+    <div className="game-card error">
+      <div className="large-icon error"><FontAwesomeIcon icon={faExclamationTriangle} /></div>
+      {errorMessage}
+      {extraInfo}
+    </div>
+  );
+}
+
+function OngoingCard() {
+  return (
+    <div className="game-card ongoing">
+      <div className="large-icon ongoing"><FontAwesomeIcon icon={faClock} /></div>
+      <p>This game is ongoing, there may be more events in the future.</p>
+    </div>
+  );
+}
+
+function TitleCard({ players, scores, baseUrl, completeTime }) {
+  const end = completeTime ? 'This game completed ' + human(completeTime) : 'This game is ongoing';
+
+  let scoresSection;
+  if (scores) {
+    scoresSection = <>
+      <h2>
+        {scores.a_wins} wins | {scores.draws} draws | {scores.b_wins} losses
+      </h2>
+      <div className='match-score-bar'>
+        {scores.percentages.a_wins > 0 && <div className='match-score-bar-wins' style={{ width: scores.percentages.a_wins + '%' }}></div>}
+        {scores.percentages.draws > 0 && <div className='match-score-bar-draws' style={{ width: scores.percentages.draws + '%' }}></div>}
+        {scores.percentages.b_wins > 0 && <div className='match-score-bar-losses' style={{ width: scores.percentages.b_wins + '%' }}></div>}
+      </div>
+    </>;
+  } else {
+    scoresSection = <h2>No scores</h2>;
+  }
+
+  return <Card darker className="match-page-header">
+    <h1><PlayerLink username={players[0].username} baseUrl={baseUrl} playerClass={'main'} /> vs <PlayerLink username={players[1].username} baseUrl={baseUrl} playerClass={'opposing'} />
+    </h1>
+    {scoresSection}
+    <p className="completed"><FontAwesomeIcon icon={faClock} /> {end}</p>
+  </Card>;
 }
 
 export default function Match({ baseUrl }) {
   const { id } = useParams();
   const [data, setData] = useState(null);
+  const auth = useAuth();
 
   useEffect(async () => {
-    setData(await loadMatchData(id));
+    setData(await loadMatchData(id, auth.token));
   }, []);
 
   if (!data) {
     return <></>;
   }
 
+  let extraCards = null;
+
+  if (data.forfeit || data.error) {
+    extraCards = <ErrorCard error={data.error} forfeit={data.forfeit} players={data.players} baseUrl={baseUrl} />;
+    //const { agent, remaining, stderr } = data.forfeit.payload;
+    //extraCards = <ErrorCard players={data.players} forfeiter={agent} remaining={remaining} stderr={stderr} baseUrl={baseUrl} />;
+  }
+
+  if (!data.completeTime) {
+    extraCards = <>{extraCards}<OngoingCard /></>;
+  }
+
   return <>
     <span></span><span></span><span></span><span></span> {/* a fun hack just to get a better outline colour below! */}
+    <TitleCard players={data.players} scores={data.scores} completeTime={data.completeTime} baseUrl={baseUrl} />
 
-    <Card darker className="match-page-header">
-      <h1>
-        <Link to={`${baseUrl}user/${data.players[0].username}`} className="match-page-main-player-link">{data.players[0].username}</Link> vs <Link to={`${baseUrl}user/${data.players[1].username}`} className="match-page-opposing-player-link">{data.players[1].username}</Link>
-      </h1>
-      <h2>
-        {data.scores.a_wins} wins | {data.scores.draws} draws | {data.scores.b_wins} losses
-      </h2>
-      <div className='match-score-bar'>
-        {data.scores.percentages.a_wins > 0 && <div className='match-score-bar-wins' style={{ width: data.scores.percentages.a_wins + '%' }}></div>}
-        {data.scores.percentages.draws > 0 && <div className='match-score-bar-draws' style={{ width: data.scores.percentages.draws + '%' }}></div>}
-        {data.scores.percentages.b_wins > 0 && <div className='match-score-bar-losses' style={{ width: data.scores.percentages.b_wins + '%' }}></div>}
-      </div>
-    </Card>
-
-    <Games matchID={id} winners={data.winners} competitionBaseUrl={baseUrl} />
+    <Games matchID={id} winners={data.winners} competitionBaseUrl={baseUrl} extra={extraCards} />
   </>;
 }

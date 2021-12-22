@@ -1,6 +1,10 @@
 use std::{marker::PhantomData, sync::Arc};
 
-use doxa_executor::{client::GameClient, error::GameManagerError, game::GameManager};
+use doxa_executor::{
+    client::{ForfeitError, GameClient},
+    error::GameManagerError,
+    game::GameManager,
+};
 
 use doxa_core::{
     lapin::options::BasicAckOptions,
@@ -126,7 +130,11 @@ impl<C: GameClient> ExecutionManager<C> {
                             match game_manager.run().await {
                                 Ok(()) => event!(Level::INFO, "game manager succesfully completed"),
                                 Err(error) => {
-                                    event!(Level::ERROR, %error, debug = ?error, "error running game manager")
+                                    if error.forfeit().is_some() {
+                                        event!(Level::INFO, forfeit=true, %error, debug = ?error, "error running game manager")
+                                    } else {
+                                        event!(Level::ERROR, forfeit=false, %error, debug = ?error, "error running game manager")
+                                    }
                                 }
                             }
                         }

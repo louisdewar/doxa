@@ -1,14 +1,18 @@
 use std::{marker::PhantomData, sync::Arc};
 
 use doxa_core::lapin::Channel;
+use doxa_core::tracing::error;
 use doxa_mq::model::MatchRequest;
-use futures::future::try_join_all;
+use futures::{
+    future::{join_all, try_join_all},
+    TryFutureExt,
+};
 
 use crate::{
     agent::VMAgent,
     client::{ForfeitError, GameClient, GameError},
     context::GameContext,
-    error::GameManagerError,
+    error::{AgentTerminated, GameContextError, GameManagerError},
     Settings,
 };
 
@@ -66,12 +70,37 @@ impl<C: GameClient> GameManager<C> {
 
         let res = match C::run(self.client_match_request, &mut context).await {
             Ok(()) => Ok(()),
-            Err(error) => {
-                if let Some(agent_id) = error.forfeit() {
-                    context.forfeit_agent(agent_id).await?;
-                }
+            Err(mut error) => {
+                let vm_logs = if let Some(agent_id) = error.forfeit() {
+                    let stderr = match &mut error {
+                        GameError::Context(GameContextError::AgentTerminated(
+                            AgentTerminated { stderr, .. },
+                            // The stderr isn't needed again
+                        )) => stderr.take(),
+                        _ => None,
+                    };
+                    context.forfeit_agent(agent_id, stderr).await?;
 
-                context.emit_error_event(&error).await?;
+                    (0..context.agents()).map(|_| None).collect()
+                } else {
+                    let mut agents = Vec::new();
+                    // Take ownership of agents swapping it with an empty vector (they aren't
+                    // needed anymore)
+                    std::mem::swap(&mut agents, context.agents);
+                    // TODO: in future if we can figure out which VM the error came from we should
+                    // only include those logs and put None elsewhere.
+                    let vm_logs = join_all(agents.into_iter().enumerate().map(|(i, agent)| {
+                        agent.shutdown().map_ok_or_else(move |e| {
+                            error!(error=%e, debug=?e, agent_id=%i, "failed to shutdown agent and collect logs");
+                            None
+                        }, Some)
+                    }))
+                    .await;
+
+                    vm_logs
+                };
+
+                context.emit_error_event(&error, vm_logs).await?;
 
                 Err(error)
             }

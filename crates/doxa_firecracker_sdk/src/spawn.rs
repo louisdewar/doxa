@@ -38,9 +38,9 @@ impl VMOptions {
             .arg("--api-sock")
             .arg(&self.socket)
             .stdin(Stdio::null())
-            // If this becomes stdio piped and it isn't consumed then the VM can run out of memory
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
+            // If this isn't consumed then the VM can run out of memory
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
             .kill_on_drop(true)
             .spawn()?;
 

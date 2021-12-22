@@ -11,6 +11,8 @@ $win: #2ECC71;
 $loss: #E74C3C;
 $draw: #3075DD;
 
+$error: $loss;
+
 @keyframes start-zero-width {
     0% {
         width: 0;

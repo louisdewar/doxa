@@ -1,0 +1,15 @@
+@import 'src/common/_common.scss';
+
+.PlayerLink {
+  text-decoration: underline;
+  font-weight: bold;
+  color: inherit;
+
+  &.player-main {
+    text-decoration-color: $win;
+  }
+
+  &.player-opposing {
+    text-decoration-color: $loss;
+  }
+}

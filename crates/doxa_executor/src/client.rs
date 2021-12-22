@@ -6,7 +6,7 @@ use serde::{de::DeserializeOwned, Serialize};
 pub use crate::error::ForfeitError;
 pub use crate::{context::GameContext, error::GameError};
 
-pub const DEFAULT_AGENT_RAM_MB: usize = 128;
+pub const DEFAULT_AGENT_RAM_MB: usize = 256;
 
 /// Maintains the game state, sending input to agents and handling the output.
 #[async_trait]

@@ -56,7 +56,8 @@ pub enum GameContextError {
         /// The maximum is the largest allowed agent id
         max: usize,
     },
-    NextMessage(NextMessageError),
+    NextEvent(NextEventError),
+    AgentTerminated(AgentTerminated),
     #[from(ignore)]
     SendInput(io::Error),
     #[display(fmt = "failed to deserialize payload: {}", _0)]
@@ -99,11 +100,12 @@ impl ForfeitError for GameContextError {
             GameContextError::UnknownAgent { .. } => None,
             // TODO: next message / send input should both be forfeit errors but we need the agent
             // id - if self.shutdown
-            GameContextError::NextMessage(_) => None,
+            GameContextError::NextEvent(_) => None,
             GameContextError::SendInput(_) => None,
             GameContextError::PayloadDeserialize(_) => None,
             GameContextError::Emit(_) => None,
             GameContextError::TimeoutWaitingForMessage { agent_id } => Some(*agent_id),
+            GameContextError::AgentTerminated(AgentTerminated { agent_id, .. }) => Some(*agent_id),
             GameContextError::IncorrectNumberAgents { .. } => None,
             GameContextError::ZeroLengthEventType => None,
             GameContextError::ReservedEventType => None,
@@ -137,7 +139,14 @@ impl ForfeitError for Infallible {
 }
 
 #[derive(Display, Error, From, Debug)]
-pub struct AgentShutdown;
+#[display(
+    fmt = "the agent terminated - or was already terminated (id={})",
+    agent_id
+)]
+pub struct AgentTerminated {
+    pub stderr: Option<String>,
+    pub agent_id: usize,
+}
 
 #[derive(Display, Error, From, Debug)]
 pub enum NextEventError {
@@ -151,7 +160,10 @@ pub enum NextEventError {
 pub enum NextMessageError {
     NextEvent(NextEventError),
     /// The agent process has terminated successfully either previously or while waiting for the current message
-    Shutdown(AgentShutdown),
+    #[display(fmt = "the agent terminated")]
+    Terminated {
+        stderr: Option<String>,
+    },
 }
 
 // TODO: either remove entierly or just remove runtime OR change on_game_error to take in

@@ -102,3 +102,20 @@ pub enum TakeFileManagerError {
     #[from]
     IO(io::Error),
 }
+
+#[derive(From, Error, Display, Debug)]
+pub enum VMRecorderError {
+    Timeout,
+    #[from]
+    IO(io::Error),
+    #[from]
+    Join(JoinError),
+}
+
+#[derive(From, Error, Display, Debug)]
+pub enum VMShutdownError {
+    #[from(forward)]
+    Firecracker(ShutdownError),
+    #[from]
+    Logs(VMRecorderError),
+}

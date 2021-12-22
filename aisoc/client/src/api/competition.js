@@ -39,18 +39,19 @@ export default class CompetitionAPI {
 
   /* Game */
 
-  static async getGameEvents(game, filter) {
+  static async getGameEvents(game, filter, authToken) {
     const data = await request({
       url: this.GAME_BASE_URL + game + '/events',
       method: 'GET',
       params: filter ? { t: filter } : null,
+      authToken
     });
 
     return data.events;
   }
 
-  static async getSingleGameEvent(game, filter) {
-    const events = await this.getGameEvents(game, filter);
+  static async getSingleGameEvent(game, filter, authToken) {
+    const events = await this.getGameEvents(game, filter, authToken);
 
     return events[0];
   }

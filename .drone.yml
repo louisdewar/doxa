@@ -18,6 +18,15 @@ steps:
       - name: dockersock
         path: /var/run/docker.sock
     commands:
+      - docker build -t registry.dewardt.uk/doxa/server:drone-build-"$DRONE_BUILD_NUMBER" -f aisoc/deploy/Dockerfile.server . --target server_builder
+  # Package the final step with the rootfs
+  - name: final_build_server
+    image: docker:dind
+    privileged: true
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
+    commands:
       - docker build -t registry.dewardt.uk/doxa/server:drone-build-"$DRONE_BUILD_NUMBER" -f aisoc/deploy/Dockerfile.server .
     depends_on:
       - rootfs
@@ -45,7 +54,7 @@ steps:
       - docker push registry.dewardt.uk/doxa/server:production
       - docker push registry.dewardt.uk/doxa/web:production
     depends_on:
-      - build_server
+      - final_build_server
       - build_web
 
 trigger:

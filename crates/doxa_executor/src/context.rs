@@ -2,20 +2,21 @@ use std::{marker::PhantomData, time::Duration};
 
 use doxa_core::{chrono::Utc, lapin::Channel, tokio};
 use doxa_mq::model::GameEvent;
+use futures::TryFutureExt;
 use serde::Serialize;
 use tokio::time::timeout;
 
 use crate::{
     agent::VMAgent,
     client::{GameClient, GameError},
-    error::GameContextError,
+    error::{AgentTerminated, GameContextError, NextMessageError},
     event::{ErrorEvent, ForfeitEvent, StartEvent},
 };
 
 pub const DEFAULT_MAX_MESSAGE_TIME: Duration = Duration::from_secs(120);
 
 pub struct GameContext<'a, C: GameClient + ?Sized> {
-    agents: &'a mut Vec<VMAgent>,
+    pub(crate) agents: &'a mut Vec<VMAgent>,
     event_queue_name: &'a str,
     event_channel: &'a Channel,
     client: PhantomData<C>,
@@ -101,6 +102,7 @@ impl<'a, C: GameClient> GameContext<'a, C> {
     pub(crate) async fn emit_error_event(
         &mut self,
         error: &GameError<C::Error>,
+        vm_logs: Vec<Option<String>>,
     ) -> Result<(), GameContextError> {
         // TODO: end event data, e.g. total time spent, maybe whether it completed succesfully or
         // not
@@ -108,14 +110,19 @@ impl<'a, C: GameClient> GameContext<'a, C> {
             ErrorEvent {
                 error: format!("{}", error),
                 debug: format!("{:?}", error),
+                vm_logs,
             },
             "_ERROR".to_string(),
         )
         .await
     }
 
-    pub async fn forfeit_agent(&mut self, agent_id: usize) -> Result<(), GameContextError> {
-        self.emit_event_raw(ForfeitEvent { agent_id }, "_FORFEIT".to_string())
+    pub async fn forfeit_agent(
+        &mut self,
+        agent_id: usize,
+        stderr: Option<String>,
+    ) -> Result<(), GameContextError> {
+        self.emit_event_raw(ForfeitEvent { agent_id, stderr }, "_FORFEIT".to_string())
             .await
     }
 
@@ -150,9 +157,17 @@ impl<'a, C: GameClient> GameContext<'a, C> {
     pub async fn next_message(&mut self, agent_id: usize) -> Result<&[u8], GameContextError> {
         let agent = self.agent_mut(agent_id)?;
 
-        let msg = timeout(DEFAULT_MAX_MESSAGE_TIME, agent.next_message())
-            .await
-            .map_err(|_| GameContextError::TimeoutWaitingForMessage { agent_id })??;
+        let msg = timeout(
+            DEFAULT_MAX_MESSAGE_TIME,
+            agent.next_message().map_err(|e| match e {
+                NextMessageError::NextEvent(e) => GameContextError::NextEvent(e),
+                NextMessageError::Terminated { stderr } => {
+                    GameContextError::AgentTerminated(AgentTerminated { stderr, agent_id })
+                }
+            }),
+        )
+        .await
+        .map_err(|_| GameContextError::TimeoutWaitingForMessage { agent_id })??;
 
         Ok(msg)
     }

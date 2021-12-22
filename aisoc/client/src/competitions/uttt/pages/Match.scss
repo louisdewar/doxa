@@ -7,23 +7,14 @@
     text-decoration: none;
     font-size: 2rem;
     margin-top: 0;
-
-    a {
-      text-decoration: underline;
-      color: #fff;
-
-      &.match-page-main-player-link {
-        text-decoration-color: #00B75F;
-      }
-
-      &.match-page-opposing-player-link {
-        text-decoration-color: #ee5253;
-      }
-    }
   }
 
   p {
     line-height: 1.35rem;
+  }
+
+  .completed svg {
+    margin-right: 5px;
   }
 }
 

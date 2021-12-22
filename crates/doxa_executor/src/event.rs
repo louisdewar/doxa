@@ -9,6 +9,7 @@ pub struct StartEvent {
 pub struct ErrorEvent {
     pub error: String,
     pub debug: String,
+    pub vm_logs: Vec<Option<String>>,
 }
 
 // TODO: consider making _ERROR only occur for internal errors?
@@ -21,5 +22,6 @@ pub struct ErrorEvent {
 /// A forfeit does not necessarily mean the end of the game.
 pub struct ForfeitEvent {
     pub agent_id: usize,
+    pub stderr: Option<String>,
     // TODO: maybe an enum of reasons?
 }

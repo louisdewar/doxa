@@ -1,17 +1,4 @@
 @import 'src/common/_common.scss';
-// @keyframes control-hover-over {
-//   0% {
-//     transform: scale(0.5);
-//   }
-
-//   35% {
-//     transform: scale(1.1);
-//   }
-
-//   100% {
-//     transform: scale(1.0);
-//   }
-// }
 
 .games-showing-n-label {
   font-style: italic;
@@ -20,7 +7,7 @@
 .games {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
-  a {
+  & > a {
     text-decoration: none;
   }
 
@@ -64,6 +51,16 @@
     }
 
     .controls {
+      button {
+        background: none;
+	color: inherit;
+	border: none;
+	padding: 0;
+	font: inherit;
+	cursor: pointer;
+	outline: inherit;
+      }
+
       svg {
         padding: 10px;
         cursor: pointer;
@@ -84,7 +81,6 @@
 
     .move-number {
       color: #323232;
-      // font-weight: bold;
       text-align: center;
     }
 
@@ -99,6 +95,49 @@
 
       .label {
         color: #646464;
+      }
+    }
+
+    .large-icon {
+      font-size: 50px;
+      margin: 30px 0;
+
+      &.error {
+        color: $error;
+      }
+
+      &.ongoing {
+        color: #555;
+      }
+    }
+  }
+
+  .game-card.error, .game-card.ongoing {
+    display: block;
+    text-align: center;
+
+    pre.logs {
+      text-align: left;
+
+      margin: 30px;
+      margin-top: 0;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid $off-black;
+
+      max-height: 500px;
+      max-width: 100%;
+      overflow: auto;
+    }
+
+    .logs-message {
+      text-align: left;
+      margin: 30px;
+      margin-bottom: 10px;
+
+      code {
+        color: $error;
+        font-weight: bold;
       }
     }
   }

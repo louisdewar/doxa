@@ -46,7 +46,7 @@ impl fmt::Debug for RespondableErrorWrapper {
 
 impl actix_web::ResponseError for RespondableErrorWrapper {
     fn status_code(&self) -> StatusCode {
-        dbg!(self.0.status_code())
+        self.0.status_code()
     }
 
     fn error_response(&self) -> HttpResponse {
