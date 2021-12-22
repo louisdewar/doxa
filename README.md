@@ -10,6 +10,12 @@ Features:
 - 🔩 Resilient: actions such as match requests and agent activations are stored in Rabbit MQ persistant queues 
 - 🔧 Customisable: the core of DOXA makes very few assumptions about competitions while providing convenience features for common functionality, e.g. if you don't need a leaderboard for a competition you can disable it.
 
+## Demo
+
+Uploading an agent using the cli (it is wrapped in a python program that automatically downloads the correct binary for the operating system for convenience):
+
+![logging in and uploading agent demo](./docs/login_and_upload.gif)
+
 ### Current Status 🚧
 
 DOXA is currently in ALPHA.
