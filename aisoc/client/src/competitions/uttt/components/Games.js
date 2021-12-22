@@ -9,7 +9,6 @@ import './Games.scss';
 import Grid from './Grid';
 
 
-
 export default function Games({ matchID, winners, competitionBaseUrl, extra = null }) {
   return <>
     <h3 className="games-showing-n-label">Showing {winners.length} games</h3>

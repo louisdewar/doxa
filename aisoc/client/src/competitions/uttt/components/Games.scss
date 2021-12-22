@@ -97,17 +97,24 @@
         color: #646464;
       }
     }
-  }
 
-  .game-card.error {
-    display: block;
-    text-align: center;
-
-    .error-icon {
-      color: $error;
+    .large-icon {
       font-size: 50px;
       margin: 30px 0;
+
+      &.error {
+        color: $error;
+      }
+
+      &.ongoing {
+        color: #555;
+      }
     }
+  }
+
+  .game-card.error, .game-card.ongoing {
+    display: block;
+    text-align: center;
 
     pre.logs {
       text-align: left;

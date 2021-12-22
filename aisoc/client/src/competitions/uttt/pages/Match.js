@@ -5,9 +5,10 @@ import { useAuth } from 'hooks/useAuth';
 import UTTTAPI from '../api';
 import Games from '../components/Games';
 import './Match.scss';
+import human from 'human-time';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
+import { faExclamationTriangle, faClock } from '@fortawesome/free-solid-svg-icons';
 import PlayerLink from '../components/PlayerLink';
 
 const PLAYER_CLASS = ['main', 'opposing'];
@@ -34,6 +35,9 @@ async function loadMatchData(matchID, authToken) {
     forfeit.payload.remaining = total - winners.length;
   }
 
+  const end = await UTTTAPI.getSingleGameEvent(matchID, '_END', authToken);
+
+
   const calculatePercentage = number => 100 * number / total;
   scores.percentages = {
     a_wins: calculatePercentage(scores.a_wins),
@@ -41,7 +45,9 @@ async function loadMatchData(matchID, authToken) {
     draws: calculatePercentage(scores.draws)
   };
 
-  return { winners, scores, players, forfeit, error };
+  const completeTime = end ? new Date(end.timestamp) : null;
+
+  return { winners, scores, players, forfeit, error, completeTime };
 }
 
 
@@ -125,21 +131,29 @@ function ErrorCard({ forfeit, error, players,  baseUrl }) {
           </pre>
         </>;
       }
-
-
     }
   }
 
   return (
     <div className="game-card error">
-      <div className="error-icon"><FontAwesomeIcon icon={faExclamationTriangle} /></div>
+      <div className="large-icon error"><FontAwesomeIcon icon={faExclamationTriangle} /></div>
       {errorMessage}
       {extraInfo}
     </div>
   );
 }
 
-function TitleCard({ players, scores, baseUrl }) {
+function OngoingCard() {
+  return (
+    <div className="game-card ongoing">
+      <div className="large-icon ongoing"><FontAwesomeIcon icon={faClock} /></div>
+      <p>This game is ongoing, there may be more events in the future.</p>
+    </div>
+  );
+}
+
+function TitleCard({ players, scores, baseUrl, completeTime }) {
+  const end = completeTime ? 'This game completed ' + human(completeTime) : 'This game is ongoing';
 
   let scoresSection;
   if (scores) {
@@ -161,6 +175,7 @@ function TitleCard({ players, scores, baseUrl }) {
     <h1><PlayerLink username={players[0].username} baseUrl={baseUrl} playerClass={'main'} /> vs <PlayerLink username={players[1].username} baseUrl={baseUrl} playerClass={'opposing'} />
     </h1>
     {scoresSection}
+    <p className="completed"><FontAwesomeIcon icon={faClock} /> {end}</p>
   </Card>;
 }
 
@@ -185,9 +200,13 @@ export default function Match({ baseUrl }) {
     //extraCards = <ErrorCard players={data.players} forfeiter={agent} remaining={remaining} stderr={stderr} baseUrl={baseUrl} />;
   }
 
+  if (!data.completeTime) {
+    extraCards = <>{extraCards}<OngoingCard /></>;
+  }
+
   return <>
     <span></span><span></span><span></span><span></span> {/* a fun hack just to get a better outline colour below! */}
-    <TitleCard players={data.players} scores={data.scores} baseUrl={baseUrl} />
+    <TitleCard players={data.players} scores={data.scores} completeTime={data.completeTime} baseUrl={baseUrl} />
 
     <Games matchID={id} winners={data.winners} competitionBaseUrl={baseUrl} extra={extraCards} />
   </>;
