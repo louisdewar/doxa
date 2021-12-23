@@ -1,9 +1,9 @@
-
 export class DoxaError extends Error {
-  constructor(error_code, error_message) {
-    super(`DOXA ERROR: code=${error_code}, message=${error_message}`);
+  constructor(error_code, error_message, status_code) {
+    super(`DOXA ERROR: code=${error_code}, message=${error_message}, status_coed=${status_code}`);
     this.error_code = error_code;
     this.error_message = error_message;
+    this.status_code = status_code;
   }
 }
 
@@ -50,7 +50,7 @@ export async function request({ url, params = {}, authToken = null, method = 'GE
   const json = await response.json();
 
   if (response.status !== 200) {
-    throw new DoxaError(json.error_code, json.error_message);
+    throw new DoxaError(json.error_code, json.error_message, response.status);
   }
 
   return json;

@@ -41,14 +41,17 @@ CREATE UNIQUE INDEX agents_active_unique ON agents (owner, competition)
 
 CREATE TABLE games(
     id SERIAL PRIMARY KEY,
-    start_time timestamptz NOT NULL,
-    complete_time timestamptz,
+    queued_at timestamptz NOT NULL,
+    started_at timestamptz,
+    completed_at timestamptz,
     competition INT references competitions(id) NOT NULL
 );
 
 CREATE TABLE game_participants(
+    index INT NOT NULL,
     agent TEXT references agents(id) NOT NULL,
     game INT references games(id) NOT NULL,
+    UNIQUE (index, game),
     PRIMARY KEY (agent, game)
 );
 

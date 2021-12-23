@@ -3,49 +3,41 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import UTTTAPI from '../api';
 import GameState from '../services/gameReducer';
 import './Games.scss';
 import Grid from './Grid';
 
 
-export default function Games({ matchID, winners, competitionBaseUrl, extra = null }) {
+export default function Games({ matchID, games, competitionBaseUrl, extra = null }) {
   return <>
-    <h3 className="games-showing-n-label">Showing {winners.length} games</h3>
+    <h3 className="games-showing-n-label">Showing {games.length} games</h3>
     <div className='games'>
-      {winners.map((winner, i) => {
-        return <GameCard key={i} matchID={matchID} gameID={i + 1} winner={winner} competitionBaseUrl={competitionBaseUrl} />;
+      {games.map((game, i) => {
+        return <GameCard key={i} matchID={matchID} gameID={i + 1} game={game} competitionBaseUrl={competitionBaseUrl} />;
       })}
       {extra}
     </div>
   </>;
 }
 
-function GameCard({ matchID, gameID, winner, competitionBaseUrl }) {
-  const [loaded, setLoaded] = useState(false);
+function GameCard({ game, competitionBaseUrl, gameID, matchID }) {
   const [grid, setGrid] = useState(null);
   const [currentMove, setCurrentMove] = useState(0);
 
   const gameState = useRef(new GameState());
 
+  const winner = game.overall_winner;
+
   const updateCurrentMove = () => {
     setCurrentMove(gameState.current.getPosition() + 1);
   };
 
-  // Load player and opponent
   useEffect(() => {
-    setLoaded(false);
-    UTTTAPI.getUTTTGameEvents(matchID, gameID).then(events => {
-      gameState.current = new GameState();
-      gameState.current.addManyEvents(events);
-      setGrid(gameState.current.getGrid());
-      updateCurrentMove();
-      setLoaded(true);
-    })
-      .catch(err => {
-        console.error(err);
-      });
-  }, [gameID, matchID]);
+    gameState.current = new GameState();
+    gameState.current.addManyEvents(game.events);
+    setGrid(gameState.current.getGrid());
+    updateCurrentMove();
+  }, [game]);
 
   const stepForward = e => {
     e.preventDefault();
@@ -74,10 +66,6 @@ function GameCard({ matchID, gameID, winner, competitionBaseUrl }) {
     updateCurrentMove();
     setGrid(gameState.current.getGrid());
   };
-
-  if (!loaded) {
-    return null;
-  }
 
   return (
     <Link to={`${competitionBaseUrl}match/${matchID}/game/${gameID}`}>
