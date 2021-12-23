@@ -19,7 +19,7 @@ use doxa_mq::{
 
 use crate::{
     client::Competition,
-    error::{AgentNotFound, ContextError, ParseSystemMessageError, StartEventNotFound},
+    error::{AgentNotFound, ContextError, ParseSystemMessageError},
 };
 
 // TODO: consider moving context methods in their own folders, this file is getting a bit unwieldy
@@ -60,15 +60,16 @@ impl<C: Competition + ?Sized> Context<C> {
                 let game = doxa_db::action::game::create_game(
                     &db,
                     &InsertableGame {
-                        start_time: Utc::now(),
+                        queued_at: Utc::now(),
                         competition,
                     },
                 )?;
 
-                for agent in agents {
+                for (index, agent) in agents.into_iter().enumerate() {
                     doxa_db::action::game::add_participant(
                         &db,
                         &GameParticipant {
+                            index: index as i32,
                             agent,
                             game: game.id,
                         },
@@ -218,42 +219,22 @@ impl<C: Competition + ?Sized> Context<C> {
         &self,
         game_id: i32,
     ) -> Result<Vec<GameParticipantUser>, ContextError> {
-        self.run_query(move |conn| doxa_db::action::game::get_game_participants(conn, game_id))
-            .await
+        self.run_query(move |conn| {
+            doxa_db::action::game::get_game_participants_unordered(conn, game_id)
+        })
+        .await
     }
 
-    /// Get the list of agent IDs in the order of their agent IDs within the game (the same order
+    /// Get the list of agent IDs and their owner in the order of their agent IDs within the game (the same order
     /// as was specified in the match request).
-    ///
-    /// This relies on the start event, if this doesn't exist then this returns a `StartEventNotFound`
-    /// error.
     pub async fn get_game_participants_ordered(
         &self,
         game_id: i32,
-    ) -> Result<Vec<String>, ContextError> {
-        let start_event = self
-            .get_start_event(game_id)
-            .await?
-            .ok_or(StartEventNotFound { game_id })?;
-
-        Ok(start_event.payload.agents)
-    }
-
-    /// Returns a list of the users and their agent in the order that they appear in the game based on the _START event.
-    /// Internally this uses [`get_game_participants_ordered`]
-    pub async fn get_game_players_ordered(
-        &self,
-        game_id: i32,
-    ) -> Result<Vec<(User, String)>, ContextError> {
-        let agents = self.get_game_participants_ordered(game_id).await?;
-
-        let mut players = Vec::with_capacity(agents.len());
-
-        for agent in agents {
-            players.push((self.get_agent_owner(agent.clone()).await?, agent));
-        }
-
-        Ok(players)
+    ) -> Result<Vec<(String, User)>, ContextError> {
+        self.run_query(move |conn| {
+            doxa_db::action::game::get_game_participants_ordered(conn, game_id)
+        })
+        .await
     }
 
     /// Gets the user that is the owner of the agent.

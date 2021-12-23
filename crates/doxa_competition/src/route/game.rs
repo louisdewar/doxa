@@ -1,10 +1,5 @@
 use doxa_auth::guard::AuthGuard;
-use doxa_core::{
-    actix_web::web,
-    chrono::{DateTime, Utc},
-    error::HttpResponse,
-    EndpointResult,
-};
+use doxa_core::{actix_web::web, error::HttpResponse, EndpointResult};
 
 use doxa_executor::{
     client::GameClient,
@@ -17,7 +12,12 @@ use crate::{
     error::{GameNotFound, IncorrectEventFormatting, UnknownEventType},
 };
 
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+
+use super::response::{
+    GameEventResponse, GameEventsResponse, GameResponse, GameResultResponse, PlayersResponse,
+    PlayersResponsePlayer,
+};
 
 #[derive(Deserialize)]
 pub struct GameEventsParams {
@@ -25,29 +25,24 @@ pub struct GameEventsParams {
     event_type: Option<String>,
 }
 
-#[derive(Serialize, Debug)]
-pub struct EventResponse {
-    // Will automatically serialize using an ISO 8601 format (rfc 3339) which should be compatable
-    // with Javascript.
-    start_time: DateTime<Utc>,
-    complete_time: Option<DateTime<Utc>>,
-    events: Vec<serde_json::Value>,
-}
+/// The default route for `_game/{game_id}`.
+pub async fn game<C: Competition + ?Sized>(
+    path: web::Path<i32>,
+    context: web::Data<Context<C>>,
+) -> EndpointResult {
+    let game_id = path.into_inner();
 
-#[derive(Serialize, Debug)]
-pub struct PlayersResponse {
-    players: Vec<PlayersResponsePlayer>,
-}
+    let game = context
+        .get_game_by_id(game_id)
+        .await?
+        .ok_or(GameNotFound { game_id })?;
 
-#[derive(Serialize, Debug)]
-pub struct PlayersResponsePlayer {
-    username: String,
-    agent: String,
-}
-
-#[derive(Serialize, Debug)]
-pub struct GameResultResponse {
-    result: Option<i32>,
+    Ok(HttpResponse::Ok().json(GameResponse {
+        game_id,
+        queued_at: game.queued_at,
+        started_at: game.started_at,
+        completed_at: game.completed_at,
+    }))
 }
 
 // TODO: get a single event endpoint
@@ -76,11 +71,7 @@ pub async fn game_events<C: Competition + ?Sized>(
     let start_event = match context.get_start_event(game_id).await? {
         Some(event) => event,
         None => {
-            return Ok(HttpResponse::Ok().json(EventResponse {
-                start_time: game.start_time,
-                complete_time: game.complete_time,
-                events: vec![],
-            }));
+            return Ok(HttpResponse::Ok().json(GameEventsResponse { events: vec![] }));
         }
     };
 
@@ -190,17 +181,15 @@ pub async fn game_events<C: Competition + ?Sized>(
             }
         };
 
-        output_events.push(json!({
-            "id": event.event_id,
-            "type": event.event_type,
-            "timestamp": event.event_timestamp,
-            "payload": event.payload
-        }));
+        output_events.push(GameEventResponse {
+            id: event.event_id,
+            event_type: event.event_type,
+            timestamp: event.event_timestamp,
+            payload: event.payload,
+        });
     }
 
-    Ok(HttpResponse::Ok().json(EventResponse {
-        start_time: game.start_time,
-        complete_time: game.complete_time,
+    Ok(HttpResponse::Ok().json(GameEventsResponse {
         events: output_events,
     }))
 }
@@ -216,18 +205,11 @@ pub async fn game_players<C: Competition + ?Sized>(
         return Err(GameNotFound { game_id }.into());
     }
 
-    // get_game_participants_ordered currently requires the start event to exist and it
-    // will cause an internal server error otherwise.
-    // TODO: once there are improvements in get_game_participants_ordered, remove this.
-    if context.get_start_event(game_id).await?.is_none() {
-        return Err(GameNotFound { game_id }.into());
-    }
-
     let players = context
-        .get_game_players_ordered(game_id)
+        .get_game_participants_ordered(game_id)
         .await?
         .into_iter()
-        .map(|(player, agent)| PlayersResponsePlayer {
+        .map(|(agent, player)| PlayersResponsePlayer {
             username: player.username,
             agent,
         })

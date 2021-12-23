@@ -60,7 +60,10 @@ impl Competition for UTTTCompetition {
             context
                 .add_game_results_active(
                     game,
-                    agents.into_iter().zip(vec![a_score, b_score].into_iter()),
+                    agents
+                        .into_iter()
+                        .map(|(agent, _)| agent)
+                        .zip(vec![a_score, b_score].into_iter()),
                     true,
                 )
                 .await?;

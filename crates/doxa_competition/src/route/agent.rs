@@ -27,8 +27,9 @@ pub async fn agent_games<C: Competition + ?Sized>(
         .map(|game| {
             json!({
                 "id": game.id,
-                "start_time": game.start_time,
-                "end_time": game.complete_time
+                "queued_at": game.queued_at,
+                "started_at": game.started_at,
+                "completed_at": game.completed_at,
             })
         })
         .collect();

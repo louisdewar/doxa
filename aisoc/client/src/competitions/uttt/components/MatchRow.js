@@ -70,11 +70,13 @@ export default function MatchRow({ filter, match, baseUrl, i }) {
     );
   }
 
+  const completed = match.completed_at? human(new Date(match.completed_at)): (match.started_at? <em>Ongoing</em>: <em>Queued</em>);
+
   return (
     <div className='pair-matches-entry'>
       <span className="pair-matches-position">{i + 1}</span>
       <span className="pair-matches-username">{username}</span>
-      <span className="pair-matches-time">{match.end_time ? human(new Date(match.end_time)) : <em>Ongoing</em>}</span>
+      <span className="pair-matches-time">{completed}</span>
       <span className="pair-matches-match-link"><Link to={`${baseUrl}match/${match.id}`}>View</Link></span>
     </div>
   );

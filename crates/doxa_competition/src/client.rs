@@ -116,6 +116,8 @@ pub trait Competition: 'static + Send + Sync {
     /// that uses Self::event_filter. If you need something more advanced you can overwrite this.
     /// If you don't want these routes you can redefine this as an empty function.
     fn configure_game_routes(&self, service: &mut actix_web::web::ServiceConfig) {
+        service.route("_game/{game_id}", web::get().to(route::game::game::<Self>));
+
         service.route(
             "_game/{game_id}/events",
             web::get().to(route::game::game_events::<Self>),

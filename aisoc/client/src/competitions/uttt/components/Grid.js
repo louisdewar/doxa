@@ -24,6 +24,11 @@ function SubGrid({ winner, tileOwners, playable }) {
 }
 
 export default function Grid({ gameState, small = false }) {
+  if (!gameState) {
+    // TODO: Maybe just render a blank grid to avoid jumpy movement on load
+    return null;
+  }
+
   return (
     <div className={classNames('grid', winnerToClass(gameState.winner), { small })}>
       {gameState.subGrids.map((subGrid, i) => {
