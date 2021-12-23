@@ -17,4 +17,4 @@ jobs:
           npm run build
       - name: Run ESLint
         working-directory: ./aisoc/client/
-        run: eslint . --ext .js,.jsx,.ts,.tsx
+        run: npx eslint . --ext .js,.jsx,.ts,.tsx
