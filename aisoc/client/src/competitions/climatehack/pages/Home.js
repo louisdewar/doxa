@@ -55,6 +55,12 @@ export default function Home({ baseUrl }) {
         <h2>Submission Guide</h2>
       </div>
     },
+    {
+      name: 'FAQ',
+      tab: <div>
+        <h2>Frequently Asked Questions</h2>
+      </div>
+    },
   ];
 
 
