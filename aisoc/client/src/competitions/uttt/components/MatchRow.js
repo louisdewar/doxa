@@ -1,7 +1,7 @@
 import LoadingPlaceholder from 'components/LoadingPlaceholder';
-import human from 'human-time';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { formatTime } from 'utils/time';
 import UTTTAPI from '../api';
 
 async function fetchMatchRow(setPlayers, setScores, matchID) {
@@ -19,7 +19,7 @@ async function fetchMatchRow(setPlayers, setScores, matchID) {
 }
 
 function Score({ val }) {
-  return (<>{typeof val === 'number'? `(${val}) `: null}</>);
+  return (<>{typeof val === 'number' ? `(${val}) ` : null}</>);
 }
 
 export default function MatchRow({ filter, match, baseUrl, i }) {
@@ -70,7 +70,7 @@ export default function MatchRow({ filter, match, baseUrl, i }) {
     );
   }
 
-  const completed = match.completed_at? human(new Date(match.completed_at)): (match.started_at? <em>Ongoing</em>: <em>Queued</em>);
+  const completed = match.completed_at ? formatTime(new Date(match.completed_at)) : (match.started_at ? <em>Ongoing</em> : <em>Queued</em>);
 
   return (
     <div className='pair-matches-entry'>

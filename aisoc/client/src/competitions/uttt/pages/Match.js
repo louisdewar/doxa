@@ -1,17 +1,17 @@
+import { faClock, faExclamationTriangle, faHourglassEnd } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { DoxaError } from 'api/common';
 import Card from 'components/Card';
+import { useAuth } from 'hooks/useAuth';
+import Error404 from 'pages/Error404';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useAuth } from 'hooks/useAuth';
+import { formatDuration, formatTime } from 'utils/time';
 import UTTTAPI from '../api';
 import Games from '../components/Games';
-import './Match.scss';
-import human from 'human-time';
-
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faExclamationTriangle, faClock } from '@fortawesome/free-solid-svg-icons';
 import PlayerLink from '../components/PlayerLink';
-import { DoxaError } from 'api/common';
-import Error404 from 'pages/Error404';
+import './Match.scss';
+
 
 const PLAYER_CLASS = ['main', 'opposing'];
 
@@ -19,7 +19,7 @@ async function loadMatchData(matchID, authToken) {
   const game = await UTTTAPI.getGame(matchID, null);
   const players = await UTTTAPI.getGamePlayers(matchID);
   const events = await UTTTAPI.getGameEvents(matchID, null, authToken);
- 
+
   const games = [];
 
   let error, forfeit, scores;
@@ -52,13 +52,13 @@ async function loadMatchData(matchID, authToken) {
 }
 
 
-function ErrorCard({ forfeit, error, players,  baseUrl }) {
+function ErrorCard({ forfeit, error, players, baseUrl }) {
   let errorMessage;
   let extraInfo;
 
   if (forfeit && forfeit.payload) {
     const forfeiter = forfeit.payload.agent;
-    const other = forfeiter === 0? 1: 0;
+    const other = forfeiter === 0 ? 1 : 0;
     const stderr = forfeit.payload.stderr;
     const remaining = forfeit.payload.remaining;
 
@@ -66,8 +66,8 @@ function ErrorCard({ forfeit, error, players,  baseUrl }) {
       <>
         <p><PlayerLink username={players[forfeiter].username} baseUrl={baseUrl} playerClass={PLAYER_CLASS[forfeiter]} />&apos;s agent forfeit the match!</p>
         <p>
-        This means that <PlayerLink username={players[other].username} baseUrl={baseUrl} playerClass={PLAYER_CLASS[other]} /> wins
-        the remaining {remaining} {remaining > 1? 'games': 'game'} by default.
+          This means that <PlayerLink username={players[other].username} baseUrl={baseUrl} playerClass={PLAYER_CLASS[other]} /> wins
+          the remaining {remaining} {remaining > 1 ? 'games' : 'game'} by default.
         </p>
       </>
     );
@@ -148,36 +148,35 @@ function OngoingCard() {
   return (
     <div className="game-card ongoing">
       <div className="large-icon ongoing"><FontAwesomeIcon icon={faClock} /></div>
-      <p>This game is ongoing, there may be more events in the future.</p>
+      <p>This match is ongoing — there may be more events in the future.</p>
     </div>
   );
 }
 
 function TitleCard({ players, scores, baseUrl, completedAt, queuedAt, startedAt }) {
-  const end = completedAt ? 'This game completed ' + human(completedAt) :
-    ( startedAt ? 'This game started ' + human(startedAt) : 'This game was queued '+ human(queuedAt));
+  const duration = formatDuration((completedAt.getTime() - startedAt.getTime()) / 1000);
+  const end = completedAt ? `This match finished ${formatTime(completedAt)}.` :
+    (startedAt ? `This match started ${formatTime(startedAt)}.` : `This match was queued ${formatTime(queuedAt)}.`);
 
-  let scoresSection;
-  if (scores) {
-    scoresSection = <>
-      <h2>
-        {scores.a_wins} wins | {scores.draws} draws | {scores.b_wins} losses
-      </h2>
-      <div className='match-score-bar'>
-        {scores.percentages.a_wins > 0 && <div className='match-score-bar-wins' style={{ width: scores.percentages.a_wins + '%' }}></div>}
-        {scores.percentages.draws > 0 && <div className='match-score-bar-draws' style={{ width: scores.percentages.draws + '%' }}></div>}
-        {scores.percentages.b_wins > 0 && <div className='match-score-bar-losses' style={{ width: scores.percentages.b_wins + '%' }}></div>}
-      </div>
-    </>;
-  } else {
-    scoresSection = <h2>No scores</h2>;
-  }
+  const scoresSection = scores ? <>
+    <h2>
+      {scores.a_wins} wins | {scores.draws} draws | {scores.b_wins} losses
+    </h2>
+    <div className='match-score-bar'>
+      {scores.percentages.a_wins > 0 && <div className='match-score-bar-wins' style={{ width: scores.percentages.a_wins + '%' }}></div>}
+      {scores.percentages.draws > 0 && <div className='match-score-bar-draws' style={{ width: scores.percentages.draws + '%' }}></div>}
+      {scores.percentages.b_wins > 0 && <div className='match-score-bar-losses' style={{ width: scores.percentages.b_wins + '%' }}></div>}
+    </div>
+  </> : <h2>No scores</h2>;
 
   return <Card darker className="match-page-header">
     <h1><PlayerLink username={players[0].username} baseUrl={baseUrl} playerClass={'main'} /> vs <PlayerLink username={players[1].username} baseUrl={baseUrl} playerClass={'opposing'} />
     </h1>
     {scoresSection}
-    <p className="completed"><FontAwesomeIcon icon={faClock} /> {end}</p>
+    <p className="completed">
+      <FontAwesomeIcon icon={faClock} size="sm" fixedWidth /> {end}<br />
+      <FontAwesomeIcon icon={faHourglassEnd} size="sm" fixedWidth /> This match took {duration} to complete.
+    </p>
   </Card>;
 }
 
@@ -197,7 +196,7 @@ export default function Match({ baseUrl }) {
         if (e.status_code === 404) {
           setNotFound(true);
         }
-      // TODO: create generic error card
+        // TODO: create generic error card
       }
     }
   }, []);
