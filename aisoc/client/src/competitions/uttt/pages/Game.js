@@ -115,7 +115,7 @@ export default function Game({ baseUrl }) {
         <Link to={`${baseUrl}user/${players[0].username}`} className="game-page-main-player-link">{players[0].username}</Link> vs <Link to={`${baseUrl}user/${players[1].username}`} className="game-page-opposing-player-link">{players[1].username}</Link>
       </h1>
       <h2>
-        Game #{gameID}
+        Game #{gameID} of match #{matchID}
       </h2>
     </Card>
 
