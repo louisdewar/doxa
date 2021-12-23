@@ -38,12 +38,26 @@ export default class CompetitionAPI {
   }
 
   /* Game */
+  static async getGame(game) {
+    const data = await request({
+      url: this.GAME_BASE_URL + game,
+      method: 'GET',
+    });
+
+    for (let field of ['completed_at', 'started_at', 'queued_at']) {
+      if (data[field]) {
+        data[field] = new Date(data[field]);
+      }
+    }
+
+    return data;
+  }
 
   static async getGameEvents(game, filter, authToken) {
     const data = await request({
       url: this.GAME_BASE_URL + game + '/events',
       method: 'GET',
-      params: filter ? { t: filter } : null,
+      params: filter ? { t: filter } : undefined,
       authToken
     });
 

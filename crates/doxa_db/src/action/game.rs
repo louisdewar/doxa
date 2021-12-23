@@ -15,14 +15,25 @@ pub fn create_game(
         .get_result(conn)
 }
 
-pub fn set_game_complete_time(
+pub fn set_game_start_time(
     conn: &PgConnection,
     game_id: i32,
-    complete_time: DateTime<Utc>,
+    started_at: DateTime<Utc>,
 ) -> Result<model::Game, DieselError> {
     diesel::update(s::games::table)
         .filter(s::games::columns::id.eq(game_id))
-        .set(s::games::columns::complete_time.eq(complete_time))
+        .set(s::games::columns::started_at.eq(started_at))
+        .get_result(conn)
+}
+
+pub fn set_game_complete_time(
+    conn: &PgConnection,
+    game_id: i32,
+    complete_at: DateTime<Utc>,
+) -> Result<model::Game, DieselError> {
+    diesel::update(s::games::table)
+        .filter(s::games::columns::id.eq(game_id))
+        .set(s::games::columns::completed_at.eq(complete_at))
         .get_result(conn)
 }
 
@@ -91,7 +102,7 @@ pub fn get_single_game_event_by_event_type(
         .optional()
 }
 
-pub fn get_game_participants(
+pub fn get_game_participants_unordered(
     conn: &PgConnection,
     id: i32,
 ) -> Result<Vec<model::GameParticipantUser>, DieselError> {
@@ -102,6 +113,19 @@ pub fn get_game_participants(
         .get_results(conn)
 }
 
+pub fn get_game_participants_ordered(
+    conn: &PgConnection,
+    id: i32,
+) -> Result<Vec<(String, crate::model::user::User)>, DieselError> {
+    s::game_participants::table
+        .filter(s::game_participants::game.eq(id))
+        .order(s::game_participants::index)
+        .inner_join(s::agents::table)
+        .inner_join(s::users::table.on(s::users::id.eq(s::agents::owner)))
+        .select((s::game_participants::agent, s::users::all_columns))
+        .get_results(conn)
+}
+
 pub fn get_agent_games(
     conn: &PgConnection,
     agent: String,
@@ -109,7 +133,7 @@ pub fn get_agent_games(
     s::games::table
         .inner_join(s::game_participants::table)
         .filter(s::game_participants::columns::agent.eq(agent))
-        .order_by(s::games::columns::start_time.asc())
+        .order_by(s::games::columns::queued_at.asc())
         .select(s::games::all_columns)
         .get_results(conn)
 }
@@ -153,6 +177,8 @@ pub fn remove_game_result_by_participant(
         .get_results(conn)
 }
 
+/// Get games that involve only active agents where the user has participated in order of the time
+/// that they were queued_at (maybe change to only include started games and order by started_at)
 pub fn get_user_active_games(
     conn: &PgConnection,
     user_id: i32,
@@ -168,7 +194,7 @@ pub fn get_user_active_games(
             view::active_games::table.on(view::active_games::id.eq(s::game_participants::game)),
         )
         .inner_join(s::games::table.on(s::games::id.eq(s::game_participants::game)))
-        .order_by(s::games::columns::start_time.asc())
+        .order_by(s::games::columns::queued_at.asc())
         .select(s::games::all_columns)
         .get_results(conn)
 }

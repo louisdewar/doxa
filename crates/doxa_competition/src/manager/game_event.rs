@@ -98,12 +98,23 @@ impl<C: Competition> GameEventManager<C> {
                     let event_type = &game_event.event_type;
 
                     if event_type.starts_with('_') {
-                        // System message, maybe do something with it? E.g. have on_game_start /
-                        // on_game_end / on_game_error
-                        //
-                        // TODO: set game start / end / if error set end and error
                         match event_type.as_str() {
-                            "_START" => {}
+                            "_START" => {
+                                tokio::task::spawn_blocking({
+                                    let started_at = game_event.timestamp;
+                                    let game_id = game_event.game_id;
+                                    let pool = self.settings.pg_pool.clone();
+                                    move || {
+                                        let db = pool.get().unwrap();
+                                        doxa_db::action::game::set_game_start_time(
+                                            &db, game_id, started_at,
+                                        )
+                                    }
+                                })
+                                .await
+                                .unwrap()
+                                .unwrap();
+                            }
 
                             "_END" => {
                                 tokio::task::spawn_blocking({

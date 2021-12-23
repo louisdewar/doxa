@@ -7,6 +7,8 @@ use crate::{
     error::NoActiveAgent,
 };
 
+use super::response::{ActiveAgentResponse, ActiveGamesResponse, GameResponse, UserScoreResponse};
+
 /// The default route for `_user/{username}/active_agent`.
 pub async fn user_active_agent<C: Competition + ?Sized>(
     path: web::Path<String>,
@@ -24,7 +26,9 @@ pub async fn user_active_agent<C: Competition + ?Sized>(
     let agent = context.get_active_agent(user.id).await?;
 
     // Either show the agent id or null if it is None:
-    Ok(HttpResponse::Ok().json(json!({ "active_agent": agent.map(|agent| agent.id) })))
+    Ok(HttpResponse::Ok().json(ActiveAgentResponse {
+        active_agent: agent.map(|agent| agent.id),
+    }))
 }
 
 // TODO: this route may not be a good idea because historical scores are likely to be inaccurate
@@ -69,7 +73,11 @@ pub async fn user_score<C: Competition + ?Sized>(
 
     let score = context.get_agent_score(agent.id.clone()).await?;
 
-    Ok(HttpResponse::Ok().json(json!({ "agent": agent.id, "score": score })))
+    //Ok(HttpResponse::Ok().json(json!({ "agent": agent.id, "score": score })))
+    Ok(HttpResponse::Ok().json(UserScoreResponse {
+        agent: agent.id,
+        score,
+    }))
 }
 
 // /// The default route for `_user/{username}/rank`.
@@ -130,15 +138,13 @@ pub async fn user_active_games<C: Competition + ?Sized>(
         .get_user_active_games(user.id)
         .await?
         .into_iter()
-        .map(|game| {
-            json!({
-                "id": game.id,
-                "start_time": game.start_time,
-                "end_time": game.complete_time
-            })
+        .map(|game| GameResponse {
+            game_id: game.id,
+            queued_at: game.queued_at,
+            started_at: game.started_at,
+            completed_at: game.completed_at,
         })
         .collect::<Vec<_>>();
 
-    // Either show the agent id or null if it is None:
-    Ok(HttpResponse::Ok().json(json!({ "games": games })))
+    Ok(HttpResponse::Ok().json(ActiveGamesResponse { games }))
 }
