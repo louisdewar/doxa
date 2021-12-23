@@ -38,6 +38,7 @@ table! {
 
 table! {
     game_participants (agent, game) {
+        index -> Int4,
         agent -> Text,
         game -> Int4,
     }
@@ -54,8 +55,9 @@ table! {
 table! {
     games (id) {
         id -> Int4,
-        start_time -> Timestamptz,
-        complete_time -> Nullable<Timestamptz>,
+        queued_at -> Timestamptz,
+        started_at -> Nullable<Timestamptz>,
+        completed_at -> Nullable<Timestamptz>,
         competition -> Int4,
     }
 }

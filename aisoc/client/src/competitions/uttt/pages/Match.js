@@ -10,44 +10,45 @@ import human from 'human-time';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faExclamationTriangle, faClock } from '@fortawesome/free-solid-svg-icons';
 import PlayerLink from '../components/PlayerLink';
+import { DoxaError } from 'api/common';
+import Error404 from 'pages/Error404';
 
 const PLAYER_CLASS = ['main', 'opposing'];
 
 async function loadMatchData(matchID, authToken) {
-  const winners = await UTTTAPI.getUTTTGameWinners(matchID) || [];
-  const scores = await UTTTAPI.getUTTTGameScores(matchID);
+  const game = await UTTTAPI.getGame(matchID, null);
   const players = await UTTTAPI.getGamePlayers(matchID);
+  const events = await UTTTAPI.getGameEvents(matchID, null, authToken);
+ 
+  const games = [];
 
-  if (!players) {
-    return null;
+  let error, forfeit, scores;
+
+  for (let event of events) {
+    if (event.type.startsWith('game_') && event.type != 'game_winners') {
+      // NOTE: if we want to include the timestamp of the game in the UI we can copy game.timestamp
+      // into game.payload
+      games.push(event.payload);
+    } else if (event.type === '_ERROR') {
+      error = event;
+    } else if (event.type === '_FORFEIT') {
+      forfeit = event;
+    } else if (event.type === 'scores') {
+      scores = event.payload;
+    }
   }
 
-  const error = await UTTTAPI.getSingleGameEvent(matchID, '_ERROR', authToken);
-
-  if (!scores) {
-    return { winners, players, error };
+  if (scores) {
+    const total = scores.a_wins + scores.b_wins + scores.draws;
+    const calculatePercentage = number => 100 * number / total;
+    scores.percentages = {
+      a_wins: calculatePercentage(scores.a_wins),
+      b_wins: calculatePercentage(scores.b_wins),
+      draws: calculatePercentage(scores.draws)
+    };
   }
 
-  const total = scores.a_wins + scores.b_wins + scores.draws;
-
-  const forfeit = await UTTTAPI.getSingleGameEvent(matchID, '_FORFEIT', authToken);
-  if (forfeit && forfeit.payload) {
-    forfeit.payload.remaining = total - winners.length;
-  }
-
-  const end = await UTTTAPI.getSingleGameEvent(matchID, '_END', authToken);
-
-
-  const calculatePercentage = number => 100 * number / total;
-  scores.percentages = {
-    a_wins: calculatePercentage(scores.a_wins),
-    b_wins: calculatePercentage(scores.b_wins),
-    draws: calculatePercentage(scores.draws)
-  };
-
-  const completeTime = end ? new Date(end.timestamp) : null;
-
-  return { winners, scores, players, forfeit, error, completeTime };
+  return { games, queuedAt: game.queued_at, startedAt: game.started_at, completedAt: game.completed_at, error, forfeit, players, scores };
 }
 
 
@@ -152,8 +153,9 @@ function OngoingCard() {
   );
 }
 
-function TitleCard({ players, scores, baseUrl, completeTime }) {
-  const end = completeTime ? 'This game completed ' + human(completeTime) : 'This game is ongoing';
+function TitleCard({ players, scores, baseUrl, completedAt, queuedAt, startedAt }) {
+  const end = completedAt ? 'This game completed ' + human(completedAt) :
+    ( startedAt ? 'This game started ' + human(startedAt) : 'This game was queued '+ human(queuedAt));
 
   let scoresSection;
   if (scores) {
@@ -184,9 +186,26 @@ export default function Match({ baseUrl }) {
   const [data, setData] = useState(null);
   const auth = useAuth();
 
+  const [notFound, setNotFound] = useState(false);
+
   useEffect(async () => {
-    setData(await loadMatchData(id, auth.token));
+    try {
+      setData(await loadMatchData(id, auth.token));
+    } catch (e) {
+      console.error(e);
+      if (e instanceof DoxaError) {
+        if (e.status_code === 404) {
+          setNotFound(true);
+        }
+      // TODO: create generic error card
+      }
+    }
   }, []);
+
+
+  if (notFound) {
+    return <Error404 />;
+  }
 
   if (!data) {
     return <></>;
@@ -200,14 +219,14 @@ export default function Match({ baseUrl }) {
     //extraCards = <ErrorCard players={data.players} forfeiter={agent} remaining={remaining} stderr={stderr} baseUrl={baseUrl} />;
   }
 
-  if (!data.completeTime) {
+  if (!data.completedAt) {
     extraCards = <>{extraCards}<OngoingCard /></>;
   }
 
   return <>
     <span></span><span></span><span></span><span></span> {/* a fun hack just to get a better outline colour below! */}
-    <TitleCard players={data.players} scores={data.scores} completeTime={data.completeTime} baseUrl={baseUrl} />
+    <TitleCard players={data.players} scores={data.scores} completedAt={data.completedAt} queuedAt={data.queuedAt} startedAt={data.startedAt} baseUrl={baseUrl} />
 
-    <Games matchID={id} winners={data.winners} competitionBaseUrl={baseUrl} extra={extraCards} />
+    <Games matchID={id} games={data.games} competitionBaseUrl={baseUrl} extra={extraCards} />
   </>;
 }

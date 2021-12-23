@@ -8,21 +8,23 @@ pub use serde_json::Value as JsonValue;
 #[derive(Debug, Clone, Queryable)]
 pub struct Game {
     pub id: i32,
-    pub start_time: DateTime<Utc>,
-    pub complete_time: Option<DateTime<Utc>>,
+    pub queued_at: DateTime<Utc>,
+    pub started_at: Option<DateTime<Utc>>,
+    pub completed_at: Option<DateTime<Utc>>,
     pub competition: i32,
 }
 
 #[derive(Debug, Clone, Insertable)]
 #[table_name = "games"]
 pub struct InsertableGame {
-    pub start_time: DateTime<Utc>,
+    pub queued_at: DateTime<Utc>,
     pub competition: i32,
 }
 
 #[derive(Debug, Clone, Queryable, Insertable)]
 #[table_name = "game_participants"]
 pub struct GameParticipant {
+    pub index: i32,
     pub agent: String,
     pub game: i32,
 }
