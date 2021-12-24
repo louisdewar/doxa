@@ -154,7 +154,7 @@ function OngoingCard() {
 }
 
 function TitleCard({ players, scores, baseUrl, completedAt, queuedAt, startedAt }) {
-  const duration = formatDuration((completedAt.getTime() - startedAt.getTime()) / 1000);
+  const duration = completedAt? formatDuration((completedAt.getTime() - startedAt.getTime()) / 1000): null;
   const end = completedAt ? `This match finished ${formatTime(completedAt)}.` :
     (startedAt ? `This match started ${formatTime(startedAt)}.` : `This match was queued ${formatTime(queuedAt)}.`);
 
@@ -175,7 +175,7 @@ function TitleCard({ players, scores, baseUrl, completedAt, queuedAt, startedAt 
     {scoresSection}
     <p className="completed">
       <FontAwesomeIcon icon={faClock} size="sm" fixedWidth /> {end}<br />
-      <FontAwesomeIcon icon={faHourglassEnd} size="sm" fixedWidth /> This match took {duration} to complete.
+      {duration? <><FontAwesomeIcon icon={faHourglassEnd} size="sm" fixedWidth /> This match took {duration} to complete.</> : null}
     </p>
   </Card>;
 }
