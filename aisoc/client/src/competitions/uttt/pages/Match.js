@@ -46,6 +46,10 @@ async function loadMatchData(matchID, authToken) {
       b_wins: calculatePercentage(scores.b_wins),
       draws: calculatePercentage(scores.draws)
     };
+
+    if (forfeit && forfeit.payload) {
+      forfeit.payload.remaining = total - games.length;
+    }
   }
 
   return { games, queuedAt: game.queued_at, startedAt: game.started_at, completedAt: game.completed_at, error, forfeit, players, scores };
@@ -60,7 +64,7 @@ function ErrorCard({ forfeit, error, players, baseUrl }) {
     const forfeiter = forfeit.payload.agent;
     const other = forfeiter === 0 ? 1 : 0;
     const stderr = forfeit.payload.stderr;
-    const remaining = forfeit.payload.remaining;
+    const remaining = forfeit.payload.remaining ?? 0;
 
     errorMessage = (
       <>
@@ -154,7 +158,7 @@ function OngoingCard() {
 }
 
 function TitleCard({ players, scores, baseUrl, completedAt, queuedAt, startedAt }) {
-  const duration = completedAt? formatDuration((completedAt.getTime() - startedAt.getTime()) / 1000): null;
+  const duration = completedAt ? formatDuration((completedAt.getTime() - startedAt.getTime()) / 1000) : null;
   const end = completedAt ? `This match finished ${formatTime(completedAt)}.` :
     (startedAt ? `This match started ${formatTime(startedAt)}.` : `This match was queued ${formatTime(queuedAt)}.`);
 
@@ -175,7 +179,7 @@ function TitleCard({ players, scores, baseUrl, completedAt, queuedAt, startedAt 
     {scoresSection}
     <p className="completed">
       <FontAwesomeIcon icon={faClock} size="sm" fixedWidth /> {end}<br />
-      {duration? <><FontAwesomeIcon icon={faHourglassEnd} size="sm" fixedWidth /> This match took {duration} to complete.</> : null}
+      {duration ? <><FontAwesomeIcon icon={faHourglassEnd} size="sm" fixedWidth /> This match took {duration} to complete.</> : null}
     </p>
   </Card>;
 }
@@ -214,8 +218,6 @@ export default function Match({ baseUrl }) {
 
   if (data.forfeit || data.error) {
     extraCards = <ErrorCard error={data.error} forfeit={data.forfeit} players={data.players} baseUrl={baseUrl} />;
-    //const { agent, remaining, stderr } = data.forfeit.payload;
-    //extraCards = <ErrorCard players={data.players} forfeiter={agent} remaining={remaining} stderr={stderr} baseUrl={baseUrl} />;
   }
 
   if (!data.completedAt) {
