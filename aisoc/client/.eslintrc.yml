@@ -6,6 +6,9 @@ extends:
   - "eslint:recommended"
   - "plugin:react/recommended"
   - "plugin:react/jsx-runtime"
+  - "plugin:jest/recommended"
+ignorePatterns:
+  - "build"
 globals:
   Atomics: readonly
   SharedArrayBuffer: readonly
@@ -37,3 +40,6 @@ rules:
     - error
     - always
   react/prop-types: 0
+settings:
+  react:
+    version: detect
