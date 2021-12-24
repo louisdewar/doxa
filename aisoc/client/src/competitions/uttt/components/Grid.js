@@ -21,20 +21,20 @@ function SubGrid({ winner, tileOwners, playable, grid, onTileClick }) {
       {tileOwners.map((tileWinner, i) => (<div
         key={i}
         className={classNames('tile', winnerToClass(tileWinner), { playable: playable && !tileWinner })}
-        onClick={() => { onTileClick(grid, i); }}
+        onClick={onTileClick? () => { onTileClick(grid, i); }: undefined}
       />))}
     </div>
   );
 }
 
-export default function Grid({ gameState, small = false, onTileClick = () => false }) {
+export default function Grid({ gameState, small = false, onTileClick }) {
   if (!gameState) {
     // TODO: Maybe just render a blank grid to avoid jumpy movement on load
     return null;
   }
 
   return (
-    <div className={classNames('grid', winnerToClass(gameState.winner), { small })}>
+    <div className={classNames('grid', winnerToClass(gameState.winner), { small, playable: !!onTileClick })}>
       {gameState.subGrids.map((subGrid, i) => {
         return <SubGrid
           key={i}

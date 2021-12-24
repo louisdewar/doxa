@@ -12,15 +12,21 @@
 
     border: 2px solid transparent;
 
+    &.playable .tile.playable {
+        cursor: pointer;
+
+        transition: background-color 100ms linear;
+
+        &:hover {
+            background-color: #44474a;
+        }
+    }
+
     &.small {
         width: 100px;
     }
 
     &.player-a {
-        // animation-duration: 1s;
-        // animation-name: start-zero-width;
-        // animation-timing-function: ease-in-out;
-        // animation-fill-mode: backwards;
         border-color: $win;
     }
 
