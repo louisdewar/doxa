@@ -1,15 +1,20 @@
+import PlayableGame from '../components/PlayableGame';
 
 export default function OverviewTab() {
-  return <div>
+  return <div style={{ boxSizing: 'border-box', display: 'flow-root' }}>
     <h2>Overview</h2>
+    <div style={{ float: 'right', width: '45%', backgroundColor: '#1F2937', borderRadius: '3px', margin: 'auto', marginLeft: '1rem' }}>
+      <PlayableGame />
+    </div>
+
     <p>
-      Cupcake ipsum dolor sit amet I love macaroon dessert I love. Gingerbread wafer wafer I love oat cake jelly ice cream. Sesame snaps topping I love candy danish I love sesame snaps I love tootsie roll. Candy canes chocolate cake jelly-o pudding soufflé lollipop icing.
+      Ultimate tic-tac-toe is two-player game based on a 3×3 grid of regular tic-tac-toe boards. To win the overall game, a player must win a horizontal, vertical or diagonal row of smaller tic-tac-toe boards — but there is a twist!
     </p>
     <p>
-      Gingerbread carrot cake jujubes croissant icing sweet. Fruitcake brownie cookie I love sesame snaps bear claw cotton candy lemon drops sugar plum. Lollipop tart brownie pudding oat cake halvah cake carrot cake caramels. Carrot cake I love I love pastry cake.
+      The tile position a player chooses in the smaller board determines the board the next player must play in. For example, if you pick the top-right tile of a board, your opponent must then play in the top-right board.
     </p>
     <p>
-      Cupcake danish soufflé marzipan I love jelly-o. Jelly beans pudding pastry chocolate bar marshmallow toffee chocolate cake cupcake caramels. I love marzipan chocolate chocolate pastry ice cream donut cake I love.
+      To get to grips with the rules, feel free to play against the agent on the right. Your challenge is then to develop an ultimate tic-tac-toe agent that beats everybody else{'\''}s.
     </p>
-  </div>;
+  </div >;
 }

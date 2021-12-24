@@ -15,15 +15,19 @@ function winnerToClass(winner) {
   }
 }
 
-function SubGrid({ winner, tileOwners, playable }) {
+function SubGrid({ winner, tileOwners, playable, grid, onTileClick }) {
   return (
     <div className={classNames('sub-grid', winnerToClass(winner))}>
-      {tileOwners.map((tileWinner, i) => (<div key={i} className={classNames('tile', winnerToClass(tileWinner), { playable: playable && !tileWinner })} />))}
+      {tileOwners.map((tileWinner, i) => (<div
+        key={i}
+        className={classNames('tile', winnerToClass(tileWinner), { playable: playable && !tileWinner })}
+        onClick={() => { onTileClick(grid, i); }}
+      />))}
     </div>
   );
 }
 
-export default function Grid({ gameState, small = false }) {
+export default function Grid({ gameState, small = false, onTileClick = () => false }) {
   if (!gameState) {
     // TODO: Maybe just render a blank grid to avoid jumpy movement on load
     return null;
@@ -32,7 +36,14 @@ export default function Grid({ gameState, small = false }) {
   return (
     <div className={classNames('grid', winnerToClass(gameState.winner), { small })}>
       {gameState.subGrids.map((subGrid, i) => {
-        return <SubGrid key={i} winner={gameState.subGridsWon[i]} tileOwners={subGrid} playable={gameState.winner === null && (gameState.nextGrid === i || (gameState.nextGrid === null && !gameState.subGridsWon[i]))} />;
+        return <SubGrid
+          key={i}
+          grid={i}
+          winner={gameState.subGridsWon[i]}
+          tileOwners={subGrid}
+          playable={gameState.winner === null && (gameState.nextGrid === i || (gameState.nextGrid === null && !gameState.subGridsWon[i]))}
+          onTileClick={onTileClick}
+        />;
       })}
     </div>
   );
