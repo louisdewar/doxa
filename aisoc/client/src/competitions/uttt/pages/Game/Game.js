@@ -5,9 +5,9 @@ import Card from 'components/Card';
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router';
 import { Link } from 'react-router-dom';
-import UTTTAPI from '../api';
-import Grid from '../components/Grid';
-import GameState from '../services/gameReducer';
+import UTTTAPI from '../../api';
+import Grid from '../../components/Grid';
+import GameState from '../../services/gameReducer';
 import './Game.scss';
 
 

@@ -1,9 +1,9 @@
 import CompetitionHeader from 'components/CompetitionHeader';
 import CompetitionTabs from 'components/CompetitionTabs';
-import LeaderboardTab from '../tabs/LeaderboardTab';
-import OverviewTab from '../tabs/OverviewTab';
-import RulesTab from '../tabs/RulesTab';
-import SubmissionGuideTab from '../tabs/SubmissionGuideTab';
+import LeaderboardTab from './LeaderboardTab';
+import OverviewTab from './OverviewTab';
+import RulesTab from './RulesTab';
+import SubmissionGuideTab from './SubmissionGuideTab';
 
 export default function Home({ baseUrl }) {
   const tabs = [

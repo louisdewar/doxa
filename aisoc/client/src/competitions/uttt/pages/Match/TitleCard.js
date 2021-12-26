@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Card from 'components/Card';
 import { formatDuration, formatTime } from 'utils/time';
 import PlayerLink from '../../components/PlayerLink';
-import '../Match.scss';
+import './Match.scss';
 
 export default function TitleCard({ players, scores, baseUrl, completedAt, queuedAt, startedAt }) {
   const duration = completedAt ? formatDuration((completedAt.getTime() - startedAt.getTime()) / 1000) : null;

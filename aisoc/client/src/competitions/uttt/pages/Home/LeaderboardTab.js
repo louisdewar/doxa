@@ -1,6 +1,6 @@
 import Leaderboard from 'components/Leaderboard';
 import { useEffect, useState } from 'react';
-import UTTTAPI from '../api';
+import UTTTAPI from '../../api';
 
 
 export default function LeaderboardTab({ baseUrl }) {

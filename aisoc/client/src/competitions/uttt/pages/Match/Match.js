@@ -4,12 +4,12 @@ import Card from 'components/Card';
 import { useAuth } from 'hooks/useAuth';
 import { useEffect, useState } from 'react';
 import { Link, Redirect, useParams } from 'react-router-dom';
-import UTTTAPI from '../api';
-import Games from '../components/Games';
+import UTTTAPI from '../../api';
+import Games from '../../components/Games';
+import ErrorCard from './ErrorCard';
 import './Match.scss';
-import ErrorCard from './Match/ErrorCard';
-import OngoingCard from './Match/OngoingCard';
-import TitleCard from './Match/TitleCard';
+import OngoingCard from './OngoingCard';
+import TitleCard from './TitleCard';
 
 async function loadMatchData(matchID, authToken) {
   const game = await UTTTAPI.getGame(matchID, null);

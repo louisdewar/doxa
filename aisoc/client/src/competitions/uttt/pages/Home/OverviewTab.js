@@ -1,4 +1,4 @@
-import PlayableGameDemo from '../components/PlayableGame/PlayableGameDemo';
+import PlayableGameDemo from '../../components/PlayableGame/PlayableGameDemo';
 import './OverviewTab.scss';
 
 export default function OverviewTab() {
