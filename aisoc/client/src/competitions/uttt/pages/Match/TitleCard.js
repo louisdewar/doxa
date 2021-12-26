@@ -2,7 +2,7 @@ import { faClock, faHourglassEnd } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Card from 'components/Card';
 import { formatDuration, formatTime } from 'utils/time';
-import PlayerLink from '../../components/PlayerLink';
+import PlayerLink from '../../components/PlayerLink/PlayerLink';
 import './Match.scss';
 
 export default function TitleCard({ players, scores, baseUrl, completedAt, queuedAt, startedAt }) {

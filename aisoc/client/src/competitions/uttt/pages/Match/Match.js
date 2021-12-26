@@ -1,11 +1,11 @@
 import { DoxaError } from 'api/common';
+import GameCard from 'competitions/uttt/components/GameCard/GameCard';
 import Button from 'components/Button';
 import Card from 'components/Card';
 import { useAuth } from 'hooks/useAuth';
 import { useEffect, useState } from 'react';
 import { Link, Redirect, useParams } from 'react-router-dom';
 import UTTTAPI from '../../api';
-import Games from '../../components/Games';
 import ErrorCard from './ErrorCard';
 import './Match.scss';
 import OngoingCard from './OngoingCard';
@@ -98,9 +98,13 @@ export default function Match({ baseUrl }) {
   return <>
     <span></span><span></span><span></span><span></span> {/* a fun hack just to get a better outline colour below! */}
     <TitleCard players={data.players} scores={data.scores} completedAt={data.completedAt} queuedAt={data.queuedAt} startedAt={data.startedAt} baseUrl={baseUrl} />
-    <Games matchID={id} games={data.games} competitionBaseUrl={baseUrl} extra={<>
+    <h3 className="match-showing-n-games-label">Showing {data.games.length} games</h3>
+    <div className='match-games'>
+      {data.games.map((game, i) => {
+        return <GameCard key={i} matchID={id} gameID={i + 1} game={game} baseUrl={baseUrl} />;
+      })}
       {!data.completedAt && <OngoingCard started={!!data.startedAt} />}
       {(data.forfeit || data.error) && <ErrorCard error={data.error} forfeit={data.forfeit} players={data.players} baseUrl={baseUrl} />}
-    </>} />
+    </div>
   </>;
 }

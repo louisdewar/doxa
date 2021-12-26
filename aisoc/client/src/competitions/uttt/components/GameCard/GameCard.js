@@ -3,24 +3,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import GameState from '../services/gameReducer';
-import './Games.scss';
-import Grid from './Grid';
+import GameState from '../Grid/GameState';
+import Grid from '../Grid/Grid';
+import './GameCard.scss';
 
-
-export default function Games({ matchID, games, competitionBaseUrl, extra = null }) {
-  return <>
-    <h3 className="games-showing-n-label">Showing {games.length} games</h3>
-    <div className='games'>
-      {games.map((game, i) => {
-        return <GameCard key={i} matchID={matchID} gameID={i + 1} game={game} competitionBaseUrl={competitionBaseUrl} />;
-      })}
-      {extra}
-    </div>
-  </>;
-}
-
-function GameCard({ game, competitionBaseUrl, gameID, matchID }) {
+export default function GameCard({ game, baseUrl, gameID, matchID }) {
   const [grid, setGrid] = useState(null);
   const [currentMove, setCurrentMove] = useState(0);
 
@@ -68,7 +55,7 @@ function GameCard({ game, competitionBaseUrl, gameID, matchID }) {
   };
 
   return (
-    <Link to={`${competitionBaseUrl}match/${matchID}/game/${gameID}`}>
+    <Link to={`${baseUrl}match/${matchID}/game/${gameID}`}>
       <div className={classNames('game-card', { 'won': winner === 'R', 'lost': winner === 'B', 'drawn': winner === 'S' })}>
         <div className="labeled-value">
           <span className="label">Game</span>

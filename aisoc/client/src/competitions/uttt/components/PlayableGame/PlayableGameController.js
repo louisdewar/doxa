@@ -1,4 +1,4 @@
-import GameState from 'competitions/uttt/services/gameReducer';
+import GameState from 'competitions/uttt/components/Grid/GameState';
 
 
 export function getPlayableTiles(state) {

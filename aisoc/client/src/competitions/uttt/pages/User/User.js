@@ -4,7 +4,7 @@ import PairMatches from 'components/PairMatches';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import UTTTAPI from '../../api';
-import MatchRow from '../../components/MatchRow';
+import MatchRow from '../../components/MatchRow/MatchRow';
 
 export default function User({ baseUrl }) {
   const { user } = useParams();

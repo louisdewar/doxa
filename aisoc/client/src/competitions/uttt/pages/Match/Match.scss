@@ -55,3 +55,23 @@
     // animation-delay: 500ms;
   }
 }
+
+.match-showing-n-games-label {
+  font-style: italic;
+}
+
+.match-games {
+  font-family: $monospace-font;
+
+  &>a {
+    text-decoration: none;
+  }
+
+  h1 {
+    margin: 20px;
+  }
+
+  h2 {
+    color: #323232;
+  }
+}

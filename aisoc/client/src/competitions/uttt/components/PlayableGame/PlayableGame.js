@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import Grid from '../Grid';
+import Grid from '../Grid/Grid';
 import PlayableGameController from './PlayableGameController';
 
 

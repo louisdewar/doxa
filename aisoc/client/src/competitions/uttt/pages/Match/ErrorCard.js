@@ -1,6 +1,6 @@
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import PlayerLink from '../../components/PlayerLink';
+import PlayerLink from '../../components/PlayerLink/PlayerLink';
 import './ErrorCard.scss';
 
 

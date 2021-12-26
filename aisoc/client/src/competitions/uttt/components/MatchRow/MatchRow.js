@@ -2,7 +2,7 @@ import LoadingPlaceholder from 'components/LoadingPlaceholder';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { formatTime } from 'utils/time';
-import UTTTAPI from '../api';
+import UTTTAPI from '../../api';
 
 async function fetchMatchRow(setPlayers, setScores, matchID) {
   setPlayers(null);
