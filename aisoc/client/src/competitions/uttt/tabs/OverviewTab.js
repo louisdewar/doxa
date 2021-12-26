@@ -1,10 +1,11 @@
-import PlayableGame from '../components/PlayableGame';
+import PlayableGameDemo from '../components/PlayableGame/PlayableGameDemo';
+import './OverviewTab.scss';
 
 export default function OverviewTab() {
-  return <div style={{ boxSizing: 'border-box', display: 'flow-root' }}>
+  return <div className='overview-tab'>
     <h2>Overview</h2>
-    <div style={{ float: 'right', width: '45%', backgroundColor: '#1F2937', borderRadius: '3px', margin: 'auto', marginLeft: '1rem' }}>
-      <PlayableGame />
+    <div className='overview-tab-game-demo'>
+      <PlayableGameDemo />
     </div>
 
     <p>
