@@ -95,8 +95,9 @@ steps:
     image: node:lts
     commands:
       - cd aisoc/client
-      - npm install
+      - npm ci
       - npm run build
+      - npx eslint . --ext .js,.jsx,.ts,.tsx
 
 trigger:
   event:
