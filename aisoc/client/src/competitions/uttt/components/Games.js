@@ -75,7 +75,6 @@ function GameCard({ game, competitionBaseUrl, gameID, matchID }) {
           <span className="main">&#35;{gameID}</span>
         </div>
         <div className="mini-player">
-
           <div className="move-number">
             {currentMove}/{gameState.current.getLength()}
             <div className="controls">

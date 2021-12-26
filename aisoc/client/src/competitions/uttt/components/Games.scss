@@ -1,11 +1,12 @@
-@import 'src/common/_common.scss';
+@import 'common/common';
+@import 'common/fonts';
 
 .games-showing-n-label {
   font-style: italic;
 }
 
 .games {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: $monospace-font;
 
   &>a {
     text-decoration: none;

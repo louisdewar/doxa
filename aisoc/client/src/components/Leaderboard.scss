@@ -1,5 +1,7 @@
+@import 'common/fonts';
+
 .leaderboard {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: $monospace-font;
 
   .leaderboard-header {
     font-weight: bold;

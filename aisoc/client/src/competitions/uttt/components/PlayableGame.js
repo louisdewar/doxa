@@ -6,8 +6,8 @@ import Grid from './Grid';
 function getPlayableTiles(state) {
   if (state.winner !== null) return [];
 
-  return (state.nextGrid !== null ? [state.nextGrid] : [...Array(9).keys()])
-    .flatMap(grid => state.subGridsWon[grid] ? [] : [...Array(9).keys()]
+  return (state.nextGrid != null ? [state.nextGrid] : [...Array(9).keys()].filter(grid => !state.subGridsWon[grid]))
+    .flatMap(grid => [...Array(9).keys()]
       .filter(tile => state.subGrids[grid][tile] === null)
       .map(tile => ({ g: grid, t: tile })));
 }
