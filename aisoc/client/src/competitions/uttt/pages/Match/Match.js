@@ -98,7 +98,7 @@ export default function Match({ baseUrl }) {
   return <>
     <span></span><span></span><span></span><span></span> {/* a fun hack just to get a better outline colour below! */}
     <TitleCard players={data.players} scores={data.scores} completedAt={data.completedAt} queuedAt={data.queuedAt} startedAt={data.startedAt} baseUrl={baseUrl} />
-    <h3 className="match-showing-n-games-label">Showing {data.games.length} games</h3>
+    <h3 className="match-showing-n-games-label">Showing {data.games.length} game{data.games.length != 1 ? 's' : ''}</h3>
     <div className='match-games'>
       {data.games.map((game, i) => {
         return <GameCard key={i} matchID={id} gameID={i + 1} game={game} baseUrl={baseUrl} />;
