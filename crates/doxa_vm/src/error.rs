@@ -1,4 +1,4 @@
-use std::io;
+use std::{io, process::ExitStatus};
 
 // TODO: clearly these errors need to be partitioned into host and guest.
 // There are many situations where they is a different but equivalent error for both sides,
@@ -19,6 +19,34 @@ pub enum ManagerError {
     TimeoutWaitingForVMConnection,
     IO(io::Error),
     Join(JoinError),
+    #[from(ignore)]
+    CreateScratch(RunCommandError),
+    #[from(ignore)]
+    GetImageUUID(RunCommandError),
+    #[from]
+    Mount(MountError),
+}
+
+#[derive(Error, Display, Debug)]
+#[display(fmt = "{}", source)]
+pub struct ManagerErrorLogContext {
+    pub source: ManagerError,
+    pub logs: Option<Result<String, VMRecorderError>>,
+}
+
+impl<E: Into<ManagerError>> From<E> for ManagerErrorLogContext {
+    fn from(source: E) -> Self {
+        ManagerErrorLogContext {
+            source: source.into(),
+            logs: None,
+        }
+    }
+}
+
+#[derive(From, Error, Display, Debug)]
+pub enum MountError {
+    IO(io::Error),
+    Expect(ExpectMessageError),
 }
 
 #[derive(From, Error, Display, Debug)]
@@ -78,6 +106,23 @@ pub(crate) enum ReceieveAgentError {
 }
 
 #[derive(Debug, Error, From, Display)]
+pub(crate) enum HandleMountsError {
+    IO(io::Error),
+    InvalidFormatting,
+    ReadMessageError(ReadMessageError),
+    FindDrives(RunCommandError),
+    #[display(
+        fmt = "UUID not found (UUID=\"{}\", mount path=\"{}\")",
+        uuid,
+        mount_path
+    )]
+    UUIDNotFound {
+        uuid: String,
+        mount_path: String,
+    },
+}
+
+#[derive(Debug, Error, From, Display)]
 pub enum HandleMessageError {
     IO(io::Error),
     MissingSeparator,
@@ -118,4 +163,13 @@ pub enum VMShutdownError {
     Firecracker(ShutdownError),
     #[from]
     Logs(VMRecorderError),
+}
+
+#[derive(From, Error, Display, Debug)]
+pub enum RunCommandError {
+    #[from]
+    IO(io::Error),
+    #[from]
+    #[error(ignore)]
+    BadExitCode(ExitStatus),
 }

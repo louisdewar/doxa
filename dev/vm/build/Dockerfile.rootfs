@@ -3,21 +3,23 @@ FROM rust:1-alpine as vm_executor
 
 WORKDIR /app
 
-COPY ./crates crates
+RUN mkdir crates
+COPY ./crates/doxa_vm crates/doxa_vm
+COPY ./crates/doxa_firecracker_sdk crates/doxa_firecracker_sdk
 COPY ./Cargo.lock .
 # Copy slim Cargo.toml
 COPY ./dev/vm/build/Cargo.toml .
 
 RUN apk add --no-cache musl-dev
 # The target should already be x86_64-unknown-linux-musl but we confirm here
-RUN cargo build -p doxa_vm --bin vm_executor --release --locked --workspace --target x86_64-unknown-linux-musl
+RUN cargo build -p doxa_vm --bin vm_executor --release --workspace --target x86_64-unknown-linux-musl
 
 RUN cp /app/target/x86_64-unknown-linux-musl/release/vm_executor /
 
 FROM alpine:3 AS rootfs
 
 
-RUN apk add --no-cache e2fsprogs
+RUN apk add --no-cache e2fsprogs e2fsprogs-extra
 
 COPY ./dev/vm/build /app
 COPY --from=vm_executor /vm_executor /app/vm_executor

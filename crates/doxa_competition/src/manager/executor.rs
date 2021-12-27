@@ -9,7 +9,7 @@ use doxa_executor::{
 use doxa_core::{
     lapin::options::BasicAckOptions,
     tokio::{self, sync::Semaphore},
-    tracing::{event, span, Instrument, Level},
+    tracing::{event, info, span, Instrument, Level},
 };
 use doxa_mq::model::MatchRequest;
 use futures::future::FutureExt;
@@ -55,44 +55,43 @@ impl<C: GameClient> ExecutionManager<C> {
                 .await
                 .unwrap();
 
-        let span = span!(
-            Level::INFO,
+        info!(
+            competition =%self.competition_name,
             "execution event listener",
-            competition = self.competition_name
         );
 
-        tokio::spawn(
-            async move {
-                let executor_settings = self.settings.executor_settings.clone();
-                let executor_limiter = Arc::new(Semaphore::new(self.executor_permits));
+        tokio::spawn(async move {
+            let executor_settings = self.settings.executor_settings.clone();
+            let executor_limiter = Arc::new(Semaphore::new(self.executor_permits));
 
-                while let Some(message) = consumer.next().await {
-                    let permit = executor_limiter.clone().acquire_owned().await.unwrap();
-                    // TODO: remove expects and convert to error logging
-                    let (_, delivery) = message.expect("Error connecting to MQ");
-                    let match_request: MatchRequest<C::MatchRequest> =
-                        doxa_mq::action::deserialize(&delivery.data)
-                            .expect("Improperly formatted message");
-                    let game_id = match_request.game_id;
+            while let Some(message) = consumer.next().await {
+                let permit = executor_limiter.clone().acquire_owned().await.unwrap();
+                // TODO: remove expects and convert to error logging
+                let (_, delivery) = message.expect("Error connecting to MQ");
+                let match_request: MatchRequest<C::MatchRequest> =
+                    doxa_mq::action::deserialize(&delivery.data)
+                        .expect("Improperly formatted message");
+                let game_id = match_request.game_id;
 
-                    let span = span!(
-                        Level::INFO,
-                        "handle match request",
-                        game_id = %game_id,
-                        agents = ?match_request.agents
-                    );
+                let span = span!(
+                    Level::INFO,
+                    "handle match request",
+                    game_id = %game_id,
+                    agents = ?match_request.agents,
+                    competition_name = %self.competition_name,
+                );
 
-                    let event_channel =
-                        doxa_mq::action::game_event_channel(&connection, self.competition_name)
-                            .await
-                            .unwrap();
-                    let event_channel_name =
-                        doxa_mq::action::game_event_queue_name(self.competition_name);
+                let event_channel =
+                    doxa_mq::action::game_event_channel(&connection, self.competition_name)
+                        .await
+                        .unwrap();
+                let event_channel_name =
+                    doxa_mq::action::game_event_queue_name(self.competition_name);
 
-                    tokio::spawn({
-                        let executor_settings = executor_settings.clone();
-                        let competition_name = self.competition_name;
-                        async move {
+                tokio::spawn({
+                    let executor_settings = executor_settings.clone();
+                    let competition_name = self.competition_name;
+                    async move {
                             // In future there can be some smarter code in the event that the
                             // code below fails or the server unexpected shutsdown, we need to
                             // consider that some game events may have been emitted and processed.
@@ -118,8 +117,12 @@ impl<C: GameClient> ExecutionManager<C> {
                                     // because a new one was uploads or because it was deleted).
                                     // This is not a problem, it's good that we don't run the game
                                     // in the case.
-                                    if let GameManagerError::StartAgent(doxa_executor::error::AgentError::AgentGone) = error {
-                                        event!(Level::DEBUG, "not starting game because agent was gone");
+                                    if let GameManagerError::StartAgent(agent_error) = &error {
+                                        let agent_error = &agent_error.source;
+                                        if matches!(agent_error, &doxa_executor::error::AgentError::AgentGone) {
+                                            event!(Level::DEBUG, "not starting game because agent was gone");
+                                            return;
+                                        }
                                     }
                                     // Should probably emit an error game event
                                     event!(Level::ERROR, %error, debug = ?error, "failed to start game manager");
@@ -140,12 +143,8 @@ impl<C: GameClient> ExecutionManager<C> {
                         }
                         .then(|_| async move { drop(permit); })
                         .instrument(span)
-                    });
-
-
-                }
+                });
             }
-            .instrument(span),
-        );
+        });
     }
 }

@@ -9,7 +9,7 @@ use futures::{
 };
 
 use crate::{
-    agent::VMAgent,
+    agent::{VMAgent, VMAgentSettings},
     client::{ForfeitError, GameClient, GameError},
     context::GameContext,
     error::{AgentTerminated, GameContextError, GameManagerError},
@@ -33,13 +33,24 @@ impl<C: GameClient> GameManager<C> {
         competition_name: &'static str,
         match_request: MatchRequest<C::MatchRequest>,
     ) -> Result<Self, GameManagerError<C::Error>> {
+        let additional_mounts = C::additional_mounts(&match_request.payload);
+
+        let mut mounts = settings.base_mounts.clone();
+        mounts.extend(additional_mounts);
+
+        let vm_agent_settings = VMAgentSettings {
+            agent_ram_mb: C::AGENT_RAM,
+            scratch_size_mb: C::AGENT_SCRATCH,
+            mounts,
+        };
+
         let agents = match_request.agents.into_iter().map(|agent_id| {
             VMAgent::new(
                 competition_name,
-                C::AGENT_RAM,
                 agent_id,
                 &settings.agent_retrieval,
                 &settings,
+                vm_agent_settings.clone(),
             )
         });
 

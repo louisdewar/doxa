@@ -1,12 +1,14 @@
 use std::error;
 
 use async_trait::async_trait;
+use doxa_vm::mount::Mount;
 use serde::{de::DeserializeOwned, Serialize};
 
 pub use crate::error::ForfeitError;
 pub use crate::{context::GameContext, error::GameError};
 
-pub const DEFAULT_AGENT_RAM_MB: usize = 256;
+pub const DEFAULT_AGENT_RAM_MB: u64 = 256;
+pub const DEFAULT_AGENT_SCRATCH_MB: u64 = 256;
 
 /// Maintains the game state, sending input to agents and handling the output.
 #[async_trait]
@@ -30,7 +32,19 @@ pub trait GameClient: Send + Sync + 'static {
     /// This defaults to [`DEFAULT_AGENT_RAM_MB`].
     /// NOTE: this is the total amount of ram including that which is used by the guest OS not just
     /// the agent.
-    const AGENT_RAM: usize = DEFAULT_AGENT_RAM_MB;
+    const AGENT_RAM: u64 = DEFAULT_AGENT_RAM_MB;
+
+    /// The amount of scratch space that an agent's VM is given measured in mega-bytes.
+    /// This defaults to [`DEFAULT_AGENT_SCRATCH_MB`].
+    ///
+    /// Scratch space is mounted at /scratch and is used to store agent files while they download
+    /// among other uses.
+    const AGENT_SCRATCH: u64 = DEFAULT_AGENT_SCRATCH_MB;
+
+    /// An optional list of additional mounts for the VM (defaults to empty vec)
+    fn additional_mounts(_match_request: &Self::MatchRequest) -> Vec<Mount> {
+        vec![]
+    }
 
     /// Runs the game until completion.
     /// TODO: allow this method to take in the competition

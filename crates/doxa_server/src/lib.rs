@@ -5,6 +5,7 @@ use std::{env, path::PathBuf, sync::Arc};
 
 use doxa_auth::limiter::GenericLimiter;
 use doxa_core::actix_web::{web, App, HttpServer};
+use doxa_executor::settings::Mount;
 use doxa_storage::AgentRetrieval;
 use tracing::info;
 use tracing_actix_web::TracingLogger;
@@ -60,10 +61,16 @@ pub async fn setup_server_from_env(
         firecracker_path: PathBuf::from("./dev/vm/firecracker"),
         kernel_img: PathBuf::from("./dev/vm/vmlinux"),
         kernel_boot_args: "console=ttyS0 reboot=k panic=1 pci=off".to_string(),
-        rootfs: PathBuf::from("./dev/vm/rootfs.img"),
+        rootfs: PathBuf::from("./dev/vm/images/rootfs.img"),
+        scratch_base_image: PathBuf::from("./dev/vm/images/scratch.img"),
         agent_retrieval: AgentRetrieval::new(
             "http://localhost:3001/api/storage/download/".to_string(),
         ),
+        base_mounts: vec![Mount {
+            path_on_host: PathBuf::from("./dev/vm/images/python_modules.img"),
+            path_on_guest: "/usr/lib/python3.9/".to_string(),
+            read_only: true,
+        }],
     };
 
     setup_server(
