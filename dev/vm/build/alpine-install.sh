@@ -18,4 +18,6 @@ adduser -S -u 1000 -G doxa doxa
 mkdir /output
 chown doxa:doxa /output
 
+ln -s /scratch/agent /home/doxa/agent
+
 echo "Done setup"

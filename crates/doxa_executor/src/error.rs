@@ -5,7 +5,10 @@ use doxa_core::lapin;
 use doxa_mq::action::BincodeError;
 use doxa_storage::RetrievalError;
 use doxa_vm::{
-    error::{AgentLifecycleManagerError, ManagerError, SendAgentError, TakeFileManagerError},
+    error::{
+        AgentLifecycleManagerError, ManagerError, ManagerErrorLogContext, SendAgentError,
+        TakeFileManagerError, VMRecorderError,
+    },
     stream::ReadMessageError,
 };
 
@@ -44,6 +47,31 @@ pub enum AgentError {
     /// The agent had a valid ID but is not currently active or has been deleted.
     /// The appropriate response is to log and skip this match.
     AgentGone,
+}
+
+#[derive(Error, Display, Debug)]
+#[display(fmt = "{}", source)]
+pub struct AgentErrorLogContext {
+    pub source: AgentError,
+    pub logs: Option<Result<String, VMRecorderError>>,
+}
+
+impl<E: Into<AgentError>> From<E> for AgentErrorLogContext {
+    fn from(source: E) -> Self {
+        AgentErrorLogContext {
+            source: source.into(),
+            logs: None,
+        }
+    }
+}
+
+impl From<ManagerErrorLogContext> for AgentErrorLogContext {
+    fn from(error: ManagerErrorLogContext) -> Self {
+        AgentErrorLogContext {
+            source: error.source.into(),
+            logs: error.logs,
+        }
+    }
 }
 
 #[derive(Display, Error, From, Debug)]
@@ -171,6 +199,6 @@ pub enum NextMessageError {
 #[derive(Display, Error, From, Debug)]
 pub enum GameManagerError<E> {
     #[from(ignore)]
-    StartAgent(AgentError),
+    StartAgent(AgentErrorLogContext),
     Runtime(GameError<E>),
 }

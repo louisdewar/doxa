@@ -1,6 +1,7 @@
 use doxa_auth::guard::AuthGuard;
 use doxa_core::{actix_web::web, error::HttpResponse, EndpointResult};
 
+use doxa_db::model::game::Game;
 use doxa_executor::{
     client::GameClient,
     event::{ErrorEvent, ForfeitEvent, StartEvent},
@@ -61,7 +62,7 @@ pub async fn game_events<C: Competition + ?Sized>(
     // be returned).
     let game_id = path.into_inner();
 
-    let game = context
+    let _game: Game = context
         .get_game_by_id(game_id)
         .await?
         .ok_or(GameNotFound { game_id })?;

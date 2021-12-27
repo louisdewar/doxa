@@ -8,6 +8,7 @@ use std::{
 };
 
 use futures_util::future::OptionFuture;
+use sys_mount::{MountFlags, SupportedFilesystems};
 use tokio::{
     self,
     fs::{File, OpenOptions},
@@ -20,9 +21,10 @@ use tokio_vsock::VsockStream;
 
 use crate::{
     error::{
-        AgentLifecycleError, AgentShutdownError, HandleMessageError, ReceieveAgentError,
-        TakeFileError,
+        AgentLifecycleError, AgentShutdownError, HandleMessageError, HandleMountsError,
+        ReceieveAgentError, TakeFileError,
     },
+    mount::{self, MountRequest},
     stream::{MessageReader, Stream},
     ExecutionConfig,
 };
@@ -59,7 +61,10 @@ impl VMExecutor {
 
             println!("VM executor connected");
             let mut stream = Stream::from_socket(stream);
-            let output_dir = PathBuf::from_str("/tmp/doxa_executor").unwrap();
+
+            Self::handle_mounts(&mut stream).await.unwrap();
+
+            let output_dir = PathBuf::from_str("/home/doxa/agent").unwrap();
             tokio::fs::create_dir_all(&output_dir).await.unwrap();
 
             Self::receive_agent(&mut stream, &output_dir)
@@ -67,7 +72,7 @@ impl VMExecutor {
                 .expect("Failed to receive agent");
 
             // TODO: better reporting of errors
-            let (config_dir, mut config_file) = Self::find_config_dir(output_dir.join("agent"))
+            let (config_dir, mut config_file) = Self::find_config_dir(output_dir)
                 .await
                 .expect("Couldn't find config dir/file");
             let mut config = String::with_capacity(1000);
@@ -238,8 +243,64 @@ impl VMExecutor {
         Ok(())
     }
 
+    async fn handle_mounts(stream: &mut Stream<VsockStream>) -> Result<(), HandleMountsError> {
+        let mut mount_msg = Vec::with_capacity(500);
+        stream
+            .next_full_message(&mut mount_msg, MAX_MSG_LEN)
+            .await?;
+
+        let (prefix, mount_request) = mount_msg.split_at(
+            mount_msg
+                .iter()
+                .position(|b| *b == b'_')
+                .ok_or(HandleMountsError::InvalidFormatting)?,
+        );
+
+        if prefix != b"MOUNTREQUEST" {
+            println!(
+                "Did not get expected prefix 'MOUNTREQUEST' got '{}'",
+                String::from_utf8_lossy(prefix)
+            );
+            return Err(HandleMountsError::InvalidFormatting);
+        }
+
+        // Skip the '_'
+        let mount_request = &mount_request[1..];
+        let mount_request: MountRequest =
+            serde_json::from_slice(mount_request).expect("Failed to deserialize mount request");
+
+        let drives = mount::find_drives_by_uuid()
+            .await
+            .map_err(HandleMountsError::FindDrives)?;
+
+        let supported = SupportedFilesystems::new().expect("failed to get supported file systems");
+
+        for (uuid, path_on_guest, read_only) in mount_request.mounts {
+            let drive = drives
+                .get(&uuid)
+                .ok_or_else(|| HandleMountsError::UUIDNotFound {
+                    uuid,
+                    mount_path: path_on_guest.clone(),
+                })?;
+
+            let mount_flags = if read_only {
+                MountFlags::RDONLY
+            } else {
+                MountFlags::empty()
+            };
+
+            println!("Mounting {} to {}", drive, path_on_guest);
+            tokio::fs::create_dir_all(&path_on_guest).await.unwrap();
+            sys_mount::Mount::new(drive, path_on_guest, &supported, mount_flags, None)?;
+        }
+
+        stream.send_full_message(b"MOUNTED").await?;
+
+        Ok(())
+    }
+
     /// Download the agent to `{output_dir}/download/agent_name.tar[.gz]`
-    /// Then extract the tar file to `{output_dir}/agent` and delete the downloaded tar.
+    /// Then extract the tar file to `{output_dir}` and delete the downloaded tar.
     async fn receive_agent(
         stream: &mut Stream<VsockStream>,
         output_dir: &Path,
@@ -285,14 +346,11 @@ impl VMExecutor {
             during: "wait for `FILE ENDS`".to_string(),
         })??;
 
-        let agent_output = output_dir.join("agent");
-        tokio::fs::create_dir_all(&agent_output).await?;
-
         let mut tar_process = tokio::process::Command::new("tar")
             .args(&[
                 "xf",
                 download_location.to_str().unwrap(),
-                &format!("--directory={}", agent_output.to_str().unwrap()),
+                &format!("--directory={}", output_dir.to_str().unwrap()),
             ])
             .spawn()
             .expect("Couldn't spawn tar");
