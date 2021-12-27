@@ -151,10 +151,9 @@ impl<C: Competition> AgentActivationManager<C> {
                 .await
                 .unwrap();
 
-        let span = span!(
-            Level::INFO,
-            "agent activation event listener",
-            competition = C::COMPETITION_NAME
+        info!(
+            competition = %C::COMPETITION_NAME,
+            "started agent activation event listener",
         );
 
         let future = async move {
@@ -168,8 +167,9 @@ impl<C: Competition> AgentActivationManager<C> {
                 let span = span!(
                     Level::INFO,
                     "handle agent activation request",
+                    competition = C::COMPETITION_NAME,
                     %agent_id,
-                    %event.activating
+                    %event.activating,
                 );
 
                 let _: Result<(), ()> = self
@@ -182,6 +182,6 @@ impl<C: Competition> AgentActivationManager<C> {
             }
         };
 
-        tokio::spawn(future.instrument(span));
+        tokio::spawn(future);
     }
 }

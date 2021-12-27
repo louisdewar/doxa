@@ -130,6 +130,8 @@ impl<C: GameClient> ExecutionManager<C> {
                                 }
                             };
 
+                            info!("started game manager");
+
                             match game_manager.run().await {
                                 Ok(()) => event!(Level::INFO, "game manager succesfully completed"),
                                 Err(error) => {
