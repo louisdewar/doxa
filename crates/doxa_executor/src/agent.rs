@@ -7,13 +7,15 @@ use doxa_core::{
 };
 use doxa_vm::{
     error::{AgentLifecycleManagerError, TakeFileManagerError, VMShutdownError},
+    manager::VMManagerArgs,
+    mount::Mount,
     stream::MessageReader,
     Manager as VM,
 };
 use tokio::time::timeout;
 
 use crate::{
-    error::{AgentError, NextEventError, NextMessageError, Timeout},
+    error::{AgentError, AgentErrorLogContext, NextEventError, NextMessageError, Timeout},
     Settings,
 };
 
@@ -32,26 +34,34 @@ pub enum AgentEvent<'a> {
     Line(&'a [u8]),
 }
 
+#[derive(Clone)]
+pub struct VMAgentSettings {
+    pub agent_ram_mb: u64,
+    pub scratch_size_mb: u64,
+    /// All mounts excluding the scratch and rootfs which are mounted automatically
+    pub mounts: Vec<Mount>,
+}
+
 impl VMAgent {
     pub async fn new(
         competition: &str,
-        agent_ram_mb: usize,
         agent_id: String,
         storage: &doxa_storage::AgentRetrieval,
         settings: &Settings,
-    ) -> Result<VMAgent, AgentError> {
+        vm_agent_settings: VMAgentSettings,
+    ) -> Result<VMAgent, AgentErrorLogContext> {
         let agent_response = storage.download_agent(&agent_id, competition).await?;
 
         if agent_response.status() == StatusCode::GONE {
-            return Err(AgentError::AgentGone);
+            return Err(AgentError::AgentGone.into());
         }
 
         if agent_response.status() == StatusCode::NOT_FOUND {
-            return Err(AgentError::AgentNotFound);
+            return Err(AgentError::AgentNotFound.into());
         }
 
         if agent_response.status() != StatusCode::OK {
-            return Err(AgentError::BadStatusCode);
+            return Err(AgentError::BadStatusCode.into());
         }
 
         let content_disposition = agent_response
@@ -70,14 +80,18 @@ impl VMAgent {
             .content_length()
             .ok_or(AgentError::CouldNotExtractFileSize)?;
 
-        let mut vm = VM::new(
-            settings.rootfs.clone(),
-            settings.kernel_img.clone(),
-            settings.kernel_boot_args.clone(),
-            settings.firecracker_path.clone(),
-            agent_ram_mb,
-        )
-        .await?;
+        let vm_args = VMManagerArgs {
+            original_rootfs: settings.rootfs.clone(),
+            kernel_img: settings.kernel_img.clone(),
+            kernel_boot_args: settings.kernel_boot_args.clone(),
+            firecracker_path: settings.firecracker_path.clone(),
+            memory_size_mib: vm_agent_settings.agent_ram_mb,
+            scratch_source_path: settings.scratch_base_image.clone(),
+            scratch_size_mib: vm_agent_settings.scratch_size_mb,
+            mounts: vm_agent_settings.mounts,
+        };
+
+        let mut vm = VM::new(vm_args).await?;
 
         timeout(
             Duration::from_secs(60),

@@ -1,5 +1,9 @@
-use crate::error::{AgentLifecycleManagerError, TakeFileManagerError, VMShutdownError};
+use crate::error::{
+    AgentLifecycleManagerError, ManagerErrorLogContext, MountError, TakeFileManagerError,
+    VMShutdownError,
+};
 use crate::manager::ManagerError::TimeoutWaitingForVMConnection;
+use crate::mount::{self, Mount, MountRequest};
 use crate::recorder::VMRecorder;
 use std::time::Duration;
 use std::{io, path::PathBuf};
@@ -31,18 +35,40 @@ pub struct Manager {
     recorder: VMRecorder,
 }
 
+pub struct VMManagerArgs {
+    pub original_rootfs: PathBuf,
+    pub kernel_img: PathBuf,
+    pub kernel_boot_args: String,
+    pub firecracker_path: PathBuf,
+    pub memory_size_mib: u64,
+    pub scratch_source_path: PathBuf,
+    pub scratch_size_mib: u64,
+    pub mounts: Vec<Mount>,
+}
+
 impl Manager {
     /// Spawns up the firecracker process and waits for the process to connect.
     /// This will copy the rootfs to a tempdir so that the VM is allowed write permissions.
     /// In future it will be a good idea to figure out properly how to make a rootfs that can be
     /// booted with read_only access into RAM.
-    pub async fn new(
-        original_rootfs: PathBuf,
-        kernel_img: PathBuf,
-        kernel_boot_args: String,
-        firecracker_path: PathBuf,
-        memory_size_mib: usize,
-    ) -> Result<Self, ManagerError> {
+    ///
+    /// This will also create a scratch file system with a specific size to be mounted at /scratch
+    /// Additional file systems to mount can also be specified in the vec.
+    /// The scratch source path is used as a base for the scratch image, it is not modified in any
+    /// way.
+    /// The path on guest is a String since it's serialized as such before sending across.
+    pub async fn new(args: VMManagerArgs) -> Result<Self, ManagerErrorLogContext> {
+        let VMManagerArgs {
+            original_rootfs,
+            kernel_img,
+            kernel_boot_args,
+            firecracker_path,
+            memory_size_mib,
+            scratch_source_path,
+            scratch_size_mib,
+            mut mounts,
+        } = args;
+
         // TODO: consider that when Drop is called for the tempdir by default it will be blocking,
         // maybe implement a custom Drop for manager that calls spawn_blocking?
         // Also if the executor is typically run as it's own process in future it may not matter,
@@ -50,8 +76,13 @@ impl Manager {
         let dir = task::spawn_blocking(tempdir).await??;
 
         let rootfs_path = dir.path().join("rootfs");
-
         tokio::fs::copy(original_rootfs, &rootfs_path).await?;
+
+        let scratch_path = dir.path().join("scratch");
+
+        mount::create_scratch_on_host(scratch_source_path, &scratch_path, scratch_size_mib)
+            .await
+            .map_err(ManagerError::CreateScratch)?;
 
         let mut vm = VMOptions {
             memory_size_mib,
@@ -65,11 +96,66 @@ impl Manager {
         .spawn(firecracker_path)
         .await?;
 
+        mounts.push(Mount {
+            path_on_host: scratch_path,
+            path_on_guest: "/scratch".to_string(),
+            read_only: false,
+        });
+
+        let mut mount_request = MountRequest {
+            mounts: Vec::with_capacity(mounts.len()),
+        };
+
+        for (i, mount) in mounts.into_iter().enumerate() {
+            vm.mount_drive(
+                format!("drive_{}", i),
+                mount.path_on_host.to_string_lossy().to_string(),
+                mount.read_only,
+            )
+            .await?;
+
+            let uuid = mount::get_image_uuid(mount.path_on_host)
+                .await
+                .map_err(ManagerError::GetImageUUID)?;
+
+            mount_request
+                .mounts
+                .push((uuid, mount.path_on_guest, mount.read_only));
+        }
+
         let stdout = vm.firecracker_process().stdout.take().unwrap();
         let stderr = vm.firecracker_process().stderr.take().unwrap();
 
         let recorder = VMRecorder::start(stdout, stderr, MAX_LOGS_LEN);
 
+        // We wrap this section because if there's an error we probably want the VM logs for
+        // debugging and it's quite a hassle to write that code for each error.
+        let stream = match Self::startup_process(&mut vm, &dir, &mount_request).await {
+            Ok(stream) => stream,
+            Err(e) => {
+                let logs = recorder.retrieve_logs().await;
+
+                return Err(ManagerErrorLogContext {
+                    source: e,
+                    logs: Some(logs),
+                });
+            }
+        };
+
+        let manager = Manager {
+            vm,
+            tempdir: dir,
+            stream,
+            recorder,
+        };
+        Ok(manager)
+    }
+
+    async fn startup_process(
+        vm: &mut VM,
+        dir: &TempDir,
+        mount_request: &MountRequest,
+    ) -> Result<Stream<UnixStream>, ManagerError> {
         // Begin listening for connections on port 1001
         let listener = UnixListener::bind(dir.path().join("v.sock_1001")).unwrap();
 
@@ -86,14 +172,27 @@ impl Manager {
             .await
             .map_err(|_| TimeoutWaitingForVMConnection)??;
 
-        let stream = Stream::from_socket(stream);
+        let mut stream = Stream::from_socket(stream);
 
-        Ok(Manager {
-            vm,
-            tempdir: dir,
-            stream,
-            recorder,
-        })
+        Self::mount_drives(&mut stream, mount_request).await?;
+
+        Ok(stream)
+    }
+
+    async fn mount_drives(
+        stream: &mut Stream<UnixStream>,
+        mount_request: &MountRequest,
+    ) -> Result<(), MountError> {
+        stream
+            .send_prefixed_full_message(
+                b"MOUNTREQUEST_",
+                serde_json::to_vec(mount_request).unwrap().as_ref(),
+            )
+            .await?;
+
+        stream.expect_exact_msg(b"MOUNTED").await?;
+
+        Ok(())
     }
 
     /// Sends the agent and then waits for the VM to spawn it
@@ -118,9 +217,6 @@ impl Manager {
 
         self.stream.expect_exact_msg(b"RECEIVED").await?;
         trace!("VM has received agent");
-
-        //self.stream.expect_exact_msg(b"SPAWNED").await?;
-        //info!("VM has spawned agent");
 
         Ok(())
     }

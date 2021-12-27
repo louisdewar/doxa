@@ -20,7 +20,7 @@ WORKDIR /app
 
 RUN mkdir -p dev/vm
 COPY ./dev/vm/firecracker dev/vm/firecracker
-COPY ./dev/vm/rootfs.img dev/vm/rootfs.img
+COPY ./dev/vm/images dev/vm/images
 COPY ./dev/vm/vmlinux dev/vm/vmlinux
 
 COPY --from=server_builder /app/target/release/aisoc_server /app/doxa

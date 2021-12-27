@@ -11,8 +11,8 @@ use crate::net::expect_ok_response;
 use crate::request::{Action, BootSource, CreateVsock, MountDrive};
 
 pub struct VMOptions {
-    pub memory_size_mib: usize,
-    pub vcpus: usize,
+    pub memory_size_mib: u64,
+    pub vcpus: u16,
     pub kernel_image_path: PathBuf,
     pub kernel_boot_args: String,
     pub rootfs_path: PathBuf,
@@ -168,6 +168,36 @@ impl VM {
 
         expect_ok_response(
             &crate::net::send_socket_request(&self.socket, Method::PUT, body, "/vsock").await?,
+        )?;
+
+        Ok(())
+    }
+
+    /// The `drive_id` needs to be unique and it's only used for updating drive info later (if
+    /// required)
+    pub async fn mount_drive(
+        &self,
+        drive_id: String,
+        path_on_host: String,
+        is_read_only: bool,
+    ) -> Result<(), RequestError> {
+        let body = serde_json::to_string(&MountDrive {
+            drive_id: drive_id.clone(),
+            path_on_host,
+            is_read_only,
+            is_root_device: false,
+        })
+        .unwrap()
+        .into();
+
+        expect_ok_response(
+            &crate::net::send_socket_request(
+                &self.socket,
+                Method::PUT,
+                body,
+                format!("/drives/{}", drive_id).as_str(),
+            )
+            .await?,
         )?;
 
         Ok(())
