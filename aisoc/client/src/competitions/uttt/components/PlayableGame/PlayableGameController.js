@@ -10,8 +10,8 @@ export function getPlayableTiles(state) {
       .map(tile => ({ g: grid, t: tile })));
 }
 
-function isBoardWon(subGrid) {
-  return {
+function findBoardWinner(subGrid) {
+  return ({
     // Rows
     [[subGrid[0], subGrid[1], subGrid[2]].every((e, _, a) => a[0] && e == a[0])]: subGrid[0],
     [[subGrid[3], subGrid[4], subGrid[5]].every((e, _, a) => a[0] && e == a[0])]: subGrid[3],
@@ -25,7 +25,7 @@ function isBoardWon(subGrid) {
     // Diagonals
     [[subGrid[0], subGrid[4], subGrid[8]].every((e, _, a) => a[0] && e == a[0])]: subGrid[0],
     [[subGrid[2], subGrid[4], subGrid[6]].every((e, _, a) => a[0] && e == a[0])]: subGrid[2],
-  }[true];
+  }[true]) ?? (subGrid.includes(null) ? undefined : 'S');
 }
 
 export default class PlayableGameController {
@@ -56,11 +56,13 @@ export default class PlayableGameController {
 
   findWins() {
     for (const i in this.gameState.state.subGrids) {
-      const w = isBoardWon(this.gameState.state.subGrids[i]);
-      if (w !== undefined && this.gameState.state.subGrids[i] != null) {
+      if (this.gameState.state.subGridsWon[i] != null) continue;
+
+      const w = findBoardWinner(this.gameState.state.subGrids[i]);
+      if (w !== undefined) {
         this.gameState.addEvent({ g: i, w });
 
-        const overall = isBoardWon(this.gameState.state.subGridsWon);
+        const overall = findBoardWinner(this.gameState.state.subGridsWon);
         if (overall) {
           this.gameState.addEvent({ overall });
           return true;
@@ -81,8 +83,11 @@ export default class PlayableGameController {
 
     if (!this.findWins()) {
       yield this.gameState.getGrid();
-      this.gameState.addEvent(this.agent.getNextMove(this.gameState.state));
-      this.findWins();
+      const nextMove = this.agent.getNextMove(this.gameState.state);
+      if (nextMove) {
+        this.gameState.addEvent(nextMove);
+        this.findWins();
+      }
     }
 
     yield this.gameState.getGrid();
