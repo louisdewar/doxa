@@ -10,6 +10,16 @@ export default function Landing({ competitions }) {
   return <>
     <Navbar />
     <Container>
+      {location.hash && location.hash.length > 1 && location.hash.includes('invite-success') && <Card darker>
+        <pre>
+          Your account was created successfully! You may now log in.
+        </pre>
+      </Card>}
+      {location.hash && location.hash.length > 1 && location.hash.includes('login-success') && <Card darker>
+        <pre>
+          You were successfully logged in!
+        </pre>
+      </Card>}
       <Card darker>
         <h1 style={{
           'textUnderlineOffset': '0.65rem',

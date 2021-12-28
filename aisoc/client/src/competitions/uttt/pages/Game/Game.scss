@@ -1,4 +1,5 @@
-@import 'src/common/_common.scss';
+@import 'common/common';
+@import 'common/fonts';
 
 // @keyframes control-hover-over {
 //   0% {
@@ -61,7 +62,7 @@
 
 .game-container {
   align-items: stretch;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: $monospace-font;
   margin-bottom: 2rem;
 
   .game-grid {

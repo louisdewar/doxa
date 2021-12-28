@@ -5,9 +5,9 @@ import Card from 'components/Card';
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router';
 import { Link } from 'react-router-dom';
-import UTTTAPI from '../api';
-import Grid from '../components/Grid';
-import GameState from '../services/gameReducer';
+import UTTTAPI from '../../api';
+import GameState from '../../components/Grid/GameState';
+import Grid from '../../components/Grid/Grid';
 import './Game.scss';
 
 
@@ -115,7 +115,7 @@ export default function Game({ baseUrl }) {
         <Link to={`${baseUrl}user/${players[0].username}`} className="game-page-main-player-link">{players[0].username}</Link> vs <Link to={`${baseUrl}user/${players[1].username}`} className="game-page-opposing-player-link">{players[1].username}</Link>
       </h1>
       <h2>
-        Game #{gameID}
+        <Link to={`${baseUrl}match/${matchID}`} className="match-link">Match #{matchID}</Link> &mdash; Game #{gameID}
       </h2>
     </Card>
 

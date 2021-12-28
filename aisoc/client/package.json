@@ -10,7 +10,6 @@
     "@testing-library/user-event": "^12.8.3",
     "classnames": "^2.3.1",
     "eslint-plugin-jest": "^24.4.2",
-    "human-time": "^0.0.2",
     "node-sass": "^6.0.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
@@ -20,7 +19,8 @@
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.16.3",
-    "eslint": "^7.29.0"
+    "eslint": "^7.29.0",
+    "react-error-overlay": "6.0.9"
   },
   "scripts": {
     "start": "react-scripts start",

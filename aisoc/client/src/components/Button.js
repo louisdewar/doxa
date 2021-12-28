@@ -10,7 +10,7 @@ export default function Button({ children, buttonProps, success, failure, disabl
   }
 
 
-  return <button className={className}   {...buttonProps}   >
+  return <button className={className} {...buttonProps}>
     {children}
-  </button >;
+  </button>;
 }

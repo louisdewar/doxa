@@ -5,11 +5,12 @@ import Navbar from 'components/Navbar';
 import TextBox from 'components/TextBox';
 import { useAuth } from 'hooks/useAuth';
 import { useState } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Redirect, useHistory } from 'react-router-dom';
 
 
 export default function Login() {
   const auth = useAuth();
+  const history = useHistory();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showError, setShowError] = useState(false);
@@ -21,6 +22,7 @@ export default function Login() {
 
     try {
       await auth.login(username, password);
+      history.push('/#login-success');
     } catch {
       setShowError(true);
     }

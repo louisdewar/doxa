@@ -1,10 +1,10 @@
 import Container from 'components/Container';
 import Navbar from 'components/Navbar';
 import { Route, Switch, useRouteMatch } from 'react-router-dom';
-import Game from './pages/Game';
-import Home from './pages/Home';
-import Match from './pages/Match';
-import User from './pages/User';
+import Game from './pages/Game/';
+import Home from './pages/Home/';
+import Match from './pages/Match/';
+import User from './pages/User/';
 
 
 function Layout({ children }) {
