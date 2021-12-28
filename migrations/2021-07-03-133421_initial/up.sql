@@ -73,12 +73,6 @@ CREATE TABLE leaderboard(
     score INT NOT NULL
 );
 
--- CREATE VIEW active_agents AS
--- SELECT DISTINCT ON(competition, owner) *
--- FROM agents
--- WHERE deleted = false AND uploaded = true AND failed = false
--- ORDER BY competition, owner, uploaded_at DESC;
-
 CREATE VIEW active_agents AS
 SELECT *
 FROM agents
@@ -88,14 +82,6 @@ CREATE VIEW active_games AS
 SELECT id from games
 WHERE games.outdated = false;
 
--- CREATE VIEW active_games AS
--- SELECT game as id from game_participants
--- INNER JOIN agents ON agents.id = game_participants.agent
--- INNER JOIN games ON games.id = game_participants.game
--- WHERE games.outdated = false
--- GROUP BY game
--- HAVING COUNT (NOT agents.active OR NULL) = 0
--- ;
 
 CREATE TABLE game_results(
     agent TEXT references agents(id) NOT NULL,
