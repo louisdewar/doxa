@@ -43,6 +43,7 @@ pub async fn game<C: Competition + ?Sized>(
         queued_at: game.queued_at,
         started_at: game.started_at,
         completed_at: game.completed_at,
+        outdated: game.outdated,
     }))
 }
 

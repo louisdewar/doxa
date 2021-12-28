@@ -38,6 +38,7 @@ pub struct GameResponse {
     pub queued_at: DateTime<Utc>,
     pub started_at: Option<DateTime<Utc>>,
     pub completed_at: Option<DateTime<Utc>>,
+    pub outdated: bool,
 }
 
 #[derive(Serialize, Debug)]

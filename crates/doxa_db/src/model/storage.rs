@@ -10,6 +10,7 @@ pub struct AgentUpload {
     pub competition: i32,
     pub extension: String,
     pub uploaded_at: DateTime<Utc>,
+    pub activated_at: Option<DateTime<Utc>>,
     pub uploaded: bool,
     pub deleted: bool,
     pub failed: bool,

@@ -32,6 +32,15 @@ pub fn get_user_by_id(conn: &PgConnection, id: i32) -> Result<model::User, Diese
         .first(conn)
 }
 
+pub fn get_user_by_id_optional(
+    conn: &PgConnection,
+    id: i32,
+) -> Result<Option<model::User>, DieselError> {
+    s::users::table
+        .filter(s::users::columns::id.eq(id))
+        .first(conn)
+        .optional()
+}
 /// Sets whether or not the user with the specified username is an admin.
 pub fn set_admin_status(
     conn: &PgConnection,

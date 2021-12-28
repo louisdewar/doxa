@@ -146,6 +146,7 @@ pub async fn user_active_games<C: Competition + ?Sized>(
             queued_at: game.queued_at,
             started_at: game.started_at,
             completed_at: game.completed_at,
+            outdated: game.outdated,
         })
         .collect::<Vec<_>>();
 

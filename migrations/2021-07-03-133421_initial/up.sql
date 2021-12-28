@@ -28,6 +28,7 @@ CREATE TABLE agents(
     competition INT references competitions(id) NOT NULL,
     extension TEXT NOT NULL,
     uploaded_at timestamptz NOT NULL default now(),
+    activated_at timestamptz,
     uploaded boolean NOT NULL default false,
     deleted boolean NOT NULL default false,
     failed boolean NOT NULL default false,
@@ -44,6 +45,7 @@ CREATE TABLE games(
     queued_at timestamptz NOT NULL,
     started_at timestamptz,
     completed_at timestamptz,
+    outdated boolean NOT NULL default false,
     competition INT references competitions(id) NOT NULL
 );
 
@@ -83,10 +85,17 @@ FROM agents
 WHERE active = true;
 
 CREATE VIEW active_games AS
-SELECT game as id from game_participants
-INNER JOIN agents ON agents.id = game_participants.agent
-GROUP BY game
-HAVING COUNT (NOT agents.active OR NULL) = 0;
+SELECT id from games
+WHERE games.outdated = false;
+
+-- CREATE VIEW active_games AS
+-- SELECT game as id from game_participants
+-- INNER JOIN agents ON agents.id = game_participants.agent
+-- INNER JOIN games ON games.id = game_participants.game
+-- WHERE games.outdated = false
+-- GROUP BY game
+-- HAVING COUNT (NOT agents.active OR NULL) = 0
+-- ;
 
 CREATE TABLE game_results(
     agent TEXT references agents(id) NOT NULL,

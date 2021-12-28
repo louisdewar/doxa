@@ -198,3 +198,24 @@ pub fn get_user_active_games(
         .select(s::games::all_columns)
         .get_results(conn)
 }
+
+/// Finds all the games that involve an agent and mark them as inactive.
+pub fn mark_games_with_agent_as_outdated(
+    conn: &PgConnection,
+    agent_id: String,
+) -> Result<(), DieselError> {
+    use s::game_participants::columns as p_c;
+    use s::games::columns as g_c;
+
+    diesel::update(s::games::table)
+        .filter(
+            g_c::id.eq_any(
+                s::game_participants::table
+                    .filter(p_c::agent.eq(agent_id))
+                    .select(p_c::game),
+            ),
+        )
+        .set(g_c::outdated.eq(true))
+        .execute(conn)
+        .map(|_rows: usize| ())
+}

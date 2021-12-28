@@ -7,6 +7,7 @@ table! {
         competition -> Int4,
         extension -> Text,
         uploaded_at -> Timestamptz,
+        activated_at -> Nullable<Timestamptz>,
         uploaded -> Bool,
         deleted -> Bool,
         failed -> Bool,

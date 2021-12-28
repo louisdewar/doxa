@@ -95,7 +95,7 @@ pub fn get_active_agent(
 /// this query `Ok(None)` is returned.
 ///
 /// The return value is post update (i.e. active will always be false).
-pub fn deactivate_agent(
+pub fn mark_active_agent_deactive(
     conn: &PgConnection,
     competition: i32,
     user: i32,
@@ -116,7 +116,7 @@ pub fn deactivate_agent(
 /// If that agent did not exist or it was not active then `Ok(None)` is returned.
 ///
 /// The return value is post update (i.e. active will always be false).
-pub fn deactivate_agent_by_id(
+pub fn mark_agent_deactive_by_id(
     conn: &PgConnection,
     agent_id: String,
 ) -> Result<Option<AgentUpload>, DieselError> {

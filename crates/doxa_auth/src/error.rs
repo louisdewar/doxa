@@ -46,7 +46,7 @@ impl_respondable_error!(
     InvalidToken,
     UNAUTHORIZED,
     "INVALID_TOKEN",
-    "The provided token was not valid"
+    "The provided token was not valid, please login again"
 );
 
 #[derive(Debug, Display, Error)]
@@ -56,7 +56,7 @@ impl_respondable_error!(
     ExpiredToken,
     UNAUTHORIZED,
     "EXPIRED_TOKEN",
-    "The provided token has expired"
+    "Your login session has expired, please login again"
 );
 
 #[derive(Debug, Display, Error)]
@@ -173,6 +173,16 @@ impl_respondable_error!(
     BAD_REQUEST,
     "USER_NOT_FOUND",
     "No user with that username exists"
+);
+
+#[derive(Debug, Display, Error)]
+pub struct UserNotFoundAuth;
+
+impl_respondable_error!(
+    UserNotFoundAuth,
+    UNAUTHORIZED,
+    "USER_NOT_FOUND",
+    "This account does not appear to exist anymore"
 );
 
 #[derive(Debug, Display, Error)]
