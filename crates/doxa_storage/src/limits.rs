@@ -18,7 +18,9 @@ impl UploadLimits {
 
 // TODO: make it so that each competition can specify their own limits (probably will need some
 // kind of hashmap of competiton name => limiter)
-fn upload_attempts_limiter() -> LimiterConfig {
+/// This limiter is used by the upload system for every attempt.
+/// It is also used to limit manual agent activations / reactivations.
+pub fn upload_attempts_limiter() -> LimiterConfig {
     let mut limiter = LimiterConfig::new(AGENT_UPLOAD_ATTEMPT_LIMITER_ID.into());
 
     limiter

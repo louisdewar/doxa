@@ -145,6 +145,21 @@ pub trait Competition: 'static + Send + Sync {
             "_agent/{agent_id}/score",
             web::get().to(route::agent::agent_score::<Self>),
         );
+
+        service.route(
+            "_agent/{agent_id}/reactivate",
+            web::post().to(route::agent::reactivate_agent::<Self>),
+        );
+
+        service.route(
+            "_agent/{agent_id}/deactivate",
+            web::post().to(route::agent::deactivate_agent::<Self>),
+        );
+
+        service.route(
+            "_agent/{agent_id}/activate",
+            web::post().to(route::agent::activate_agent::<Self>),
+        );
     }
 
     /// This function should register the `/_user/{username}/...` routes.
@@ -172,6 +187,16 @@ pub trait Competition: 'static + Send + Sync {
         service.route(
             "_user/{username}/active_games",
             web::get().to(route::user::user_active_games::<Self>),
+        );
+
+        service.route(
+            "_user/{username}/reactivate_active_agent",
+            web::post().to(route::user::reactivate_agent::<Self>),
+        );
+
+        service.route(
+            "_user/{username}/deactivate_active_agent",
+            web::post().to(route::user::deactivate_agent::<Self>),
         );
 
         // TODO:

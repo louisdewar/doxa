@@ -1,0 +1,2 @@
+Add some string key in agents to identify the most recent activation batch, then include this key in game participants to show what activation generation a game is from.
+Or at the very least when returning active_games find a way to include whether a game contributes to the score or not (particularily whether a *completed* game contributes to a score).

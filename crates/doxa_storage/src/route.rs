@@ -27,6 +27,11 @@ use crate::{
     LocalStorage,
 };
 
+// TODO: consider mounting these routes under the competition prefix e.g.
+// `competitions/{competition_name/_agent/upload`,
+// then this method could be called from within the competition setup code.
+// Also this would help the situation with the per competition limiter as it could be generated
+// fresh for each scope with per competition settings.
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.route("/storage/upload/{competition}", web::post().to(upload));
     cfg.route(

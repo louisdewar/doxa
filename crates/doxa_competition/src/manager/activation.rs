@@ -25,7 +25,7 @@ impl<C: Competition> Context<C> {
     /// returned (no data will be changed).
     ///
     /// This action is performed atomically.
-    async fn activate_agent(&self, agent_id: String) -> Result<Option<AgentUpload>, ContextError> {
+    async fn set_agent_flag(&self, agent_id: String) -> Result<Option<AgentUpload>, ContextError> {
         let agent = self.get_agent_required(agent_id).await?;
         self.run_query(move |conn| {
             let deactivated_agent =
@@ -40,7 +40,7 @@ impl<C: Competition> Context<C> {
 
     /// Deactivates the agent if it exists and if it is currently activated.
     /// If either of these preconditions are false then `Ok(None)` is returned
-    async fn deactivate_agent(
+    async fn set_agent_deactive_flag(
         &self,
         agent_id: String,
     ) -> Result<Option<AgentUpload>, ContextError> {
@@ -84,7 +84,7 @@ impl<C: Competition> AgentActivationManager<C> {
             return Ok(());
         }
 
-        if let Some(deactivated_agent) = self.context.activate_agent(agent_id.clone()).await? {
+        if let Some(deactivated_agent) = self.context.set_agent_flag(agent_id.clone()).await? {
             let span = span!(Level::INFO, "deactiving agent before activating new one", old_agent = %deactivated_agent.id);
             self.competition
                 .on_agent_deactivated(&self.context, deactivated_agent.id)
@@ -110,7 +110,7 @@ impl<C: Competition> AgentActivationManager<C> {
     /// Both deactivates the agent and calls the deactiate handler.
     /// If the agent doesn't exist or has already been deactivated this will not do anything.
     async fn deactivate_agent(&self, agent_id: String) -> Result<(), ContextError> {
-        if let Some(agent) = self.context.deactivate_agent(agent_id).await? {
+        if let Some(agent) = self.context.set_agent_deactive_flag(agent_id).await? {
             self.competition
                 .on_agent_deactivated(&self.context, agent.id)
                 .await?;

@@ -1,13 +1,16 @@
-use doxa_auth::error::UserNotFound;
+use doxa_auth::{error::UserNotFound, guard::AuthGuard};
 use doxa_core::{actix_web::web, error::HttpResponse, EndpointResult};
 use serde_json::json;
 
 use crate::{
     client::{Competition, Context},
-    error::NoActiveAgent,
+    error::{NoActiveAgent, TooManyActivations, UserNotOwner},
 };
 
-use super::response::{ActiveAgentResponse, ActiveGamesResponse, GameResponse, UserScoreResponse};
+use super::{
+    limits::CompetitionLimits,
+    response::{ActiveAgentResponse, ActiveGamesResponse, GameResponse, UserScoreResponse},
+};
 
 /// The default route for `_user/{username}/active_agent`.
 pub async fn user_active_agent<C: Competition + ?Sized>(
@@ -147,4 +150,67 @@ pub async fn user_active_games<C: Competition + ?Sized>(
         .collect::<Vec<_>>();
 
     Ok(HttpResponse::Ok().json(ActiveGamesResponse { games }))
+}
+
+/// The default route for `_user/{username}/reactivate_active_agent`.
+pub async fn reactivate_agent<C: Competition + ?Sized>(
+    path: web::Path<String>,
+    context: web::Data<Context<C>>,
+    user_auth: AuthGuard,
+    limits: web::Data<CompetitionLimits>,
+) -> EndpointResult {
+    let username = path.into_inner();
+
+    let user = context
+        .get_user_by_username(username)
+        .await?
+        .ok_or(UserNotFound)?;
+
+    if !(user.id == user_auth.id() || user_auth.admin()) {
+        return Err(UserNotOwner.into());
+    }
+
+    let agent = context
+        .get_active_agent(user.id)
+        .await?
+        .ok_or(NoActiveAgent)?;
+
+    if !user_auth.admin() {
+        limits
+            .activations
+            .get_permit(format!("{}-{}", C::COMPETITION_NAME, agent.owner))
+            .await?
+            .map_err(TooManyActivations::from)?;
+    }
+
+    context.activate_agent(agent.id).await?;
+
+    Ok(HttpResponse::Ok().json(json!({})))
+}
+
+/// The default route for `_user/{username}/deactivate_active_agent`.
+pub async fn deactivate_agent<C: Competition + ?Sized>(
+    path: web::Path<String>,
+    context: web::Data<Context<C>>,
+    user_auth: AuthGuard,
+) -> EndpointResult {
+    let username = path.into_inner();
+
+    let user = context
+        .get_user_by_username(username)
+        .await?
+        .ok_or(UserNotFound)?;
+
+    if !(user.id == user_auth.id() || user_auth.admin()) {
+        return Err(UserNotOwner.into());
+    }
+
+    let agent = context
+        .get_active_agent(user.id)
+        .await?
+        .ok_or(NoActiveAgent)?;
+
+    context.deactivate_agent(agent.id).await?;
+
+    Ok(HttpResponse::Ok().json(json!({})))
 }

@@ -109,6 +109,7 @@ pub async fn setup_server(
         executor_settings: Arc::new(executor_settings),
         mq_pool: Arc::clone(&mq_pool),
         pg_pool: Arc::clone(&db_pool),
+        generic_limiter: storage_settings.generic_limiter.clone(),
     };
 
     let configure_competition_routes = competition_system

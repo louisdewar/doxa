@@ -13,7 +13,7 @@ use doxa_db::{
 };
 use doxa_executor::{client::GameClient, event::StartEvent};
 use doxa_mq::{
-    model::{GameEvent, MatchRequest},
+    model::{ActivationEvent, GameEvent, MatchRequest},
     MQPool,
 };
 
@@ -521,6 +521,40 @@ impl<C: Competition + ?Sized> Context<C> {
         for agent in unique_agents.into_iter() {
             self.set_score_by_game_result_sum(agent).await?;
         }
+
+        Ok(())
+    }
+
+    /// Adds the agent to the activation queue (this will automatically deactivate the previous
+    /// agent before activating the new one including if the previous agent was this agent).
+    pub async fn activate_agent(&self, agent: String) -> Result<(), ContextError> {
+        let connection = self.mq_pool.get().await?;
+        doxa_mq::action::emit_activation_event(
+            &connection,
+            &ActivationEvent {
+                agent,
+                activating: true,
+                competition: C::COMPETITION_NAME.to_string(),
+            },
+        )
+        .await?;
+
+        Ok(())
+    }
+
+    /// Adds the agent to the activation queue (this will automatically deactivate the previous
+    /// agent before activating the new one including if the previous agent was this agent).
+    pub async fn deactivate_agent(&self, agent: String) -> Result<(), ContextError> {
+        let connection = self.mq_pool.get().await?;
+        doxa_mq::action::emit_activation_event(
+            &connection,
+            &ActivationEvent {
+                agent,
+                activating: false,
+                competition: C::COMPETITION_NAME.to_string(),
+            },
+        )
+        .await?;
 
         Ok(())
     }

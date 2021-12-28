@@ -2,7 +2,7 @@
 
 mod controller;
 mod error;
-mod limits;
+pub mod limits;
 mod retrieval;
 mod route;
 mod settings;

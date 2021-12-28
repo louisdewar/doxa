@@ -53,6 +53,7 @@ async fn run() -> Result<(), CliError> {
         cli::MainCommands::Agent(agent) => {
             command::agent::handle_subcommand(agent, &settings).await?
         }
+        cli::MainCommands::Raw(raw) => command::raw::handle_subcommand(raw, &settings).await?,
     }
 
     Ok(())
