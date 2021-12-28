@@ -1,0 +1,62 @@
+@import 'src/common/_common.scss';
+
+.match-games .game-card.error {
+  display: block;
+  text-align: center;
+  padding: 5px 20px 5px 20px;
+
+  a {
+    text-underline-offset: 0.05rem;
+  }
+
+
+  .game-card-error-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .error-icon {
+      font-size: 50px;
+      margin: 21.25px 5px;
+      color: #f59e0b;
+    }
+
+    .error-message {
+      flex: 1;
+    }
+  }
+
+  pre.logs {
+    text-align: left;
+
+    margin: 30px;
+    margin-top: 0;
+    padding: 10px;
+    border-radius: 5px;
+    // border: 1px solid $off-black;
+
+    max-height: 500px;
+    max-width: 100%;
+    overflow: auto;
+
+    background-color: #cbd5e1;
+  }
+
+  .logs-message {
+    text-align: left;
+    font-style: italic;
+    margin: 30px;
+    margin-bottom: 10px;
+
+    code {
+      color: $error;
+      font-weight: bold;
+    }
+  }
+
+  &.error-output {
+    border-left: 20px solid #0e7490;
+    padding: 5px;
+  }
+
+}

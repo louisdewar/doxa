@@ -3,6 +3,10 @@ export default class GameState {
     // List of moves
     // Each move is a list with at least one element (the placement event)
     // If there is another event e.g. a grid won then it counts as part of the previous move
+    this.reset();
+  }
+
+  reset() {
     this.moves = [];
     this.index = -1;
     this.state = initialState();
@@ -41,7 +45,7 @@ export default class GameState {
   next() {
     if (this.index + 1 === this.moves.length) {
       return false;
-    }  
+    }
 
     for (let move of this.moves[this.index + 1]) {
       this.state = apply(this.state, move);
@@ -55,7 +59,7 @@ export default class GameState {
   previous() {
     if (this.index === -1) {
       return false;
-    }  
+    }
 
     for (let move of this.moves[this.index]) {
       this.state = undo(this.state, move);
@@ -153,7 +157,7 @@ function apply(state, action) {
     state.subGrids = [...state.subGrids];
     state.subGrids[action.g] = [...state.subGrids[action.g]];
     state.subGrids[action.g][action.t] = state.nextPlayer;
-    state.nextPlayer = state.nextPlayer === 'R'? 'B': 'R';
+    state.nextPlayer = state.nextPlayer === 'R' ? 'B' : 'R';
 
     // Store the previous "nextGrid"
     state.pastNextGrids.push(state.nextGrid);
@@ -188,7 +192,7 @@ function undo(state, action) {
     state.subGrids = [...state.subGrids];
     state.subGrids[action.g] = [...state.subGrids[action.g]];
     state.subGrids[action.g][action.t] = null;
-    state.nextPlayer = state.nextPlayer === 'R'? 'B': 'R';
+    state.nextPlayer = state.nextPlayer === 'R' ? 'B' : 'R';
     state.nextGrid = state.pastNextGrids.pop();
 
   } else if ('w' in action) {

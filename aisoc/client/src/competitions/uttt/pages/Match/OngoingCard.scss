@@ -1,0 +1,24 @@
+@import 'src/common/_common.scss';
+
+.match-games .game-card.ongoing {
+  display: block;
+  text-align: center;
+  padding: 5px 20px 5px 20px;
+  border-left: 20px solid #0e7490;
+
+  .game-card-ongoing-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .ongoing-icon {
+      font-size: 50px;
+      margin: 21.25px 5px;
+      color: #475569;
+    }
+
+    .ongoing-message {
+      flex: 1;
+    }
+  }
+}

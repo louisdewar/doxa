@@ -4,6 +4,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     width: 100%;
+    box-sizing: border-box;
 
     @supports (aspect-ratio: 1/1) {
         aspect-ratio: 1/1;
@@ -11,15 +12,21 @@
 
     border: 2px solid transparent;
 
+    &.playable .tile.playable {
+        cursor: pointer;
+
+        transition: background-color 100ms linear;
+
+        &:hover {
+            background-color: #44474a;
+        }
+    }
+
     &.small {
         width: 100px;
     }
 
     &.player-a {
-        // animation-duration: 1s;
-        // animation-name: start-zero-width;
-        // animation-timing-function: ease-in-out;
-        // animation-fill-mode: backwards;
         border-color: $win;
     }
 
@@ -51,7 +58,7 @@
         }
 
         .playable {
-            background-color: darken($grey, 5);
+            background-color: #9ca3af; // darken($grey, 5);
         }
 
         .player-a {
@@ -70,11 +77,13 @@
 
         .tile {
             border: 0.5px solid $grey;
+
             @supports not (aspect-ratio: 1/1) {
                 // I have no idea why, but the difference between aspect-ratio: 1/1 on the main grid and using this trick is a constant 1.2px difference
                 width: 100%;
                 padding-bottom: calc(100% - 1.2px);
             }
+
             // I don't know if this if even necessary, the number of browsers that don't have calc and I care to support is minimal
             @supports (not (aspect-ratio: 1/1)) and (not (padding-bottom: calc(100% - 1.2px))) {
                 padding-bottom: 100%;

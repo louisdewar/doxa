@@ -10,7 +10,7 @@ export function useAuthProvider() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [authToken, setAuthToken] = useState(() => {
-    const token = sessionStorage.getItem('doxa-auth-token');
+    const token = localStorage.getItem('doxa-auth-token');
     setLoading(false);
     return token;
   });
@@ -18,35 +18,35 @@ export function useAuthProvider() {
   const updateAuthToken = token => {
     if (!token) {
       setAuthToken(null);
-      sessionStorage.removeItem('doxa-auth-token');
+      localStorage.removeItem('doxa-auth-token');
       return;
     }
 
     setAuthToken(token);
-    sessionStorage.setItem('doxa-auth-token', token);
+    localStorage.setItem('doxa-auth-token', token);
   };
 
-  const refresh = async () => {
-    if (!authToken) {
+  const refresh = async token => {
+    if (!token) {
       setUser(null);
       return;
     }
 
     try {
-      const info = await getUserInfo(authToken);
+      const info = await getUserInfo(token);
       setUser({
         username: info.username,
         admin: info.admin ?? false,
         competitions: info.competitions ?? []
       });
     } catch {
-      setAuthToken(null);
+      updateAuthToken(null);
       setUser(null);
     }
   };
 
   useEffect(async () => {
-    await refresh();
+    await refresh(authToken);
   }, []);
 
   return {
@@ -56,8 +56,9 @@ export function useAuthProvider() {
       return !!authToken;
     },
     async login(username, password) {
-      updateAuthToken(await login(username, password));
-      setUser({ username });
+      const token = await login(username, password);
+      updateAuthToken(token);
+      refresh(token);
     },
     logout() {
       updateAuthToken(null);

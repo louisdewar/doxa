@@ -26,10 +26,13 @@ pub fn upload_attempts_limiter() -> LimiterConfig {
     limiter
         // 1 per minute
         .add_limit(TokenBucket::new(Duration::from_secs(60), 1))
-        // 10 per hour
-        .add_limit(TokenBucket::new(ONE_HOUR, 10))
-        // 40 per day
-        .add_limit(TokenBucket::new(ONE_DAY, 40));
+        // Temporarily relax limits
+        // 5 per 10 mins
+        .add_limit(TokenBucket::new(Duration::from_secs(60 * 10), 5));
+    //// 10 per hour
+    //.add_limit(TokenBucket::new(ONE_HOUR, 10))
+    //// 40 per day
+    //.add_limit(TokenBucket::new(ONE_DAY, 40));
 
     limiter
 }

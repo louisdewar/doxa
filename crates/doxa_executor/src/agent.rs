@@ -93,14 +93,27 @@ impl VMAgent {
 
         let mut vm = VM::new(vm_args).await?;
 
-        timeout(
-            Duration::from_secs(60),
-            vm.send_agent(agent_name, agent_size, agent_response.bytes_stream()),
-        )
+        match async {
+            timeout(
+                Duration::from_secs(60),
+                vm.send_agent(agent_name, agent_size, agent_response.bytes_stream()),
+            )
+            .await
+            .map_err(|_| Timeout {
+                during: "send_agent".to_string(),
+            })??;
+
+            Ok(())
+        }
         .await
-        .map_err(|_| Timeout {
-            during: "send_agent".to_string(),
-        })??;
+        {
+            Ok(()) => {}
+            Err(e) => {
+                let logs = Some(vm.shutdown().await);
+
+                return Err(AgentErrorLogContext { source: e, logs });
+            }
+        }
 
         let agent = VMAgent {
             vm_manager: vm,
