@@ -91,7 +91,7 @@ export default function ErrorCard({ forfeit, error, players, baseUrl }) {
   }
 
   return <>
-    <div className={`game-card error ${['lost', 'won'][forfeit.payload.agent]}`}>
+    <div className={`game-card error ${forfeit && forfeit.payload && ['lost', 'won'][forfeit.payload.agent]}`}>
       <div className="game-card-error-header">
         <div className="error-icon"><FontAwesomeIcon icon={faExclamationTriangle} fixedWidth /></div>
         {errorMessage}
