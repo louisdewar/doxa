@@ -41,13 +41,13 @@ export default function ErrorCard({ forfeit, error, players, baseUrl }) {
     // If the error was not a forfeit it represents an internal error
     if (!forfeit) {
       errorMessage = (
-        <>
+        <div className="error-message">
           <p>An internal error occured when running this match that meant it couldn&apos;t continue.</p>
           <p>
             The match can be re-rescheduled by either <PlayerLink username={players[0].username} baseUrl={baseUrl} playerClass={'main'} /> {' '}
             or <PlayerLink username={players[1].username} baseUrl={baseUrl} playerClass={'opposing'} /> re-uploading their agent.
           </p>
-        </>
+        </div>
       );
     }
 
