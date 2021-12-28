@@ -5,7 +5,7 @@ use uttt::UTTTCompetition;
 async fn main() -> std::io::Result<()> {
     let mut competition_system = CompetitionSystem::new();
 
-    competition_system.add_competition(UTTTCompetition, 10);
+    competition_system.add_competition(UTTTCompetition, 25);
 
     doxa_server::setup_server_from_env(true, competition_system).await
 }
