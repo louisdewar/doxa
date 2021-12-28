@@ -14,7 +14,7 @@ export default function SubmissionGuideTab() {
       To use the Doxa CLI, run the following command from the extracted folder:
     </p>
     <pre>
-      python doxa_cli.py --help
+      python3 doxa_cli.py --help
     </pre>
     <p>
       If you do not have the relevant Doxa CLI binary for your operating system, it will be downloaded into the <code>{'"bin"'}</code> folder.
@@ -23,13 +23,13 @@ export default function SubmissionGuideTab() {
       Before you can submit your agent code, you must first log in using the following command:
     </p>
     <pre>
-      python doxa_cli.py user login
+      python3 doxa_cli.py user login
     </pre>
     <p>
       When you want to upload your agent, run the following command:
     </p>
     <pre>
-      python doxa_cli.py agent upload uttt ./agent
+      python3 doxa_cli.py agent upload uttt ./agent
     </pre>
     <p>
       Here, <code>{'"./agent"'}</code> refers to the folder containing the agent code you wish to submit.
