@@ -40,7 +40,7 @@ export function useAuthProvider() {
         competitions: info.competitions ?? []
       });
     } catch {
-      setAuthToken(null);
+      updateAuthToken(null);
       setUser(null);
     }
   };
