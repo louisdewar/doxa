@@ -174,7 +174,7 @@ impl<T: AsyncRead + AsyncWrite + Unpin> Stream<T> {
                     panic!("already received start message")
                 }
                 MessagePart::Bytes(bytes) => {
-                    buf[n..bytes.len()].copy_from_slice(bytes);
+                    buf[n..(n + bytes.len())].copy_from_slice(bytes);
                     n += bytes.len();
                 }
                 MessagePart::EndMessage => return Ok(()),

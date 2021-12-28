@@ -7,7 +7,7 @@ use doxa_storage::RetrievalError;
 use doxa_vm::{
     error::{
         AgentLifecycleManagerError, ManagerError, ManagerErrorLogContext, SendAgentError,
-        TakeFileManagerError, VMRecorderError,
+        TakeFileManagerError, VMRecorderError, VMShutdownError,
     },
     stream::ReadMessageError,
 };
@@ -53,7 +53,7 @@ pub enum AgentError {
 #[display(fmt = "{}", source)]
 pub struct AgentErrorLogContext {
     pub source: AgentError,
-    pub logs: Option<Result<String, VMRecorderError>>,
+    pub logs: Option<Result<String, VMShutdownError>>,
 }
 
 impl<E: Into<AgentError>> From<E> for AgentErrorLogContext {
@@ -69,7 +69,7 @@ impl From<ManagerErrorLogContext> for AgentErrorLogContext {
     fn from(error: ManagerErrorLogContext) -> Self {
         AgentErrorLogContext {
             source: error.source.into(),
-            logs: error.logs,
+            logs: error.logs.map(|res| res.map_err(|e| e.into())),
         }
     }
 }

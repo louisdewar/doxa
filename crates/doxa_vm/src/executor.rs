@@ -70,6 +70,7 @@ impl VMExecutor {
             Self::receive_agent(&mut stream, &output_dir)
                 .await
                 .expect("Failed to receive agent");
+            println!("Received agent");
 
             // TODO: better reporting of errors
             let (config_dir, mut config_file) = Self::find_config_dir(output_dir)
@@ -345,6 +346,8 @@ impl VMExecutor {
         .map_err(|_| ReceieveAgentError::Timeout {
             during: "wait for `FILE ENDS`".to_string(),
         })??;
+
+        println!("FILE ENDS");
 
         let mut tar_process = tokio::process::Command::new("tar")
             .args(&[

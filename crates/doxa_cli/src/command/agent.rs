@@ -113,7 +113,7 @@ pub async fn upload(args: UploadArgs, settings: &Settings) -> Result<(), Command
 
         (format!("{}.tar.gz", agent_file_name), tar_file)
     } else {
-        if !(agent_path.ends_with(".tar.gz") || agent_path.ends_with(".tar")) {
+        if !(agent_file_name.ends_with(".tar.gz") || agent_file_name.ends_with(".tar")) {
             return Err(UploadError::IncorrectExtension.into());
         }
 
