@@ -26,7 +26,7 @@ export default function Invite() {
 
     try {
       await auth.acceptInvite(id, username, password);
-      history.push('/');
+      history.push('/#invite-success');
     } catch {
       setShowError(true);
     }
