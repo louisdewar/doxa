@@ -69,6 +69,19 @@ pub fn get_game_by_id(
         .optional()
 }
 
+pub fn get_game_by_id_required(
+    conn: &PgConnection,
+    id: i32,
+    competition_name: &str,
+) -> Result<model::Game, DieselError> {
+    s::games::table
+        .inner_join(s::competitions::table)
+        .filter(s::competitions::columns::name.eq(competition_name))
+        .filter(s::games::columns::id.eq(id))
+        .select(s::games::all_columns)
+        .first(conn)
+}
+
 pub fn get_game_events(conn: &PgConnection, id: i32) -> Result<Vec<model::GameEvent>, DieselError> {
     s::game_events::table
         .filter(s::game_events::columns::game.eq(id))
@@ -159,8 +172,14 @@ pub fn get_game_result(
         .optional()
 }
 
-pub fn sum_game_results(conn: &PgConnection, agent: String) -> Result<Option<i64>, DieselError> {
+/// Sums games results for a particular agent only from games where outdated = false
+pub fn sum_non_outdated_game_results(
+    conn: &PgConnection,
+    agent: String,
+) -> Result<Option<i64>, DieselError> {
     s::game_results::table
+        .inner_join(s::games::table)
+        .filter(s::games::columns::outdated.eq(false))
         .select(dsl::sum(s::game_results::result))
         .filter(s::game_results::agent.eq(agent))
         .first(conn)

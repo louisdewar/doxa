@@ -416,7 +416,7 @@ impl<C: Competition + ?Sized> Context<C> {
             .await
     }
 
-    /// Inserts a group of game results at once only if all the agents are currently active.
+    /// Inserts a group of game results at once only if the game is not outdated.
     /// This guarantees (using a transaction) that if the rows are inserted the agents were all active at the time of insertion.
     /// If any agent in the group was not active then this will not return an error but it will also not insert into the DB.
     /// If `update_score_by_sum` is true then this will sum the game results and set that to the score as part of the same transaction.
@@ -426,9 +426,21 @@ impl<C: Competition + ?Sized> Context<C> {
         results: impl Iterator<Item = (String, i32)> + Send + 'static,
         update_score_by_sum: bool,
     ) -> Result<(), ContextError> {
+        // TODO: re-write this code properly using the new outdated field on games (should make
+        // things simpler)
         if let Err(e) = self
             .run_query(move |conn| {
                 conn.build_transaction().repeatable_read().run(|| {
+                    let game = doxa_db::action::game::get_game_by_id_required(
+                        conn,
+                        game_id,
+                        C::COMPETITION_NAME,
+                    )?;
+
+                    if game.outdated {
+                        return Ok(());
+                    }
+
                     for (agent, result) in results {
                         let agent =
                             doxa_db::action::storage::get_agent_required(conn, agent.clone())?;
@@ -447,9 +459,11 @@ impl<C: Competition + ?Sized> Context<C> {
                         )?;
 
                         if update_score_by_sum {
-                            let score =
-                                doxa_db::action::game::sum_game_results(conn, agent.id.clone())?
-                                    .unwrap_or(0);
+                            let score = doxa_db::action::game::sum_non_outdated_game_results(
+                                conn,
+                                agent.id.clone(),
+                            )?
+                            .unwrap_or(0);
                             doxa_db::action::leaderboard::upsert_score(
                                 conn,
                                 agent.id,
@@ -475,8 +489,10 @@ impl<C: Competition + ?Sized> Context<C> {
     }
 
     pub async fn sum_game_results(&self, agent: String) -> Result<Option<i64>, ContextError> {
-        self.run_query(move |conn| doxa_db::action::game::sum_game_results(conn, agent))
-            .await
+        self.run_query(move |conn| {
+            doxa_db::action::game::sum_non_outdated_game_results(conn, agent)
+        })
+        .await
     }
 
     /// For each game that the given agent was a participant in, this will remove the game results for each of those games (including results for agents other than the current one).
