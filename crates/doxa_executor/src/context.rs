@@ -117,13 +117,24 @@ impl<'a, C: GameClient> GameContext<'a, C> {
         .await
     }
 
+    /// Forfeits an agent.
+    ///
+    /// The error message is viewable by the owner of the agent that forfeitted.
     pub async fn forfeit_agent(
         &mut self,
         agent_id: usize,
         stderr: Option<String>,
+        error_message: Option<String>,
     ) -> Result<(), GameContextError> {
-        self.emit_event_raw(ForfeitEvent { agent_id, stderr }, "_FORFEIT".to_string())
-            .await
+        self.emit_event_raw(
+            ForfeitEvent {
+                agent_id,
+                stderr,
+                error_message,
+            },
+            "_FORFEIT".to_string(),
+        )
+        .await
     }
 
     /// Returns the number of agents playing in the game.

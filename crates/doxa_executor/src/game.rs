@@ -90,7 +90,9 @@ impl<C: GameClient> GameManager<C> {
                         )) => stderr.take(),
                         _ => None,
                     };
-                    context.forfeit_agent(agent_id, stderr).await?;
+                    context
+                        .forfeit_agent(agent_id, stderr, error.forfeit_message())
+                        .await?;
 
                     (0..context.agents()).map(|_| None).collect()
                 } else {

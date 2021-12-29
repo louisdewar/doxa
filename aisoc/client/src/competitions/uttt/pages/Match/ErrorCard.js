@@ -16,6 +16,7 @@ export default function ErrorCard({ forfeit, error, players, baseUrl }) {
     const other = forfeiter === 0 ? 1 : 0;
     const stderr = forfeit.payload.stderr;
     const remaining = forfeit.payload.remaining ?? 0;
+    const reason = forfeit.payload.reason;
 
     errorMessage = (
       <div className='error-message'>
@@ -27,9 +28,16 @@ export default function ErrorCard({ forfeit, error, players, baseUrl }) {
       </div>
     );
 
+    if (reason) {
+      extraInfo = <>
+        <p className="logs-message">Forfeit reason:</p>
+        <pre className="logs">{reason}</pre>
+      </>;
+    }
     if (stderr) {
       extraInfo = (
         <>
+          {extraInfo}
           <p className="logs-message">You have permission to view the <code>stderr</code> of <PlayerLink username={players[forfeiter].username} baseUrl={baseUrl} playerClass={PLAYER_CLASS[forfeiter]} />&apos;s agent (max 50MiB):</p>
           <pre className="logs">{stderr}</pre>
         </>
