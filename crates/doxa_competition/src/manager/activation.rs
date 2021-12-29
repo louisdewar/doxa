@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use doxa_core::{
+    chrono::{DateTime, Utc},
     lapin::{message::Delivery, options::BasicAckOptions},
     tokio,
     tracing::{error, info, span, Level},
@@ -28,16 +29,24 @@ impl<C: Competition> Context<C> {
     async fn activate_agent_db(
         &self,
         agent_id: String,
+        activated_at: DateTime<Utc>,
     ) -> Result<Option<AgentUpload>, ContextError> {
         let agent = self.get_agent_required(agent_id).await?;
+        dbg!(&agent);
         self.run_query(move |conn| {
-            let deactivated_agent = doxa_db::action::storage::mark_active_agent_deactive(
+            let deactivated_agent = doxa_db::action::storage::mark_active_agent_as_inactive(
                 conn,
                 agent.competition,
                 agent.owner,
             )?;
 
-            doxa_db::action::storage::activate_agent(conn, agent.id)?;
+            dbg!(&deactivated_agent);
+
+            dbg!(doxa_db::action::storage::activate_agent(
+                conn,
+                agent.id,
+                activated_at
+            ))?;
 
             Ok(deactivated_agent)
         })
@@ -95,7 +104,11 @@ impl<C: Competition> AgentActivationManager<C> {
             return Ok(());
         }
 
-        if let Some(deactivated_agent) = self.context.activate_agent_db(agent_id.clone()).await? {
+        if let Some(deactivated_agent) = self
+            .context
+            .activate_agent_db(agent_id.clone(), Utc::now())
+            .await?
+        {
             self.context
                 .run_query({
                     let agent_id = agent_id.clone();

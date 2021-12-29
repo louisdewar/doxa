@@ -25,3 +25,11 @@ pub struct InsertableAgentUpload {
     pub competition: i32,
     pub extension: String,
 }
+
+#[derive(AsChangeset)]
+#[table_name = "agents"]
+#[changeset_options(treat_none_as_null = "true")]
+pub(crate) struct ActivateChangeset {
+    pub active: bool,
+    pub activated_at: Option<DateTime<Utc>>,
+}

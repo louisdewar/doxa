@@ -15,6 +15,8 @@ table! {
     }
 }
 
+// TODO: consider removal (and remove from up.sql)
+// also consider active_agents removal
 table! {
     active_games (id) {
         id -> Int4,

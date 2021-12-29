@@ -23,6 +23,8 @@ pub enum ContextError {
     #[from]
     AgentNotFound(AgentNotFound),
     #[from]
+    AgentNotActive(AgentNotActive),
+    #[from]
     ParseSystemMessage(ParseSystemMessageError),
     #[from]
     StartEventNotFound(StartEventNotFound),

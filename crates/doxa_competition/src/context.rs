@@ -19,7 +19,7 @@ use doxa_mq::{
 
 use crate::{
     client::Competition,
-    error::{AgentNotFound, ContextError, ParseSystemMessageError},
+    error::{AgentNotActive, AgentNotFound, ContextError, ParseSystemMessageError},
 };
 
 // TODO: consider moving context methods in their own folders, this file is getting a bit unwieldy
@@ -112,12 +112,14 @@ impl<C: Competition + ?Sized> Context<C> {
             .await?
             .ok_or(AgentNotFound)?;
 
+        let activated_at = agent.activated_at.ok_or(AgentNotActive)?;
+
         let active_agents = self
             .run_query(move |conn| {
-                doxa_db::action::storage::get_active_agents_uploaded_before(
+                doxa_db::action::storage::get_active_agents_activated_before(
                     conn,
                     agent.competition,
-                    agent.uploaded_at,
+                    activated_at,
                 )
             })
             .await?;
