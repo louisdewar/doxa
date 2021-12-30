@@ -1,6 +1,13 @@
 import random
 from typing import List, Optional, Tuple
 
+#########################################################
+#                                                       #
+#   YOU SHOULD NOT NEED TO EDIT THIS FILE AT ALL        #
+#   UNLESS YOU ARE IMPLEMENTING A MORE ADVANCED AGENT   #
+#                                                       #
+#########################################################
+
 
 class BaseAgent:
     def __init__(self) -> None:

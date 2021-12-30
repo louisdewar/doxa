@@ -3,15 +3,19 @@ from typing import List, Optional, Tuple
 
 from uttt import BaseAgent, UTTTGame
 
+#########################################################################
+#                                                                       #
+#       Modify the Agent class below to implement your own agent.       #
+#       You may define additional methods as you see fit.               #
+#                                                                       #
+#########################################################################
+
 
 class Agent(BaseAgent):
     """
     This is an example agent for the ultimate tic-tac-toe competition on Doxa.
 
     Its current strategy is to play valid moves picked completely at random.
-
-    Feel free to modify this class to implement your own agent! You are welcome
-    to define additional methods as you see fit.
     """
 
     def make_move(
@@ -38,8 +42,14 @@ class Agent(BaseAgent):
             Tuple[int, int]: The local board and tile position to mark for your agent.
         """
 
-        # You can get the player you are currently playing as (R or B) with `self.player`.
-        # Likewise, you can get your opponent (B or R) with `self.opponent`.
+        ################################################################################
+        #                                                                              #
+        #                   Replace this section with your own code!                   #
+        #                                                                              #
+        ################################################################################
+
+        # `self.player` is the player you are currently playing as (either R or B).
+        # Likewise, `self.opponent` is your opponent (either B or R).
 
         # Find all the free tiles across the playable boards.
         possible_moves = [
@@ -49,8 +59,12 @@ class Agent(BaseAgent):
             if boards[board][tile] is None
         ]
 
-        # Pick a random valid move
-        return random.choice(possible_moves)
+        # Pick a valid move at random
+        move = random.choice(possible_moves)
+
+        ################################################################################
+
+        return move
 
 
 def main():
