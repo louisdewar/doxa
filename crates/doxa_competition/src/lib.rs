@@ -15,6 +15,8 @@ pub mod settings;
 use route::limits::CompetitionLimits;
 pub use settings::Settings;
 
+pub use doxa_core::tracing;
+
 use doxa_core::tracing::{error, info};
 
 pub struct CompetitionSystem {

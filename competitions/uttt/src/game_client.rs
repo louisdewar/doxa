@@ -1,6 +1,9 @@
 use std::time::Duration;
 
-use doxa_competition::client::{async_trait, ForfeitError, GameClient, GameContext, GameError};
+use doxa_competition::{
+    client::{async_trait, ForfeitError, GameClient, GameContext, GameError},
+    tracing::debug,
+};
 
 use crate::model::{self, Model, ModelError, Player, Winner};
 
@@ -273,6 +276,7 @@ impl GameClient for UTTTGameClient {
         let mut b_wins = 0;
         let mut draws = 0;
         let mut winners = Vec::with_capacity(GAMES_PER_SIDE as usize);
+        debug!(total_games=%GAMES_PER_SIDE, "uttt starting");
 
         for game in 0..GAMES_PER_SIDE {
             // Reboot all agents to reset each game
@@ -318,6 +322,8 @@ impl GameClient for UTTTGameClient {
                     return Err(e);
                 }
             };
+
+            debug!(game_number=%game, "uttt game completed");
 
             // Game ID are 1 indexed as they are shown to the user
             let game_id = format!("game_{}", game + 1);

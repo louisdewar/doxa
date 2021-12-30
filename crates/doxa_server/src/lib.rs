@@ -13,6 +13,7 @@ use tracing_actix_web::TracingLogger;
 mod telemetry;
 
 pub use doxa_competition::CompetitionSystem;
+pub use doxa_core::tracing;
 
 /// Uses well known environment variables for configuring the various parameters of the server
 /// (e.g. database urls).
