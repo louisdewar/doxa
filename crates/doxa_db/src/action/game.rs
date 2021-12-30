@@ -218,10 +218,12 @@ pub fn get_user_active_games(
         .get_results(conn)
 }
 
-/// Finds all the games that involve an agent and mark them as inactive.
-pub fn mark_games_with_agent_as_outdated(
+/// Finds all the games that involve a paticular user and mark them as inactive.
+/// This is done by player instead of agent to make it more resliant in the case of a crash when
+/// activating / deactivating an agent
+pub fn mark_games_with_player_as_outdated(
     conn: &PgConnection,
-    agent_id: String,
+    user: i32,
 ) -> Result<(), DieselError> {
     use s::game_participants::columns as p_c;
     use s::games::columns as g_c;
@@ -230,7 +232,8 @@ pub fn mark_games_with_agent_as_outdated(
         .filter(
             g_c::id.eq_any(
                 s::game_participants::table
-                    .filter(p_c::agent.eq(agent_id))
+                    .inner_join(s::agents::table)
+                    .filter(s::agents::owner.eq(user))
                     .select(p_c::game),
             ),
         )

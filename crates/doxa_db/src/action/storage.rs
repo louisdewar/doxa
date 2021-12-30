@@ -117,13 +117,13 @@ pub fn mark_active_agent_as_inactive(
 
 /// Sets the given agent's active flag to false and activated_at to NULL, if it active was set to true.
 ///
-/// If that agent did not exist or it was not active then `Ok(None)` is returned.
+/// If that agent did not exist or it was not active then an error is returned.
 ///
 /// The return value is post update (i.e. active will always be false).
 pub fn mark_agent_deactive_by_id(
     conn: &PgConnection,
     agent_id: String,
-) -> Result<Option<AgentUpload>, DieselError> {
+) -> Result<AgentUpload, DieselError> {
     use s::agents::columns as c;
     diesel::update(
         s::agents::table
@@ -135,7 +135,6 @@ pub fn mark_agent_deactive_by_id(
         activated_at: None,
     })
     .get_result(conn)
-    .optional()
 }
 
 /// Sets the active field for this agent to true.
