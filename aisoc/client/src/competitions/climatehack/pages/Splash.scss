@@ -1,0 +1,91 @@
+@import 'common/colours';
+@import 'common/fonts';
+@import "./splash-common.scss";
+
+
+button.ch-compete-button {
+  margin: 1rem 0;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  background-color: $pink;
+  border: 0;
+  border-radius: 3px;
+  color: #fff;
+  font-family: $monospace-font;
+  cursor: pointer;
+
+  &:hover {
+    background-color: darken($pink, 5%);
+  }
+
+  &:active {
+    background-color: darken($pink, 10%);
+  }
+}
+
+header.ch-splash-header {
+  margin-top: 20px;
+  height: calc(100vh - 73px);
+
+  background-color: #000;
+
+  background-image: url('/competitions/climatehack/assets/globe.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  align-items: center;
+
+  .ch-splash-header-title {
+    margin-top: 25vh;
+    color: #f1f5f9;
+    height: calc(100vh - 2 * 73px);
+    align-items: center;
+    text-align: left;
+
+    h1,
+    h2 {
+      margin-top: 0;
+      margin-bottom: 0;
+      font-size: 4rem;
+
+      span {
+        background-color: #2563ebaa;
+      }
+    }
+
+    h2 {
+      font-weight: 100;
+    }
+  }
+}
+
+@media screen and (min-width: 640px) {
+
+  header.ch-splash-header {
+    margin-top: 73px;
+
+    .ch-splash-header-title h1,
+    .ch-splash-header-title h2 {
+      font-size: 6rem;
+    }
+  }
+
+}
+
+.ch-scroll-to-about {
+  text-align: center;
+  font-size: 4rem;
+
+  a {
+    color: #fff;
+  }
+}
+
+section.climatehack-about {
+  margin-top: 2rem;
+  color: #fff;
+}

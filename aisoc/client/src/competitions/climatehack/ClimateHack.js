@@ -1,7 +1,9 @@
 import Container from 'components/Container';
 import Navbar from 'components/Navbar';
 import { Route, Switch, useRouteMatch } from 'react-router-dom';
+import Challenge from './pages/Challenge';
 import Home from './pages/Home';
+import Splash from './pages/Splash';
 import User from './pages/User';
 
 
@@ -22,10 +24,16 @@ export default function ClimateHack() {
         <User baseUrl={path} />
       </Layout>
     </Route>
-    <Route path={path}>
+    <Route path={`${path}compete`}>
       <Layout>
         <Home baseUrl={path} />
       </Layout>
+    </Route>
+    <Route path={`${path}challenge`}>
+      <Challenge baseUrl={path} />
+    </Route>
+    <Route path={path}>
+      <Splash baseUrl={path} />
     </Route>
   </Switch>;
 }
