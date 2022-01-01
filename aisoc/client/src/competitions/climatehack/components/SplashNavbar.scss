@@ -1,12 +1,6 @@
 @import 'common/colours';
 @import 'common/fonts';
 
-// @media screen and (min-width: 640px) {
-//   nav.ch-navbar {
-//     padding: 5px 20px;
-//   }
-// }
-
 nav.ch-navbar {
   color: #fff;
   position: fixed;
@@ -19,10 +13,10 @@ nav.ch-navbar {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  font-size: 0.9rem;
+  font-size: 0.7rem;
   font-weight: bold;
 
-  padding: 25px 20px;
+  padding: 25px 0;
 
   a {
     position: relative;
@@ -33,7 +27,7 @@ nav.ch-navbar {
 
     &.ch-navbar-title {
       margin-right: auto;
-      font-size: 1.4rem;
+      font-size: 0.9rem;
 
       span {
         font-weight: normal;
@@ -49,5 +43,16 @@ nav.ch-navbar {
       }
     }
 
+  }
+}
+
+@media screen and (min-width: 640px) {
+  nav.ch-navbar {
+    font-size: 0.9rem;
+    padding: 25px 20px;
+
+    a .ch-navbar-title {
+      font-size: 1.4rem;
+    }
   }
 }
