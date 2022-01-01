@@ -1,8 +1,11 @@
 .container {
-  margin-top: 100px;
   margin-left: auto;
   margin-right: auto;
   width: calc(100% - 2rem);
+}
+
+.container-with-top-margin {
+  margin-top: 100px;
 }
 
 @media screen and (min-width: 640px) {
@@ -17,8 +20,8 @@
   }
 }
 
-// @media screen and (min-width: 1024px) {
-//   .container {
-//     max-width: 1024px;
-//   }
-// }
+@media screen and (min-width: 1024px) {
+  .container {
+    max-width: 1024px;
+  }
+}
