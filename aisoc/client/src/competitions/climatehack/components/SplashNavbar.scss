@@ -1,0 +1,53 @@
+@import 'common/colours';
+@import 'common/fonts';
+
+// @media screen and (min-width: 640px) {
+//   nav.ch-navbar {
+//     padding: 5px 20px;
+//   }
+// }
+
+nav.ch-navbar {
+  color: #fff;
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  background-color: #000;
+  z-index: 100;
+
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  font-size: 0.9rem;
+  font-weight: bold;
+
+  padding: 25px 20px;
+
+  a {
+    position: relative;
+    font-family: 'Montserrat', sans-serif;
+    color: #FFFFFF;
+    text-decoration: none;
+    margin: 0 15px;
+
+    &.ch-navbar-title {
+      margin-right: auto;
+      font-size: 1.4rem;
+
+      span {
+        font-weight: normal;
+      }
+    }
+
+    &.ch-navbar-active,
+    &:hover:not(.ch-navbar-title) {
+      color: $pink;
+
+      &::after {
+        background-color: $pink;
+      }
+    }
+
+  }
+}

@@ -1,0 +1,94 @@
+@import "common/colours";
+@import "./splash-common.scss";
+
+.ch-challenge-header {
+  margin-top: 75px;
+  color: #fff;
+  padding: 6rem 6rem;
+
+  background-image: url('/competitions/climatehack/assets/challenge-header.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  h1,
+  h2 {
+    font-size: 5rem;
+    margin: 0;
+  }
+
+  h2 {
+    font-weight: 100;
+  }
+
+}
+
+@media screen and (min-width: 640px) {
+  .ch-challenge-section-content {
+    max-width: 640px;
+  }
+}
+
+@media screen and (min-width: 768px) {
+  .ch-challenge-section-content {
+    max-width: 768px;
+  }
+}
+
+// @media screen and (min-width: 1024px) {
+  //   .ch-challenge-section-content {
+  //     max-width: 1024px;
+  //   }
+  // }
+
+
+section.ch-challenge-section {
+  padding: 2rem;
+  width: calc(100% - 4rem);
+
+  .ch-challenge-section-content {
+    display: flex;
+    margin-left: auto;
+    margin-right: auto;
+
+    .ch-challenge-section-heading {
+      margin: 16px 2rem 16px 0;
+
+      h2 {
+        margin-top: 0;
+        width: 250px;
+      }
+    }
+  }
+
+  &.ch-challenge-pv {
+    background-color: #f1f5f9;
+
+    .ch-challenge-section-heading h2 {
+      color: #2563eb;
+    }
+  }
+
+  &.ch-challenge-ocf {
+    color: #fff;
+
+    .ch-challenge-section-heading h2 {
+      color: $pink;
+    }
+  }
+
+  &.ch-challenge-impact {
+    color: #fff;
+
+    padding: 2rem 2rem 8rem 2rem;
+
+    background-image: url('/competitions/climatehack/assets/challenge-solar-panels.png');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+
+    .ch-challenge-section-heading h2 {
+      color: #fff;
+    }
+  }
+}
