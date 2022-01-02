@@ -232,7 +232,8 @@ pub enum NextMessageError {
 // GameManagerError and then include startup errors
 #[derive(Display, Error, From, Debug)]
 pub enum GameManagerError<E> {
-    #[from(ignore)]
     StartAgent(AgentErrorLogContext),
+    EmitStartEvent(lapin::Error),
+    #[from]
     Runtime(GameError<E>),
 }

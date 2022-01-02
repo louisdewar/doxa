@@ -32,7 +32,7 @@ impl<C: Competition> GameEventManager<C> {
     async fn handle_game_event(&self, delivery: Delivery) {
         let game_event: GameEvent<serde_json::Value> =
             serde_json::from_slice(&delivery.data).expect("Improperly formatted message");
-        event!(Level::INFO, %game_event.game_id, %game_event.event_type, "received game event for agent");
+        event!(Level::DEBUG, %game_event.game_id, %game_event.event_type, "received game event for agent");
 
         let res = tokio::task::spawn_blocking({
             let game_event = game_event.clone();

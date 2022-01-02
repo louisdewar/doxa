@@ -11,7 +11,7 @@ use futures::{
 use crate::{
     agent::{VMAgent, VMAgentSettings},
     client::{ForfeitError, GameClient, GameError},
-    context::GameContext,
+    context::{GameContext, GameEventContext},
     error::{AgentTerminated, GameContextError, GameManagerError},
     Settings,
 };
@@ -19,10 +19,8 @@ use crate::{
 pub struct GameManager<C: GameClient> {
     client: PhantomData<C>,
     agents: Vec<VMAgent>,
-    event_queue_name: String,
-    event_channel: Channel,
     client_match_request: C::MatchRequest,
-    game_id: i32,
+    game_event_context: GameEventContext<C>,
 }
 
 impl<C: GameClient> GameManager<C> {
@@ -33,6 +31,14 @@ impl<C: GameClient> GameManager<C> {
         competition_name: &'static str,
         match_request: MatchRequest<C::MatchRequest>,
     ) -> Result<Self, GameManagerError<C::Error>> {
+        let mut game_event_context =
+            GameEventContext::new(event_channel, event_queue_name, match_request.game_id);
+
+        game_event_context
+            .emit_start_event(match_request.agents.clone())
+            .await
+            .map_err(GameManagerError::EmitStartEvent)?;
+
         let additional_mounts = C::additional_mounts(&match_request.payload);
 
         let mut mounts = settings.base_mounts.clone();
@@ -44,40 +50,57 @@ impl<C: GameClient> GameManager<C> {
             mounts,
         };
 
-        let agents = match_request.agents.into_iter().map(|agent_id| {
-            VMAgent::new(
-                competition_name,
-                agent_id,
-                &settings.agent_retrieval,
-                &settings,
-                vm_agent_settings.clone(),
-            )
-        });
+        let agents = match_request
+            .agents
+            .iter()
+            .enumerate()
+            .map(|(index, agent_id)| {
+                VMAgent::new(
+                    competition_name,
+                    agent_id.clone(),
+                    &settings.agent_retrieval,
+                    &settings,
+                    vm_agent_settings.clone(),
+                )
+                .map_err(move |e| (index, e))
+            });
 
-        let agents = try_join_all(agents)
-            .await
-            .map_err(GameManagerError::StartAgent)?;
+        let agents = match try_join_all(agents).await {
+            Ok(agents) => agents,
+            Err((index, mut e)) => {
+                let mut vm_logs = vec![None; match_request.agents.len()];
+
+                if let Some(logs) = e.logs.take() {
+                    match logs {
+                        Ok(logs) => vm_logs[index] = Some(logs),
+                        Err(vm_logs_error) => {
+                            error!(logs_error=%vm_logs_error, debug=?vm_logs_error, "failed to get VM logs for agent while processing a startup error");
+                        }
+                    }
+                }
+
+                if let Err(e) = game_event_context.emit_error_event(&e, vm_logs).await {
+                    // If there is an error here the VM logs are lost, but it probably doesn't
+                    // matter as it's unlikely that the VM logs will be related to the game event
+                    // emit error
+                    error!(error=%e, debug=?e, "failed to emit error event containing VM logs while processing a startup error");
+                }
+
+                return Err(GameManagerError::StartAgent(e));
+            }
+        };
 
         Ok(GameManager {
             agents,
             client: PhantomData,
-            event_queue_name,
-            event_channel,
+            game_event_context,
             client_match_request: match_request.payload,
-            game_id: match_request.game_id,
         })
     }
 
     /// Runs the game to completion
     pub async fn run(mut self) -> Result<(), GameError<C::Error>> {
-        let mut context = GameContext::new(
-            &mut self.agents,
-            &self.event_queue_name,
-            &self.event_channel,
-            self.game_id,
-        );
-
-        context.emit_start_event().await?;
+        let mut context = GameContext::new(&mut self.agents, &mut self.game_event_context);
 
         let res = match C::run(self.client_match_request, &mut context).await {
             Ok(()) => Ok(()),
@@ -113,13 +136,21 @@ impl<C: GameClient> GameManager<C> {
                     vm_logs
                 };
 
-                context.emit_error_event(&error, vm_logs).await?;
+                if let Err(e) = self
+                    .game_event_context
+                    .emit_error_event(&error, vm_logs)
+                    .await
+                {
+                    error!(error=%e, debug=?e, "failed to emit error event while processing an error during the game");
+                }
 
                 Err(error)
             }
         };
 
-        context.emit_end_event().await?;
+        if let Err(e) = self.game_event_context.emit_end_event().await {
+            error!(error=%e, debug=?e, "failed to emit end event");
+        }
 
         res
     }

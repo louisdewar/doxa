@@ -1,45 +1,39 @@
 use std::{marker::PhantomData, time::Duration};
 
-use doxa_core::{chrono::Utc, lapin::Channel, tokio};
-use doxa_mq::model::GameEvent;
+use doxa_core::tokio;
 use futures::TryFutureExt;
-use serde::Serialize;
 use tokio::time::timeout;
 
 use crate::{
     agent::VMAgent,
-    client::{GameClient, GameError},
+    client::GameClient,
     error::{AgentTerminated, GameContextError, NextMessageError},
-    event::{ErrorEvent, ForfeitEvent, StartEvent},
+    event::ForfeitEvent,
 };
+
+mod game_event;
+
+pub(crate) use game_event::GameEventContext;
 
 pub const DEFAULT_MAX_MESSAGE_TIME: Duration = Duration::from_secs(120);
 
 pub struct GameContext<'a, C: GameClient + ?Sized> {
     pub(crate) agents: &'a mut Vec<VMAgent>,
-    event_queue_name: &'a str,
-    event_channel: &'a Channel,
     client: PhantomData<C>,
-    event_id: u32,
-    game_id: i32,
     max_message_time: Duration,
+    game_event_context: &'a mut GameEventContext<C>,
 }
 
 impl<'a, C: GameClient> GameContext<'a, C> {
     pub(crate) fn new(
         agents: &'a mut Vec<VMAgent>,
-        event_queue_name: &'a str,
-        event_channel: &'a Channel,
-        game_id: i32,
+        game_event_context: &'a mut GameEventContext<C>,
     ) -> Self {
         GameContext {
             agents,
-            event_queue_name,
-            event_channel,
             client: PhantomData,
-            event_id: 0,
-            game_id,
             max_message_time: DEFAULT_MAX_MESSAGE_TIME,
+            game_event_context,
         }
     }
 
@@ -51,70 +45,10 @@ impl<'a, C: GameClient> GameContext<'a, C> {
         event: C::GameEvent,
         event_type: S,
     ) -> Result<(), GameContextError> {
-        self.emit_event_raw(event, event_type.into()).await
-    }
-
-    async fn emit_event_raw<T: Serialize>(
-        &mut self,
-        payload: T,
-        event_type: String,
-    ) -> Result<(), GameContextError> {
-        let timestamp = Utc::now();
-        let game_event = GameEvent {
-            event_id: self.event_id,
-            timestamp,
-            event_type,
-            payload,
-            game_id: self.game_id,
-        };
-        self.event_id += 1;
-
-        doxa_mq::action::publish(
-            self.event_channel,
-            self.event_queue_name,
-            serde_json::to_vec(&game_event).unwrap(),
-        )
-        .await
-        .map_err(GameContextError::Emit)
-        .map(|_| ())
-    }
-
-    pub(crate) async fn emit_start_event(&mut self) -> Result<(), GameContextError> {
-        self.emit_event_raw(
-            StartEvent {
-                agents: self
-                    .agents
-                    .iter()
-                    .map(|agent| agent.id().to_string())
-                    .collect(),
-            },
-            "_START".to_string(),
-        )
-        .await
-    }
-
-    pub(crate) async fn emit_end_event(&mut self) -> Result<(), GameContextError> {
-        // TODO: end event data, e.g. total time spent, maybe whether it completed succesfully or
-        // not
-        self.emit_event_raw((), "_END".to_string()).await
-    }
-
-    pub(crate) async fn emit_error_event(
-        &mut self,
-        error: &GameError<C::Error>,
-        vm_logs: Vec<Option<String>>,
-    ) -> Result<(), GameContextError> {
-        // TODO: end event data, e.g. total time spent, maybe whether it completed succesfully or
-        // not
-        self.emit_event_raw(
-            ErrorEvent {
-                error: format!("{}", error),
-                debug: format!("{:?}", error),
-                vm_logs,
-            },
-            "_ERROR".to_string(),
-        )
-        .await
+        self.game_event_context
+            .emit_event_raw(event, event_type.into())
+            .await
+            .map_err(GameContextError::Emit)
     }
 
     /// Forfeits an agent.
@@ -126,15 +60,17 @@ impl<'a, C: GameClient> GameContext<'a, C> {
         stderr: Option<String>,
         error_message: Option<String>,
     ) -> Result<(), GameContextError> {
-        self.emit_event_raw(
-            ForfeitEvent {
-                agent_id,
-                stderr,
-                error_message,
-            },
-            "_FORFEIT".to_string(),
-        )
-        .await
+        self.game_event_context
+            .emit_event_raw(
+                ForfeitEvent {
+                    agent_id,
+                    stderr,
+                    error_message,
+                },
+                "_FORFEIT".to_string(),
+            )
+            .await
+            .map_err(GameContextError::Emit)
     }
 
     /// Returns the number of agents playing in the game.
