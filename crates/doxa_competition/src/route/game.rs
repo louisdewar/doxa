@@ -1,5 +1,12 @@
 use doxa_auth::guard::AuthGuard;
-use doxa_core::{actix_web::web, error::HttpResponse, EndpointResult};
+use doxa_core::{
+    actix_web::{
+        http::header::{CacheControl, CacheDirective},
+        web,
+    },
+    error::HttpResponse,
+    EndpointResult,
+};
 
 use doxa_db::model::game::Game;
 use doxa_executor::{
@@ -19,6 +26,9 @@ use super::response::{
     GameEventResponse, GameEventsResponse, GameResponse, GameResultResponse, PlayersResponse,
     PlayersResponsePlayer,
 };
+
+pub const ONE_DAY_SECONDS: u32 = 60 * 60 * 24;
+pub const ONE_WEEK_SECONDS: u32 = ONE_DAY_SECONDS * 7;
 
 #[derive(Deserialize)]
 pub struct GameEventsParams {
@@ -217,7 +227,17 @@ pub async fn game_players<C: Competition + ?Sized>(
         })
         .collect();
 
-    Ok(HttpResponse::Ok().json(PlayersResponse { players }))
+    // The players in a game should never change but we set an upper limit in case a username
+    // changes (this is currently rare).
+    Ok(HttpResponse::Ok()
+        .insert_header(CacheControl(vec![
+            CacheDirective::MaxAge(ONE_WEEK_SECONDS),
+            CacheDirective::Extension(
+                "stale-while-revalidate".to_string(),
+                Some(ONE_DAY_SECONDS.to_string()),
+            ),
+        ]))
+        .json(PlayersResponse { players }))
 }
 
 /// The default route for `_game/{game_id}/result/{agent}`.
@@ -236,5 +256,19 @@ pub async fn game_result_agent<C: Competition + ?Sized>(
         .await?
         .map(|result| result.result);
 
-    Ok(HttpResponse::Ok().json(GameResultResponse { result }))
+    let cache_control = if result.is_some() {
+        vec![
+            CacheDirective::MaxAge(ONE_WEEK_SECONDS),
+            CacheDirective::Extension(
+                "stale-while-revalidate".to_string(),
+                Some(ONE_DAY_SECONDS.to_string()),
+            ),
+        ]
+    } else {
+        vec![CacheDirective::NoCache]
+    };
+
+    Ok(HttpResponse::Ok()
+        .insert_header(CacheControl(cache_control))
+        .json(GameResultResponse { result }))
 }
