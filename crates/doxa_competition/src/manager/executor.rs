@@ -89,6 +89,11 @@ impl<C: GameClient> ExecutionManager<C> {
                     doxa_mq::action::game_event_queue_name(self.competition_name);
 
                 tokio::spawn({
+                    let cancel_endpoint = format!(
+                        "{}{}/_game/{}/cancelled",
+                        self.settings.competitions_base_url, self.competition_name, game_id
+                    );
+                    let request_client = self.settings.request_client.clone();
                     let executor_settings = executor_settings.clone();
                     let competition_name = self.competition_name;
                     async move {
@@ -132,7 +137,7 @@ impl<C: GameClient> ExecutionManager<C> {
 
                             info!("started game manager");
 
-                            match game_manager.run().await {
+                            match game_manager.run_with_cancel_check(cancel_endpoint, request_client).await {
                                 Ok(()) => event!(Level::INFO, "game manager succesfully completed"),
                                 Err(error) => {
                                     if error.forfeit().is_some() {

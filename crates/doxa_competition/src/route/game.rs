@@ -23,8 +23,8 @@ use crate::{
 use serde::Deserialize;
 
 use super::response::{
-    GameEventResponse, GameEventsResponse, GameResponse, GameResultResponse, PlayersResponse,
-    PlayersResponsePlayer,
+    CancelledResponse, GameEventResponse, GameEventsResponse, GameResponse, GameResultResponse,
+    PlayersResponse, PlayersResponsePlayer,
 };
 
 pub const ONE_DAY_SECONDS: u32 = 60 * 60 * 24;
@@ -54,6 +54,24 @@ pub async fn game<C: Competition + ?Sized>(
         started_at: game.started_at,
         completed_at: game.completed_at,
         outdated: game.outdated,
+    }))
+}
+
+/// The default route for `_game/{game_id}/cancelled`.
+pub async fn game_cancelled<C: Competition + ?Sized>(
+    path: web::Path<i32>,
+    context: web::Data<Context<C>>,
+) -> EndpointResult {
+    let game_id = path.into_inner();
+
+    let game = context
+        .get_game_by_id(game_id)
+        .await?
+        .ok_or(GameNotFound { game_id })?;
+
+    // If the game is outdated cancel it
+    Ok(HttpResponse::Ok().json(CancelledResponse {
+        cancelled: game.outdated,
     }))
 }
 
@@ -131,7 +149,10 @@ pub async fn game_events<C: Competition + ?Sized>(
                 // We don't want to leak the internal payload, if there is information we want
                 // to send to the client we need to manually add it.
                 event.payload = serde_json::Value::Null;
-
+                event
+            }
+            "_CANCELLED" => {
+                event.payload = serde_json::Value::Null;
                 event
             }
             "_FORFEIT" => {

@@ -5,10 +5,10 @@ import { formatDuration, formatTime } from 'utils/time';
 import PlayerLink from '../../components/PlayerLink/PlayerLink';
 import './Match.scss';
 
-export default function TitleCard({ players, scores, baseUrl, completedAt, queuedAt, startedAt }) {
+export default function TitleCard({ players, scores, baseUrl, completedAt, cancelledAt, queuedAt, startedAt }) {
   const duration = completedAt ? formatDuration((completedAt.getTime() - startedAt.getTime()) / 1000) : null;
-  const end = completedAt ? `finished ${formatTime(completedAt)}` :
-    (startedAt ? `started ${formatTime(startedAt)}` : `was queued ${formatTime(queuedAt)}`);
+  const end = cancelledAt ? `was cancelled ${formatTime(cancelledAt)}`: (completedAt ? `finished ${formatTime(completedAt)}` :
+    (startedAt ? `started ${formatTime(startedAt)}` : `was queued ${formatTime(queuedAt)}`));
 
   return <Card darker className='match-page-header'>
     <h1>

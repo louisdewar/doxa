@@ -7,3 +7,5 @@ pub mod game;
 pub mod settings;
 
 pub use settings::Settings;
+
+pub use reqwest::Client as HTTPClient;

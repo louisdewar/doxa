@@ -6,6 +6,9 @@ pub struct StartEvent {
 }
 
 #[derive(Serialize, Deserialize)]
+pub struct CancelledEvent {}
+
+#[derive(Serialize, Deserialize)]
 pub struct ErrorEvent {
     pub error: String,
     pub debug: String,

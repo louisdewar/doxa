@@ -9,7 +9,7 @@ use serde::Serialize;
 
 use crate::{
     client::GameClient,
-    event::{ErrorEvent, StartEvent},
+    event::{CancelledEvent, ErrorEvent, StartEvent},
 };
 
 use std::error::Error;
@@ -41,6 +41,10 @@ impl<'a, C: GameClient> GameEventContext<C> {
             .await
     }
 
+    pub(crate) async fn emit_cancelled_event(&mut self) -> Result<(), lapin::Error> {
+        self.emit_event_raw(CancelledEvent {}, "_CANCELLED".to_string())
+            .await
+    }
     pub(crate) async fn emit_end_event(&mut self) -> Result<(), lapin::Error> {
         // TODO: end event data, e.g. total time spent, maybe whether it completed succesfully or
         // not

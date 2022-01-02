@@ -6,6 +6,7 @@ import { useAuth } from 'hooks/useAuth';
 import { useEffect, useState } from 'react';
 import { Link, Redirect, useParams } from 'react-router-dom';
 import UTTTAPI from '../../api';
+import CancelledCard from './CancelledCard';
 import ErrorCard from './ErrorCard';
 import './Match.scss';
 import OngoingCard from './OngoingCard';
@@ -18,7 +19,7 @@ async function loadMatchData(matchID, authToken) {
 
   const games = [];
 
-  let error, forfeit, scores;
+  let error, forfeit, scores, cancelled;
 
   for (let event of events) {
     if (event.type.startsWith('game_') && event.type != 'game_winners') {
@@ -27,6 +28,8 @@ async function loadMatchData(matchID, authToken) {
       games.push(event.payload);
     } else if (event.type === '_ERROR') {
       error = event;
+    } else if (event.type === '_CANCELLED') {
+      cancelled = event;
     } else if (event.type === '_FORFEIT') {
       forfeit = event;
     } else if (event.type === 'scores') {
@@ -48,7 +51,9 @@ async function loadMatchData(matchID, authToken) {
     }
   }
 
-  return { games, queuedAt: game.queued_at, startedAt: game.started_at, completedAt: game.completed_at, error, forfeit, players, scores };
+  const cancelledAt = cancelled? new Date(cancelled.timestamp): null;
+
+  return { games, queuedAt: game.queued_at, startedAt: game.started_at, completedAt: game.completed_at, cancelledAt, error, forfeit, players, scores };
 }
 
 
@@ -97,13 +102,14 @@ export default function Match({ baseUrl }) {
 
   return <>
     <span></span><span></span><span></span><span></span> {/* a fun hack just to get a better outline colour below! */}
-    <TitleCard players={data.players} scores={data.scores} completedAt={data.completedAt} queuedAt={data.queuedAt} startedAt={data.startedAt} baseUrl={baseUrl} />
+    <TitleCard players={data.players} scores={data.scores} completedAt={data.completedAt} queuedAt={data.queuedAt} startedAt={data.startedAt} cancelledAt={data.cancelledAt} baseUrl={baseUrl} />
     <h3 className="match-showing-n-games-label">Showing {data.games.length} game{data.games.length != 1 ? 's' : ''}</h3>
     <div className='match-games'>
       {data.games.map((game, i) => {
         return <GameCard key={i} matchID={id} gameID={i + 1} game={game} baseUrl={baseUrl} />;
       })}
       {!data.completedAt && <OngoingCard started={!!data.startedAt} />}
+      {data.cancelledAt && <CancelledCard />}
       {(data.forfeit || data.error) && <ErrorCard error={data.error} forfeit={data.forfeit} players={data.players} baseUrl={baseUrl} />}
     </div>
   </>;

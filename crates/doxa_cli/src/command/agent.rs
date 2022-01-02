@@ -174,9 +174,10 @@ pub async fn upload(args: UploadArgs, settings: &Settings) -> Result<(), Command
         4,
         total_steps,
         format!(
-            "Successfully uploaded agent to competition {}, it was given the id {}",
+            "Congratulations {}, you successfully uploaded an agent to competition {} and it was given the id {}",
+            ui::keyword(&settings.user_profile.as_ref().expect("to successfully upload an agent the user has to be logged in").name),
             ui::keyword(response.competition),
-            ui::keyword(response.id)
+            ui::keyword(response.id),
         ),
     );
 

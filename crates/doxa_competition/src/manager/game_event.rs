@@ -83,7 +83,7 @@ impl<C: Competition> GameEventManager<C> {
                         .unwrap();
                     }
 
-                    "_END" => {
+                    "_END" | "_CANCELLED" => {
                         tokio::task::spawn_blocking({
                             let complete_time = game_event.timestamp;
                             let game_id = game_event.game_id;
@@ -102,6 +102,7 @@ impl<C: Competition> GameEventManager<C> {
                         .unwrap();
                     }
                     "_ERROR" => {}
+
                     "_FORFEIT" => {}
                     _ => {
                         error!(%event_type, ?game_event, "unknown event type");

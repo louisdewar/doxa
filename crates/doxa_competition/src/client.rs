@@ -132,6 +132,11 @@ pub trait Competition: 'static + Send + Sync {
             "_game/{game_id}/result/{agent_id}",
             web::get().to(route::game::game_result_agent::<Self>),
         );
+
+        service.route(
+            "_game/{game_id}/cancelled",
+            web::get().to(route::game::game_cancelled::<Self>),
+        );
     }
 
     /// This function should register the `/_agent/{agent_id}/...` routes.

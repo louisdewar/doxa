@@ -56,3 +56,9 @@ pub struct UserScoreResponse {
     pub agent: String,
     pub score: Option<i32>,
 }
+
+#[derive(Serialize, Debug)]
+pub struct CancelledResponse {
+    pub cancelled: bool,
+}
+

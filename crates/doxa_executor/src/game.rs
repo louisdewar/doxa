@@ -1,12 +1,14 @@
+use std::time::Duration;
 use std::{marker::PhantomData, sync::Arc};
 
-use doxa_core::lapin::Channel;
-use doxa_core::tracing::error;
+use doxa_core::tracing::{debug, error};
+use doxa_core::{lapin::Channel, tracing::info};
 use doxa_mq::model::MatchRequest;
 use futures::{
     future::{join_all, try_join_all},
     TryFutureExt,
 };
+use tokio::time::sleep;
 
 use crate::{
     agent::{VMAgent, VMAgentSettings},
@@ -15,6 +17,8 @@ use crate::{
     error::{AgentTerminated, GameContextError, GameManagerError},
     Settings,
 };
+
+use doxa_core::tokio;
 
 pub struct GameManager<C: GameClient> {
     client: PhantomData<C>,
@@ -99,10 +103,14 @@ impl<C: GameClient> GameManager<C> {
     }
 
     /// Runs the game to completion
-    pub async fn run(mut self) -> Result<(), GameError<C::Error>> {
-        let mut context = GameContext::new(&mut self.agents, &mut self.game_event_context);
+    async fn run(
+        mut agents: Vec<VMAgent>,
+        client_match_request: C::MatchRequest,
+        game_event_context: &'_ mut GameEventContext<C>,
+    ) -> Result<(), GameError<C::Error>> {
+        let mut context = GameContext::new(&mut agents, game_event_context);
 
-        let res = match C::run(self.client_match_request, &mut context).await {
+        let res = match C::run(client_match_request, &mut context).await {
             Ok(()) => Ok(()),
             Err(mut error) => {
                 let vm_logs = if let Some(agent_id) = error.forfeit() {
@@ -136,11 +144,7 @@ impl<C: GameClient> GameManager<C> {
                     vm_logs
                 };
 
-                if let Err(e) = self
-                    .game_event_context
-                    .emit_error_event(&error, vm_logs)
-                    .await
-                {
+                if let Err(e) = game_event_context.emit_error_event(&error, vm_logs).await {
                     error!(error=%e, debug=?e, "failed to emit error event while processing an error during the game");
                 }
 
@@ -148,10 +152,77 @@ impl<C: GameClient> GameManager<C> {
             }
         };
 
-        if let Err(e) = self.game_event_context.emit_end_event().await {
+        if let Err(e) = game_event_context.emit_end_event().await {
             error!(error=%e, debug=?e, "failed to emit end event");
         }
 
         res
+    }
+
+    /// Runs the game but polls regularily (every 30 seconds) to see if the game has been cancelled.
+    /// The `cancel_endpoint` is a string of a URL to poll that should output `{ "cancelled": bool
+    /// }`. If there is an error accessing the endpoint, it will be logged but otherwise it will
+    /// be treated as if it returned `{ "cancelled": false }` and the game (and polling) will
+    /// continue.
+    pub async fn run_with_cancel_check(
+        self,
+        cancel_endpoint: String,
+        client: reqwest::Client,
+    ) -> Result<(), GameError<C::Error>> {
+        let cancel_check = async move {
+            #[derive(serde::Deserialize)]
+            struct CancelResponse {
+                cancelled: bool,
+            }
+
+            let mut first = true;
+
+            loop {
+                // Skip the first cancel check to see if the game was cancelled while it was in the
+                // queue.
+                if !first {
+                    sleep(Duration::from_secs(30)).await;
+                }
+                first = false;
+
+                debug!(endpoint=%cancel_endpoint, "making cancel check");
+                let response = match client.get(&cancel_endpoint).send().await {
+                    Ok(response) => response,
+                    Err(e) => {
+                        error!(error=%e, debug=?e, "error making get request during cancel check");
+                        continue;
+                    }
+                };
+
+                let response: CancelResponse = match response.json().await {
+                    Ok(res) => res,
+                    Err(e) => {
+                        error!(error=%e, debug=?e, "error deserializing response during cancel check");
+                        continue;
+                    }
+                };
+
+                if response.cancelled {
+                    return;
+                }
+
+                debug!("game was not cancelled, sleeping again until next poll");
+            }
+        };
+
+        let mut game_event_context = self.game_event_context;
+        tokio::select! {
+            res = Self::run(self.agents, self.client_match_request, &mut game_event_context) => {
+                res
+            },
+            _ = cancel_check => {
+                info!("game cancelled");
+                if let Err(e) = game_event_context.emit_cancelled_event().await {
+                    error!(error=%e, debug=?e, "failed to emit cancelled event");
+                }
+                Ok(())
+            }
+
+        }
     }
 }
