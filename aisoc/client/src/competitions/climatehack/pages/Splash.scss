@@ -52,9 +52,8 @@ header.ch-splash-header {
       margin-bottom: 0;
       font-size: 4rem;
 
-      span {
-        background-color: #2563ebaa;
-      }
+      text-decoration: underline;
+      text-decoration-color: #2563ebf0;
     }
 
     h2 {
@@ -64,7 +63,6 @@ header.ch-splash-header {
 }
 
 @media screen and (min-width: 640px) {
-
   header.ch-splash-header {
     margin-top: 73px;
 
@@ -73,7 +71,6 @@ header.ch-splash-header {
       font-size: 6rem;
     }
   }
-
 }
 
 .ch-scroll-to-about {
@@ -85,7 +82,197 @@ header.ch-splash-header {
   }
 }
 
-section.climatehack-about {
-  margin-top: 2rem;
-  color: #fff;
+section.ch-splash-section {
+  padding: 2rem;
+  width: calc(100% - 4rem);
+
+  .ch-splash-section-content {
+    margin-left: auto;
+    margin-right: auto;
+
+    .ch-splash-section-heading {
+      margin: 16px 2rem 16px 0;
+
+      h2 {
+        margin-top: 0;
+      }
+    }
+  }
+
+  &.ch-splash-about {
+    color: #fff;
+    padding: 4rem 2rem;
+
+    background-image: url('/competitions/climatehack/assets/europe-at-night.png');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+
+    .ch-splash-section-heading h2 {
+      color: #fff;
+    }
+  }
+
+  &.ch-splash-universities {
+    background-color: #2563eb;
+    color: #fff;
+
+    .ch-splash-universities-logos {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      // align-items: center;
+
+      img {
+        box-sizing: border-box;
+        height: 4rem;
+        margin: 0.5rem 0.4rem;
+      }
+    }
+  }
+
+  &.ch-splash-format {
+    // background-color: #2563eb;
+    color: #fff;
+
+    // p {
+    //   margin-top: 0;
+    // }
+
+    .ch-splash-format-description {
+      text-align: center;
+
+      h3,
+      p {
+        text-align: left;
+      }
+
+      p a {
+        color: #fff;
+        text-underline-offset: 0.1rem;
+      }
+
+      .ch-splash-format-columns {
+        display: flex;
+        justify-content: center;
+
+        h3,
+        p {
+          text-align: center;
+        }
+
+        div {
+          padding: 0.5rem;
+        }
+
+        &>* {
+          flex: 1;
+        }
+      }
+
+      svg {
+        width: 56%;
+      }
+    }
+  }
+
+  &.ch-splash-prizes {
+    color: #fff;
+    background-color: #EC5764;
+
+    .ch-splash-section-heading {
+      h3 {
+        font-weight: 400;
+        font-size: 1rem;
+      }
+
+      span {
+        font-weight: bold;
+        font-size: 1.5rem;
+      }
+    }
+
+    .ch-splash-prizes-descriptions {
+      text-align: right;
+      width: 100%;
+
+      span {
+        font-weight: bold;
+        font-size: 2rem;
+      }
+
+      .ch-splash-prizes-columns {
+        display: flex;
+        justify-content: center;
+        text-align: center;
+
+        h3 {
+          font-weight: normal;
+          font-size: 0.9rem;
+        }
+
+        span {
+          font-size: 1.5rem;
+        }
+
+        &>* {
+          flex: 1;
+        }
+      }
+    }
+  }
+
+  &.ch-splash-tangible-impact {
+    background-color: #f1f5f9;
+
+    .ch-splash-section-heading h2,
+    a {
+      color: #2563eb;
+    }
+  }
 }
+
+.ch-splash-impact-stripe {
+  background-color: #f1f5f9;
+  color: #2563eb;
+
+  p {
+    margin: 0;
+    text-align: center;
+    font-size: 1.25rem;
+    padding: 1rem;
+    font-weight: 700;
+  }
+}
+
+@media screen and (min-width: 640px) {
+  section.ch-splash-section {
+    .ch-splash-section-heading {
+      width: 200px;
+
+      h2 {
+        width: 190px;
+      }
+    }
+
+    .ch-splash-section-content {
+      max-width: 640px;
+      display: flex;
+    }
+  }
+
+  .ch-splash-prizes-descriptions {
+    margin-left: 6rem;
+  }
+}
+
+@media screen and (min-width: 768px) {
+  section.ch-splash-section .ch-splash-section-content {
+    max-width: 768px;
+  }
+}
+
+// @media screen and (min-width: 1024px) {
+//   section.ch-splash-section .ch-splash-section-content {
+//     max-width: 1024px;
+//   }}
