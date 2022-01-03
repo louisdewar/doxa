@@ -39,12 +39,19 @@ pub enum UTTTGameEvent {
     },
 }
 
+fn is_false(b: &bool) -> bool {
+    !b
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(tag = "type")]
 pub enum UTTTMatchEvent {
     GameHistory {
         events: Vec<UTTTGameEvent>,
         overall_winner: Winner,
+        #[serde(skip_serializing_if = "is_false")]
+        #[serde(default = "bool::default")]
+        forfeit: bool,
     },
     Scores {
         draws: u32,
@@ -279,6 +286,8 @@ impl GameClient for UTTTGameClient {
         debug!(total_games=%GAMES_PER_SIDE, "uttt starting");
 
         for game in 0..GAMES_PER_SIDE {
+            // Game ID are 1 indexed as they are shown to the user
+            let game_id = format!("game_{}", game + 1);
             // Reboot all agents to reset each game
             context.reboot_all_agents(vec![]).await?;
 
@@ -294,11 +303,24 @@ impl GameClient for UTTTGameClient {
                     if let Some(agent) = e.forfeit() {
                         let remaining = GAMES_PER_SIDE - game;
 
-                        if agent == 0 {
+                        let winner = if agent == 0 {
                             b_wins += remaining;
+                            Winner::Blue
                         } else {
                             a_wins += remaining;
-                        }
+                            Winner::Red
+                        };
+
+                        context
+                            .emit_game_event(
+                                UTTTMatchEvent::GameHistory {
+                                    overall_winner: winner,
+                                    events,
+                                    forfeit: true,
+                                },
+                                game_id,
+                            )
+                            .await?;
 
                         context
                             .emit_game_event(
@@ -325,13 +347,12 @@ impl GameClient for UTTTGameClient {
 
             debug!(game_number=%game, "uttt game completed");
 
-            // Game ID are 1 indexed as they are shown to the user
-            let game_id = format!("game_{}", game + 1);
             context
                 .emit_game_event(
                     UTTTMatchEvent::GameHistory {
                         overall_winner,
                         events,
+                        forfeit: false,
                     },
                     game_id,
                 )
