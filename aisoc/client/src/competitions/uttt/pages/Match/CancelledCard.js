@@ -4,13 +4,15 @@ import './CancelledCard.scss';
 
 export default function CancelledCard() {
   return (
-    <div className="game-card cancelled">
-      <div className="game-card-cancelled-container">
-        <div className="cancelled-icon"><FontAwesomeIcon icon={faBan} fixedWidth /></div>
-        <div className="cancelled-message">
-          <p>
-            This match was cancelled, there will not be any more events.
-          </p>
+    <div className="game-card">
+      <div className="game-card-body cancelled">
+        <div className="game-card-cancelled-container">
+          <div className="cancelled-icon"><FontAwesomeIcon icon={faBan} fixedWidth /></div>
+          <div className="cancelled-message">
+            <p>
+              This match was cancelled, so there will not be any more game events.
+            </p>
+          </div>
         </div>
       </div>
     </div>

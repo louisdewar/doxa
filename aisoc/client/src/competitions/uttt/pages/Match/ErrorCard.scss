@@ -1,6 +1,6 @@
 @import 'src/common/_common.scss';
 
-.match-games .game-card.error {
+.match-games .game-card .game-card-body.error {
   display: block;
   text-align: center;
   padding: 5px 20px 5px 20px;
@@ -56,6 +56,7 @@
 
   &.error-output {
     border-left: 20px solid #0e7490;
+    border-radius: 3px;
     padding: 5px;
   }
 

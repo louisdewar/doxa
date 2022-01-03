@@ -51,7 +51,7 @@ async function loadMatchData(matchID, authToken) {
     }
   }
 
-  const cancelledAt = cancelled? new Date(cancelled.timestamp): null;
+  const cancelledAt = cancelled ? new Date(cancelled.timestamp) : null;
 
   return { games, queuedAt: game.queued_at, startedAt: game.started_at, completedAt: game.completed_at, cancelledAt, error, forfeit, players, scores };
 }
@@ -106,11 +106,11 @@ export default function Match({ baseUrl }) {
     <h3 className="match-showing-n-games-label">Showing {data.games.length} game{data.games.length != 1 ? 's' : ''}</h3>
     <div className='match-games'>
       {data.games.map((game, i) => {
-        return <GameCard key={i} matchID={id} gameID={i + 1} game={game} baseUrl={baseUrl} />;
+        return <GameCard key={i} matchID={id} gameID={i + 1} game={game} baseUrl={baseUrl} players={data.players} forfeit={data.forfeit} />;
       })}
       {!data.completedAt && <OngoingCard started={!!data.startedAt} />}
       {data.cancelledAt && <CancelledCard />}
-      {(data.forfeit || data.error) && <ErrorCard error={data.error} forfeit={data.forfeit} players={data.players} baseUrl={baseUrl} />}
+      {(data.forfeit || data.error) && <ErrorCard error={data.error} forfeit={data.forfeit} players={data.players} baseUrl={baseUrl} canShowForfeitedError={data.games.length == 0} />}
     </div>
   </>;
 }

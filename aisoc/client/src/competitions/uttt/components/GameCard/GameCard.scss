@@ -6,11 +6,6 @@
   color: $off-black;
   border-radius: 3px;
 
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  padding: 5px 5px 5px 20px;
   margin-bottom: 23px;
 
   transition: transform 200ms ease-in-out, box-shadow 200ms linear;
@@ -22,73 +17,107 @@
     box-shadow: 0 0 #0000, 0 0 #0000, 6px 6px #475569;
   }
 
-  .mini-player {
+
+  .game-card-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 5px 5px 20px;
+
+    .mini-player {
+      display: flex;
+      align-items: center;
+
+      &> :not(:last-child) {
+        margin-right: 20px;
+      }
+    }
+
+    .controls {
+      button {
+        background: none;
+        color: inherit;
+        border: none;
+        padding: 0;
+        font: inherit;
+        cursor: pointer;
+        outline: inherit;
+      }
+
+      svg {
+        padding: 10px;
+        cursor: pointer;
+
+        backface-visibility: hidden;
+
+        &:hover {
+          background-color: #f1f5f9;
+          border-radius: 100%;
+          animation: control-hover-over 1.0s forwards;
+        }
+
+        &:active {
+          background-color: #cbd5e1;
+        }
+      }
+    }
+
+    .move-number {
+      color: #323232;
+      text-align: center;
+    }
+
+    .labeled-value {
+      text-align: center;
+
+      .main {
+        font-weight: bold;
+        font-size: 30px;
+        display: block;
+      }
+
+      .label {
+        color: #646464;
+      }
+    }
+
+    &.won,
+    &.drawn,
+    &.lost {
+      border-radius: 3px 0 0 0;
+
+      &:not(.forfeited) {
+        border-radius: 3px;
+      }
+    }
+
+    &.won {
+      border-left: 20px solid $win;
+    }
+
+    &.drawn {
+      border-left: 20px solid $draw;
+    }
+
+    &.lost {
+      border-left: 20px solid $loss;
+    }
+
+    &.forfeited {
+      text-underline-offset: 0.1rem;
+      // border-left: 20px solid #f59e0b;
+    }
+  }
+
+  .game-card-forfeit-warning {
+    background-color: #f59e0b;
+    padding: 0.5rem;
+    border-radius: 0 0 3px 3px;
     display: flex;
     align-items: center;
 
-
-    &> :not(:last-child) {
-      margin-right: 20px;
-    }
-  }
-
-  .controls {
-    button {
-      background: none;
-      color: inherit;
-      border: none;
-      padding: 0;
-      font: inherit;
-      cursor: pointer;
-      outline: inherit;
-    }
-
     svg {
-      padding: 10px;
-      cursor: pointer;
-
-      backface-visibility: hidden;
-
-      &:hover {
-        background-color: #f1f5f9;
-        border-radius: 100%;
-        animation: control-hover-over 1.0s forwards;
-      }
-
-      &:active {
-        background-color: #cbd5e1;
-      }
+      margin-right: 1rem;
     }
-  }
-
-  .move-number {
-    color: #323232;
-    text-align: center;
-  }
-
-  .labeled-value {
-    text-align: center;
-
-    .main {
-      font-weight: bold;
-      font-size: 30px;
-      display: block;
-    }
-
-    .label {
-      color: #646464;
-    }
-  }
-
-  &.won {
-    border-left: 20px solid $win;
-  }
-
-  &.drawn {
-    border-left: 20px solid $draw;
-  }
-
-  &.lost {
-    border-left: 20px solid $loss;
   }
 }
