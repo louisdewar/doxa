@@ -69,8 +69,10 @@ CREATE TABLE game_events(
 );
 
 CREATE TABLE leaderboard(
-    agent TEXT references agents(id) PRIMARY KEY,
-    score INT NOT NULL
+    key TEXT NOT NULL default 'primary',
+    agent TEXT references agents(id),
+    score INT NOT NULL,
+    PRIMARY KEY (key, agent)
 );
 
 CREATE VIEW active_agents AS

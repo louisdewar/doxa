@@ -179,13 +179,18 @@ pub trait Competition: 'static + Send + Sync {
             web::get().to(route::user::user_active_agent::<Self>),
         );
 
-        service.route(
-            "_user/{username}/high_score",
-            web::get().to(route::user::user_high_score::<Self>),
-        );
+        // service.route(
+        //     "_user/{username}/high_score",
+        //     web::get().to(route::user::user_high_score::<Self>),
+        // );
 
         service.route(
             "_user/{username}/score",
+            web::get().to(route::user::user_score_primary::<Self>),
+        );
+
+        service.route(
+            "_user/{username}/score/{leaderboard}",
             web::get().to(route::user::user_score::<Self>),
         );
 
@@ -217,6 +222,11 @@ pub trait Competition: 'static + Send + Sync {
     fn configure_leaderboard_routes(&self, service: &mut actix_web::web::ServiceConfig) {
         service.route(
             "_leaderboard/active",
+            web::get().to(route::leaderboard::active_leaderboard_primary::<Self>),
+        );
+
+        service.route(
+            "_leaderboard/active/{leaderboard}",
             web::get().to(route::leaderboard::active_leaderboard::<Self>),
         );
     }

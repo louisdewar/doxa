@@ -74,7 +74,8 @@ table! {
 }
 
 table! {
-    leaderboard (agent) {
+    leaderboard (key, agent) {
+        key -> Text,
         agent -> Text,
         score -> Int4,
     }

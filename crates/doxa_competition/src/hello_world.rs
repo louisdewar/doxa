@@ -63,7 +63,9 @@ impl Competition for HelloWorldCompetiton {
             HelloWorldGameEvent::RespondedSuccessfully { .. } => 1,
         };
 
-        context.set_new_score(participant.agent, score).await?;
+        context
+            .set_new_score(None, participant.agent, score)
+            .await?;
 
         Ok(())
     }

@@ -41,7 +41,7 @@ pub async fn agent_games<C: Competition + ?Sized>(
 }
 
 /// The default route for `_agent/{agent_id}/score`.
-pub async fn agent_score<C: Competition + ?Sized>(
+pub async fn agent_score_primary<C: Competition + ?Sized>(
     path: web::Path<String>,
     context: web::Data<Context<C>>,
 ) -> EndpointResult {
@@ -52,7 +52,26 @@ pub async fn agent_score<C: Competition + ?Sized>(
         .await?
         .ok_or(AgentNotFound)?;
 
-    let score = context.get_agent_score(agent.id.clone()).await?;
+    let score = context.get_agent_score(agent.id.clone(), None).await?;
+
+    Ok(HttpResponse::Ok().json(json!({ "agent": agent.id, "score": score })))
+}
+
+/// The default route for `_agent/{agent_id}/score/{leaderboard}`.
+pub async fn agent_score<C: Competition + ?Sized>(
+    path: web::Path<(String, String)>,
+    context: web::Data<Context<C>>,
+) -> EndpointResult {
+    let (agent_id, leaderboard_key) = path.into_inner();
+
+    let agent = context
+        .get_agent(agent_id.clone())
+        .await?
+        .ok_or(AgentNotFound)?;
+
+    let score = context
+        .get_agent_score(agent.id.clone(), Some(leaderboard_key))
+        .await?;
 
     Ok(HttpResponse::Ok().json(json!({ "agent": agent.id, "score": score })))
 }
