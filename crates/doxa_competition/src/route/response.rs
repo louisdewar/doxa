@@ -61,4 +61,3 @@ pub struct UserScoreResponse {
 pub struct CancelledResponse {
     pub cancelled: bool,
 }
-
