@@ -68,11 +68,23 @@ class UTTTGame:
             Tuple[int, int]: The local board and tile to mark
         """
 
-        return self.agent.make_move(
-            boards=self.boards,
-            board_winners=self.board_winners,
+        move = self.agent.make_move(
+            boards=[board[:] for board in self.boards],  # only give copies lest the
+            board_winners=self.board_winners[:],  # lists get modified by the agent
             playable_boards=playable_boards,
         )
+
+        if self.boards[move[0]][move[1]] is not None:
+            raise ValueError(
+                f"The agent tried to make an illegal move: the tile {move} is already occupied by {self.boards[move[0]][move[1]]}."
+            )
+
+        if self.board_winners[move[0]] is not None:
+            raise ValueError(
+                f"The agent tried to make an illegal move: the tile {move} is in a board already won by {self.boards[move[0]]}."
+            )
+
+        return move
 
     def _place_tile(self, player: str, board: int, tile: int) -> None:
         """Marks a tile in the specified local board for the player specified.
