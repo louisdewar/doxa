@@ -16,7 +16,8 @@ export default function ErrorCard({ forfeit, error, players, baseUrl, canShowFor
         <div className="game-card-error-header">
           <div className="error-icon"><FontAwesomeIcon icon={faExclamationTriangle} fixedWidth /></div>
           <div className="error-message">
-            <p><PlayerLink username={players[forfeit.payload.agent].username} baseUrl={baseUrl} playerClass={PLAYER_CLASS[forfeit.payload.agent]} />&apos;s agent forfeited the game, so <PlayerLink username={players[forfeit.payload.agent === 0 ? 1 : 0].username} baseUrl={baseUrl} playerClass={PLAYER_CLASS[forfeit.payload.agent === 0 ? 1 : 0]} /> wins
+            <p>
+              <PlayerLink username={players[forfeit.payload.agent].username} baseUrl={baseUrl} playerClass={PLAYER_CLASS[forfeit.payload.agent]} />&apos;s agent forfeited the game, so <PlayerLink username={players[forfeit.payload.agent === 0 ? 1 : 0].username} baseUrl={baseUrl} playerClass={PLAYER_CLASS[forfeit.payload.agent === 0 ? 1 : 0]} /> wins
               the remaining {forfeit.payload.remaining ?? 0} {forfeit.payload.remaining ?? 0 > 1 ? 'games' : 'game'} in the match by default.
             </p>
           </div>

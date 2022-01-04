@@ -1,4 +1,4 @@
-import { faFastBackward, faFastForward, faSquare, faStepBackward, faStepForward } from '@fortawesome/free-solid-svg-icons';
+import { faExclamationTriangle, faFastBackward, faFastForward, faSquare, faStepBackward, faStepForward } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
 import Card from 'components/Card';
@@ -45,6 +45,8 @@ export default function Game({ baseUrl }) {
   const [loaded, setLoaded] = useState(false);
   const [grid, setGrid] = useState(null);
   const [moves, setMoves] = useState(null);
+  const [winner, setWinner] = useState(null);
+  const [forfeited, setForfeited] = useState(false);
 
   const [currentMove, setCurrentMove] = useState(0);
 
@@ -55,12 +57,16 @@ export default function Game({ baseUrl }) {
   };
 
   useEffect(async () => {
-
     setPlayers(await UTTTAPI.getGamePlayers(matchID));
-    const events = await UTTTAPI.getUTTTGameEvents(matchID, gameID);
+    const data = await UTTTAPI.getUTTTGameEvents(matchID, gameID);
+    setWinner(data.overall_winner);
+
+    if (data.forfeit) {
+      setForfeited(true);
+    }
 
     gameState.current = new GameState();
-    gameState.current.addManyEvents(events);
+    gameState.current.addManyEvents(data.events);
     setGrid(gameState.current.getGrid());
     updateCurrentMove();
     setMoves(gameState.current.toMoveList());
@@ -119,6 +125,8 @@ export default function Game({ baseUrl }) {
       </h2>
     </Card>
 
+    {forfeited && <ForfeitedErrorCard players={players} winner={winner} baseUrl={baseUrl} />}
+
     <div className="game-container">
       <div className="game-grid">
         <Grid gameState={grid} />
@@ -143,4 +151,15 @@ export default function Game({ baseUrl }) {
       </div>
     </div>
   </>;
+}
+
+
+function ForfeitedErrorCard({ winner, players, baseUrl }) {
+  const forfeiter = winner == 'R' ? players[1] : players[0];
+  const other = winner == 'R' ? players[0] : players[1];
+
+  return <Card className='game-page-forfeit-warning'>
+    <FontAwesomeIcon icon={faExclamationTriangle} fixedWidth />
+    <Link to={`${baseUrl}user/${forfeiter.username}`} className={forfeiter.username == players[0].username ? 'game-page-forfeit-warning-main-player-link' : 'game-page-forfeit-warning-opposing-player-link'}>{forfeiter.username}</Link>&apos;s agent forfeited, so <Link to={`${baseUrl}user/${other.username}`} className={forfeiter.username == players[0].username ? 'game-page-forfeit-warning-opposing-player-link' : 'game-page-forfeit-warning-main-player-link'}>{other.username}</Link> wins this game.
+  </Card>;
 }

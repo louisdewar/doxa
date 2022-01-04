@@ -19,7 +19,7 @@ export default class UTTTAPI extends CompetitionAPI {
   static async getUTTTGameEvents(match, subGameID) {
     const data = await this.getSingleGameEvent(match, 'game_' + subGameID);
 
-    return data && data.payload.events;
+    return data && data.payload;
   }
 
 }
