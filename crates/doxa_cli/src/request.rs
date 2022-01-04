@@ -17,6 +17,8 @@ pub struct Settings {
     pub verbose: bool,
 }
 
+static APP_USER_AGENT: &str = concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION"),);
+
 impl Settings {
     pub fn new(
         user_profile: Result<UserProfile, NoDefaultUserProfile>,
@@ -27,7 +29,10 @@ impl Settings {
         Settings {
             user_profile,
             base_url,
-            client: Client::new(),
+            client: Client::builder()
+                .user_agent(APP_USER_AGENT)
+                .build()
+                .unwrap(),
             config_dir,
             verbose,
         }

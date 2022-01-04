@@ -1,4 +1,5 @@
 use derive_more::{Display, Error, From};
+use doxa_auth::create_rate_limit_error;
 use doxa_core::{
     actix_web, deadpool_lapin, impl_respondable_error, lapin, tokio::task::JoinError,
     RespondableError,
@@ -21,6 +22,8 @@ pub enum ContextError {
     Diesel(DieselError),
     #[from]
     AgentNotFound(AgentNotFound),
+    #[from]
+    AgentNotActive(AgentNotActive),
     #[from]
     ParseSystemMessage(ParseSystemMessageError),
     #[from]
@@ -82,6 +85,16 @@ impl_respondable_error!(
     "INTERNAL_SERVER_ERROR"
 );
 
+#[derive(Debug, Display, Error)]
+pub struct UserNotOwner;
+
+impl_respondable_error!(
+    UserNotOwner,
+    UNAUTHORIZED,
+    "USER_NOT_OWNER",
+    "You are not allowed to perform this action as you are not the owner of this agent"
+);
+
 #[derive(Error, Display, Debug)]
 pub struct NoActiveAgent;
 
@@ -100,6 +113,26 @@ impl_respondable_error!(
     NOT_FOUND,
     "AGENT_NOT_FOUND",
     "No agent with that ID is part of this competition"
+);
+
+#[derive(Error, Display, Debug)]
+pub struct AgentAlreadyActive;
+
+impl_respondable_error!(
+    AgentAlreadyActive,
+    BAD_REQUEST,
+    "AGENT_ALREADY_ACTIVE",
+    "This agent is already active"
+);
+
+#[derive(Error, Display, Debug)]
+pub struct AgentNotActive;
+
+impl_respondable_error!(
+    AgentNotActive,
+    BAD_REQUEST,
+    "AGENT_NOT_ACTIVE",
+    "This agent is not currently active"
 );
 
 #[derive(Error, Display, Debug)]
@@ -154,3 +187,5 @@ impl_respondable_error!(
     INTERNAL_SERVER_ERROR,
     "INTERNAL_SERVER_ERROR"
 );
+
+create_rate_limit_error!(TooManyActivations, "There have been too many agent activations by your account to this competition, please wait and try again later (note: uploading an agent counts as an activation)");

@@ -1,4 +1,4 @@
-use crate::model::storage::{AgentUpload, InsertableAgentUpload};
+use crate::model::storage::{ActivateChangeset, AgentUpload, InsertableAgentUpload};
 use crate::model::user::User;
 use crate::{schema as s, view, DieselError};
 use chrono::{DateTime, Utc};
@@ -89,56 +89,79 @@ pub fn get_active_agent(
         .optional()
 }
 
-/// Sets the active agent's active flag to false.
+/// Sets the active agent's active flag to false and the activated_at to NULL.
 ///
 /// If there was no active agent for that user in that competition at the time of
 /// this query `Ok(None)` is returned.
 ///
 /// The return value is post update (i.e. active will always be false).
-pub fn deactivate_agent(
+pub fn mark_active_agent_as_inactive(
     conn: &PgConnection,
     competition: i32,
     user: i32,
 ) -> Result<Option<AgentUpload>, DieselError> {
-    use view::active_agents::columns as c;
+    use s::agents::columns as c;
     diesel::update(
-        view::active_agents::table
+        s::agents::table
             .filter(c::owner.eq(user))
-            .filter(c::competition.eq(competition)),
+            .filter(c::competition.eq(competition))
+            .filter(c::active.eq(true)),
     )
-    .set(c::active.eq(false))
+    .set(&ActivateChangeset {
+        active: false,
+        activated_at: None,
+    })
     .get_result(conn)
     .optional()
 }
 
-/// Sets the given agent's active flag to false if it is set to true.
+/// Sets the given agent's active flag to false and activated_at to NULL, if it active was set to true.
 ///
-/// If that agent did not exist or it was not active then `Ok(None)` is returned.
+/// If that agent did not exist or it was not active then an error is returned.
 ///
 /// The return value is post update (i.e. active will always be false).
-pub fn deactivate_agent_by_id(
+pub fn mark_agent_deactive_by_id(
     conn: &PgConnection,
     agent_id: String,
-) -> Result<Option<AgentUpload>, DieselError> {
-    use view::active_agents::columns as c;
-    diesel::update(view::active_agents::table.filter(c::id.eq(agent_id)))
-        .set(c::active.eq(false))
-        .get_result(conn)
-        .optional()
+) -> Result<AgentUpload, DieselError> {
+    use s::agents::columns as c;
+    diesel::update(
+        s::agents::table
+            .filter(c::id.eq(agent_id))
+            .filter(c::active.eq(false)),
+    )
+    .set(&ActivateChangeset {
+        active: false,
+        activated_at: None,
+    })
+    .get_result(conn)
 }
 
 /// Sets the active field for this agent to true.
 /// If another agent is currently active this will return an error.
 ///
+/// This will return a `Not Found` if the agent is already active.
+///
 /// If the agent does not exist this will return an error
-pub fn activate_agent(conn: &PgConnection, agent_id: String) -> Result<AgentUpload, DieselError> {
+pub fn activate_agent(
+    conn: &PgConnection,
+    agent_id: String,
+    activated_at: DateTime<Utc>,
+) -> Result<AgentUpload, DieselError> {
     use s::agents::columns as c;
-    diesel::update(s::agents::table.filter(c::id.eq(agent_id)))
-        .set(c::active.eq(true))
-        .get_result(conn)
+    diesel::update(
+        s::agents::table
+            .filter(c::id.eq(agent_id))
+            .filter(c::active.eq(false)),
+    )
+    .set(&ActivateChangeset {
+        active: true,
+        activated_at: Some(activated_at),
+    })
+    .get_result(conn)
 }
 
-pub fn get_active_agents_uploaded_before(
+pub fn get_active_agents_activated_before(
     conn: &PgConnection,
     competition: i32,
     before: DateTime<Utc>,
@@ -146,7 +169,7 @@ pub fn get_active_agents_uploaded_before(
     use view::active_agents::columns as c;
     view::active_agents::table
         .filter(c::competition.eq(competition))
-        .filter(c::uploaded_at.lt(before))
+        .filter(c::activated_at.lt(before))
         .get_results(conn)
 }
 

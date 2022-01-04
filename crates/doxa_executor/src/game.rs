@@ -1,28 +1,30 @@
+use std::time::Duration;
 use std::{marker::PhantomData, sync::Arc};
 
-use doxa_core::lapin::Channel;
-use doxa_core::tracing::error;
+use doxa_core::tracing::{debug, error};
+use doxa_core::{lapin::Channel, tracing::info};
 use doxa_mq::model::MatchRequest;
 use futures::{
     future::{join_all, try_join_all},
     TryFutureExt,
 };
+use tokio::time::sleep;
 
 use crate::{
     agent::{VMAgent, VMAgentSettings},
     client::{ForfeitError, GameClient, GameError},
-    context::GameContext,
+    context::{GameContext, GameEventContext},
     error::{AgentTerminated, GameContextError, GameManagerError},
     Settings,
 };
 
+use doxa_core::tokio;
+
 pub struct GameManager<C: GameClient> {
     client: PhantomData<C>,
     agents: Vec<VMAgent>,
-    event_queue_name: String,
-    event_channel: Channel,
     client_match_request: C::MatchRequest,
-    game_id: i32,
+    game_event_context: GameEventContext<C>,
 }
 
 impl<C: GameClient> GameManager<C> {
@@ -33,6 +35,14 @@ impl<C: GameClient> GameManager<C> {
         competition_name: &'static str,
         match_request: MatchRequest<C::MatchRequest>,
     ) -> Result<Self, GameManagerError<C::Error>> {
+        let mut game_event_context =
+            GameEventContext::new(event_channel, event_queue_name, match_request.game_id);
+
+        game_event_context
+            .emit_start_event(match_request.agents.clone())
+            .await
+            .map_err(GameManagerError::EmitStartEvent)?;
+
         let additional_mounts = C::additional_mounts(&match_request.payload);
 
         let mut mounts = settings.base_mounts.clone();
@@ -44,42 +54,63 @@ impl<C: GameClient> GameManager<C> {
             mounts,
         };
 
-        let agents = match_request.agents.into_iter().map(|agent_id| {
-            VMAgent::new(
-                competition_name,
-                agent_id,
-                &settings.agent_retrieval,
-                &settings,
-                vm_agent_settings.clone(),
-            )
-        });
+        let agents = match_request
+            .agents
+            .iter()
+            .enumerate()
+            .map(|(index, agent_id)| {
+                VMAgent::new(
+                    competition_name,
+                    agent_id.clone(),
+                    &settings.agent_retrieval,
+                    &settings,
+                    vm_agent_settings.clone(),
+                )
+                .map_err(move |e| (index, e))
+            });
 
-        let agents = try_join_all(agents)
-            .await
-            .map_err(GameManagerError::StartAgent)?;
+        let agents = match try_join_all(agents).await {
+            Ok(agents) => agents,
+            Err((index, mut e)) => {
+                let mut vm_logs = vec![None; match_request.agents.len()];
+
+                if let Some(logs) = e.logs.take() {
+                    match logs {
+                        Ok(logs) => vm_logs[index] = Some(logs),
+                        Err(vm_logs_error) => {
+                            error!(logs_error=%vm_logs_error, debug=?vm_logs_error, "failed to get VM logs for agent while processing a startup error");
+                        }
+                    }
+                }
+
+                if let Err(e) = game_event_context.emit_error_event(&e, vm_logs).await {
+                    // If there is an error here the VM logs are lost, but it probably doesn't
+                    // matter as it's unlikely that the VM logs will be related to the game event
+                    // emit error
+                    error!(error=%e, debug=?e, "failed to emit error event containing VM logs while processing a startup error");
+                }
+
+                return Err(GameManagerError::StartAgent(e));
+            }
+        };
 
         Ok(GameManager {
             agents,
             client: PhantomData,
-            event_queue_name,
-            event_channel,
+            game_event_context,
             client_match_request: match_request.payload,
-            game_id: match_request.game_id,
         })
     }
 
     /// Runs the game to completion
-    pub async fn run(mut self) -> Result<(), GameError<C::Error>> {
-        let mut context = GameContext::new(
-            &mut self.agents,
-            &self.event_queue_name,
-            &self.event_channel,
-            self.game_id,
-        );
+    async fn run(
+        mut agents: Vec<VMAgent>,
+        client_match_request: C::MatchRequest,
+        game_event_context: &'_ mut GameEventContext<C>,
+    ) -> Result<(), GameError<C::Error>> {
+        let mut context = GameContext::new(&mut agents, game_event_context);
 
-        context.emit_start_event().await?;
-
-        let res = match C::run(self.client_match_request, &mut context).await {
+        let res = match C::run(client_match_request, &mut context).await {
             Ok(()) => Ok(()),
             Err(mut error) => {
                 let vm_logs = if let Some(agent_id) = error.forfeit() {
@@ -90,7 +121,9 @@ impl<C: GameClient> GameManager<C> {
                         )) => stderr.take(),
                         _ => None,
                     };
-                    context.forfeit_agent(agent_id, stderr).await?;
+                    context
+                        .forfeit_agent(agent_id, stderr, error.forfeit_message())
+                        .await?;
 
                     (0..context.agents()).map(|_| None).collect()
                 } else {
@@ -111,14 +144,85 @@ impl<C: GameClient> GameManager<C> {
                     vm_logs
                 };
 
-                context.emit_error_event(&error, vm_logs).await?;
+                if let Err(e) = game_event_context.emit_error_event(&error, vm_logs).await {
+                    error!(error=%e, debug=?e, "failed to emit error event while processing an error during the game");
+                }
 
                 Err(error)
             }
         };
 
-        context.emit_end_event().await?;
+        if let Err(e) = game_event_context.emit_end_event().await {
+            error!(error=%e, debug=?e, "failed to emit end event");
+        }
 
         res
+    }
+
+    /// Runs the game but polls regularily (every 30 seconds) to see if the game has been cancelled.
+    /// The `cancel_endpoint` is a string of a URL to poll that should output `{ "cancelled": bool
+    /// }`. If there is an error accessing the endpoint, it will be logged but otherwise it will
+    /// be treated as if it returned `{ "cancelled": false }` and the game (and polling) will
+    /// continue.
+    pub async fn run_with_cancel_check(
+        self,
+        cancel_endpoint: String,
+        client: reqwest::Client,
+    ) -> Result<(), GameError<C::Error>> {
+        let cancel_check = async move {
+            #[derive(serde::Deserialize)]
+            struct CancelResponse {
+                cancelled: bool,
+            }
+
+            let mut first = true;
+
+            loop {
+                // Skip the first cancel check to see if the game was cancelled while it was in the
+                // queue.
+                if !first {
+                    sleep(Duration::from_secs(30)).await;
+                }
+                first = false;
+
+                debug!(endpoint=%cancel_endpoint, "making cancel check");
+                let response = match client.get(&cancel_endpoint).send().await {
+                    Ok(response) => response,
+                    Err(e) => {
+                        error!(error=%e, debug=?e, "error making get request during cancel check");
+                        continue;
+                    }
+                };
+
+                let response: CancelResponse = match response.json().await {
+                    Ok(res) => res,
+                    Err(e) => {
+                        error!(error=%e, debug=?e, "error deserializing response during cancel check");
+                        continue;
+                    }
+                };
+
+                if response.cancelled {
+                    return;
+                }
+
+                debug!("game was not cancelled, sleeping again until next poll");
+            }
+        };
+
+        let mut game_event_context = self.game_event_context;
+        tokio::select! {
+            res = Self::run(self.agents, self.client_match_request, &mut game_event_context) => {
+                res
+            },
+            _ = cancel_check => {
+                info!("game cancelled");
+                if let Err(e) = game_event_context.emit_cancelled_event().await {
+                    error!(error=%e, debug=?e, "failed to emit cancelled event");
+                }
+                Ok(())
+            }
+
+        }
     }
 }

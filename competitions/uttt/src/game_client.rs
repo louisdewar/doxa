@@ -1,8 +1,11 @@
 use std::time::Duration;
 
-use doxa_competition::client::{async_trait, ForfeitError, GameClient, GameContext, GameError};
+use doxa_competition::{
+    client::{async_trait, ForfeitError, GameClient, GameContext, GameError},
+    tracing::debug,
+};
 
-use crate::model::{self, Model, Player, Winner};
+use crate::model::{self, Model, ModelError, Player, Winner};
 
 use derive_more::{Display, Error, From};
 use serde::{Deserialize, Serialize};
@@ -36,12 +39,19 @@ pub enum UTTTGameEvent {
     },
 }
 
+fn is_false(b: &bool) -> bool {
+    !b
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(tag = "type")]
 pub enum UTTTMatchEvent {
     GameHistory {
         events: Vec<UTTTGameEvent>,
         overall_winner: Winner,
+        #[serde(skip_serializing_if = "is_false")]
+        #[serde(default = "bool::default")]
+        forfeit: bool,
     },
     Scores {
         draws: u32,
@@ -56,13 +66,35 @@ pub enum UTTTMatchEvent {
 #[derive(From, Error, Display, Debug, Clone)]
 pub enum UTTTError {
     #[from]
-    Model(model::ModelError),
-    ImproperFormat {
+    #[display(
+        fmt = "model error from agent `{}`: {} (the agent output was: {})",
+        agent,
+        source,
+        output
+    )]
+    Model {
+        source: model::ModelError,
         agent: usize,
+        output: String,
     },
-    NotNumber {
-        agent: usize,
-    },
+    #[display(fmt = "improper format: agent {} outputted `{}`", agent, output)]
+    ImproperFormat { agent: usize, output: String },
+    #[display(
+        fmt = "not a number: agent {} outputted `{}` where we expected a number",
+        agent,
+        output
+    )]
+    NotNumber { agent: usize, output: String },
+}
+
+impl ModelError {
+    fn with_context(self, agent: usize, output: impl Into<String>) -> UTTTError {
+        UTTTError::Model {
+            source: self,
+            agent,
+            output: output.into(),
+        }
+    }
 }
 
 impl UTTTError {
@@ -74,9 +106,43 @@ impl UTTTError {
 impl ForfeitError for UTTTError {
     fn forfeit(&self) -> Option<usize> {
         match &self {
-            UTTTError::Model(_) => None,
-            UTTTError::ImproperFormat { agent } => Some(*agent),
-            UTTTError::NotNumber { agent } => Some(*agent),
+            UTTTError::Model {
+                source: e, agent, ..
+            } => match e {
+                ModelError::GameAlreadyOver => None,
+                ModelError::WrongPlayer => None,
+                ModelError::CellTaken => Some(*agent),
+                ModelError::GridTaken => Some(*agent),
+                ModelError::InvalidGrid => Some(*agent),
+                ModelError::InvalidIndex => Some(*agent),
+            },
+            UTTTError::ImproperFormat { agent, .. } => Some(*agent),
+            UTTTError::NotNumber { agent, .. } => Some(*agent),
+        }
+    }
+
+    fn forfeit_message(&self) -> Option<String> {
+        match &self {
+            UTTTError::Model {
+                source: e,
+                output,
+                ..
+            } => match e {
+                ModelError::GameAlreadyOver => None,
+                ModelError::WrongPlayer => None,
+                ModelError::CellTaken => Some(format!("The agent tried to play in a cell that was already taken (the agent outputted: {})", output)),
+                ModelError::GridTaken => Some(format!("The agent tried to play in a grid that was already taken (the agent outputted: {})", output)),
+                ModelError::InvalidGrid => Some(format!("The agent tried to play in an invalid grid (the agent outputted: {})", output)),
+                ModelError::InvalidIndex => Some(format!("The agent tried to play in a grid or cell with an invalid (out of range) index (the agent outputted: {})", output)),
+            },
+            UTTTError::ImproperFormat { output, .. } => Some(format!(
+                "We receieved `{}` from the agent which was not a properly formatted message",
+                output
+            )),
+            UTTTError::NotNumber { output, .. } => Some(format!(
+                "We recieved `{}` from the agent where we expected a number",
+                output
+            )),
         }
     }
 }
@@ -122,24 +188,43 @@ impl UTTTGameClient {
                 msg.split(|b| *b == b' ').collect::<Vec<_>>().as_slice()
             {
                 if *start != b"M" {
-                    return Err(UTTTError::ImproperFormat { agent: agent_id }.game_error());
+                    return Err(UTTTError::ImproperFormat {
+                        agent: agent_id,
+                        output: String::from_utf8_lossy(msg).into(),
+                    }
+                    .game_error());
                 }
 
-                let grid: usize = String::from_utf8_lossy(grid)
-                    .parse()
-                    .map_err(|_| UTTTError::NotNumber { agent: agent_id }.game_error())?;
-                let tile: usize = String::from_utf8_lossy(tile)
-                    .parse()
-                    .map_err(|_| UTTTError::NotNumber { agent: agent_id }.game_error())?;
+                let grid = String::from_utf8_lossy(grid);
+                let grid: usize = grid.parse().map_err(|_| {
+                    UTTTError::NotNumber {
+                        agent: agent_id,
+                        output: grid.into(),
+                    }
+                    .game_error()
+                })?;
+                let tile = String::from_utf8_lossy(tile);
+                let tile: usize = tile.parse().map_err(|_| {
+                    UTTTError::NotNumber {
+                        agent: agent_id,
+                        output: tile.into(),
+                    }
+                    .game_error()
+                })?;
 
                 (grid, tile)
             } else {
-                return Err(UTTTError::ImproperFormat { agent: agent_id }.game_error());
+                return Err(UTTTError::ImproperFormat {
+                    agent: agent_id,
+                    output: String::from_utf8_lossy(msg).into(),
+                }
+                .game_error());
             };
 
-            let event = model
-                .place_tile(current_player, grid, tile)
-                .map_err(|e| UTTTError::from(e).game_error())?;
+            let event = model.place_tile(current_player, grid, tile).map_err(|e| {
+                e.with_context(agent_id, String::from_utf8_lossy(msg))
+                    .game_error()
+            })?;
 
             let place_msg = format!("P {} {} {}\n", current_player.to_char(), grid, tile);
 
@@ -198,8 +283,11 @@ impl GameClient for UTTTGameClient {
         let mut b_wins = 0;
         let mut draws = 0;
         let mut winners = Vec::with_capacity(GAMES_PER_SIDE as usize);
+        debug!(total_games=%GAMES_PER_SIDE, "uttt starting");
 
         for game in 0..GAMES_PER_SIDE {
+            // Game ID are 1 indexed as they are shown to the user
+            let game_id = format!("game_{}", game + 1);
             // Reboot all agents to reset each game
             context.reboot_all_agents(vec![]).await?;
 
@@ -215,11 +303,24 @@ impl GameClient for UTTTGameClient {
                     if let Some(agent) = e.forfeit() {
                         let remaining = GAMES_PER_SIDE - game;
 
-                        if agent == 0 {
+                        let winner = if agent == 0 {
                             b_wins += remaining;
+                            Winner::Blue
                         } else {
                             a_wins += remaining;
-                        }
+                            Winner::Red
+                        };
+
+                        context
+                            .emit_game_event(
+                                UTTTMatchEvent::GameHistory {
+                                    overall_winner: winner,
+                                    events,
+                                    forfeit: true,
+                                },
+                                game_id,
+                            )
+                            .await?;
 
                         context
                             .emit_game_event(
@@ -244,13 +345,14 @@ impl GameClient for UTTTGameClient {
                 }
             };
 
-            // Game ID are 1 indexed as they are shown to the user
-            let game_id = format!("game_{}", game + 1);
+            debug!(game_number=%game, "uttt game completed");
+
             context
                 .emit_game_event(
                     UTTTMatchEvent::GameHistory {
                         overall_winner,
                         events,
+                        forfeit: false,
                     },
                     game_id,
                 )

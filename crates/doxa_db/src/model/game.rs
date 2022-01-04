@@ -11,6 +11,7 @@ pub struct Game {
     pub queued_at: DateTime<Utc>,
     pub started_at: Option<DateTime<Utc>>,
     pub completed_at: Option<DateTime<Utc>>,
+    pub outdated: bool,
     pub competition: i32,
 }
 

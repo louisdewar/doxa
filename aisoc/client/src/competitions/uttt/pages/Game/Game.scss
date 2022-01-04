@@ -142,3 +142,21 @@
 
   }
 }
+
+.game-page-forfeit-warning {
+  svg {
+    margin-right: 1rem;
+  }
+
+  a {
+    text-underline-offset: 0.1rem;
+
+    &.game-page-forfeit-warning-main-player-link {
+      text-decoration-color: #00B75F;
+    }
+
+    &.game-page-forfeit-warning-opposing-player-link {
+      text-decoration-color: #ee5253;
+    }
+  }
+}

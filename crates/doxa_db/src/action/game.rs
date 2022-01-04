@@ -69,6 +69,19 @@ pub fn get_game_by_id(
         .optional()
 }
 
+pub fn get_game_by_id_required(
+    conn: &PgConnection,
+    id: i32,
+    competition_name: &str,
+) -> Result<model::Game, DieselError> {
+    s::games::table
+        .inner_join(s::competitions::table)
+        .filter(s::competitions::columns::name.eq(competition_name))
+        .filter(s::games::columns::id.eq(id))
+        .select(s::games::all_columns)
+        .first(conn)
+}
+
 pub fn get_game_events(conn: &PgConnection, id: i32) -> Result<Vec<model::GameEvent>, DieselError> {
     s::game_events::table
         .filter(s::game_events::columns::game.eq(id))
@@ -159,8 +172,14 @@ pub fn get_game_result(
         .optional()
 }
 
-pub fn sum_game_results(conn: &PgConnection, agent: String) -> Result<Option<i64>, DieselError> {
+/// Sums games results for a particular agent only from games where outdated = false
+pub fn sum_non_outdated_game_results(
+    conn: &PgConnection,
+    agent: String,
+) -> Result<Option<i64>, DieselError> {
     s::game_results::table
+        .inner_join(s::games::table)
+        .filter(s::games::columns::outdated.eq(false))
         .select(dsl::sum(s::game_results::result))
         .filter(s::game_results::agent.eq(agent))
         .first(conn)
@@ -197,4 +216,28 @@ pub fn get_user_active_games(
         .order_by(s::games::columns::queued_at.asc())
         .select(s::games::all_columns)
         .get_results(conn)
+}
+
+/// Finds all the games that involve a paticular user and mark them as inactive.
+/// This is done by player instead of agent to make it more resliant in the case of a crash when
+/// activating / deactivating an agent
+pub fn mark_games_with_player_as_outdated(
+    conn: &PgConnection,
+    user: i32,
+) -> Result<(), DieselError> {
+    use s::game_participants::columns as p_c;
+    use s::games::columns as g_c;
+
+    diesel::update(s::games::table)
+        .filter(
+            g_c::id.eq_any(
+                s::game_participants::table
+                    .inner_join(s::agents::table)
+                    .filter(s::agents::owner.eq(user))
+                    .select(p_c::game),
+            ),
+        )
+        .set(g_c::outdated.eq(true))
+        .execute(conn)
+        .map(|_rows: usize| ())
 }

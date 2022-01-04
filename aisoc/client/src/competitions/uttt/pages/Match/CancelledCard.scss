@@ -1,24 +1,24 @@
 @import 'src/common/_common.scss';
 
-.match-games .game-card .game-card-body.ongoing {
+.match-games .game-card .game-card-body.cancelled {
   display: block;
   text-align: center;
   padding: 5px 20px 5px 20px;
   border-left: 20px solid #0e7490;
   border-radius: 3px;
 
-  .game-card-ongoing-container {
+  .game-card-cancelled-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
 
-    .ongoing-icon {
+    .cancelled-icon {
       font-size: 50px;
       margin: 21.25px 5px;
       color: #475569;
     }
 
-    .ongoing-message {
+    .cancelled-message {
       flex: 1;
     }
   }
