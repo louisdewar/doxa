@@ -12,7 +12,6 @@ pub mod manager;
 pub mod route;
 pub mod settings;
 
-use route::limits::CompetitionLimits;
 pub use settings::Settings;
 
 pub use doxa_core::tracing;
@@ -99,14 +98,23 @@ impl CompetitionSystem {
         }
 
         let settings = settings.clone();
-        let competition_limits =
-            web::Data::new(CompetitionLimits::new(settings.generic_limiter.clone()));
 
         move |service: &mut web::ServiceConfig| {
-            service.app_data(competition_limits.clone());
             for (name, record, competition_id) in competitions.iter() {
+                let competition_limits = web::Data::new(
+                    record
+                        .competition
+                        .build_competition_limiter(settings.generic_limiter.clone()),
+                );
+                // Temporary (see comment on `configure_upload_route`)
+                record.competition.configure_upload_route(
+                    competition_limits.clone(),
+                    name.clone(),
+                    service,
+                );
                 service.service(web::scope(&format!("/competition/{}", name)).configure(
                     |config| {
+                        config.app_data(competition_limits.clone());
                         record
                             .competition
                             .configure_routes(config, &settings, *competition_id)

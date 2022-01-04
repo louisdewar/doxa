@@ -1,27 +1,13 @@
-use std::{sync::Arc, time::Duration};
+use std::time::Duration;
 
-use doxa_auth::limiter::{GenericLimiter, Limiter, LimiterConfig, TokenBucket, ONE_DAY, ONE_HOUR};
+use doxa_auth::limiter::{LimiterConfig, TokenBucket};
 
-const AGENT_UPLOAD_ATTEMPT_LIMITER_ID: &str = "DOXA_AGENT_UPLOAD_ATTEMPT";
+// const AGENT_UPLOAD_ATTEMPT_LIMITER_ID: &str = "DOXA_AGENT_UPLOAD_ATTEMPT";
 
-pub struct UploadLimits {
-    pub upload_attempts: Limiter,
-}
-
-impl UploadLimits {
-    pub fn new(generic: Arc<GenericLimiter>) -> Self {
-        UploadLimits {
-            upload_attempts: upload_attempts_limiter().build(&generic),
-        }
-    }
-}
-
-// TODO: make it so that each competition can specify their own limits (probably will need some
-// kind of hashmap of competiton name => limiter)
 /// This limiter is used by the upload system for every attempt.
 /// It is also used to limit manual agent activations / reactivations.
-pub fn upload_attempts_limiter() -> LimiterConfig {
-    let mut limiter = LimiterConfig::new(AGENT_UPLOAD_ATTEMPT_LIMITER_ID.into());
+pub fn default_upload_attempts_limiter(key: String) -> LimiterConfig {
+    let mut limiter = LimiterConfig::new(key);
 
     limiter
         // 1 per minute

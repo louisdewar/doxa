@@ -2,12 +2,14 @@
 
 use std::sync::Arc;
 
+use doxa_auth::limiter::{GenericLimiter, LimiterConfig};
 use doxa_core::actix_web::{self, web};
 
 use crate::{
     error::{CompetitionManagerError, ContextError},
     manager::CompetitionManager,
-    route, Settings,
+    route::{self, limits::CompetitionLimits},
+    Settings,
 };
 
 pub use crate::context::Context;
@@ -148,6 +150,11 @@ pub trait Competition: 'static + Send + Sync {
 
         service.route(
             "_agent/{agent_id}/score",
+            web::get().to(route::agent::agent_score_primary::<Self>),
+        );
+
+        service.route(
+            "_agent/{agent_id}/score/{leaderboard}",
             web::get().to(route::agent::agent_score::<Self>),
         );
 
@@ -216,7 +223,7 @@ pub trait Competition: 'static + Send + Sync {
         // );
     }
 
-    /// This function registers the `/_leaderboard/...` route.
+    /// This function registers the `/_leaderboard/...` routes.
     ///
     /// If you want to customise this or disable this you can overwrite this function.
     fn configure_leaderboard_routes(&self, service: &mut actix_web::web::ServiceConfig) {
@@ -229,6 +236,23 @@ pub trait Competition: 'static + Send + Sync {
             "_leaderboard/active/{leaderboard}",
             web::get().to(route::leaderboard::active_leaderboard::<Self>),
         );
+    }
+
+    /// This function registers the `/_upload`.
+    ///
+    /// If you want to customise this or disable this you can overwrite this function.
+    fn configure_upload_routes(&self, service: &mut actix_web::web::ServiceConfig) {
+        service.route("_upload", web::post().to(route::upload::upload::<Self>));
+    }
+
+    /// Builds a limiter to use for this competition for uploads and activations.
+    /// Admins can ignore this limit.
+    ///
+    /// If you want to define your own limiter you should use the provided key.
+    ///
+    /// The default is `doxa_storage::limits::upload_attempts_limiter`
+    fn upload_limiter(&self, key: String) -> LimiterConfig {
+        doxa_storage::limits::default_upload_attempts_limiter(key)
     }
 
     /// Filter maps the events before sending them to a user.
@@ -257,6 +281,17 @@ pub(crate) trait CompetitionInner: 'static + Send + Sync {
         competition_id: i32,
     );
 
+    fn build_competition_limiter(&self, generic_limiter: Arc<GenericLimiter>) -> CompetitionLimits;
+
+    // A temporary route to keep the old storage upload path working for older versions of the CLI
+    // This cannot be added in `configure_routes` because the routes are prefixed.
+    fn configure_upload_route(
+        &self,
+        limits: web::Data<CompetitionLimits>,
+        name: String,
+        service: &mut actix_web::web::ServiceConfig,
+    );
+
     async fn start_competition_manager(
         self: Arc<Self>,
         settings: Arc<Settings>,
@@ -283,6 +318,7 @@ impl<T: Competition> CompetitionInner for T {
         Competition::configure_agent_routes(self, service);
         Competition::configure_user_routes(self, service);
         Competition::configure_leaderboard_routes(self, service);
+        Competition::configure_upload_routes(self, service);
 
         Competition::configure_routes(self, service);
     }
@@ -293,6 +329,28 @@ impl<T: Competition> CompetitionInner for T {
         executor_permits: usize,
     ) -> Result<i32, CompetitionManagerError> {
         CompetitionManager::start(self, settings, executor_permits).await
+    }
+
+    fn configure_upload_route(
+        &self,
+        limits: web::Data<CompetitionLimits>,
+        name: String,
+        service: &mut actix_web::web::ServiceConfig,
+    ) {
+        service.service(
+            web::resource(&format!("/storage/upload/{}", name))
+                .app_data(limits)
+                .route(web::post().to(route::upload::upload::<Self>)),
+        );
+    }
+
+    fn build_competition_limiter(&self, generic_limiter: Arc<GenericLimiter>) -> CompetitionLimits {
+        let activations = Competition::upload_limiter(
+            self,
+            format!("ACTIVATION_LIMIT_{}", <T as Competition>::COMPETITION_NAME),
+        );
+
+        CompetitionLimits::new(generic_limiter, activations)
     }
 
     fn name(&self) -> &'static str {

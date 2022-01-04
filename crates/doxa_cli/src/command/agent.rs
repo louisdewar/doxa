@@ -163,7 +163,7 @@ pub async fn upload(args: UploadArgs, settings: &Settings) -> Result<(), Command
 
     let builder = post(
         settings,
-        &format!("storage/upload/{}", competition_name),
+        &format!("competition/{}/_upload", competition_name),
         false,
     )
     .multipart(form);

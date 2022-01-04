@@ -1,10 +1,11 @@
-use std::convert::Infallible;
+use std::{convert::Infallible, time::Duration};
 
 use crate::{
     client::{Competition, Context, GameEvent},
     error::ContextError,
 };
 use async_trait::async_trait;
+use doxa_auth::limiter::{LimiterConfig, TokenBucket};
 use doxa_executor::{client::GameClient, context::GameContext};
 
 use serde::{Deserialize, Serialize};
@@ -68,6 +69,13 @@ impl Competition for HelloWorldCompetiton {
             .await?;
 
         Ok(())
+    }
+
+    fn upload_limiter(&self, key: String) -> LimiterConfig {
+        let mut limiter = LimiterConfig::new(key);
+        limiter.add_limit(TokenBucket::new(Duration::from_secs(120), 20));
+
+        limiter
     }
 
     fn event_filter(

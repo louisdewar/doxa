@@ -1,12 +1,10 @@
+use crate::error::{AgentGone, TooManyUploadAttempts};
 use crate::error::{AgentUploadError, FileTooLarge};
 use crate::route::request::DownloadParams;
-use crate::{
-    error::{AgentGone, TooManyUploadAttempts},
-    limits::UploadLimits,
-};
 use actix_files::NamedFile;
 use actix_multipart::{Field, Multipart};
 use actix_web::{web, HttpRequest, HttpResponse};
+use doxa_auth::limiter::Limiter;
 use doxa_auth::{error::CompetitionNotFound, guard::AuthGuard};
 use doxa_core::tokio::fs::File;
 use doxa_core::tokio::io::AsyncWriteExt;
@@ -33,14 +31,15 @@ use crate::{
 // Also this would help the situation with the per competition limiter as it could be generated
 // fresh for each scope with per competition settings.
 pub fn config(cfg: &mut web::ServiceConfig) {
-    cfg.route("/storage/upload/{competition}", web::post().to(upload));
+    // Maybe in future use a route like this:
+    // cfg.route("/_agent/{agent}/download", web::get().to(download));
     cfg.route(
         "/storage/download/{competition}/{agent}",
         web::get().to(download),
     );
 }
 
-async fn download(
+pub async fn download(
     pool: web::Data<PgPool>,
     storage: web::Data<LocalStorage>,
     path: web::Path<(String, String)>,
@@ -112,16 +111,15 @@ async fn process_field_upload(
     Ok(())
 }
 
-async fn upload(
+pub async fn upload(
     pool: web::Data<PgPool>,
     mq_pool: web::Data<MQPool>,
     storage: web::Data<LocalStorage>,
     mut payload: Multipart,
-    path: web::Path<String>,
+    competition: String,
     auth: AuthGuard<()>,
-    limiter: web::Data<UploadLimits>,
+    limiter: &Limiter,
 ) -> EndpointResult {
-    let competition = path.into_inner();
     // Check if the user is enrolled
     let enrollment = web::block({
         let user_id = auth.id();
@@ -136,7 +134,6 @@ async fn upload(
 
     if !auth.admin() {
         limiter
-            .upload_attempts
             .get_permit(format!("{}-{}", competition, auth.id()))
             .await?
             .map_err(TooManyUploadAttempts::from)?;
@@ -240,5 +237,3 @@ async fn upload(
 
     Ok(HttpResponse::Ok().json(response::Upload { id, competition }))
 }
-
-// async fn cleanup(user: AuthGuard<Admin>) -> EndpointResult {}
