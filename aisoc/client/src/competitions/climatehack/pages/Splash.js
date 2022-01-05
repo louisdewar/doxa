@@ -38,7 +38,7 @@ export default function Splash({ baseUrl }) {
         <h2><span>Hack</span></h2>
 
         <button className='ch-compete-button' onClick={() => {
-          history.push(`${baseUrl}compete`);
+          history.push(`${baseUrl}comingsoon`);
         }}>Compete on DOXA</button>
       </div>
 
