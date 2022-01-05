@@ -1,0 +1,83 @@
+@import "common/colours";
+@import "./splash-common.scss";
+
+.ch-partners-header {
+  margin-top: 75px;
+  color: #fff;
+  padding: 3rem 1rem;
+
+  background-image: url('/competitions/climatehack/assets/challenge-header.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  h1,
+  h2 {
+    font-size: 3rem;
+    margin: 0;
+  }
+
+  h2 {
+    font-weight: 100;
+  }
+
+}
+
+@media screen and (min-width: 640px) {
+  .ch-partners-header {
+    padding: 6rem;
+
+    h1,
+    h2 {
+      font-size: 5rem;
+    }
+  }
+
+  .ch-partners-section-content {
+    max-width: 640px;
+    display: flex;
+  }
+}
+
+@media screen and (min-width: 768px) {
+  .ch-partners-section-content {
+    max-width: 768px;
+  }
+}
+
+section.ch-partners-section {
+  padding: 2rem;
+  width: calc(100% - 4rem);
+
+  .ch-partners-section-content {
+    margin-left: auto;
+    margin-right: auto;
+
+    .ch-partners-section-heading {
+      margin: 16px 2rem 16px 0;
+
+      h2 {
+        margin-top: 0;
+        width: 250px;
+      }
+    }
+  }
+
+  &.ch-partners-sponsor-1 {
+    background-color: #f1f5f9;
+
+    .ch-partners-section-heading h2 {
+      color: #2563eb;
+    }
+  }
+
+  &.ch-partners-sponsor-2 {
+    color: #fff;
+    background-color: #141006;
+
+    .ch-partners-section-heading h2 {
+      color: $pink;
+    }
+  }
+
+}
