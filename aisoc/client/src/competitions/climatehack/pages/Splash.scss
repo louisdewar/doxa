@@ -7,7 +7,7 @@ button.ch-compete-button {
   margin: 1rem 0;
   padding: 1rem 2rem;
   font-size: 1rem;
-  background-color: $pink;
+  background-color: $ch-salmon;
   border: 0;
   border-radius: 3px;
   color: #fff;
@@ -15,11 +15,11 @@ button.ch-compete-button {
   cursor: pointer;
 
   &:hover {
-    background-color: darken($pink, 5%);
+    background-color: darken($ch-salmon, 5%);
   }
 
   &:active {
-    background-color: darken($pink, 10%);
+    background-color: darken($ch-salmon, 10%);
   }
 }
 
@@ -53,7 +53,7 @@ header.ch-splash-header {
       font-size: 4rem;
 
       text-decoration: underline;
-      text-decoration-color: #2563ebf0;
+      text-decoration-color: $ch-blue-transparent;
     }
 
     h2 {
@@ -96,6 +96,18 @@ section.ch-splash-section {
       h2 {
         margin-top: 0;
       }
+
+      img {
+        width: 100%;
+      }
+
+      p {
+        text-align: left;
+      }
+    }
+
+    p {
+      text-align: justify;
     }
   }
 
@@ -114,7 +126,7 @@ section.ch-splash-section {
   }
 
   &.ch-splash-universities {
-    background-color: #2563eb;
+    background-color: $ch-blue;
     color: #fff;
 
     .ch-splash-universities-logos {
@@ -125,14 +137,14 @@ section.ch-splash-section {
 
       img {
         box-sizing: border-box;
-        height: 4rem;
+        height: 3.5rem;
         margin: 0.5rem 0.4rem;
       }
     }
   }
 
   &.ch-splash-format {
-    // background-color: #2563eb;
+    // background-color: $ch-blue;
     color: #fff;
 
     // p {
@@ -178,7 +190,7 @@ section.ch-splash-section {
 
   &.ch-splash-prizes {
     color: #fff;
-    background-color: #EC5764;
+    background-color: $ch-salmon;
 
     .ch-splash-section-heading {
       h3 {
@@ -227,14 +239,47 @@ section.ch-splash-section {
 
     .ch-splash-section-heading h2,
     a {
-      color: #2563eb;
+      color: $ch-blue;
+      text-underline-offset: 0.05rem;
+    }
+
+    .ch-splash-tangible-impact-description>p:first-child {
+      font-weight: bold;
+    }
+  }
+
+  &.ch-splash-joint-final {
+    // background-color: #f1f5f9;
+    color: #fff;
+
+    .ch-splash-section-heading h2,
+    a {
+      color: $ch-salmon;
+      text-underline-offset: 0.1rem;
+    }
+
+    .ch-splash-joint-final-description>p:first-child {
+      font-weight: bold;
+    }
+  }
+
+  &.ch-splash-community-connection {
+    background-color: #f1f5f9;
+
+    .ch-splash-section-heading h2 {
+      color: $ch-blue;
+      text-underline-offset: 0.05rem;
+    }
+
+    .ch-splash-tangible-impact-description>p:first-child {
+      font-weight: bold;
     }
   }
 }
 
 .ch-splash-impact-stripe {
   background-color: #f1f5f9;
-  color: #2563eb;
+  color: $ch-blue;
 
   p {
     margin: 0;

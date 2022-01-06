@@ -1,3 +1,4 @@
+import Footer from '../components/Footer';
 import SplashNavbar from '../components/SplashNavbar';
 import './Partners.scss';
 
@@ -58,8 +59,7 @@ export default function Partners({ baseUrl }) {
 
     </section>
 
-    <br />    <br />
-    <br />    <br />
+    <Footer />
 
   </div>;
 }

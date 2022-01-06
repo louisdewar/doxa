@@ -1,5 +1,6 @@
 @import 'common/colours';
 @import 'common/fonts';
+@import "../pages/splash-common.scss";
 
 nav.ch-navbar {
   color: #fff;
@@ -36,10 +37,10 @@ nav.ch-navbar {
 
     &.ch-navbar-active,
     &:hover:not(.ch-navbar-title) {
-      color: $pink;
+      color: $ch-salmon;
 
       &::after {
-        background-color: $pink;
+        background-color: $ch-salmon;
       }
     }
 

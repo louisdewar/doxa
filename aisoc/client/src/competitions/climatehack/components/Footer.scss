@@ -1,0 +1,33 @@
+.ch-footer {
+  padding: 2rem;
+  width: calc(100% - 4rem);
+  margin: auto;
+  color: #fff;
+
+  a {
+    color: #fff;
+    text-underline-offset: 0.2rem;
+  }
+
+  .ch-footer-copyright {
+    margin-left: auto;
+    margin-top: 1rem;
+  }
+}
+
+@media screen and (min-width: 640px) {
+  .ch-footer {
+    max-width: 640px;
+    display: flex;
+
+    .ch-footer-copyright {
+      margin-top: 0;
+    }
+  }
+}
+
+@media screen and (min-width: 768px) {
+  .ch-footer {
+    max-width: 768px;
+  }
+}

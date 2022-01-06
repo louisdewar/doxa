@@ -1,4 +1,5 @@
 import ocfLogo from '../assets/ocf-logo.png';
+import Footer from '../components/Footer';
 import SplashNavbar from '../components/SplashNavbar';
 import './Challenge.scss';
 
@@ -66,8 +67,7 @@ export default function Challenge({ baseUrl }) {
       </div>
     </section>
 
-    <br />    <br />
-    <br />    <br />
+    <Footer />
 
   </div>;
 }
