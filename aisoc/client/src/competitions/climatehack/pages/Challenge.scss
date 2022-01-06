@@ -76,7 +76,7 @@ section.ch-challenge-section {
 }
 
 @media screen and (min-width: $breakpoint-sm) {
-  .ch-challenge-header {
+  header.ch-challenge-header {
     padding: 6rem;
 
     h1,
@@ -92,7 +92,7 @@ section.ch-challenge-section {
 }
 
 @media screen and (min-width: $breakpoint-md) {
-  .ch-challenge-section-content {
+  section.ch-challenge-section .ch-challenge-section-content {
     max-width: $breakpoint-md;
   }
 }
