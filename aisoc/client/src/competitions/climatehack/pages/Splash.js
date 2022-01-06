@@ -273,12 +273,12 @@ export default function Splash({ baseUrl }) {
         <div className='ch-splash-community-connection-description'>
           <p>
             Beyond the competition, Climate Hack strives to cultivate a community between students interested in AI around the world. Throughout the competition, there will be plenty of internal and cross-university events for students to connect to and showcase their knowledge in AI, including the following:
-            <ul>
-              <li>In-person social events and mini-competitions</li>
-              <li>Virtual Social Events</li>
-              <li>Cross-University Tutorials</li>
-            </ul>
           </p>
+          <ul>
+            <li>In-person social events and mini-competitions</li>
+            <li>Virtual Social Events</li>
+            <li>Cross-University Tutorials</li>
+          </ul>
         </div>
       </div>
     </section>
