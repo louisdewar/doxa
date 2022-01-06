@@ -1,3 +1,4 @@
+@import "common/common";
 @import "common/colours";
 @import "./splash-common.scss";
 
@@ -23,28 +24,6 @@
 
 }
 
-@media screen and (min-width: 640px) {
-  .ch-partners-header {
-    padding: 6rem;
-
-    h1,
-    h2 {
-      font-size: 5rem;
-    }
-  }
-
-  .ch-partners-section-content {
-    max-width: 640px;
-    display: flex;
-  }
-}
-
-@media screen and (min-width: 768px) {
-  .ch-partners-section-content {
-    max-width: 768px;
-  }
-}
-
 section.ch-partners-section {
   padding: 2rem;
   width: calc(100% - 4rem);
@@ -67,7 +46,7 @@ section.ch-partners-section {
     background-color: #f1f5f9;
 
     .ch-partners-section-heading h2 {
-      color: #2563eb;
+      color: $ch-blue;
     }
   }
 
@@ -80,4 +59,26 @@ section.ch-partners-section {
     }
   }
 
+}
+
+@media screen and (min-width: $breakpoint-sm) {
+  .ch-partners-header {
+    padding: 6rem;
+
+    h1,
+    h2 {
+      font-size: 5rem;
+    }
+  }
+
+  section.ch-partners-section .ch-partners-section-content {
+    max-width: $breakpoint-sm;
+    display: flex;
+  }
+}
+
+@media screen and (min-width: $breakpoint-md) {
+  section.ch-partners-section .ch-partners-section-content {
+    max-width: $breakpoint-md;
+  }
 }

@@ -1,3 +1,5 @@
+@import 'common/common';
+
 .container {
   margin-left: auto;
   margin-right: auto;
@@ -8,20 +10,20 @@
   margin-top: 100px;
 }
 
-@media screen and (min-width: 640px) {
+@media screen and (min-width: $breakpoint-sm) {
   .container {
-    max-width: 640px;
+    max-width: $breakpoint-sm;
   }
 }
 
-@media screen and (min-width: 768px) {
+@media screen and (min-width: $breakpoint-md) {
   .container {
-    max-width: 768px;
+    max-width: $breakpoint-md;
   }
 }
 
-@media screen and (min-width: 1024px) {
+@media screen and (min-width: $breakpoint-lg) {
   .container {
-    max-width: 1024px;
+    max-width: $breakpoint-lg;
   }
 }

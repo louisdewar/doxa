@@ -1,3 +1,4 @@
+@import 'common/common';
 @import 'common/fonts';
 
 .competition-summary-card {
@@ -10,6 +11,11 @@
     color: #fff;
     text-underline-offset: 0.325rem;
     font-style: italic;
+
+    @media screen and (max-width: $breakpoint-sm) {
+        font-size: 1.2rem;
+        text-decoration: none;
+    }
 }
 
 .open-competitions-label {

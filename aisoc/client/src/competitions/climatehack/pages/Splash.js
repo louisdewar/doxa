@@ -189,7 +189,7 @@ export default function Splash({ baseUrl }) {
           <span>£6.75k</span>
         </div>
         <div className='ch-splash-prizes-descriptions'>
-          <p>
+          <p className='ch-splash-prizes-descriptions-label'>
             The top 3 teams will share a prize pool of
           </p>
           <span>
@@ -198,7 +198,7 @@ export default function Splash({ baseUrl }) {
           <br />
           <br />
           <br />
-          <p>
+          <p >
             In addition, the societies the top 3 teams represent will receive the following cash prizes:
           </p>
           <div className='ch-splash-prizes-columns'>

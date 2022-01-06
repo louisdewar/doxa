@@ -1,3 +1,4 @@
+@import 'common/common';
 @import 'common/colours';
 @import 'common/fonts';
 @import "./splash-common.scss";
@@ -58,17 +59,6 @@ header.ch-splash-header {
 
     h2 {
       font-weight: 100;
-    }
-  }
-}
-
-@media screen and (min-width: 640px) {
-  header.ch-splash-header {
-    margin-top: 73px;
-
-    .ch-splash-header-title h1,
-    .ch-splash-header-title h2 {
-      font-size: 6rem;
     }
   }
 }
@@ -208,6 +198,10 @@ section.ch-splash-section {
       text-align: right;
       width: 100%;
 
+      .ch-splash-prizes-descriptions-label {
+        text-align: right;
+      }
+
       span {
         font-weight: bold;
         font-size: 2rem;
@@ -290,7 +284,16 @@ section.ch-splash-section {
   }
 }
 
-@media screen and (min-width: 640px) {
+@media screen and (min-width: $breakpoint-sm) {
+  header.ch-splash-header {
+    margin-top: 73px;
+
+    .ch-splash-header-title h1,
+    .ch-splash-header-title h2 {
+      font-size: 6rem;
+    }
+  }
+
   section.ch-splash-section {
     .ch-splash-section-heading {
       width: 200px;
@@ -301,7 +304,7 @@ section.ch-splash-section {
     }
 
     .ch-splash-section-content {
-      max-width: 640px;
+      max-width: $breakpoint-sm;
       display: flex;
     }
   }
@@ -311,13 +314,8 @@ section.ch-splash-section {
   }
 }
 
-@media screen and (min-width: 768px) {
+@media screen and (min-width: $breakpoint-md) {
   section.ch-splash-section .ch-splash-section-content {
-    max-width: 768px;
+    max-width: $breakpoint-md;
   }
 }
-
-// @media screen and (min-width: 1024px) {
-//   section.ch-splash-section .ch-splash-section-content {
-//     max-width: 1024px;
-//   }}

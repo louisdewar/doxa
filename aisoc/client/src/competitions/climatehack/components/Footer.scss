@@ -1,3 +1,5 @@
+@import 'common/common';
+
 .ch-footer {
   padding: 2rem;
   width: calc(100% - 4rem);
@@ -15,9 +17,9 @@
   }
 }
 
-@media screen and (min-width: 640px) {
+@media screen and (min-width: $breakpoint-sm) {
   .ch-footer {
-    max-width: 640px;
+    max-width: $breakpoint-sm;
     display: flex;
 
     .ch-footer-copyright {
@@ -26,8 +28,8 @@
   }
 }
 
-@media screen and (min-width: 768px) {
+@media screen and (min-width: $breakpoint-md) {
   .ch-footer {
-    max-width: 768px;
+    max-width: $breakpoint-md;
   }
 }

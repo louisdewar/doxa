@@ -1,7 +1,8 @@
+@import "common/common";
 @import "common/colours";
 @import "./splash-common.scss";
 
-.ch-challenge-header {
+header.ch-challenge-header {
   margin-top: 75px;
   color: #fff;
   padding: 3rem 1rem;
@@ -22,35 +23,6 @@
   }
 
 }
-
-@media screen and (min-width: 640px) {
-  .ch-challenge-header {
-    padding: 6rem;
-
-    h1,
-    h2 {
-      font-size: 5rem;
-    }
-  }
-
-  .ch-challenge-section-content {
-    max-width: 640px;
-    display: flex;
-  }
-}
-
-@media screen and (min-width: 768px) {
-  .ch-challenge-section-content {
-    max-width: 768px;
-  }
-}
-
-// @media screen and (min-width: 1024px) {
-//   .ch-challenge-section-content {
-//     max-width: 1024px;
-//   }
-// }
-
 
 section.ch-challenge-section {
   padding: 2rem;
@@ -100,5 +72,27 @@ section.ch-challenge-section {
     .ch-challenge-section-heading h2 {
       color: #fff;
     }
+  }
+}
+
+@media screen and (min-width: $breakpoint-sm) {
+  .ch-challenge-header {
+    padding: 6rem;
+
+    h1,
+    h2 {
+      font-size: 5rem;
+    }
+  }
+
+  section.ch-challenge-section .ch-challenge-section-content {
+    max-width: $breakpoint-sm;
+    display: flex;
+  }
+}
+
+@media screen and (min-width: $breakpoint-md) {
+  .ch-challenge-section-content {
+    max-width: $breakpoint-md;
   }
 }
