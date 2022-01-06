@@ -26,6 +26,17 @@
       }
     }
 
+    .pair-matches-player-1,
+    .pair-matches-player-2 {
+      flex: 2 1 auto;
+      flex-basis: 0;
+
+      a {
+        color: #fff;
+        text-underline-offset: 0.1rem;
+      }
+    }
+
     .pair-matches-time {
       flex: 0 0 auto;
       width: 10rem;
