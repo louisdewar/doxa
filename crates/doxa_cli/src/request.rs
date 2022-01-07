@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use reqwest::{Client, RequestBuilder, Response, StatusCode, Url};
+use reqwest::{header::HeaderMap, Client, RequestBuilder, Response, StatusCode, Url};
 use serde::de::DeserializeOwned;
 use serde::Deserialize;
 
@@ -46,11 +46,12 @@ struct DoxaErrorRaw {
 }
 
 impl DoxaErrorRaw {
-    fn into_doxa_error(self, status_code: StatusCode) -> DoxaError {
+    fn into_doxa_error(self, status_code: StatusCode, headers: HeaderMap) -> DoxaError {
         DoxaError {
             error_code: self.error_code,
             message: self.error,
             status_code,
+            headers,
         }
     }
 }
@@ -109,6 +110,7 @@ pub async fn send_request(builder: RequestBuilder) -> Result<Response, RequestEr
     if status.is_success() {
         Ok(response)
     } else {
+        let headers = response.headers().clone();
         let bytes = response.bytes().await?;
         match serde_json::from_slice::<DoxaErrorRaw>(&bytes) {
             Err(_) => Err(PlainError {
@@ -116,7 +118,7 @@ pub async fn send_request(builder: RequestBuilder) -> Result<Response, RequestEr
                 error_message: String::from_utf8_lossy(&bytes).to_string(),
             }
             .into()),
-            Ok(v) => Err(v.into_doxa_error(status).into()),
+            Ok(v) => Err(v.into_doxa_error(status, headers).into()),
         }
     }
 }
