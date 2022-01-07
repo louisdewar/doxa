@@ -8,6 +8,15 @@ RUN npm ci
 
 COPY aisoc/client .
 
+
+ARG multiple_competitions
+ARG default_competition
+
+ENV REACT_APP_DEFAULT_COMPETITION=$default_competition
+ENV REACT_APP_MULTIPLE_COMPETITIONS=$multiple_competitions
+
+RUN echo $REACT_APP_DEFAULT_COMPETITION
+RUN echo $REACT_APP_MULTIPLE_COMPETITIONS
 # TODO: remove DISABLE_ESLINT_PLUGIN in future once the frontend is free of warnings
 RUN DISABLE_ESLINT_PLUGIN=true npm run build
 

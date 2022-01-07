@@ -11,6 +11,9 @@ steps:
         path: /var/run/docker.sock
     commands:
       - sh dev/vm/build_rootfs.sh
+    when:
+      target:
+      - production
   - name: build_server
     image: docker:dind
     privileged: true
@@ -19,6 +22,9 @@ steps:
         path: /var/run/docker.sock
     commands:
       - docker build -t registry.dewardt.uk/doxa/server:drone-build-"$DRONE_BUILD_NUMBER" -f aisoc/deploy/Dockerfile.server . --target server_builder
+    when:
+      target:
+      - production
   # Package the final step with the rootfs
   - name: final_build_server
     image: docker:dind
@@ -30,6 +36,9 @@ steps:
       - docker build -t registry.dewardt.uk/doxa/server:drone-build-"$DRONE_BUILD_NUMBER" -f aisoc/deploy/Dockerfile.server .
     depends_on:
       - rootfs
+    when:
+      target:
+      - production
   - name: build_web
     image: docker:dind
     privileged: true
@@ -38,7 +47,18 @@ steps:
         path: /var/run/docker.sock
     commands:
       - docker build -t registry.dewardt.uk/doxa/web:drone-build-"$DRONE_BUILD_NUMBER" -f aisoc/deploy/Dockerfile.web .
-  - name: publish
+    when:
+      target:
+      - production
+  - name: build_climatehack_web
+    image: docker:dind
+    privileged: true
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
+    commands:
+      - docker build --build-arg multiple_competitions=false --build-arg default_competition=climatehack -t registry.dewardt.uk/doxa/climatehack-web:drone-build-"$DRONE_BUILD_NUMBER" -f aisoc/deploy/Dockerfile.web .
+  - name: publish main
     image: docker:dind
     privileged: true
     volumes:
@@ -56,12 +76,30 @@ steps:
     depends_on:
       - final_build_server
       - build_web
-
+    when:
+      target:
+      - production
+  - name: publish climate hack
+    image: docker:dind
+    privileged: true
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
+    environment:
+      DOCKER_PASSWORD:
+        from_secret: DOCKER_PASSWORD
+    commands:
+      - echo $DOCKER_PASSWORD | docker login https://registry.dewardt.uk --username doxa --password-stdin
+      - docker tag registry.dewardt.uk/doxa/climatehack-web:drone-build-"$DRONE_BUILD_NUMBER" registry.dewardt.uk/doxa/climatehack-web:production
+      - docker push registry.dewardt.uk/doxa/climatehack-web:production
+    depends_on:
+      - build_climatehack_web
 trigger:
   event:
     - promote
   target:
     - production
+    - climatehack-production
 
 volumes:
   - name: dockersock
