@@ -109,10 +109,6 @@ export default function Splash({ baseUrl }) {
           <img src={illinoisLogo} style={{ margin: '0.5rem -0.75rem' }} />
           <img src={michiganLogo} style={{ padding: '0.75rem 0' }} />
 
-
-
-
-
         </div>
       </div>
     </section>
