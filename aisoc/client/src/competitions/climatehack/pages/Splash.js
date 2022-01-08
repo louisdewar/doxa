@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useRef } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import berkeleyLogo from '../assets/logos/berkeley.png';
+import bristolLogo from '../assets/logos/bristol.png';
 import caltechLogo from '../assets/logos/caltech.png';
 import cambridgeLogo from '../assets/logos/cambridge.png';
 import carnegieLogo from '../assets/logos/carnegie-mellon.png';
@@ -10,16 +11,21 @@ import columbiaLogo from '../assets/logos/columbia.png';
 import cornellLogo from '../assets/logos/cornell.png';
 import edinburghLogo from '../assets/logos/edinburgh.png';
 import georgiaTechLogo from '../assets/logos/georgia-tech.png';
+import glasgowLogo from '../assets/logos/glasgow.png';
 import harvardLogo from '../assets/logos/harvard.png';
 import illinoisLogo from '../assets/logos/illinois.png';
 import imperialLogo from '../assets/logos/imperial.png';
+import manchesterLogo from '../assets/logos/manchester.png';
 import michiganLogo from '../assets/logos/michigan.png';
 import mitLogo from '../assets/logos/mit.png';
 import oxfordLogo from '../assets/logos/oxford.png';
 import princetonLogo from '../assets/logos/princeton.png';
+import stAndrewsLogo from '../assets/logos/st-andrews.png';
+import stanfordLogo from '../assets/logos/stanford.png';
 import torontoLogo from '../assets/logos/toronto.png';
 import uclLogo from '../assets/logos/ucl.png';
 import uclaLogo from '../assets/logos/ucla.png';
+import warwickLogo from '../assets/logos/warwick.png';
 import waterlooLogo from '../assets/logos/waterloo.png';
 import stPauls from '../assets/st-pauls.png';
 import Footer from '../components/Footer';
@@ -30,6 +36,18 @@ import './Splash.scss';
 export default function Splash({ baseUrl }) {
   const history = useHistory();
   const aboutRef = useRef(null);
+
+  const logoMargin = '0.6rem';
+
+  const logo = (src, p = '0rem', m = '0rem', etc = {}) => <img
+    src={src}
+    style={{
+      paddingTop: p ?? '0', paddingBottom: p ?? '0',
+      marginLeft: `calc(${logoMargin} - ${m})`,
+      marginRight: `calc(${logoMargin} - ${m})`,
+      ...etc
+    }}
+  />;
 
   return <div className='ch-wrapper'>
     <SplashNavbar baseUrl={baseUrl} />
@@ -88,27 +106,32 @@ export default function Splash({ baseUrl }) {
           </p>
         </div>
         <div className='ch-splash-universities-logos'>
-          <img src={uclLogo} />
-          <img src={mitLogo} style={{ padding: '0.75rem 0' }} />
-          {/* Stanford */}
-          <img src={carnegieLogo} style={{ padding: '0.45rem 0' }} />
-          <img src={berkeleyLogo} style={{ padding: '0.5rem 0', margin: '0.5rem -0.2rem' }} />
-          <img src={oxfordLogo} style={{ padding: '0.75rem 0' }} />
-          <img src={cambridgeLogo} />
-          <img src={harvardLogo} style={{ marginRight: '-1rem' }} />
-          <img src={torontoLogo} style={{ margin: '0.5rem -0.5rem' }} />
-          <img src={princetonLogo} style={{ padding: '1rem 0' }} />
-          <img src={imperialLogo} style={{ padding: '1rem 0' }} />
-          <img src={uclaLogo} style={{ padding: '1rem 0' }} />
-          <img src={columbiaLogo} />
-          <img src={cornellLogo} style={{ margin: '0.5rem -0.5rem' }} />
-          <img src={edinburghLogo} style={{ padding: '0.75rem 0' }} />
-          <img src={waterlooLogo} />
-          <img src={georgiaTechLogo} style={{ padding: '0.75rem 0' }} />
-          <img src={caltechLogo} style={{ margin: '0.5rem -0.8rem' }} />
-          <img src={illinoisLogo} style={{ margin: '0.5rem -0.75rem' }} />
-          <img src={michiganLogo} style={{ padding: '0.75rem 0' }} />
-
+          {logo(uclLogo, undefined, '0.25rem')}
+          {logo(mitLogo, '0.9rem')}
+          {logo(stanfordLogo, '0.6rem')}
+          {logo(berkeleyLogo, '0.65rem', '0.2rem')}
+          {logo(oxfordLogo, '0.75rem', '0.25rem')}
+          {logo(cambridgeLogo, '0.25rem')}
+          {/* <img src={harvardLogo} style={{ padding: '0.225rem 0', marginRight: '-1rem' }} /> */}
+          {logo(harvardLogo, '0.225rem', undefined, { marginRight: '-0.4rem' })}
+          {logo(torontoLogo, '0.2rem', '0.6rem')}
+          {logo(princetonLogo, '0.9rem')}
+          {logo(imperialLogo, '1rem', '-0.1rem')}
+          {logo(caltechLogo, '0.2rem', '0.8rem')}
+          {logo(carnegieLogo, '0.65rem')}
+          {logo(uclaLogo, '1rem')}
+          {logo(columbiaLogo, '0.4rem')}
+          {logo(cornellLogo, '0.5rem', '0.5rem')}
+          {logo(stAndrewsLogo, '0.25rem', '0.2rem')}
+          {logo(edinburghLogo, '0.8rem')}
+          {logo(waterlooLogo, undefined, '0.3rem')}
+          {logo(georgiaTechLogo, '0.9rem')}
+          {logo(michiganLogo, '1rem')}
+          {logo(illinoisLogo, '0.15rem', '0.75rem')}
+          {logo(manchesterLogo, '0.4rem', '0.4rem')}
+          {logo(warwickLogo, undefined, '1.5rem')}
+          {logo(bristolLogo, '0.4rem')}
+          {logo(glasgowLogo, undefined, '1.75rem')}
         </div>
       </div>
     </section>

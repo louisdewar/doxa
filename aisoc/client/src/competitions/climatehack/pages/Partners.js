@@ -1,3 +1,4 @@
+import newcross from '../assets/newcross-white.png';
 import Footer from '../components/Footer';
 import SplashNavbar from '../components/SplashNavbar';
 import './Partners.scss';
@@ -40,12 +41,7 @@ export default function Partners({ baseUrl }) {
     <section className='ch-partners-section ch-partners-sponsor-2'>
       <div className='ch-partners-section-content'>
         <div className='ch-partners-section-heading'>
-          <h2>
-            Sponsor Name
-          </h2>
-          <p>
-            Logo
-          </p>
+          <img src={newcross} />
         </div>
         <div>
           <p>

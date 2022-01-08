@@ -123,12 +123,17 @@ section.ch-splash-section {
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
-      // align-items: center;
+      align-items: center;
+
+      // $logo-gap: 0.75rem;
 
       img {
         box-sizing: border-box;
         height: 3.5rem;
-        margin: 0.5rem 0.4rem;
+        // margin: 0.5rem 0.4rem;
+        // margin: 0;
+        // margin-left: $logo-gap;
+        // margin-right: $logo-gap;
       }
     }
   }

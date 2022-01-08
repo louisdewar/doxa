@@ -39,24 +39,26 @@ section.ch-partners-section {
         margin-top: 0;
         width: 250px;
       }
+
+      img {
+        width: 250px;
+      }
     }
   }
 
   &.ch-partners-sponsor-1 {
-    background-color: #f1f5f9;
+    color: #fff;
+    background-color: #141006;
 
     .ch-partners-section-heading h2 {
       color: $ch-blue;
     }
   }
 
+
   &.ch-partners-sponsor-2 {
     color: #fff;
-    background-color: #141006;
-
-    .ch-partners-section-heading h2 {
-      color: $ch-salmon;
-    }
+    background-color: $ch-salmon;
   }
 
 }
