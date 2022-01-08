@@ -54,12 +54,14 @@ export default function Splash({ baseUrl }) {
 
     <header className='ch-splash-header'>
       <div className='ch-splash-header-title'>
-        <h1 className='ch-intro-title'><span>Climate</span></h1>
-        <h2><span>Hack</span></h2>
+        <div className='ch-splash-header-title-content'>
+          <h1 className='ch-intro-title'><span>Climate</span></h1>
+          <h2><span>Hack</span></h2>
 
-        <button className='ch-compete-button' onClick={() => {
-          history.push(`${baseUrl}comingsoon`);
-        }}>Compete on DOXA</button>
+          <button className='ch-compete-button' onClick={() => {
+            history.push(`${baseUrl}comingsoon`);
+          }}>Compete on DOXA</button>
+        </div>
       </div>
 
       <div className='ch-scroll-to-about'>
@@ -112,7 +114,6 @@ export default function Splash({ baseUrl }) {
           {logo(berkeleyLogo, '0.65rem', '0.2rem')}
           {logo(oxfordLogo, '0.75rem', '0.25rem')}
           {logo(cambridgeLogo, '0.25rem')}
-          {/* <img src={harvardLogo} style={{ padding: '0.225rem 0', marginRight: '-1rem' }} /> */}
           {logo(harvardLogo, '0.225rem', undefined, { marginRight: '-0.4rem' })}
           {logo(torontoLogo, '0.2rem', '0.6rem')}
           {logo(princetonLogo, '0.9rem')}

@@ -26,10 +26,9 @@ button.ch-compete-button {
 
 header.ch-splash-header {
   margin-top: 20px;
-  height: calc(100vh - 73px);
+  height: calc(100vh - 20px);
 
   background-color: #000;
-
   background-image: url('/competitions/climatehack/assets/globe.png');
   background-position: center;
   background-repeat: no-repeat;
@@ -37,15 +36,15 @@ header.ch-splash-header {
 
   display: flex;
   flex-direction: column;
-  text-align: center;
+  justify-content: center;
   align-items: center;
 
   .ch-splash-header-title {
-    margin-top: 25vh;
     color: #f1f5f9;
-    height: calc(100vh - 2 * 73px);
+    flex: 1;
+
+    display: flex;
     align-items: center;
-    text-align: left;
 
     h1,
     h2 {
@@ -61,16 +60,18 @@ header.ch-splash-header {
       font-weight: 100;
     }
   }
-}
 
-.ch-scroll-to-about {
-  text-align: center;
-  font-size: 4rem;
+  .ch-scroll-to-about {
+    text-align: center;
+    font-size: 4rem;
 
-  a {
-    color: #fff;
+    a {
+      color: #fff;
+    }
   }
 }
+
+
 
 section.ch-splash-section {
   padding: 2rem;
@@ -292,6 +293,7 @@ section.ch-splash-section {
 @media screen and (min-width: $breakpoint-sm) {
   header.ch-splash-header {
     margin-top: 73px;
+    height: calc(100vh - 73px);
 
     .ch-splash-header-title h1,
     .ch-splash-header-title h2 {
