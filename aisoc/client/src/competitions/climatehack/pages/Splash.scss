@@ -25,8 +25,8 @@ button.ch-compete-button {
 }
 
 header.ch-splash-header {
-  margin-top: 20px;
-  height: calc(100vh - 20px);
+  margin-top: 65px;
+  height: calc(100vh - 66px);
 
   background-color: #000;
   background-image: url('/competitions/climatehack/assets/globe.png');
@@ -37,20 +37,26 @@ header.ch-splash-header {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
+  align-items: left;
 
   .ch-splash-header-title {
     color: #f1f5f9;
-    flex: 1;
+    // flex: 1;
 
     display: flex;
     align-items: center;
+
+    .ch-splash-header-title-content {
+      margin-left: 10%;
+      margin-top: 6rem;
+      margin-bottom: 6rem;
+    }
 
     h1,
     h2 {
       margin-top: 0;
       margin-bottom: 0;
-      font-size: 4rem;
+      font-size: 3.5rem;
 
       text-decoration: underline;
       text-decoration-color: $ch-blue-transparent;
@@ -81,8 +87,15 @@ section.ch-splash-section {
     margin-left: auto;
     margin-right: auto;
 
+    P {
+      margin-top: 16px;
+    }
+
     .ch-splash-section-heading {
-      margin: 16px 2rem 16px 0;
+      margin-top: 16px;
+      margin-bottom: 16px;
+      margin-right: 2rem;
+      margin-left: 0;
 
       h2 {
         margin-top: 0;
@@ -104,7 +117,7 @@ section.ch-splash-section {
 
   &.ch-splash-about {
     color: #fff;
-    padding: 4rem 2rem;
+    padding: 8rem 2rem;
 
     background-image: url('/competitions/climatehack/assets/europe-at-night.png');
     background-position: center;
@@ -113,6 +126,11 @@ section.ch-splash-section {
 
     .ch-splash-section-heading h2 {
       color: #fff;
+    }
+
+    .ch-splash-section-content>div p:first-child {
+      font-weight: bold;
+      font-size: 1.5rem;
     }
   }
 
@@ -130,7 +148,7 @@ section.ch-splash-section {
 
       img {
         box-sizing: border-box;
-        height: 3.5rem;
+        height: 3rem;
         // margin: 0.5rem 0.4rem;
         // margin: 0;
         // margin-left: $logo-gap;
@@ -164,9 +182,12 @@ section.ch-splash-section {
         display: flex;
         justify-content: center;
 
-        h3,
-        p {
+        h3 {
           text-align: center;
+        }
+
+        p {
+          text-align: justify;
         }
 
         div {
@@ -245,16 +266,16 @@ section.ch-splash-section {
 
     .ch-splash-tangible-impact-description>p:first-child {
       font-weight: bold;
+      font-size: 1.5rem;
     }
   }
 
   &.ch-splash-joint-final {
-    // background-color: #f1f5f9;
-    color: #fff;
+    background-color: #f1f5f9;
 
     .ch-splash-section-heading h2,
     a {
-      color: $ch-salmon;
+      color: $ch-blue;
       text-underline-offset: 0.1rem;
     }
 
@@ -303,10 +324,10 @@ section.ch-splash-section {
 
   section.ch-splash-section {
     .ch-splash-section-heading {
-      width: 200px;
+      width: 25vw;
 
       h2 {
-        width: 190px;
+        width: calc(25vw - 2rem);
       }
     }
 
@@ -314,7 +335,12 @@ section.ch-splash-section {
       max-width: $breakpoint-sm;
       display: flex;
     }
+
+    &.ch-splash-universities .ch-splash-universities-logos img {
+      height: 3.7rem;
+    }
   }
+
 
   .ch-splash-prizes-descriptions {
     margin-left: 6rem;
@@ -322,7 +348,34 @@ section.ch-splash-section {
 }
 
 @media screen and (min-width: $breakpoint-md) {
-  section.ch-splash-section .ch-splash-section-content {
-    max-width: $breakpoint-md;
+  section.ch-splash-section {
+    .ch-splash-section-content {
+      max-width: $breakpoint-md;
+    }
+  }
+}
+
+@media screen and (min-width: $breakpoint-lg) {
+  section.ch-splash-section {
+    .ch-splash-section-content {
+      max-width: $breakpoint-lg;
+      font-size: 1.2rem;
+    }
+
+    &.ch-splash-universities .ch-splash-universities-logos img {
+      height: 4.5rem;
+    }
+  }
+}
+
+@media screen and (min-width: $breakpoint-xl) {
+  section.ch-splash-section {
+    .ch-splash-section-content {
+      max-width: $breakpoint-xl;
+    }
+
+    &.ch-splash-universities .ch-splash-universities-logos img {
+      height: 5rem;
+    }
   }
 }

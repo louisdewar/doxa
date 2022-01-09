@@ -33,3 +33,15 @@
     max-width: $breakpoint-md;
   }
 }
+
+@media screen and (min-width: $breakpoint-lg) {
+  .ch-footer {
+    max-width: $breakpoint-lg;
+  }
+}
+
+@media screen and (min-width: $breakpoint-xl) {
+  .ch-footer {
+    max-width: $breakpoint-xl;
+  }
+}

@@ -96,3 +96,9 @@ section.ch-challenge-section {
     max-width: $breakpoint-md;
   }
 }
+
+@media screen and (min-width: $breakpoint-lg) {
+  section.ch-challenge-section .ch-challenge-section-content {
+    max-width: $breakpoint-lg;
+  }
+}
