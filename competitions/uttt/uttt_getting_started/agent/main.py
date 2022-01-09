@@ -17,10 +17,11 @@ class Agent(BaseAgent):
 
     Its current strategy is to play valid moves picked completely at random.
     """
-
     def make_move(
-        self,  # If you have never seen this syntax before, these are type annotations!
-        boards: List[List[Optional[str]]],  # Don't worry - they're totally optional.
+        self,
+        # If you have never seen this syntax before, these are type annotations!
+        # Don't worry - they're totally optional
+        boards: List[List[Optional[str]]],
         board_winners: List[Optional[str]],
         playable_boards: List[int],
     ) -> Tuple[int, int]:
