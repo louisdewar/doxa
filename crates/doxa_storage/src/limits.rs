@@ -1,8 +1,6 @@
 use std::time::Duration;
 
-use doxa_auth::limiter::{LimiterConfig, TokenBucket};
-
-// const AGENT_UPLOAD_ATTEMPT_LIMITER_ID: &str = "DOXA_AGENT_UPLOAD_ATTEMPT";
+use doxa_auth::limiter::{LimiterConfig, TokenBucket, ONE_DAY, ONE_HOUR};
 
 /// This limiter is used by the upload system for every attempt.
 /// It is also used to limit manual agent activations / reactivations.
@@ -12,13 +10,12 @@ pub fn default_upload_attempts_limiter(key: String) -> LimiterConfig {
     limiter
         // 1 per minute
         .add_limit(TokenBucket::new(Duration::from_secs(60), 1))
-        // Temporarily relax limits
         // 5 per 10 mins
-        .add_limit(TokenBucket::new(Duration::from_secs(60 * 10), 5));
-    //// 10 per hour
-    //.add_limit(TokenBucket::new(ONE_HOUR, 10))
-    //// 40 per day
-    //.add_limit(TokenBucket::new(ONE_DAY, 40));
+        .add_limit(TokenBucket::new(Duration::from_secs(60 * 10), 5))
+        // 20 per hour
+        .add_limit(TokenBucket::new(ONE_HOUR, 20))
+        // 80 per day
+        .add_limit(TokenBucket::new(ONE_DAY, 80));
 
     limiter
 }

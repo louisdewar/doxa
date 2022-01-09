@@ -46,6 +46,12 @@ pub fn derive_respondable_error(input: TokenStream) -> TokenStream {
                     #(#ident::#variant_idents(e) => doxa_core::error::RespondableError::status_code(e)),*
                 }
             }
+
+            fn inject_headers(&self, builder: &mut doxa_core::error::HttpResponseBuilder)  {
+                match self {
+                    #(#ident::#variant_idents(e) => doxa_core::error::RespondableError::inject_headers(e, builder)),*
+                }
+            }
         }
     };
 

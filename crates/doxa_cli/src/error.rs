@@ -1,5 +1,11 @@
+use std::time::Duration;
+
 use derive_more::{Display, Error, From};
-use reqwest::StatusCode;
+use indicatif::HumanDuration;
+use reqwest::{
+    header::{HeaderMap, RETRY_AFTER},
+    StatusCode,
+};
 
 #[derive(Error, Display, From, Debug)]
 pub enum CliError {
@@ -49,6 +55,22 @@ pub struct DoxaError {
     pub error_code: String,
     pub status_code: StatusCode,
     pub message: Option<String>,
+    pub headers: HeaderMap,
+}
+
+impl DoxaError {
+    pub fn retry_after_message(&self) -> Option<String> {
+        if let Some(header) = self.headers.get(RETRY_AFTER) {
+            let ttl: u64 = header.to_str().unwrap().parse().unwrap();
+
+            Some(format!(
+                "Please try again after {}.",
+                HumanDuration(Duration::from_secs(ttl))
+            ))
+        } else {
+            None
+        }
+    }
 }
 
 #[derive(Display, Error, Debug, Clone)]
