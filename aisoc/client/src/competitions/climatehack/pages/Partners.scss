@@ -84,3 +84,9 @@ section.ch-partners-section {
     max-width: $breakpoint-md;
   }
 }
+
+@media screen and (min-width: $breakpoint-lg) {
+  section.ch-partners-section .ch-partners-section-content {
+    max-width: $breakpoint-lg;
+  }
+}

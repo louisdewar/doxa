@@ -27,7 +27,6 @@ import uclLogo from '../assets/logos/ucl.png';
 import uclaLogo from '../assets/logos/ucla.png';
 import warwickLogo from '../assets/logos/warwick.png';
 import waterlooLogo from '../assets/logos/waterloo.png';
-import stPauls from '../assets/st-pauls.png';
 import Footer from '../components/Footer';
 import SplashNavbar from '../components/SplashNavbar';
 import './Splash.scss';
@@ -80,7 +79,7 @@ export default function Splash({ baseUrl }) {
 
     <div className='ch-splash-impact-stripe' ref={scrollRef}>
       <p>
-        MEET PEOPLE. MAKE AN IMPACT. WIN BIG.
+        MEET PEOPLE | MAKE AN IMPACT | WIN BIG
       </p>
     </div>
 
@@ -91,10 +90,13 @@ export default function Splash({ baseUrl }) {
         </div>
         <div>
           <p>
-            Climate Hack.AI is a collaborative initiative between the student communities of 25 universities leading in computer science and artificial intelligence from across the United States, the United Kingdom and Canada to take a lead in the fight against climate change.
+            Climate Hack.AI is a collaborative initiative between the student communities of 25 universities leading in CS and AI from across the United States, the United Kingdom and Canada to take a lead in the fight against climate change.
           </p>
           <p>
-            Participants have two months to apply cutting-edge machine learning techniques in order to develop the best satellite imagery prediction algorithm for use in solar photovolatic output forecasting. The winning entry has the chance to be deployed in the UK National Grid to minimise the use of idle gas turbines, potentially resulting in significant savings in national carbon emissions.
+            Participants have two months to apply cutting-edge machine learning techniques in order to develop the best satellite imagery prediction algorithm for use in solar photovolatic output forecasting.
+          </p>
+          <p>
+            The winning entry has the chance to be deployed in the UK National Grid to minimise the use of idle gas turbines, potentially resulting in significant savings in national carbon emissions.
           </p>
         </div>
       </div>
@@ -107,7 +109,7 @@ export default function Splash({ baseUrl }) {
             Connect with Participants from 25 Universities
           </h2>
           <p>
-            Jointly organised by the student communities of 25 top-ranking CS universities from the US, UK and Canada.
+            Climate Hack.AI is jointly organised by the student communities of 25 top-ranking universities from across the US, UK and Canada.
           </p>
         </div>
         <div className='ch-splash-universities-logos'>
@@ -138,12 +140,15 @@ export default function Splash({ baseUrl }) {
           {logo(glasgowLogo, undefined, '1.75rem')}
 
           <p>
-            Beyond the competition, Climate Hack.AI strives to cultivate a community between students interested in AI around the world. Throughout the competition, there will be plenty of internal and cross-university events for students to connect to and showcase their knowledge in AI, including the following:
+            Beyond this competition, Climate Hack.AI aims to foster a community of students interested in artificial intelligence from around the world.
+          </p>
+          <p>
+            Throughout the competition, there will be plenty of internal and cross-university events for students to meet each other and showcase their knowledge of AI, including the following:
           </p>
           <ul>
-            <li>In-person social events and mini-competitions</li>
-            <li>Virtual Social Events</li>
-            <li>Cross-University Tutorials</li>
+            <li>In-person and virtual social events</li>
+            <li>Mini-competitions</li>
+            <li>Cross-university tutorials</li>
           </ul>
         </div>
       </div>
@@ -158,13 +163,16 @@ export default function Splash({ baseUrl }) {
         </div>
         <div className='ch-splash-tangible-impact-description'>
           <p>
-            Climate Hack.AI is a 3-month long datathon, for which our partner organisation, OpenClimateFix, provides a dataset of climate-related data.
+            Climate Hack.AI is a two-month-long datathon based on climate-related data provided by our partner, OpenClimateFix.
           </p>
           <p>
-            Competitors are tasked with developing machine learning models trained on this data, which are then automatically evaluated against a test set for their expected capability to reduce carbon emissions.
+            Competitors are challenged to develop the best machine learning models trained on this data. Submissions are evaluated against an unseen test dataset on our own custom competition platform, <Link to={`${baseUrl}comingsoon`}>DOXA</Link>.
           </p>
           <p>
-            The winning model may be deployed to the UK National Grid.
+            By improving on the state of the art in nowcasting satellite imagery, the winning model could be deployed by the British electricity system operator (National Grid) to produce significantly more accurate solar photovoltaic output forecasts.
+          </p>
+          <p>
+            This would allow them to minimise the use of idle gas turbines, potentially leading to a substantial reduction in carbon emissions.
           </p>
           <p>
             Learn more about the <Link to={`${baseUrl}challenge`}>challenge</Link>.
@@ -253,24 +261,24 @@ export default function Splash({ baseUrl }) {
           <div className='ch-splash-format-columns'>
             <div>
               <p>
-                Participants will produce models using the provided dataset to be submitted either individually or in teams of up to three. The top 3 competitors from each university will then be invited to the finals.
+                Participants train models on the provided dataset to be submitted either individually or in teams of up to three. The top three competitors from each university will then be invited to the finals, along with a society representative.
               </p>
             </div>
 
             <div>
               <p>
-                Finalists will get access to an expanded training dataset and work within a team representing their respective universities to determine an overall winning model.
+                Finalists gain access to an expanded training dataset and work in teams of three representing their respective universities. The final models they submit will be used to determine the winning team.
               </p>
             </div>
           </div>
 
           <h3>Participation Requirements</h3>
           <p>
-            Participants must be attending one of our partner universities as an undergraduate, masters or PhD student.
+            Participants must be attending one of the co-hosting universities as an undergraduate, masters or PhD student at the time of the competition.
           </p>
 
           <p>
-            Detailed competition rules and submission instructions may be found on our competition platform <Link to={`${baseUrl}compete`}>DOXA</Link>.
+            Detailed competition rules and submission instructions may be found on our competition platform, <Link to={`${baseUrl}comingsoon`}>DOXA</Link>.
           </p>
         </div>
       </div>
@@ -282,14 +290,14 @@ export default function Splash({ baseUrl }) {
           <h2>
             Simultaneous Final in New York and London
           </h2>
-          <img src={stPauls} />
+          {/* <img src={stPauls} /> */}
         </div>
         <div className='ch-splash-joint-final-description'>
           <p>
-            The competition will include a launch and will culminate in an IN-PERSON final weekend for the top 3 competitors from each university.
+            The competition will conclude with an <strong>in-person</strong> final weekend for the top 3 competitors from each university.
           </p>
           <p>
-            The finals will take place across 2 simultaneous events in the US and UK, with the finalists from North America convening in New York, while the finalists from the UK will be hosted in London. The winning team will be selected on the final day. All transport, room, and carbon costs are paid for.
+            There will be two simultaneous final events hosted in New York and London for finalists in North America and London, respectively. All transport, accommodation and carbon offsetting expenses will be paid for. The winning team will be selected and announced on the last day of the competition.
           </p>
         </div>
       </div>

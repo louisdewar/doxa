@@ -4,6 +4,11 @@
 @import "./splash-common.scss";
 
 
+@mixin bigBoldParagraph() {
+  // font-weight: bold;
+  font-size: 1.35em;
+}
+
 button.ch-compete-button {
   margin: 1rem 0;
   padding: 1rem 2rem;
@@ -80,7 +85,7 @@ header.ch-splash-header {
 
 
 section.ch-splash-section {
-  padding: 2rem;
+  padding: 4rem 2rem;
   width: calc(100% - 4rem);
 
   .ch-splash-section-content {
@@ -89,6 +94,7 @@ section.ch-splash-section {
 
     P {
       margin-top: 16px;
+      margin-bottom: 0;
     }
 
     .ch-splash-section-heading {
@@ -99,6 +105,7 @@ section.ch-splash-section {
 
       h2 {
         margin-top: 0;
+        font-size: 1.8em;
       }
 
       img {
@@ -109,15 +116,11 @@ section.ch-splash-section {
         text-align: left;
       }
     }
-
-    p {
-      text-align: justify;
-    }
   }
 
   &.ch-splash-about {
     color: #fff;
-    padding: 8rem 2rem;
+    // padding: 8rem 2rem;
 
     background-image: url('/competitions/climatehack/assets/europe-at-night.png');
     background-position: center;
@@ -129,8 +132,7 @@ section.ch-splash-section {
     }
 
     .ch-splash-section-content>div p:first-child {
-      font-weight: bold;
-      font-size: 1.5rem;
+      @include bigBoldParagraph;
     }
   }
 
@@ -158,12 +160,7 @@ section.ch-splash-section {
   }
 
   &.ch-splash-format {
-    // background-color: $ch-blue;
     color: #fff;
-
-    // p {
-    //   margin-top: 0;
-    // }
 
     .ch-splash-format-description {
       text-align: center;
@@ -191,7 +188,7 @@ section.ch-splash-section {
         }
 
         div {
-          padding: 0.5rem;
+          padding: 1rem;
         }
 
         &>* {
@@ -231,7 +228,7 @@ section.ch-splash-section {
 
       span {
         font-weight: bold;
-        font-size: 2rem;
+        font-size: 3rem;
       }
 
       .ch-splash-prizes-columns {
@@ -265,8 +262,7 @@ section.ch-splash-section {
     }
 
     .ch-splash-tangible-impact-description>p:first-child {
-      font-weight: bold;
-      font-size: 1.5rem;
+      @include bigBoldParagraph;
     }
   }
 
@@ -280,7 +276,7 @@ section.ch-splash-section {
     }
 
     .ch-splash-joint-final-description>p:first-child {
-      font-weight: bold;
+      @include bigBoldParagraph;
     }
   }
 
@@ -293,7 +289,7 @@ section.ch-splash-section {
     }
 
     .ch-splash-tangible-impact-description>p:first-child {
-      font-weight: bold;
+      @include bigBoldParagraph;
     }
   }
 }
@@ -324,10 +320,10 @@ section.ch-splash-section {
 
   section.ch-splash-section {
     .ch-splash-section-heading {
-      width: 25vw;
+      width: 30vw;
 
       h2 {
-        width: calc(25vw - 2rem);
+        width: calc(30vw - 2rem);
       }
     }
 
@@ -351,15 +347,20 @@ section.ch-splash-section {
   section.ch-splash-section {
     .ch-splash-section-content {
       max-width: $breakpoint-md;
+
+      p {
+        text-align: justify;
+      }
     }
   }
 }
 
 @media screen and (min-width: $breakpoint-lg) {
   section.ch-splash-section {
+    font-size: 18px;
+
     .ch-splash-section-content {
       max-width: $breakpoint-lg;
-      font-size: 1.2rem;
     }
 
     &.ch-splash-universities .ch-splash-universities-logos img {
