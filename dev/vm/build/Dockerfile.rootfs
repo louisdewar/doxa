@@ -1,5 +1,13 @@
-# The VM runs alpine so it's a good idea to use that as the rust base image
-FROM rust:1-alpine as vm_executor
+# As of writing this, 3.9 is the latest version that pytorch supports
+FROM python:3.9-slim as rootfs_base
+
+COPY ./dev/vm/build/vm_install.sh /
+RUN /vm_install.sh
+
+RUN rm /vm_install.sh
+
+# The VM runs debian so it's a good idea to use that as the rust base image
+FROM rust:1-bullseye as vm_executor
 
 WORKDIR /app
 
@@ -10,31 +18,22 @@ COPY ./Cargo.lock .
 # Copy slim Cargo.toml
 COPY ./dev/vm/build/Cargo.toml .
 
-RUN apk add --no-cache musl-dev
-# The target should already be x86_64-unknown-linux-musl but we confirm here
-RUN cargo build -p doxa_vm --bin vm_executor --release --workspace --target x86_64-unknown-linux-musl
+# RUN apk add --no-cache musl-dev
+# # The target should already be x86_64-unknown-linux-musl but we confirm here
+RUN cargo build -p doxa_vm --bin vm_executor --release --workspace # --target x86_64-unknown-linux-musl
 
-RUN cp /app/target/x86_64-unknown-linux-musl/release/vm_executor /
+RUN cp /app/target/release/vm_executor /
 
-FROM alpine:3 AS rootfs
+FROM ubuntu:latest AS rootfs_builder
 
+RUN apt-get install e2fsprogs
 
-RUN apk add --no-cache e2fsprogs e2fsprogs-extra
+RUN mkdir -p /image_src/rootfs && mkdir /images
 
-COPY ./dev/vm/build /app
-COPY --from=vm_executor /vm_executor /app/vm_executor
+COPY --from=rootfs_base / /image_src/rootfs
+COPY --from=vm_executor /vm_executor /image_src/rootfs/sbin/vm_executor
+COPY ./dev/vm/build/init.sh /image_src/rootfs/sbin/init
 
+COPY ./dev/vm/build/make_images.sh /
+RUN sh /make_images.sh
 
-WORKDIR /app
-
-# For some reason the alpine-make-rootfs looks for /etc/alpine-release on the host and tries to install extra packages which causes it to crash
-# This just makes it so that the check fails
-RUN rm /etc/alpine-release
-
-RUN wget https://raw.githubusercontent.com/alpinelinux/alpine-make-rootfs/v0.6.0/alpine-make-rootfs \
-    && echo 'c9cfea712709df162f4dcf26e2b1422aadabad43  alpine-make-rootfs' | sha1sum -c \
-    || exit 1
-RUN chmod +x alpine-make-rootfs
-
-# This requires privileged mode which can't be done at build time.
-CMD ["sh", "/app/make_image.sh"]
