@@ -22,9 +22,6 @@ docker build -f ./build/Dockerfile.rootfs -t doxa-rootfs-builder-img "$ROOT"
 
 image_id=$(docker create doxa-rootfs-builder-img)
 
-# Privileged because it has to do mount operations
-# docker run --privileged --name doxa-rootfs-builder doxa-rootfs-builder-img
-
 # Copy images from inside container
 mkdir -p images
 docker cp "$image_id":/images/rootfs.img ./images/rootfs.img
