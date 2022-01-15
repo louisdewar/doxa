@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# This script runs inside the VM at startup
+
 echo "DOXA - presetup"
 
 mount -t proc proc /proc

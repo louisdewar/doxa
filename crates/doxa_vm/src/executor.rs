@@ -103,7 +103,7 @@ impl VMExecutor {
                     }
                     message = message_reader.read_full_message(&mut executor.stream) => {
                         let message = message.expect("failed to read message");
-                        println!("Got line {}", String::from_utf8_lossy(message).to_string());
+                        println!("Got line {}", String::from_utf8_lossy(message));
                         executor.handle_message(message).await.unwrap();
                     }
                 };
