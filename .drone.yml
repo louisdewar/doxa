@@ -13,7 +13,7 @@ steps:
       - sh dev/vm/build_rootfs.sh
     when:
       target:
-      - production
+        - production
   - name: build_server
     image: docker:dind
     privileged: true
@@ -24,7 +24,7 @@ steps:
       - docker build -t registry.dewardt.uk/doxa/server:drone-build-"$DRONE_BUILD_NUMBER" -f aisoc/deploy/Dockerfile.server . --target server_builder
     when:
       target:
-      - production
+        - production
   # Package the final step with the rootfs
   - name: final_build_server
     image: docker:dind
@@ -38,7 +38,7 @@ steps:
       - rootfs
     when:
       target:
-      - production
+        - production
   - name: build_web
     image: docker:dind
     privileged: true
@@ -49,7 +49,7 @@ steps:
       - docker build -t registry.dewardt.uk/doxa/web:drone-build-"$DRONE_BUILD_NUMBER" -f aisoc/deploy/Dockerfile.web .
     when:
       target:
-      - production
+        - production
   - name: build_climatehack_web
     image: docker:dind
     privileged: true
@@ -57,7 +57,7 @@ steps:
       - name: dockersock
         path: /var/run/docker.sock
     commands:
-      - docker build --build-arg multiple_competitions=false --build-arg default_competition=climatehack -t registry.dewardt.uk/doxa/climatehack-web:drone-build-"$DRONE_BUILD_NUMBER" -f aisoc/deploy/Dockerfile.web .
+      - docker build --build-arg multiple_competitions=false --build-arg default_competition=climatehack --build-arg title="Climate Hack" -t registry.dewardt.uk/doxa/climatehack-web:drone-build-"$DRONE_BUILD_NUMBER" -f aisoc/deploy/Dockerfile.web .
   - name: publish main
     image: docker:dind
     privileged: true
@@ -78,7 +78,7 @@ steps:
       - build_web
     when:
       target:
-      - production
+        - production
   - name: publish climate hack
     image: docker:dind
     privileged: true
