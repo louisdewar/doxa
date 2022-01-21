@@ -1,12 +1,18 @@
 $ch-salmon: #EC5764;
-$ch-blue: #2563eb;
-$ch-blue-transparent: #2563ebf0;
+$ch-blue: #115FD4;
+$ch-blue-transparent: #115FD4F0;
+
+$ch-primary-accent: #CBEF9D;
+$ch-primary-accent-transparent: #CBEF9DF0;
+
+$ch-green: #83C554;
 
 .ch-wrapper {
-  background-color: #111827;
+  background-color: #000; //#111827
   height: 100%;
   width: 100%;
   min-height: 100%;
+  font-family: 'IBM Plex Sans', sans-serif;
 
   h1,
   h2,
@@ -14,6 +20,6 @@ $ch-blue-transparent: #2563ebf0;
   h4,
   h5,
   h6 {
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'IBM Plex Sans', sans-serif;
   }
 }

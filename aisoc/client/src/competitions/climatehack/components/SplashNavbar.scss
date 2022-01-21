@@ -14,14 +14,14 @@ nav.ch-navbar {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  font-size: 0.7rem;
-  font-weight: bold;
+  // font-size: 1rem;
+  font-weight: 700;
 
   padding: 25px 0;
 
   a {
     position: relative;
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'IBM Plex Sans', sans-serif;
     color: #FFFFFF;
     text-decoration: none;
     margin: 0 15px;
@@ -29,18 +29,20 @@ nav.ch-navbar {
     &.ch-navbar-title {
       margin-right: auto;
       font-size: 0.9rem;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-weight: 400;
 
       span {
-        font-weight: normal;
+        font-weight: 700;
       }
     }
 
     &.ch-navbar-active,
     &:hover:not(.ch-navbar-title) {
-      color: $ch-salmon;
+      color: $ch-primary-accent;
 
       &::after {
-        background-color: $ch-salmon;
+        background-color: $ch-primary-accent;
       }
     }
 

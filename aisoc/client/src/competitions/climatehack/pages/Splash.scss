@@ -5,15 +5,16 @@
 
 
 @mixin bigBoldParagraph() {
-  // font-weight: bold;
-  font-size: 1.35em;
+  font-weight: 700;
+  text-align: left;
+  // font-size: 1.35em;
 }
 
 button.ch-compete-button {
   margin: 1rem 0;
   padding: 1rem 2rem;
   font-size: 1rem;
-  background-color: $ch-salmon;
+  background-color: $ch-green;
   border: 0;
   border-radius: 3px;
   color: #fff;
@@ -21,11 +22,11 @@ button.ch-compete-button {
   cursor: pointer;
 
   &:hover {
-    background-color: darken($ch-salmon, 5%);
+    background-color: darken($ch-green, 5%);
   }
 
   &:active {
-    background-color: darken($ch-salmon, 10%);
+    background-color: darken($ch-green, 10%);
   }
 }
 
@@ -34,10 +35,14 @@ header.ch-splash-header {
   height: calc(100vh - 66px);
 
   background-color: #000;
+
   background-image: url('/competitions/climatehack/assets/globe.png');
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+  border-left: inset 20vw transparent;
+  border-right: inset 20vw transparent;
+
 
   display: flex;
   flex-direction: column;
@@ -52,7 +57,7 @@ header.ch-splash-header {
     align-items: center;
 
     .ch-splash-header-title-content {
-      margin-left: 10%;
+      margin-left: -20%;
       margin-top: 6rem;
       margin-bottom: 6rem;
     }
@@ -64,11 +69,16 @@ header.ch-splash-header {
       font-size: 3.5rem;
 
       text-decoration: underline;
-      text-decoration-color: $ch-blue-transparent;
+      text-decoration-color: $ch-primary-accent-transparent;
+      text-underline-offset: 0.1rem;
     }
 
     h2 {
-      font-weight: 100;
+      // font-weight: 300;
+
+      span {
+        font-weight: 300;
+      }
     }
   }
 
@@ -85,8 +95,13 @@ header.ch-splash-header {
 
 
 section.ch-splash-section {
-  padding: 4rem 2rem;
+  padding: 2rem 2rem;
   width: calc(100% - 4rem);
+  box-sizing: border-box;
+  margin: auto;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  border-radius: 20px;
 
   .ch-splash-section-content {
     margin-left: auto;
@@ -103,9 +118,12 @@ section.ch-splash-section {
       margin-right: 2rem;
       margin-left: 0;
 
+
       h2 {
         margin-top: 0;
+        margin-right: 2rem;
         font-size: 1.8em;
+        font-family: 'Playfair Display', serif;
       }
 
       img {
@@ -122,10 +140,11 @@ section.ch-splash-section {
     color: #fff;
     // padding: 8rem 2rem;
 
-    background-image: url('/competitions/climatehack/assets/europe-at-night.png');
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
+    // background-image: url('/competitions/climatehack/assets/europe-at-night.png');
+    // background-position: center;
+    // background-repeat: no-repeat;
+    // background-size: cover;
+    background-color: #111827;
 
     .ch-splash-section-heading h2 {
       color: #fff;
@@ -161,6 +180,7 @@ section.ch-splash-section {
 
   &.ch-splash-format {
     color: #fff;
+    background-color: #282a2d;
 
     .ch-splash-format-description {
       text-align: center;
@@ -204,26 +224,20 @@ section.ch-splash-section {
 
   &.ch-splash-prizes {
     color: #fff;
-    background-color: $ch-salmon;
+    background-color: $ch-green;
 
     .ch-splash-section-heading {
-      h3 {
-        font-weight: 400;
-        font-size: 1rem;
-      }
-
-      span {
-        font-weight: bold;
-        font-size: 1.5rem;
+      h2 {
+        font-size: 2.5rem;
       }
     }
 
     .ch-splash-prizes-descriptions {
-      text-align: right;
+      text-align: center;
       width: 100%;
 
       .ch-splash-prizes-descriptions-label {
-        text-align: right;
+        text-align: center;
       }
 
       span {
@@ -315,20 +329,29 @@ section.ch-splash-section {
     .ch-splash-header-title h1,
     .ch-splash-header-title h2 {
       font-size: 6rem;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-weight: 400;
+
+      span {
+        font-weight: 700;
+      }
     }
   }
 
   section.ch-splash-section {
     .ch-splash-section-heading {
-      width: 30vw;
+      // width: 40vw;
 
       h2 {
-        width: calc(30vw - 2rem);
+        width: calc(17.5vw - 2rem);
       }
     }
 
-    .ch-splash-section-content {
+    .ch-panel-container {
       max-width: $breakpoint-sm;
+    }
+
+    .ch-splash-section-content {
       display: flex;
     }
 
@@ -336,47 +359,43 @@ section.ch-splash-section {
       height: 3.7rem;
     }
   }
+}
 
-
-  .ch-splash-prizes-descriptions {
-    margin-left: 6rem;
-  }
+.ch-panel-container {
+  width: 100%;
+  margin: auto;
 }
 
 @media screen and (min-width: $breakpoint-md) {
-  section.ch-splash-section {
-    .ch-splash-section-content {
-      max-width: $breakpoint-md;
+  .ch-panel-container {
+    max-width: $breakpoint-md;
 
-      p {
-        text-align: justify;
-      }
+    p {
+      text-align: justify;
     }
   }
 }
 
 @media screen and (min-width: $breakpoint-lg) {
+  .ch-panel-container {
+    max-width: $breakpoint-lg;
+  }
+
   section.ch-splash-section {
-    font-size: 18px;
-
-    .ch-splash-section-content {
-      max-width: $breakpoint-lg;
-    }
-
     &.ch-splash-universities .ch-splash-universities-logos img {
       height: 4.5rem;
     }
   }
 }
 
-@media screen and (min-width: $breakpoint-xl) {
-  section.ch-splash-section {
-    .ch-splash-section-content {
-      max-width: $breakpoint-xl;
-    }
+// @media screen and (min-width: $breakpoint-xl) {
+//   section.ch-splash-section {
+//     .ch-splash-section-content {
+//       max-width: $breakpoint-xl;
+//     }
 
-    &.ch-splash-universities .ch-splash-universities-logos img {
-      height: 5rem;
-    }
-  }
-}
+//     &.ch-splash-universities .ch-splash-universities-logos img {
+//       height: 5rem;
+//     }
+//   }
+// }

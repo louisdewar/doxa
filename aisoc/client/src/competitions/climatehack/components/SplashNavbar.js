@@ -3,7 +3,7 @@ import './SplashNavbar.scss';
 
 export default function SplashNavbar({ baseUrl }) {
   return <nav className="ch-navbar">
-    <Link to={baseUrl} className='ch-navbar-title'>Climate <span>Hack.</span>AI</Link>
+    <Link to={baseUrl} className='ch-navbar-title'>Climate Hack.<span>AI</span></Link>
     {/* <a href={baseUrl} className='ch-navbar-home'>Home</a> */}
     <Link to={`${baseUrl}challenge`}>The Challenge</Link>
     <Link to={`${baseUrl}partners`}>Our Partners</Link>

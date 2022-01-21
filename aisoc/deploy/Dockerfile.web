@@ -11,7 +11,7 @@ COPY aisoc/client .
 
 ARG multiple_competitions
 ARG default_competition
-ARG title="DOXA"
+ARG title
 
 ENV REACT_APP_DEFAULT_COMPETITION=$default_competition
 ENV REACT_APP_MULTIPLE_COMPETITIONS=$multiple_competitions
