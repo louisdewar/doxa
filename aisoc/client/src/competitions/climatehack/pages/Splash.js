@@ -36,7 +36,7 @@ export default function Splash({ baseUrl }) {
   const history = useHistory();
   const scrollRef = useRef(null);
 
-  const logoMargin = '0.6rem';
+  const logoMargin = '0.75rem';
 
   const logo = (src, p = '0rem', m = '0rem', etc = {}) => <img
     src={src}

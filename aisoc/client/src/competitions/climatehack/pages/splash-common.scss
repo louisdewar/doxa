@@ -33,7 +33,7 @@ $ch-green: #83C554;
 
 section.ch-section {
   padding: 2rem 2rem;
-  width: calc(100% - 4rem);
+  width: 100%;
   box-sizing: border-box;
   margin: auto;
   margin-top: 2rem;
@@ -80,7 +80,7 @@ section.ch-section {
 
     .ch-section-content {
       display: flex;
-      gap: 2rem;
+      gap: 4rem;
     }
   }
 

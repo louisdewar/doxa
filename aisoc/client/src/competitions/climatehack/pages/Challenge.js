@@ -1,4 +1,4 @@
-import ocfLogo from '../assets/ocf-logo.png';
+import ocfLogo from '../assets/ocf-white.png';
 import Footer from '../components/Footer';
 import SplashNavbar from '../components/SplashNavbar';
 import './Challenge.scss';
