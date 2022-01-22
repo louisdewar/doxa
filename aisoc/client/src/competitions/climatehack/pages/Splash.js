@@ -1,7 +1,5 @@
-import { faCaretDown } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useRef } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import berkeleyLogo from '../assets/logos/berkeley.png';
 import bristolLogo from '../assets/logos/bristol.png';
 import caltechLogo from '../assets/logos/caltech.png';
@@ -28,16 +26,15 @@ import uclaLogo from '../assets/logos/ucla.png';
 import warwickLogo from '../assets/logos/warwick.png';
 import waterlooLogo from '../assets/logos/waterloo.png';
 import Footer from '../components/Footer';
+import SplashHeader from '../components/SplashHeader';
 import SplashNavbar from '../components/SplashNavbar';
 import './Splash.scss';
 
 
 export default function Splash({ baseUrl }) {
-  const history = useHistory();
   const scrollRef = useRef(null);
 
   const logoMargin = '0.75rem';
-
   const logo = (src, p = '0rem', m = '0rem', etc = {}) => <img
     src={src}
     style={{
@@ -51,30 +48,12 @@ export default function Splash({ baseUrl }) {
   return <div className='ch-wrapper'>
     <SplashNavbar baseUrl={baseUrl} />
 
-    <header className='ch-splash-header'>
-      <div className='ch-splash-header-title'>
-        <div className='ch-splash-header-title-content'>
-          <h1 className='ch-intro-title'>Climate</h1>
-          <h2>Hack.<span>AI</span></h2>
-
-          <button className='ch-compete-button' onClick={() => {
-            history.push(`${baseUrl}comingsoon`);
-          }}>Compete on DOXA</button>
-        </div>
-      </div>
-
-      <div className='ch-scroll-to-about'>
-        <a href="#" onClick={e => {
-          e.preventDefault();
-
-          window.scrollTo({
-            top: scrollRef.current.getBoundingClientRect().top + window.scrollY - 95,
-            behavior: 'smooth'
-          });
-
-        }}><FontAwesomeIcon icon={faCaretDown} fixedWidth /></a>
-      </div>
-    </header>
+    <SplashHeader baseUrl={baseUrl} scroll={() => {
+      window.scrollTo({
+        top: scrollRef.current.getBoundingClientRect().top + window.scrollY - 95,
+        behavior: 'smooth'
+      });
+    }} />
 
     <div className="ch-panel-container">
       <section className='ch-section ch-splash-about' ref={scrollRef}>
@@ -130,7 +109,6 @@ export default function Splash({ baseUrl }) {
             {logo(illinoisLogo, '0.15rem', '0.75rem')}
             {logo(glasgowLogo, undefined, '1.75rem')}
 
-
             <p>
               Beyond this competition, Climate Hack.AI aims to foster a community of students interested in artificial intelligence from around the world.
             </p>
@@ -179,7 +157,6 @@ export default function Splash({ baseUrl }) {
             <p>
               The top 3 student teams will receive the following cash prizes:
             </p>
-
             <div className='ch-splash-prizes-columns'>
               <div>
                 <h3>1<sup>st</sup> place team</h3>
@@ -194,9 +171,7 @@ export default function Splash({ baseUrl }) {
                 <span>£6.75k</span>
               </div>
             </div>
-
             <br />
-
             <p>
               Their respective societies will receive the following cash prizes:
             </p>
@@ -214,7 +189,6 @@ export default function Splash({ baseUrl }) {
                 <span>£750</span>
               </div>
             </div>
-
           </div>
         </div>
       </section>
@@ -232,7 +206,6 @@ export default function Splash({ baseUrl }) {
                 <h3>Launch</h3>
                 <h4>28th January</h4>
               </div>
-
               <div>
                 <h3>In-person finals</h3>
                 <h4>24-26th March</h4>
@@ -257,19 +230,16 @@ export default function Splash({ baseUrl }) {
                   Participants train models on the provided dataset to be submitted either individually or in teams of up to three. The top three competitors from each university will then be invited to the finals, along with a society representative.
                 </p>
               </div>
-
               <div>
                 <p>
                   Finalists gain access to an expanded training dataset and work in teams of three representing their respective universities. The final models they submit will be used to determine the winning team.
                 </p>
               </div>
             </div>
-
             <h3>Participation Requirements</h3>
             <p>
               Participants must be attending one of the co-hosting universities as an undergraduate, masters or PhD student at the time of the competition.
             </p>
-
             <p>
               Detailed competition rules and submission instructions may be found on our competition platform, <Link to={`${baseUrl}comingsoon`}>DOXA</Link>.
             </p>
@@ -297,6 +267,5 @@ export default function Splash({ baseUrl }) {
     </div>
 
     <Footer />
-
   </div >;
 }

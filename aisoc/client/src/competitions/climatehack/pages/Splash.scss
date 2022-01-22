@@ -3,99 +3,9 @@
 @import 'common/fonts';
 @import "./splash-common.scss";
 
-
-@mixin bigBoldParagraph() {
-  font-weight: 700;
-  text-align: left;
-}
-
-button.ch-compete-button {
-  margin: 1rem 0;
-  padding: 1rem 2rem;
-  font-size: 1rem;
-  background-color: $ch-green;
-  border: 0;
-  border-radius: 3px;
-  color: #fff;
-  font-family: $monospace-font;
-  cursor: pointer;
-
-  &:hover {
-    background-color: darken($ch-green, 5%);
-  }
-
-  &:active {
-    background-color: darken($ch-green, 10%);
-  }
-}
-
-header.ch-splash-header {
-  margin-top: 65px;
-  height: calc(100vh - 66px);
-
-  background-color: #000;
-
-  background-image: url('/competitions/climatehack/assets/globe.png');
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-  border-left: inset 20vw transparent;
-  border-right: inset 20vw transparent;
-
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: left;
-
-  .ch-splash-header-title {
-    color: #f1f5f9;
-
-    display: flex;
-    align-items: center;
-
-    .ch-splash-header-title-content {
-      margin-left: -20%;
-      margin-top: 6rem;
-      margin-bottom: 6rem;
-    }
-
-    h1,
-    h2 {
-      margin-top: 0;
-      margin-bottom: 0;
-      font-size: 3.5rem;
-
-      text-decoration: underline;
-      text-decoration-color: $ch-primary-accent-transparent;
-      text-underline-offset: 0.1rem;
-    }
-
-    h2 {
-      span {
-        font-weight: 300;
-      }
-    }
-  }
-
-  .ch-scroll-to-about {
-    text-align: center;
-    font-size: 4rem;
-
-    a {
-      color: #fff;
-    }
-  }
-}
-
 section.ch-section {
   &.ch-splash-about {
-    color: #fff;
     background-color: #111827;
-
-    .ch-section-heading h2 {
-      color: #fff;
-    }
 
     .ch-section-content>div p:first-child {
       @include bigBoldParagraph;
@@ -104,7 +14,6 @@ section.ch-section {
 
   &.ch-splash-universities {
     background-color: $ch-blue;
-    color: #fff;
 
     .ch-splash-universities-logos {
       display: flex;
@@ -120,7 +29,6 @@ section.ch-section {
   }
 
   &.ch-splash-format {
-    color: #fff;
     background-color: #282a2d;
 
     .ch-splash-format-description {
@@ -164,7 +72,6 @@ section.ch-section {
   }
 
   &.ch-splash-prizes {
-    color: #fff;
     background-color: $ch-green;
 
     .ch-section-heading {
@@ -209,6 +116,7 @@ section.ch-section {
 
   &.ch-splash-tangible-impact {
     background-color: #f1f5f9;
+    color: #000;
 
     .ch-section-heading h2,
     a {
@@ -223,6 +131,7 @@ section.ch-section {
 
   &.ch-splash-joint-final {
     background-color: #f1f5f9;
+    color: #000;
 
     .ch-section-heading h2,
     a {

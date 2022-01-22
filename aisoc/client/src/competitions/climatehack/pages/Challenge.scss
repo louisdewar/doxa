@@ -27,6 +27,7 @@ header.ch-challenge-header {
 section.ch-section {
   &.ch-challenge-pv {
     background-color: #f1f5f9;
+    color: #000;
 
     .ch-section-heading h2 {
       color: #2563eb;
@@ -34,7 +35,6 @@ section.ch-section {
   }
 
   &.ch-challenge-ocf {
-    color: #fff;
     background-color: #141006;
 
     .ch-section-heading h2 {
@@ -43,8 +43,6 @@ section.ch-section {
   }
 
   &.ch-challenge-impact {
-    color: #fff;
-
     padding: 2rem 2rem 8rem 2rem;
 
     background-image: url('/competitions/climatehack/assets/challenge-solar-panels.png');

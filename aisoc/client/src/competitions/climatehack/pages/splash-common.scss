@@ -11,6 +11,7 @@ $ch-green: #83C554;
 
 .ch-wrapper {
   background-color: #000; //#111827
+  color: #fff;
   height: 100%;
   width: 100%;
   min-height: 100%;
@@ -29,6 +30,11 @@ $ch-green: #83C554;
 .ch-panel-container {
   width: 100%;
   margin: auto;
+}
+
+@mixin bigBoldParagraph() {
+  font-weight: 700;
+  text-align: left;
 }
 
 section.ch-section {
