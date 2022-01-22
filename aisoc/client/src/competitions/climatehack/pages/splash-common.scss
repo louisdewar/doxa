@@ -55,7 +55,7 @@ section.ch-section {
 
       h2 {
         margin-top: 0;
-        margin-right: 2rem;
+        margin-bottom: 0;
         font-size: 2em;
         font-family: 'Playfair Display', serif;
       }
@@ -70,14 +70,17 @@ section.ch-section {
 @media screen and (min-width: $breakpoint-sm) {
   section.ch-section {
     .ch-section-heading {
-      h2 {
-        width: 14vw;
+      max-width: 15vw;
+
+      h2,
+      img {
+        width: 15vw;
       }
     }
 
     .ch-section-content {
       display: flex;
-      gap: 1rem;
+      gap: 2rem;
     }
   }
 

@@ -172,7 +172,7 @@ export default function Splash({ baseUrl }) {
         <div className='ch-section-content ch-section-content'>
           <div className='ch-section-heading ch-section-heading'>
             <h2>
-              A £50k prize pool
+              A £50k Prize Pool
             </h2>
           </div>
           <div className='ch-splash-prizes-descriptions'>
@@ -281,7 +281,7 @@ export default function Splash({ baseUrl }) {
         <div className='ch-section-content ch-section-content'>
           <div className='ch-section-heading ch-section-heading'>
             <h2>
-              Simultaneous Final in New York and London
+              Joint Final in New York and London
             </h2>
           </div>
           <div className='ch-splash-joint-final-description'>

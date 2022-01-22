@@ -39,10 +39,7 @@ export default function Challenge({ baseUrl }) {
       <section className='ch-section ch-challenge-ocf'>
         <div className='ch-section-content'>
           <div className='ch-section-heading'>
-            <h2>
-              OpenClimateFix
-            </h2>
-            <img src={ocfLogo} width={'100%'} />
+            <img src={ocfLogo} />
           </div>
           <div>
             <p>
