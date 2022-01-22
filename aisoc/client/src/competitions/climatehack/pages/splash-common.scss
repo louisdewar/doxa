@@ -1,3 +1,5 @@
+@import 'common/common';
+
 $ch-salmon: #EC5764;
 $ch-blue: #115FD4;
 $ch-blue-transparent: #115FD4F0;
@@ -21,5 +23,81 @@ $ch-green: #83C554;
   h5,
   h6 {
     font-family: 'IBM Plex Sans', sans-serif;
+  }
+}
+
+.ch-panel-container {
+  width: 100%;
+  margin: auto;
+}
+
+section.ch-section {
+  padding: 2rem 2rem;
+  width: calc(100% - 4rem);
+  box-sizing: border-box;
+  margin: auto;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  border-radius: 20px;
+
+  .ch-section-content {
+    margin-left: auto;
+    margin-right: auto;
+
+    P {
+      margin-top: 16px;
+      margin-bottom: 0;
+    }
+
+    .ch-section-heading {
+      margin-top: 16px;
+      margin-bottom: 16px;
+
+      h2 {
+        margin-top: 0;
+        margin-right: 2rem;
+        font-size: 2em;
+        font-family: 'Playfair Display', serif;
+      }
+
+      img {
+        width: 100%;
+      }
+    }
+  }
+}
+
+@media screen and (min-width: $breakpoint-sm) {
+  section.ch-section {
+    .ch-section-heading {
+      h2 {
+        width: 14vw;
+      }
+    }
+
+    .ch-section-content {
+      display: flex;
+      gap: 1rem;
+    }
+  }
+
+  .ch-panel-container {
+    max-width: $breakpoint-sm;
+  }
+}
+
+@media screen and (min-width: $breakpoint-md) {
+  .ch-panel-container {
+    max-width: $breakpoint-md;
+
+    p {
+      text-align: justify;
+    }
+  }
+}
+
+@media screen and (min-width: $breakpoint-lg) {
+  .ch-panel-container {
+    max-width: $breakpoint-lg;
   }
 }

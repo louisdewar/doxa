@@ -7,7 +7,6 @@
 @mixin bigBoldParagraph() {
   font-weight: 700;
   text-align: left;
-  // font-size: 1.35em;
 }
 
 button.ch-compete-button {
@@ -51,7 +50,6 @@ header.ch-splash-header {
 
   .ch-splash-header-title {
     color: #f1f5f9;
-    // flex: 1;
 
     display: flex;
     align-items: center;
@@ -74,8 +72,6 @@ header.ch-splash-header {
     }
 
     h2 {
-      // font-weight: 300;
-
       span {
         font-weight: 300;
       }
@@ -92,65 +88,16 @@ header.ch-splash-header {
   }
 }
 
-
-
-section.ch-splash-section {
-  padding: 2rem 2rem;
-  width: calc(100% - 4rem);
-  box-sizing: border-box;
-  margin: auto;
-  margin-top: 2rem;
-  margin-bottom: 2rem;
-  border-radius: 20px;
-
-  .ch-splash-section-content {
-    margin-left: auto;
-    margin-right: auto;
-
-    P {
-      margin-top: 16px;
-      margin-bottom: 0;
-    }
-
-    .ch-splash-section-heading {
-      margin-top: 16px;
-      margin-bottom: 16px;
-      margin-right: 2rem;
-      margin-left: 0;
-
-
-      h2 {
-        margin-top: 0;
-        margin-right: 2rem;
-        font-size: 1.8em;
-        font-family: 'Playfair Display', serif;
-      }
-
-      img {
-        width: 100%;
-      }
-
-      p {
-        text-align: left;
-      }
-    }
-  }
-
+section.ch-section {
   &.ch-splash-about {
     color: #fff;
-    // padding: 8rem 2rem;
-
-    // background-image: url('/competitions/climatehack/assets/europe-at-night.png');
-    // background-position: center;
-    // background-repeat: no-repeat;
-    // background-size: cover;
     background-color: #111827;
 
-    .ch-splash-section-heading h2 {
+    .ch-section-heading h2 {
       color: #fff;
     }
 
-    .ch-splash-section-content>div p:first-child {
+    .ch-section-content>div p:first-child {
       @include bigBoldParagraph;
     }
   }
@@ -165,15 +112,9 @@ section.ch-splash-section {
       justify-content: space-between;
       align-items: center;
 
-      // $logo-gap: 0.75rem;
-
       img {
         box-sizing: border-box;
         height: 3rem;
-        // margin: 0.5rem 0.4rem;
-        // margin: 0;
-        // margin-left: $logo-gap;
-        // margin-right: $logo-gap;
       }
     }
   }
@@ -226,7 +167,7 @@ section.ch-splash-section {
     color: #fff;
     background-color: $ch-green;
 
-    .ch-splash-section-heading {
+    .ch-section-heading {
       h2 {
         font-size: 2.5rem;
       }
@@ -269,7 +210,7 @@ section.ch-splash-section {
   &.ch-splash-tangible-impact {
     background-color: #f1f5f9;
 
-    .ch-splash-section-heading h2,
+    .ch-section-heading h2,
     a {
       color: $ch-blue;
       text-underline-offset: 0.05rem;
@@ -283,7 +224,7 @@ section.ch-splash-section {
   &.ch-splash-joint-final {
     background-color: #f1f5f9;
 
-    .ch-splash-section-heading h2,
+    .ch-section-heading h2,
     a {
       color: $ch-blue;
       text-underline-offset: 0.1rem;
@@ -297,7 +238,7 @@ section.ch-splash-section {
   &.ch-splash-community-connection {
     background-color: #f1f5f9;
 
-    .ch-splash-section-heading h2 {
+    .ch-section-heading h2 {
       color: $ch-blue;
       text-underline-offset: 0.05rem;
     }
@@ -305,19 +246,6 @@ section.ch-splash-section {
     .ch-splash-tangible-impact-description>p:first-child {
       @include bigBoldParagraph;
     }
-  }
-}
-
-.ch-splash-impact-stripe {
-  background-color: #f1f5f9;
-  color: $ch-blue;
-
-  p {
-    margin: 0;
-    text-align: center;
-    font-size: 1.25rem;
-    padding: 1rem;
-    font-weight: 700;
   }
 }
 
@@ -338,64 +266,17 @@ section.ch-splash-section {
     }
   }
 
-  section.ch-splash-section {
-    .ch-splash-section-heading {
-      // width: 40vw;
-
-      h2 {
-        width: calc(17.5vw - 2rem);
-      }
-    }
-
-    .ch-panel-container {
-      max-width: $breakpoint-sm;
-    }
-
-    .ch-splash-section-content {
-      display: flex;
-    }
-
+  section.ch-section {
     &.ch-splash-universities .ch-splash-universities-logos img {
       height: 3.7rem;
     }
   }
 }
 
-.ch-panel-container {
-  width: 100%;
-  margin: auto;
-}
-
-@media screen and (min-width: $breakpoint-md) {
-  .ch-panel-container {
-    max-width: $breakpoint-md;
-
-    p {
-      text-align: justify;
-    }
-  }
-}
-
 @media screen and (min-width: $breakpoint-lg) {
-  .ch-panel-container {
-    max-width: $breakpoint-lg;
-  }
-
-  section.ch-splash-section {
+  section.ch-section {
     &.ch-splash-universities .ch-splash-universities-logos img {
       height: 4.5rem;
     }
   }
 }
-
-// @media screen and (min-width: $breakpoint-xl) {
-//   section.ch-splash-section {
-//     .ch-splash-section-content {
-//       max-width: $breakpoint-xl;
-//     }
-
-//     &.ch-splash-universities .ch-splash-universities-logos img {
-//       height: 5rem;
-//     }
-//   }
-// }

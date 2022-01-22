@@ -72,21 +72,14 @@ export default function Splash({ baseUrl }) {
             behavior: 'smooth'
           });
 
-          // scrollRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }}><FontAwesomeIcon icon={faCaretDown} fixedWidth /></a>
       </div>
     </header>
 
-    {/* <div className='ch-splash-impact-stripe'>
-      <p>
-        MEET PEOPLE | MAKE AN IMPACT | WIN BIG
-      </p>
-    </div> */}
-
     <div className="ch-panel-container">
-      <section className='ch-splash-section ch-splash-about' ref={scrollRef}>
-        <div className='ch-splash-section-content'>
-          <div className='ch-splash-section-heading'>
+      <section className='ch-section ch-splash-about' ref={scrollRef}>
+        <div className='ch-section-content ch-section-content'>
+          <div className='ch-section-heading ch-section-heading'>
             <h2>About Climate Hack.AI</h2>
           </div>
           <div>
@@ -103,38 +96,38 @@ export default function Splash({ baseUrl }) {
         </div>
       </section >
 
-      <section className='ch-splash-section ch-splash-universities'>
-        <div className='ch-splash-section-content'>
-          <div className='ch-splash-section-heading'>
+      <section className='ch-section ch-splash-universities'>
+        <div className='ch-section-content ch-section-content'>
+          <div className='ch-section-heading ch-section-heading'>
             <h2>
               Connect with Participants from 25 Universities
             </h2>
           </div>
           <div className='ch-splash-universities-logos'>
             {logo(uclLogo, undefined, '0.25rem')}
-            {logo(mitLogo, '0.9rem')}
             {logo(stanfordLogo, '0.6rem')}
             {logo(berkeleyLogo, '0.65rem', '0.2rem')}
             {logo(oxfordLogo, '0.75rem', '0.25rem')}
             {logo(cambridgeLogo, '0.25rem')}
-            {logo(harvardLogo, '0.225rem', undefined, { marginRight: '-0.4rem' })}
+            {logo(mitLogo, '1.3rem')}
             {logo(torontoLogo, '0.2rem', '0.6rem')}
+            {logo(harvardLogo, '0.225rem', undefined, { marginRight: '-0.4rem' })}
             {logo(princetonLogo, '0.9rem')}
             {logo(imperialLogo, '1rem', '-0.1rem')}
+            {logo(cornellLogo, '0.5rem', '0.5rem')}
             {logo(caltechLogo, '0.2rem', '0.8rem')}
             {logo(carnegieLogo, '0.65rem')}
             {logo(uclaLogo, '1rem')}
             {logo(columbiaLogo, '0.4rem')}
-            {logo(cornellLogo, '0.5rem', '0.5rem')}
             {logo(stAndrewsLogo, '0.25rem', '0.2rem')}
-            {logo(edinburghLogo, '0.8rem')}
-            {logo(waterlooLogo, undefined, '0.3rem')}
             {logo(georgiaTechLogo, '0.9rem')}
-            {logo(michiganLogo, '1rem')}
-            {logo(illinoisLogo, '0.15rem', '0.75rem')}
+            {logo(edinburghLogo, '0.8rem')}
             {logo(manchesterLogo, '0.4rem', '0.4rem')}
-            {logo(warwickLogo, undefined, '1.5rem')}
+            {logo(waterlooLogo, undefined, '0.3rem')}
+            {logo(michiganLogo, '1rem')}
+            {logo(warwickLogo, undefined, '2.25rem')}
             {logo(bristolLogo, '0.4rem')}
+            {logo(illinoisLogo, '0.15rem', '0.75rem')}
             {logo(glasgowLogo, undefined, '1.75rem')}
 
 
@@ -148,9 +141,9 @@ export default function Splash({ baseUrl }) {
         </div>
       </section>
 
-      <section className='ch-splash-section ch-splash-tangible-impact'>
-        <div className='ch-splash-section-content'>
-          <div className='ch-splash-section-heading'>
+      <section className='ch-section ch-splash-tangible-impact'>
+        <div className='ch-section-content ch-section-content'>
+          <div className='ch-section-heading ch-section-heading'>
             <h2>
               Make a Tangible Impact
             </h2>
@@ -175,31 +168,29 @@ export default function Splash({ baseUrl }) {
         </div>
       </section>
 
-      <section className='ch-splash-section ch-splash-prizes'>
-        <div className='ch-splash-section-content'>
-          <div className='ch-splash-section-heading'>
+      <section className='ch-section ch-splash-prizes'>
+        <div className='ch-section-content ch-section-content'>
+          <div className='ch-section-heading ch-section-heading'>
             <h2>
-              A £50 prize pool
+              A £50k prize pool
             </h2>
           </div>
           <div className='ch-splash-prizes-descriptions'>
-
-
             <p>
               The top 3 student teams will receive the following cash prizes:
             </p>
 
             <div className='ch-splash-prizes-columns'>
               <div>
-                <h3>First-place team</h3>
+                <h3>1<sup>st</sup> place team</h3>
                 <span>£30k</span>
               </div>
               <div>
-                <h3>Second-place team</h3>
+                <h3>2<sup>nd</sup> place team</h3>
                 <span>£9k</span>
               </div>
               <div>
-                <h3>Third-place team</h3>
+                <h3>3<sup>rd</sup> place team</h3>
                 <span>£6.75k</span>
               </div>
             </div>
@@ -211,15 +202,15 @@ export default function Splash({ baseUrl }) {
             </p>
             <div className='ch-splash-prizes-columns'>
               <div>
-                <h3>First-place society</h3>
+                <h3>1<sup>st</sup> place society</h3>
                 <span>£2.5k</span>
               </div>
               <div>
-                <h3>Second-place society</h3>
+                <h3>2<sup>nd</sup> place society</h3>
                 <span>£1k</span>
               </div>
               <div>
-                <h3>Third-place society</h3>
+                <h3>3<sup>rd</sup> place society</h3>
                 <span>£750</span>
               </div>
             </div>
@@ -228,9 +219,9 @@ export default function Splash({ baseUrl }) {
         </div>
       </section>
 
-      <section className='ch-splash-section ch-splash-format'>
-        <div className='ch-splash-section-content'>
-          <div className='ch-splash-section-heading'>
+      <section className='ch-section ch-splash-format'>
+        <div className='ch-section-content ch-section-content'>
+          <div className='ch-section-heading ch-section-heading'>
             <h2>
               Competition Format
             </h2>
@@ -286,13 +277,12 @@ export default function Splash({ baseUrl }) {
         </div>
       </section>
 
-      <section className='ch-splash-section ch-splash-joint-final'>
-        <div className='ch-splash-section-content'>
-          <div className='ch-splash-section-heading'>
+      <section className='ch-section ch-splash-joint-final'>
+        <div className='ch-section-content ch-section-content'>
+          <div className='ch-section-heading ch-section-heading'>
             <h2>
               Simultaneous Final in New York and London
             </h2>
-            {/* <img src={stPauls} /> */}
           </div>
           <div className='ch-splash-joint-final-description'>
             <p>

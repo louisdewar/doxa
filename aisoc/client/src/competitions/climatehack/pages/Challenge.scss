@@ -24,28 +24,11 @@ header.ch-challenge-header {
 
 }
 
-section.ch-challenge-section {
-  padding: 2rem;
-  width: calc(100% - 4rem);
-
-  .ch-challenge-section-content {
-    margin-left: auto;
-    margin-right: auto;
-
-    .ch-challenge-section-heading {
-      margin: 16px 2rem 16px 0;
-
-      h2 {
-        margin-top: 0;
-        width: 250px;
-      }
-    }
-  }
-
+section.ch-section {
   &.ch-challenge-pv {
     background-color: #f1f5f9;
 
-    .ch-challenge-section-heading h2 {
+    .ch-section-heading h2 {
       color: #2563eb;
     }
   }
@@ -54,8 +37,8 @@ section.ch-challenge-section {
     color: #fff;
     background-color: #141006;
 
-    .ch-challenge-section-heading h2 {
-      color: $ch-salmon;
+    .ch-section-heading h2 {
+      color: $ch-primary-accent;
     }
   }
 
@@ -69,7 +52,7 @@ section.ch-challenge-section {
     background-repeat: no-repeat;
     background-size: cover;
 
-    .ch-challenge-section-heading h2 {
+    .ch-section-heading h2 {
       color: #fff;
     }
   }
@@ -83,22 +66,5 @@ section.ch-challenge-section {
     h2 {
       font-size: 5rem;
     }
-  }
-
-  section.ch-challenge-section .ch-challenge-section-content {
-    max-width: $breakpoint-sm;
-    display: flex;
-  }
-}
-
-@media screen and (min-width: $breakpoint-md) {
-  section.ch-challenge-section .ch-challenge-section-content {
-    max-width: $breakpoint-md;
-  }
-}
-
-@media screen and (min-width: $breakpoint-lg) {
-  section.ch-challenge-section .ch-challenge-section-content {
-    max-width: $breakpoint-lg;
   }
 }
