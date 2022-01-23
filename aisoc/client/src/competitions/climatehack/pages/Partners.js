@@ -1,3 +1,4 @@
+import ennovate from '../assets/ennovate.png';
 import newcross from '../assets/newcross-white.png';
 import Footer from '../components/Footer';
 import SplashNavbar from '../components/SplashNavbar';
@@ -20,12 +21,7 @@ export default function Partners({ baseUrl }) {
       <section className='ch-section ch-partners-sponsor-1'>
         <div className='ch-section-content'>
           <div className='ch-section-heading'>
-            <h2>
-              Sponsor Name
-            </h2>
-            <p>
-              Logo
-            </p>
+            <img src={ennovate} />
           </div>
           <div>
             <p>
