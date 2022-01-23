@@ -657,6 +657,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "climatehack"
+version = "0.1.0"
+dependencies = [
+ "derive_more",
+ "doxa_competition",
+ "futures",
+ "serde",
+]
+
+[[package]]
 name = "combine"
 version = "4.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
