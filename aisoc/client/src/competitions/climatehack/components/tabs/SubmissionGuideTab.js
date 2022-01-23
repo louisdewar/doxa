@@ -29,10 +29,10 @@ export default function SubmissionGuideTab() {
       When you want to upload your agent, run the following command:
     </p>
     <pre>
-      python doxa_cli.py agent upload climatehack ./evaluation
+      python doxa_cli.py agent upload climatehack ./submission
     </pre>
     <p>
-      Here, <code>{'"./evaluation"'}</code> refers to the folder containing the code used to evaluate your trained model.
+      Here, <code>{'"./submission"'}</code> refers to the folder containing the code used to evaluate your trained model.
     </p>
   </div>;
 }
