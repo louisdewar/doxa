@@ -227,12 +227,18 @@ export default function Splash({ baseUrl }) {
             <div className='ch-splash-format-columns'>
               <div>
                 <p>
-                  Participants train models on the provided dataset to be submitted either individually or in teams of up to three. The top three competitors from each university will then be invited to the finals, along with a society representative.
+                  Participants train models on the provided dataset to be submitted either individually or in teams of up to three.
+                </p>
+                <p>
+                  The top three competitors from each university will then be invited to the finals, along with a society representative.
                 </p>
               </div>
               <div>
                 <p>
-                  Finalists gain access to an expanded training dataset and work in teams of three representing their respective universities. The final models they submit will be used to determine the winning team.
+                  Finalists gain access to an expanded training dataset and work in teams of three representing their respective universities.
+                </p>
+                <p>
+                  The final models they submit will be used to determine the winning team.
                 </p>
               </div>
             </div>
