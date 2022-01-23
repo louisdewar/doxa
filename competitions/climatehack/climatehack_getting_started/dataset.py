@@ -7,14 +7,24 @@ from torch.utils.data import IterableDataset
 
 
 class ClimateHackDataset(IterableDataset):
-    def __init__(self, data_array, samples_per_slice=1, day_limit=0) -> None:
+    def __init__(
+        self, data_array, samples_per_slice=1, day_limit=0, cache=True
+    ) -> None:
         super().__init__()
 
         self.data_array = data_array
         self.samples_per_slice = samples_per_slice
         self.day_limit = day_limit
+        self.cache = True
+        self.cached_items = []
 
     def __iter__(self) -> Iterator[T_co]:
+        if self.cached_items:
+            for item in self.cached_items:
+                yield item
+
+            return
+
         times = self.data_array.get_index("time")
         start_date = times[0].date()
         end_date = times[-1].date()
@@ -31,27 +41,37 @@ class ClimateHackDataset(IterableDataset):
                     rand_x = randrange(550, 950 - 128)
                     rand_y = randrange(375, 700 - 128)
 
-                    yield self.data_array.sel(
-                        time=slice(
-                            current_time,
-                            current_time + timedelta(minutes=55),
+                    res = (
+                        self.data_array.sel(
+                            time=slice(
+                                current_time,
+                                current_time + timedelta(minutes=55),
+                            )
                         )
-                    ).isel(
-                        x=slice(rand_x, rand_x + 128),
-                        y=slice(rand_y, rand_y + 128),
-                    ).to_numpy().astype(
-                        float32
-                    ), self.data_array.sel(
-                        time=slice(
-                            current_time + timedelta(hours=1),
-                            current_time + timedelta(hours=1, minutes=55),
+                        .isel(
+                            x=slice(rand_x, rand_x + 128),
+                            y=slice(rand_y, rand_y + 128),
                         )
-                    ).isel(
-                        x=slice(rand_x + 32, rand_x + 96),
-                        y=slice(rand_y + 32, rand_y + 96),
-                    ).to_numpy().astype(
-                        float32
+                        .to_numpy()
+                        .astype(float32),
+                        self.data_array.sel(
+                            time=slice(
+                                current_time + timedelta(hours=1),
+                                current_time + timedelta(hours=1, minutes=55),
+                            )
+                        )
+                        .isel(
+                            x=slice(rand_x + 32, rand_x + 96),
+                            y=slice(rand_y + 32, rand_y + 96),
+                        )
+                        .to_numpy()
+                        .astype(float32),
                     )
+
+                    if self.cache:
+                        self.cached_items.append(res)
+
+                    yield res
 
                 current_time += timedelta(minutes=5)
 
