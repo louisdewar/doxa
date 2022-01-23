@@ -14,7 +14,7 @@ $ch-green: #83C554;
   color: #fff;
   height: 100%;
   width: 100%;
-  min-height: 100%;
+  min-height: 100vh;
   font-family: 'IBM Plex Sans', sans-serif;
 
   h1,
@@ -30,6 +30,7 @@ $ch-green: #83C554;
 .ch-panel-container {
   width: calc(100% - 2rem);
   margin: auto;
+  min-height: 100vh;
 }
 
 @mixin bigBoldParagraph() {
