@@ -1,33 +1,37 @@
 use diesel::JoinOnDsl;
 use diesel::{ExpressionMethods, OptionalExtension, PgConnection, QueryDsl, RunQueryDsl};
 
-use crate::model::leaderboard::LeaderboardScore;
+use crate::model::leaderboard::{InsertableLeaderboardScore, LeaderboardScore};
 use crate::model::user::User;
 use crate::schema as s;
 use crate::view;
 use crate::DieselError;
 
+const DEFAULT_LEADERBOARD_KEY: &str = "primary";
+
 /// Inserts a new scoreboard entry returning an error if there is already an agent in the
 /// scoreboard
 pub fn insert_new_score(
     conn: &PgConnection,
+    key: Option<String>,
     agent: String,
     score: i32,
 ) -> Result<LeaderboardScore, DieselError> {
     diesel::insert_into(s::leaderboard::table)
-        .values(LeaderboardScore { agent, score })
+        .values(InsertableLeaderboardScore { key, agent, score })
         .get_result(conn)
 }
 
 /// Either inserts a new score or overwrites the previous one for this agent
 pub fn upsert_score(
     conn: &PgConnection,
+    key: Option<String>,
     agent: String,
     score: i32,
 ) -> Result<LeaderboardScore, DieselError> {
     diesel::insert_into(s::leaderboard::table)
-        .values(LeaderboardScore { agent, score })
-        .on_conflict(s::leaderboard::columns::agent)
+        .values(InsertableLeaderboardScore { key, agent, score })
+        .on_conflict((s::leaderboard::columns::agent, s::leaderboard::columns::key))
         .do_update()
         .set(s::leaderboard::columns::score.eq(score))
         .get_result(conn)
@@ -38,16 +42,18 @@ pub fn upsert_score(
 /// such that final result is `default + delta`
 pub fn update_score(
     conn: &PgConnection,
+    key: Option<String>,
     agent: String,
     delta: i32,
     default: i32,
 ) -> Result<LeaderboardScore, DieselError> {
     diesel::insert_into(s::leaderboard::table)
-        .values(LeaderboardScore {
+        .values(InsertableLeaderboardScore {
+            key,
             agent,
             score: delta + default,
         })
-        .on_conflict(s::leaderboard::columns::agent)
+        .on_conflict((s::leaderboard::columns::agent, s::leaderboard::columns::key))
         .do_update()
         .set(s::leaderboard::columns::score.eq(s::leaderboard::columns::score + delta))
         .get_result(conn)
@@ -55,10 +61,13 @@ pub fn update_score(
 
 pub fn get_score(
     conn: &PgConnection,
+    key: Option<String>,
     agent: String,
 ) -> Result<Option<LeaderboardScore>, DieselError> {
+    let key = key.unwrap_or_else(|| DEFAULT_LEADERBOARD_KEY.to_string());
     s::leaderboard::table
         .filter(s::leaderboard::columns::agent.eq(agent))
+        .filter(s::leaderboard::columns::key.eq(key))
         .first(conn)
         .optional()
 }
@@ -66,10 +75,15 @@ pub fn get_score(
 pub fn get_user_high_score(
     conn: &PgConnection,
     user: i32,
+    competition: i32,
+    key: Option<String>,
 ) -> Result<Option<LeaderboardScore>, DieselError> {
+    let key = key.unwrap_or_else(|| DEFAULT_LEADERBOARD_KEY.to_string());
     s::agents::table
         .filter(s::agents::owner.eq(user))
+        .filter(s::agents::competition.eq(competition))
         .inner_join(s::leaderboard::table)
+        .filter(s::leaderboard::columns::key.eq(key))
         .select(s::leaderboard::all_columns)
         .order_by(s::leaderboard::score.desc())
         .first(conn)
@@ -91,10 +105,13 @@ pub fn get_user_rank(
 pub fn active_leaderboard(
     conn: &PgConnection,
     competition: i32,
+    key: Option<String>,
 ) -> Result<Vec<(User, LeaderboardScore)>, DieselError> {
+    let key = key.unwrap_or_else(|| DEFAULT_LEADERBOARD_KEY.to_string());
     view::active_agents::table
         .filter(view::active_agents::competition.eq(competition))
         .inner_join(s::leaderboard::table.on(s::leaderboard::agent.eq(view::active_agents::id)))
+        .filter(s::leaderboard::columns::key.eq(key))
         .inner_join(s::users::table.on(s::users::id.eq(view::active_agents::owner)))
         .order_by(s::leaderboard::score.desc())
         .select((s::users::all_columns, s::leaderboard::all_columns))

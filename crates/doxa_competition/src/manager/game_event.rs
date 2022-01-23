@@ -1,9 +1,9 @@
 use std::sync::Arc;
 
 use doxa_core::{
-    lapin::options::BasicAckOptions,
+    lapin::{message::Delivery, options::BasicAckOptions},
     tokio,
-    tracing::{error, event, span, warn, Level},
+    tracing::{error, event, info, span, warn, Level},
     tracing_futures::Instrument,
 };
 
@@ -29,6 +29,109 @@ impl<C: Competition> GameEventManager<C> {
         }
     }
 
+    async fn handle_game_event(&self, delivery: Delivery) {
+        let game_event: GameEvent<serde_json::Value> =
+            serde_json::from_slice(&delivery.data).expect("Improperly formatted message");
+        event!(Level::DEBUG, %game_event.game_id, %game_event.event_type, "received game event for agent");
+
+        let res = tokio::task::spawn_blocking({
+            let game_event = game_event.clone();
+            let pool = self.settings.pg_pool.clone();
+            move || {
+                let db = pool.get().unwrap();
+                doxa_db::action::game::add_event(
+                    &db,
+                    &doxa_db::model::game::GameEvent {
+                        event_id: game_event.event_id as i32,
+                        game: game_event.game_id,
+                        event_timestamp: game_event.timestamp,
+                        event_type: game_event.event_type,
+                        payload: game_event.payload,
+                    },
+                )
+            }
+        })
+        .await
+        .unwrap();
+
+        if let Err(error) = res {
+            if doxa_db::was_unique_key_violation(&error) {
+                warn!(?game_event, "already inserted game event into db, not inserting or notifying again as there was likely an error last time");
+                // TODO: decide whether to notify the event again.
+            } else {
+                error!(?game_event, "failed to insert event into db");
+                // This will not ACK
+                return;
+            }
+        } else {
+            let event_type = &game_event.event_type;
+
+            if event_type.starts_with('_') {
+                match event_type.as_str() {
+                    "_START" => {
+                        tokio::task::spawn_blocking({
+                            let started_at = game_event.timestamp;
+                            let game_id = game_event.game_id;
+                            let pool = self.settings.pg_pool.clone();
+                            move || {
+                                let db = pool.get().unwrap();
+                                doxa_db::action::game::set_game_start_time(&db, game_id, started_at)
+                            }
+                        })
+                        .await
+                        .unwrap()
+                        .unwrap();
+                    }
+
+                    "_END" | "_CANCELLED" => {
+                        tokio::task::spawn_blocking({
+                            let complete_time = game_event.timestamp;
+                            let game_id = game_event.game_id;
+                            let pool = self.settings.pg_pool.clone();
+                            move || {
+                                let db = pool.get().unwrap();
+                                doxa_db::action::game::set_game_complete_time(
+                                    &db,
+                                    game_id,
+                                    complete_time,
+                                )
+                            }
+                        })
+                        .await
+                        .unwrap()
+                        .unwrap();
+                    }
+                    "_ERROR" => {}
+
+                    "_FORFEIT" => {}
+                    _ => {
+                        error!(%event_type, ?game_event, "unknown event type");
+                    }
+                }
+            } else {
+                let game_event = game_event
+                    .try_map_payload(serde_json::from_value)
+                    .expect("Improperly formatted client message");
+
+                if let Err(error) = self
+                    .competition
+                    .on_game_event(&self.context, game_event)
+                    .await
+                {
+                    event!(Level::ERROR, %error, debug = ?error, "on_game_event failed for agent");
+                    // This will not ACK but right now this function will not be run again
+                    // so it is somewhat pointless
+                    return;
+                }
+            }
+        }
+
+        delivery
+            .ack(BasicAckOptions::default())
+            .await
+            .expect("Failed to acknowledge MQ");
+    }
+
     pub async fn start(self) {
         let connection = self
             .settings
@@ -41,10 +144,9 @@ impl<C: Competition> GameEventManager<C> {
             doxa_mq::action::get_game_event_consumer(&connection, C::COMPETITION_NAME)
                 .await
                 .unwrap();
-        let span = span!(
-            Level::INFO,
-            "game event listener",
-            competition = C::COMPETITION_NAME
+        info!(
+            competition = %C::COMPETITION_NAME,
+            "started game event listener",
         );
         let future = async move {
             // NOTE for future self: for concurrency it's better to have multiple game event
@@ -61,110 +163,15 @@ impl<C: Competition> GameEventManager<C> {
                 // It might be easier for error handling if this was moved into it's own async fn
                 let (_, delivery) = message.expect("Error getting message");
 
-                let game_event: GameEvent<serde_json::Value> =
-                    serde_json::from_slice(&delivery.data).expect("Improperly formatted message");
-                event!(Level::INFO, %game_event.game_id, %game_event.event_type, "received game event for agent");
-
-                let res = tokio::task::spawn_blocking({
-                    let game_event = game_event.clone();
-                    let pool = self.settings.pg_pool.clone();
-                    move || {
-                        let db = pool.get().unwrap();
-                        doxa_db::action::game::add_event(
-                            &db,
-                            &doxa_db::model::game::GameEvent {
-                                event_id: game_event.event_id as i32,
-                                game: game_event.game_id,
-                                event_timestamp: game_event.timestamp,
-                                event_type: game_event.event_type,
-                                payload: game_event.payload,
-                            },
-                        )
-                    }
-                })
-                .await
-                .unwrap();
-
-                if let Err(error) = res {
-                    if doxa_db::was_unique_key_violation(&error) {
-                        warn!(?game_event, "already inserted game event into db, not inserting or notifying again as there was likely an error last time");
-                        // TODO: decide whether to notify the event again.
-                    } else {
-                        error!(?game_event, "failed to insert event into db");
-                        // This will not ACK
-                        continue;
-                    }
-                } else {
-                    let event_type = &game_event.event_type;
-
-                    if event_type.starts_with('_') {
-                        match event_type.as_str() {
-                            "_START" => {
-                                tokio::task::spawn_blocking({
-                                    let started_at = game_event.timestamp;
-                                    let game_id = game_event.game_id;
-                                    let pool = self.settings.pg_pool.clone();
-                                    move || {
-                                        let db = pool.get().unwrap();
-                                        doxa_db::action::game::set_game_start_time(
-                                            &db, game_id, started_at,
-                                        )
-                                    }
-                                })
-                                .await
-                                .unwrap()
-                                .unwrap();
-                            }
-
-                            "_END" => {
-                                tokio::task::spawn_blocking({
-                                    let complete_time = game_event.timestamp;
-                                    let game_id = game_event.game_id;
-                                    let pool = self.settings.pg_pool.clone();
-                                    move || {
-                                        let db = pool.get().unwrap();
-                                        doxa_db::action::game::set_game_complete_time(
-                                            &db,
-                                            game_id,
-                                            complete_time,
-                                        )
-                                    }
-                                })
-                                .await
-                                .unwrap()
-                                .unwrap();
-                            }
-                            "_ERROR" => {}
-                            "_FORFEIT" => {}
-                            _ => {
-                                error!(%event_type, ?game_event, "unknown event type");
-                            }
-                        }
-                    } else {
-                        let game_event = game_event
-                            .try_map_payload(serde_json::from_value)
-                            .expect("Improperly formatted client message");
-
-                        if let Err(error) = self
-                            .competition
-                            .on_game_event(&self.context, game_event)
-                            .await
-                        {
-                            event!(Level::ERROR, %error, debug = ?error, "on_game_event failed for agent");
-                            // This will not ACK but right now this function will not be run again
-                            // so it is somewhat pointless
-                            continue;
-                        }
-                    }
-                }
-
-                delivery
-                    .ack(BasicAckOptions::default())
-                    .await
-                    .expect("Failed to acknowledge MQ");
+                let span = span!(
+                    Level::DEBUG,
+                    "handle game event",
+                    competition = C::COMPETITION_NAME
+                );
+                self.handle_game_event(delivery).instrument(span).await;
             }
         };
 
-        tokio::spawn(future.instrument(span));
+        tokio::spawn(future);
     }
 }

@@ -1,5 +1,12 @@
 use doxa_auth::guard::AuthGuard;
-use doxa_core::{actix_web::web, error::HttpResponse, EndpointResult};
+use doxa_core::{
+    actix_web::{
+        http::header::{CacheControl, CacheDirective},
+        web,
+    },
+    error::HttpResponse,
+    EndpointResult,
+};
 
 use doxa_db::model::game::Game;
 use doxa_executor::{
@@ -16,9 +23,12 @@ use crate::{
 use serde::Deserialize;
 
 use super::response::{
-    GameEventResponse, GameEventsResponse, GameResponse, GameResultResponse, PlayersResponse,
-    PlayersResponsePlayer,
+    CancelledResponse, GameEventResponse, GameEventsResponse, GameResponse, GameResultResponse,
+    PlayersResponse, PlayersResponsePlayer,
 };
+
+pub const ONE_DAY_SECONDS: u32 = 60 * 60 * 24;
+pub const ONE_WEEK_SECONDS: u32 = ONE_DAY_SECONDS * 7;
 
 #[derive(Deserialize)]
 pub struct GameEventsParams {
@@ -43,6 +53,25 @@ pub async fn game<C: Competition + ?Sized>(
         queued_at: game.queued_at,
         started_at: game.started_at,
         completed_at: game.completed_at,
+        outdated: game.outdated,
+    }))
+}
+
+/// The default route for `_game/{game_id}/cancelled`.
+pub async fn game_cancelled<C: Competition + ?Sized>(
+    path: web::Path<i32>,
+    context: web::Data<Context<C>>,
+) -> EndpointResult {
+    let game_id = path.into_inner();
+
+    let game = context
+        .get_game_by_id(game_id)
+        .await?
+        .ok_or(GameNotFound { game_id })?;
+
+    // If the game is outdated cancel it
+    Ok(HttpResponse::Ok().json(CancelledResponse {
+        cancelled: game.outdated,
     }))
 }
 
@@ -120,7 +149,10 @@ pub async fn game_events<C: Competition + ?Sized>(
                 // We don't want to leak the internal payload, if there is information we want
                 // to send to the client we need to manually add it.
                 event.payload = serde_json::Value::Null;
-
+                event
+            }
+            "_CANCELLED" => {
+                event.payload = serde_json::Value::Null;
                 event
             }
             "_FORFEIT" => {
@@ -133,7 +165,7 @@ pub async fn game_events<C: Competition + ?Sized>(
 
                 // Admins or the owner of the agent
                 if is_admin || agent_id == Some(payload.agent_id) {
-                    event.payload = json!({ "agent": payload.agent_id, "stderr": payload.stderr });
+                    event.payload = json!({ "agent": payload.agent_id, "stderr": payload.stderr, "reason": payload.error_message });
                 } else {
                     event.payload = json!({ "agent": payload.agent_id });
                 }
@@ -216,7 +248,17 @@ pub async fn game_players<C: Competition + ?Sized>(
         })
         .collect();
 
-    Ok(HttpResponse::Ok().json(PlayersResponse { players }))
+    // The players in a game should never change but we set an upper limit in case a username
+    // changes (this is currently rare).
+    Ok(HttpResponse::Ok()
+        .insert_header(CacheControl(vec![
+            CacheDirective::MaxAge(ONE_WEEK_SECONDS),
+            CacheDirective::Extension(
+                "stale-while-revalidate".to_string(),
+                Some(ONE_DAY_SECONDS.to_string()),
+            ),
+        ]))
+        .json(PlayersResponse { players }))
 }
 
 /// The default route for `_game/{game_id}/result/{agent}`.
@@ -235,5 +277,19 @@ pub async fn game_result_agent<C: Competition + ?Sized>(
         .await?
         .map(|result| result.result);
 
-    Ok(HttpResponse::Ok().json(GameResultResponse { result }))
+    let cache_control = if result.is_some() {
+        vec![
+            CacheDirective::MaxAge(ONE_WEEK_SECONDS),
+            CacheDirective::Extension(
+                "stale-while-revalidate".to_string(),
+                Some(ONE_DAY_SECONDS.to_string()),
+            ),
+        ]
+    } else {
+        vec![CacheDirective::NoCache]
+    };
+
+    Ok(HttpResponse::Ok()
+        .insert_header(CacheControl(cache_control))
+        .json(GameResultResponse { result }))
 }

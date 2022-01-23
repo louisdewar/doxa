@@ -45,12 +45,12 @@ pub async fn wait_for_mq(pool: &MQPool) {
             Ok(_) => return,
             Err(e) => {
                 i += 1;
-                // Only four attempts
-                if i == 4 {
+                // Reached max attempts
+                if i == 10 {
                     panic!("failed to connect to rabbit mq: {}", e);
                 }
 
-                info!(attempt=%i, "failed to connect to rabbit mq, trying again");
+                info!(attempt=%i, reason=%e, "failed to connect to rabbit mq, trying again");
 
                 tokio::time::sleep(Duration::from_millis(750)).await;
             }

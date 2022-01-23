@@ -24,6 +24,10 @@ function make_admin {
   cargo run -p doxa_adm -- user admin promote "$1"
 }
 
+function upload_uttt_agent {
+  cargo run -q -p doxa_cli -- agent upload uttt ./competitions/uttt/uttt_getting_started/agent/
+}
+
 echo 'This script will run the appropriate doxa_adm commands for setting up some example users and
 logging them in'
 
@@ -56,6 +60,7 @@ for user in "${users[@]}"; do
   echo "Using invite $invite to register & login $user"
   register_user "$user" password "$invite"
   login_user "$user" password
+  upload_uttt_agent
 done
 
 echo 'Creating admin user (admin1)'

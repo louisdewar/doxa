@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 @import 'common/common';
 
 .overview-tab {
@@ -24,5 +25,16 @@
         .overview-tab-game-demo {
             width: 30%;
         }
+=======
+.overview-tab {
+    box-sizing: border-box;
+    display: flow-root;
+
+    .overview-tab-game-demo {
+        float: right;
+        width: 45%;
+        margin: auto;
+        margin-left: 1rem;
+>>>>>>> origin/master
     }
 }

@@ -1,9 +1,10 @@
 use std::fmt::{self, Display};
 
-use actix_web::{error::BlockingError, HttpResponseBuilder};
+use actix_web::error::BlockingError;
 
 pub use actix_web::http::StatusCode;
 pub use actix_web::HttpResponse;
+pub use actix_web::HttpResponseBuilder;
 
 use serde::Serialize;
 
@@ -23,10 +24,19 @@ pub trait RespondableError: fmt::Debug + std::error::Error {
     fn status_code(&self) -> StatusCode;
 
     fn as_response(&self) -> HttpResponse {
-        HttpResponseBuilder::new(self.status_code()).json(ErrorResponse {
+        let mut builder = HttpResponseBuilder::new(self.status_code());
+
+        self.inject_headers(&mut builder);
+
+        builder.json(ErrorResponse {
             error_code: self.error_code(),
             error: self.error_message(),
         })
+    }
+
+    /// Overwrite this function to inject additional optional headers
+    fn inject_headers(&self, builder: &mut HttpResponseBuilder) {
+        let _ = builder;
     }
 }
 

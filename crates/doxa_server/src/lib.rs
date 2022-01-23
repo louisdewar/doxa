@@ -13,6 +13,7 @@ use tracing_actix_web::TracingLogger;
 mod telemetry;
 
 pub use doxa_competition::CompetitionSystem;
+pub use doxa_core::tracing;
 
 /// Uses well known environment variables for configuring the various parameters of the server
 /// (e.g. database urls).
@@ -109,6 +110,9 @@ pub async fn setup_server(
         executor_settings: Arc::new(executor_settings),
         mq_pool: Arc::clone(&mq_pool),
         pg_pool: Arc::clone(&db_pool),
+        generic_limiter: storage_settings.generic_limiter.clone(),
+        request_client: doxa_competition::settings::HTTPClient::new(),
+        competitions_base_url: "http://localhost:3001/api/competition/".to_string(),
     };
 
     let configure_competition_routes = competition_system

@@ -113,7 +113,7 @@ pub async fn upload(args: UploadArgs, settings: &Settings) -> Result<(), Command
 
         (format!("{}.tar.gz", agent_file_name), tar_file)
     } else {
-        if !(agent_path.ends_with(".tar.gz") || agent_path.ends_with(".tar")) {
+        if !(agent_file_name.ends_with(".tar.gz") || agent_file_name.ends_with(".tar")) {
             return Err(UploadError::IncorrectExtension.into());
         }
 
@@ -163,7 +163,7 @@ pub async fn upload(args: UploadArgs, settings: &Settings) -> Result<(), Command
 
     let builder = post(
         settings,
-        &format!("storage/upload/{}", competition_name),
+        &format!("competition/{}/_upload", competition_name),
         false,
     )
     .multipart(form);
@@ -174,9 +174,10 @@ pub async fn upload(args: UploadArgs, settings: &Settings) -> Result<(), Command
         4,
         total_steps,
         format!(
-            "Successfully uploaded agent to competition {}, it was given the id {}",
+            "Congratulations {}, you successfully uploaded an agent to competition {} and it was given the id {}",
+            ui::keyword(&settings.user_profile.as_ref().expect("to successfully upload an agent the user has to be logged in").name),
             ui::keyword(response.competition),
-            ui::keyword(response.id)
+            ui::keyword(response.id),
         ),
     );
 

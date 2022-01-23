@@ -1,5 +1,5 @@
 use doxa_core::{error::RespondableErrorWrapper, tokio};
-use doxa_db::{was_unique_key_violation, PgPool};
+use doxa_db::PgPool;
 
 use std::future::Future;
 use std::pin::Pin;
@@ -8,7 +8,8 @@ use actix_web::{dev, web, FromRequest, HttpRequest};
 
 use crate::{
     error::{
-        IncorrectTokenGeneration, InvalidAuthenticationHeader, MissingAuthentication, UserNotFound,
+        IncorrectTokenGeneration, InvalidAuthenticationHeader, MissingAuthentication,
+        UserNotFoundAuth,
     },
     guard::AuthGuard,
     settings::Settings,
@@ -46,16 +47,10 @@ impl FromRequest for AuthGuard<()> {
             // practise this is probably just an INTERNAL_SERVER_ERROR
             let user = tokio::task::spawn_blocking(move || {
                 let conn = pool.get().unwrap();
-                doxa_db::action::user::get_user_by_id(&conn, id)
+                doxa_db::action::user::get_user_by_id_optional(&conn, id)
             })
-            .await?
-            .map_err(|e| {
-                if was_unique_key_violation(&e) {
-                    UserNotFound.into()
-                } else {
-                    RespondableErrorWrapper::from(e)
-                }
-            })?;
+            .await??
+            .ok_or(UserNotFoundAuth)?;
 
             if token.generation() != user.token_generation {
                 return Err(IncorrectTokenGeneration.into());

@@ -7,7 +7,7 @@ use doxa_storage::RetrievalError;
 use doxa_vm::{
     error::{
         AgentLifecycleManagerError, ManagerError, ManagerErrorLogContext, SendAgentError,
-        TakeFileManagerError, VMRecorderError,
+        TakeFileManagerError, VMShutdownError,
     },
     stream::ReadMessageError,
 };
@@ -15,6 +15,8 @@ use doxa_vm::{
 /// A way of indicating whether an error should count as a forfeit for a particular agent
 pub trait ForfeitError {
     fn forfeit(&self) -> Option<usize>;
+
+    fn forfeit_message(&self) -> Option<String>;
 }
 
 #[derive(From, Error, Display, Debug)]
@@ -53,7 +55,7 @@ pub enum AgentError {
 #[display(fmt = "{}", source)]
 pub struct AgentErrorLogContext {
     pub source: AgentError,
-    pub logs: Option<Result<String, VMRecorderError>>,
+    pub logs: Option<Result<String, VMShutdownError>>,
 }
 
 impl<E: Into<AgentError>> From<E> for AgentErrorLogContext {
@@ -69,7 +71,7 @@ impl From<ManagerErrorLogContext> for AgentErrorLogContext {
     fn from(error: ManagerErrorLogContext) -> Self {
         AgentErrorLogContext {
             source: error.source.into(),
-            logs: error.logs,
+            logs: error.logs.map(|res| res.map_err(|e| e.into())),
         }
     }
 }
@@ -142,6 +144,27 @@ impl ForfeitError for GameContextError {
             GameContextError::TakeFile(_) => None,
         }
     }
+
+    fn forfeit_message(&self) -> Option<String> {
+        match &self {
+            GameContextError::UnknownAgent { .. } => None,
+            GameContextError::NextEvent(_) => None,
+            GameContextError::SendInput(_) => None,
+            GameContextError::PayloadDeserialize(_) => None,
+            GameContextError::Emit(_) => None,
+            GameContextError::TimeoutWaitingForMessage { .. } => {
+                Some("The agent took too long to output a message".into())
+            }
+            GameContextError::AgentTerminated(AgentTerminated { .. }) => {
+                Some("The agent terminated early".into())
+            }
+            GameContextError::IncorrectNumberAgents { .. } => None,
+            GameContextError::ZeroLengthEventType => None,
+            GameContextError::ReservedEventType => None,
+            GameContextError::RebootError(_) => None,
+            GameContextError::TakeFile(_) => None,
+        }
+    }
 }
 
 #[derive(Display, Error, From, Debug)]
@@ -158,10 +181,21 @@ impl<E: ForfeitError> ForfeitError for GameError<E> {
             GameError::Client(e) => e.forfeit(),
         }
     }
+
+    fn forfeit_message(&self) -> Option<String> {
+        match &self {
+            GameError::Context(e) => e.forfeit_message(),
+            GameError::Client(e) => e.forfeit_message(),
+        }
+    }
 }
 
 impl ForfeitError for Infallible {
     fn forfeit(&self) -> Option<usize> {
+        None
+    }
+
+    fn forfeit_message(&self) -> Option<String> {
         None
     }
 }
@@ -198,7 +232,8 @@ pub enum NextMessageError {
 // GameManagerError and then include startup errors
 #[derive(Display, Error, From, Debug)]
 pub enum GameManagerError<E> {
-    #[from(ignore)]
     StartAgent(AgentErrorLogContext),
+    EmitStartEvent(lapin::Error),
+    #[from]
     Runtime(GameError<E>),
 }

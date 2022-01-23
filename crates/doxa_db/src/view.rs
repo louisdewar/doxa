@@ -7,6 +7,7 @@ table! {
         competition -> Int4,
         extension -> Text,
         uploaded_at -> Timestamptz,
+        activated_at -> Nullable<Timestamptz>,
         uploaded -> Bool,
         deleted -> Bool,
         failed -> Bool,
@@ -14,6 +15,8 @@ table! {
     }
 }
 
+// TODO: consider removal (and remove from up.sql)
+// also consider active_agents removal
 table! {
     active_games (id) {
         id -> Int4,

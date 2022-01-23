@@ -6,6 +6,9 @@ pub struct StartEvent {
 }
 
 #[derive(Serialize, Deserialize)]
+pub struct CancelledEvent {}
+
+#[derive(Serialize, Deserialize)]
 pub struct ErrorEvent {
     pub error: String,
     pub debug: String,
@@ -23,5 +26,6 @@ pub struct ErrorEvent {
 pub struct ForfeitEvent {
     pub agent_id: usize,
     pub stderr: Option<String>,
+    pub error_message: Option<String>,
     // TODO: maybe an enum of reasons?
 }

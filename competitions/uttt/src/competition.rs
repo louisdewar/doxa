@@ -33,7 +33,7 @@ impl Competition for UTTTCompetition {
         agent_id: String,
     ) -> Result<(), ContextError> {
         context
-            .remove_game_result_by_participant_and_update_scores_by_sum(agent_id)
+            .remove_game_result_by_participant_and_update_scores_by_sum(None, agent_id)
             .await?;
 
         Ok(())
@@ -59,6 +59,7 @@ impl Competition for UTTTCompetition {
 
             context
                 .add_game_results_active(
+                    None,
                     game,
                     agents
                         .into_iter()

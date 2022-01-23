@@ -14,10 +14,23 @@ mod command;
 
 #[tokio::main]
 async fn main() {
-    if let Err(e) = run().await {
+    let args = Cli::parse();
+    let verbose = args.verbose;
+    if let Err(e) = run(args).await {
         if let CliError::Command(CommandError::Request(RequestError::Doxa(doxa))) = &e {
             if let Some(message) = &doxa.message {
                 ui::error(message);
+                if verbose {
+                    ui::error(format!(
+                        "error code = `{}`, status code = `{}`",
+                        doxa.error_code, doxa.status_code
+                    ));
+                }
+
+                if let Some(msg) = doxa.retry_after_message() {
+                    ui::error(msg)
+                }
+
                 return;
             }
         }
@@ -26,9 +39,7 @@ async fn main() {
     }
 }
 
-async fn run() -> Result<(), CliError> {
-    let args = Cli::parse();
-
+async fn run(args: Cli) -> Result<(), CliError> {
     let config_dir = config::default_config_dir();
 
     let profiles = config::load_or_default_profile(&config_dir).await?;
@@ -53,6 +64,7 @@ async fn run() -> Result<(), CliError> {
         cli::MainCommands::Agent(agent) => {
             command::agent::handle_subcommand(agent, &settings).await?
         }
+        cli::MainCommands::Raw(raw) => command::raw::handle_subcommand(raw, &settings).await?,
     }
 
     Ok(())

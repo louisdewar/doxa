@@ -13,13 +13,13 @@ use doxa_db::{
 };
 use doxa_executor::{client::GameClient, event::StartEvent};
 use doxa_mq::{
-    model::{GameEvent, MatchRequest},
+    model::{ActivationEvent, GameEvent, MatchRequest},
     MQPool,
 };
 
 use crate::{
     client::Competition,
-    error::{AgentNotFound, ContextError, ParseSystemMessageError},
+    error::{AgentNotActive, AgentNotFound, ContextError, ParseSystemMessageError},
 };
 
 // TODO: consider moving context methods in their own folders, this file is getting a bit unwieldy
@@ -112,12 +112,14 @@ impl<C: Competition + ?Sized> Context<C> {
             .await?
             .ok_or(AgentNotFound)?;
 
+        let activated_at = agent.activated_at.ok_or(AgentNotActive)?;
+
         let active_agents = self
             .run_query(move |conn| {
-                doxa_db::action::storage::get_active_agents_uploaded_before(
+                doxa_db::action::storage::get_active_agents_activated_before(
                     conn,
                     agent.competition,
-                    agent.uploaded_at,
+                    activated_at,
                 )
             })
             .await?;
@@ -163,13 +165,18 @@ impl<C: Competition + ?Sized> Context<C> {
     }
 
     /// Sets the score for a particular agent returning an error if it already has a score
+    ///
+    /// The key can be set if there are multiple leaderboards that you want to differentiate
+    /// between.
+    /// If no key is provided (i.e. `None`) then the `primary` leaderboard is used.
     pub async fn set_new_score(
         &self,
+        key: Option<String>,
         agent: String,
         score: i32,
     ) -> Result<LeaderboardScore, ContextError> {
         self.run_query(move |conn| {
-            doxa_db::action::leaderboard::insert_new_score(conn, agent, score)
+            doxa_db::action::leaderboard::insert_new_score(conn, key, agent, score)
         })
         .await
     }
@@ -177,30 +184,38 @@ impl<C: Competition + ?Sized> Context<C> {
     /// Overwrites the score for a particular agent or inserts the score if no score currently exists.
     pub async fn upsert_score(
         &self,
+        key: Option<String>,
         agent: String,
         score: i32,
     ) -> Result<LeaderboardScore, ContextError> {
-        self.run_query(move |conn| doxa_db::action::leaderboard::upsert_score(conn, agent, score))
-            .await
+        self.run_query(move |conn| {
+            doxa_db::action::leaderboard::upsert_score(conn, key, agent, score)
+        })
+        .await
     }
 
     /// Adds delta to the score or sets the score to `default + delta` if no score currently
     /// exists.
     pub async fn update_score(
         &self,
+        key: Option<String>,
         agent: String,
         delta: i32,
         default: i32,
     ) -> Result<LeaderboardScore, ContextError> {
         self.run_query(move |conn| {
-            doxa_db::action::leaderboard::update_score(conn, agent, delta, default)
+            doxa_db::action::leaderboard::update_score(conn, key, agent, delta, default)
         })
         .await
     }
 
     /// Gets the agent's current score if it exists.
-    pub async fn get_agent_score(&self, agent: String) -> Result<Option<i32>, ContextError> {
-        self.run_query(move |conn| doxa_db::action::leaderboard::get_score(conn, agent))
+    pub async fn get_agent_score(
+        &self,
+        agent: String,
+        key: Option<String>,
+    ) -> Result<Option<i32>, ContextError> {
+        self.run_query(move |conn| doxa_db::action::leaderboard::get_score(conn, key, agent))
             .await
             .map(|res| res.map(|s| s.score))
     }
@@ -209,9 +224,13 @@ impl<C: Competition + ?Sized> Context<C> {
     pub async fn get_high_score(
         &self,
         user_id: i32,
+        key: Option<String>,
     ) -> Result<Option<LeaderboardScore>, ContextError> {
-        self.run_query(move |conn| doxa_db::action::leaderboard::get_user_high_score(conn, user_id))
-            .await
+        let competition_id = self.competition_id;
+        self.run_query(move |conn| {
+            doxa_db::action::leaderboard::get_user_high_score(conn, user_id, competition_id, key)
+        })
+        .await
     }
 
     /// Get the **unordered** game participants
@@ -379,10 +398,13 @@ impl<C: Competition + ?Sized> Context<C> {
 
     /// Returns the list of active agents and their scores in descending order for this competition
     /// (only for those that exist in the leaderboard since an agent could be active but not yet on the leaderboard)
-    pub async fn get_leaderboard(&self) -> Result<Vec<(User, LeaderboardScore)>, ContextError> {
+    pub async fn get_leaderboard(
+        &self,
+        key: Option<String>,
+    ) -> Result<Vec<(User, LeaderboardScore)>, ContextError> {
         let competition_id = self.competition_id;
         self.run_query(move |conn| {
-            doxa_db::action::leaderboard::active_leaderboard(conn, competition_id)
+            doxa_db::action::leaderboard::active_leaderboard(conn, competition_id, key)
         })
         .await
     }
@@ -414,19 +436,32 @@ impl<C: Competition + ?Sized> Context<C> {
             .await
     }
 
-    /// Inserts a group of game results at once only if all the agents are currently active.
+    /// Inserts a group of game results at once only if the game is not outdated.
     /// This guarantees (using a transaction) that if the rows are inserted the agents were all active at the time of insertion.
     /// If any agent in the group was not active then this will not return an error but it will also not insert into the DB.
     /// If `update_score_by_sum` is true then this will sum the game results and set that to the score as part of the same transaction.
     pub async fn add_game_results_active(
         &self,
+        key: Option<String>,
         game_id: i32,
         results: impl Iterator<Item = (String, i32)> + Send + 'static,
         update_score_by_sum: bool,
     ) -> Result<(), ContextError> {
+        // TODO: re-write this code properly using the new outdated field on games (should make
+        // things simpler)
         if let Err(e) = self
             .run_query(move |conn| {
                 conn.build_transaction().repeatable_read().run(|| {
+                    let game = doxa_db::action::game::get_game_by_id_required(
+                        conn,
+                        game_id,
+                        C::COMPETITION_NAME,
+                    )?;
+
+                    if game.outdated {
+                        return Ok(());
+                    }
+
                     for (agent, result) in results {
                         let agent =
                             doxa_db::action::storage::get_agent_required(conn, agent.clone())?;
@@ -445,11 +480,14 @@ impl<C: Competition + ?Sized> Context<C> {
                         )?;
 
                         if update_score_by_sum {
-                            let score =
-                                doxa_db::action::game::sum_game_results(conn, agent.id.clone())?
-                                    .unwrap_or(0);
+                            let score = doxa_db::action::game::sum_non_outdated_game_results(
+                                conn,
+                                agent.id.clone(),
+                            )?
+                            .unwrap_or(0);
                             doxa_db::action::leaderboard::upsert_score(
                                 conn,
+                                key.clone(),
                                 agent.id,
                                 score as i32,
                             )?;
@@ -473,8 +511,10 @@ impl<C: Competition + ?Sized> Context<C> {
     }
 
     pub async fn sum_game_results(&self, agent: String) -> Result<Option<i64>, ContextError> {
-        self.run_query(move |conn| doxa_db::action::game::sum_game_results(conn, agent))
-            .await
+        self.run_query(move |conn| {
+            doxa_db::action::game::sum_non_outdated_game_results(conn, agent)
+        })
+        .await
     }
 
     /// For each game that the given agent was a participant in, this will remove the game results for each of those games (including results for agents other than the current one).
@@ -494,15 +534,17 @@ impl<C: Competition + ?Sized> Context<C> {
     /// If there are no game results for that agent it will set the score to 0
     pub async fn set_score_by_game_result_sum(
         &self,
+        key: Option<String>,
         agent: String,
     ) -> Result<LeaderboardScore, ContextError> {
         // TODO: use transaction
         let score = self.sum_game_results(agent.clone()).await?.unwrap_or(0);
-        self.upsert_score(agent, score as i32).await
+        self.upsert_score(key, agent, score as i32).await
     }
 
     pub async fn remove_game_result_by_participant_and_update_scores_by_sum(
         &self,
+        key: Option<String>,
         agent: String,
     ) -> Result<(), ContextError> {
         // TODO: use transaction?
@@ -519,8 +561,43 @@ impl<C: Competition + ?Sized> Context<C> {
         }
 
         for agent in unique_agents.into_iter() {
-            self.set_score_by_game_result_sum(agent).await?;
+            self.set_score_by_game_result_sum(key.clone(), agent)
+                .await?;
         }
+
+        Ok(())
+    }
+
+    /// Adds the agent to the activation queue (this will automatically deactivate the previous
+    /// agent before activating the new one including if the previous agent was this agent).
+    pub async fn activate_agent(&self, agent: String) -> Result<(), ContextError> {
+        let connection = self.mq_pool.get().await?;
+        doxa_mq::action::emit_activation_event(
+            &connection,
+            &ActivationEvent {
+                agent,
+                activating: true,
+                competition: C::COMPETITION_NAME.to_string(),
+            },
+        )
+        .await?;
+
+        Ok(())
+    }
+
+    /// Adds the agent to the activation queue (this will automatically deactivate the previous
+    /// agent before activating the new one including if the previous agent was this agent).
+    pub async fn deactivate_agent(&self, agent: String) -> Result<(), ContextError> {
+        let connection = self.mq_pool.get().await?;
+        doxa_mq::action::emit_activation_event(
+            &connection,
+            &ActivationEvent {
+                agent,
+                activating: false,
+                competition: C::COMPETITION_NAME.to_string(),
+            },
+        )
+        .await?;
 
         Ok(())
     }

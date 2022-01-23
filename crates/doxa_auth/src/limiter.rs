@@ -32,6 +32,7 @@ const REDIS_RATE_LIMIT_DECR_LUA: &str = r#"
         -- TODO: consider also removing the key if value = 0
     end
 "#;
+
 /// A neat wrapper around a redis backend that helps with rate limiting various actions.
 ///
 /// Generally it's better to use a `ConfiguredLimiter` (which wraps around this) as you don't need

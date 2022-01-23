@@ -36,6 +36,12 @@ export default function Home({ baseUrl }) {
       name: 'RULES',
       tab: <RulesTab />
     },
+    {
+      name: 'FAQ',
+      tab: <div>
+        <h2>Frequently Asked Questions</h2>
+      </div>
+    },
   ];
 
   return <>

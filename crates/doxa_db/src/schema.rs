@@ -5,6 +5,7 @@ table! {
         competition -> Int4,
         extension -> Text,
         uploaded_at -> Timestamptz,
+        activated_at -> Nullable<Timestamptz>,
         uploaded -> Bool,
         deleted -> Bool,
         failed -> Bool,
@@ -58,6 +59,7 @@ table! {
         queued_at -> Timestamptz,
         started_at -> Nullable<Timestamptz>,
         completed_at -> Nullable<Timestamptz>,
+        outdated -> Bool,
         competition -> Int4,
     }
 }
@@ -72,7 +74,8 @@ table! {
 }
 
 table! {
-    leaderboard (agent) {
+    leaderboard (key, agent) {
+        key -> Text,
         agent -> Text,
         score -> Int4,
     }

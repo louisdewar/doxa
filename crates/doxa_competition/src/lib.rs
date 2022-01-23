@@ -14,6 +14,8 @@ pub mod settings;
 
 pub use settings::Settings;
 
+pub use doxa_core::tracing;
+
 use doxa_core::tracing::{error, info};
 
 pub struct CompetitionSystem {
@@ -97,10 +99,22 @@ impl CompetitionSystem {
 
         let settings = settings.clone();
 
-        move |service| {
+        move |service: &mut web::ServiceConfig| {
             for (name, record, competition_id) in competitions.iter() {
+                let competition_limits = web::Data::new(
+                    record
+                        .competition
+                        .build_competition_limiter(settings.generic_limiter.clone()),
+                );
+                // Temporary (see comment on `configure_upload_route`)
+                record.competition.configure_upload_route(
+                    competition_limits.clone(),
+                    name.clone(),
+                    service,
+                );
                 service.service(web::scope(&format!("/competition/{}", name)).configure(
                     |config| {
+                        config.app_data(competition_limits.clone());
                         record
                             .competition
                             .configure_routes(config, &settings, *competition_id)

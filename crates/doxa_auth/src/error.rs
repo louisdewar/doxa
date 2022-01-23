@@ -46,7 +46,7 @@ impl_respondable_error!(
     InvalidToken,
     UNAUTHORIZED,
     "INVALID_TOKEN",
-    "The provided token was not valid"
+    "The provided token was not valid, please login again"
 );
 
 #[derive(Debug, Display, Error)]
@@ -56,7 +56,7 @@ impl_respondable_error!(
     ExpiredToken,
     UNAUTHORIZED,
     "EXPIRED_TOKEN",
-    "The provided token has expired"
+    "Your login session has expired, please login again"
 );
 
 #[derive(Debug, Display, Error)]
@@ -176,6 +176,16 @@ impl_respondable_error!(
 );
 
 #[derive(Debug, Display, Error)]
+pub struct UserNotFoundAuth;
+
+impl_respondable_error!(
+    UserNotFoundAuth,
+    UNAUTHORIZED,
+    "USER_NOT_FOUND",
+    "This account does not appear to exist anymore"
+);
+
+#[derive(Debug, Display, Error)]
 pub struct IncorrectPassword;
 
 impl_respondable_error!(
@@ -251,7 +261,25 @@ macro_rules! create_rate_limit_error {
             source: $crate::error::RateLimitReached,
         }
 
-        impl_respondable_error!($name, TOO_MANY_REQUESTS, "NO_PERMITS", $error_message);
+        impl doxa_core::RespondableError for $name {
+            fn error_code(&self) -> String {
+                "NO_PERMITS".into()
+            }
+
+            fn error_message(&self) -> Option<String> {
+                let message: Option<_> = $error_message.into();
+
+                message.map(|inner| inner.into())
+            }
+
+            fn status_code(&self) -> actix_web::http::StatusCode {
+                actix_web::http::StatusCode::TOO_MANY_REQUESTS
+            }
+
+            fn inject_headers(&self, builder: &mut doxa_core::error::HttpResponseBuilder) {
+                builder.insert_header((actix_web::http::header::RETRY_AFTER, self.source.ttl));
+            }
+        }
     };
 }
 

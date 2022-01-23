@@ -38,6 +38,7 @@ pub struct GameResponse {
     pub queued_at: DateTime<Utc>,
     pub started_at: Option<DateTime<Utc>>,
     pub completed_at: Option<DateTime<Utc>>,
+    pub outdated: bool,
 }
 
 #[derive(Serialize, Debug)]
@@ -54,4 +55,9 @@ pub struct ActiveAgentResponse {
 pub struct UserScoreResponse {
     pub agent: String,
     pub score: Option<i32>,
+}
+
+#[derive(Serialize, Debug)]
+pub struct CancelledResponse {
+    pub cancelled: bool,
 }
