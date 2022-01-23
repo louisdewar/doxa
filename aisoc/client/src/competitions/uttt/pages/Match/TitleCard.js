@@ -5,17 +5,10 @@ import { formatDuration, formatTime } from 'utils/time';
 import PlayerLink from '../../components/PlayerLink/PlayerLink';
 import './Match.scss';
 
-<<<<<<< HEAD
-export default function TitleCard({ players, scores, baseUrl, completedAt, queuedAt, startedAt }) {
-  const duration = completedAt ? formatDuration((completedAt.getTime() - startedAt.getTime()) / 1000) : null;
-  const end = completedAt ? `finished ${formatTime(completedAt)}` :
-    (startedAt ? `started ${formatTime(startedAt)}` : `was queued ${formatTime(queuedAt)}`);
-=======
 export default function TitleCard({ players, scores, baseUrl, completedAt, cancelledAt, queuedAt, startedAt }) {
   const duration = completedAt ? formatDuration((completedAt.getTime() - startedAt.getTime()) / 1000) : null;
   const end = cancelledAt ? `was cancelled ${formatTime(cancelledAt)}` : (completedAt ? `finished ${formatTime(completedAt)}` :
     (startedAt ? `started ${formatTime(startedAt)}` : `was queued ${formatTime(queuedAt)}`));
->>>>>>> origin/master
 
   return <Card darker className='match-page-header'>
     <h1>
@@ -35,11 +28,7 @@ export default function TitleCard({ players, scores, baseUrl, completedAt, cance
 
     <p className='completed'>
       <FontAwesomeIcon icon={faClock} size='sm' fixedWidth /> This match {end}.<br />
-<<<<<<< HEAD
-      {duration && <><FontAwesomeIcon icon={faHourglassEnd} size='sm' fixedWidth /> This match took {duration} to complete.</>}
-=======
       {duration && <><FontAwesomeIcon icon={faHourglassEnd} size='sm' fixedWidth /> This match lasted {duration}.</>}
->>>>>>> origin/master
-    </p>
-  </Card>;
+    </p >
+  </Card >;
 }

@@ -1,18 +1,11 @@
 @import 'src/common/_common.scss';
 
-<<<<<<< HEAD
-.match-games .game-card.ongoing {
-=======
 .match-games .game-card .game-card-body.ongoing {
->>>>>>> origin/master
   display: block;
   text-align: center;
   padding: 5px 20px 5px 20px;
   border-left: 20px solid #0e7490;
-<<<<<<< HEAD
-=======
   border-radius: 3px;
->>>>>>> origin/master
 
   .game-card-ongoing-container {
     display: flex;

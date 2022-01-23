@@ -1,31 +1,3 @@
-<<<<<<< HEAD
-@import 'common/common';
-
-.overview-tab {
-    box-sizing: border-box;
-
-    .overview-tab-game-demo {
-        margin: auto;
-    }
-
-    @media screen and (min-width: $breakpoint-sm) {
-        display: flex;
-
-        .overview-tab-description {
-            flex: 1;
-        }
-
-        .overview-tab-game-demo {
-            margin-left: 1rem;
-            width: 40%;
-        }
-    }
-
-    @media screen and (min-width: $breakpoint-lg) {
-        .overview-tab-game-demo {
-            width: 30%;
-        }
-=======
 .overview-tab {
     box-sizing: border-box;
     display: flow-root;
@@ -35,6 +7,5 @@
         width: 45%;
         margin: auto;
         margin-left: 1rem;
->>>>>>> origin/master
     }
 }
