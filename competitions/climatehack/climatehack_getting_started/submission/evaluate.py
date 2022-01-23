@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -5,27 +6,49 @@ import torch
 
 from model import Model
 
-# load the trained model
-model = Model()
-model.load_state_dict(torch.load("model.pt"))
-model.eval()
 
-# get the input and output folder paths from DOXA
-input_path = Path(input())
-output_path = Path(input())
+def main():
+    # load the trained model (in evaluation mode)
+    model = Model()
+    model.load_state_dict(torch.load("model.pt"))
+    model.eval()
 
-# load the data
-data = np.load(input_path)["data"]
+    try:
+        # get the input and output directory paths from doxa
+        input_path = Path(sys.argv[1])
+        output_path = Path(sys.argv[2])
 
-with torch.no_grad():
-    i = 0
-    while i < data.shape[0]:
-        # predict the next hour of satellite imagery
-        prediction = model(torch.from_numpy(data[i : i + 12]).view(-1, 12 * 128 * 128))
-
-        # output for DOXA to score
-        np.savez_compressed(
-            output_path / f"{i}.npz", data=prediction.view(12, 64, 64).detach().numpy()
+        # get the number of groups
+        group_count = int(sys.argv[3])
+    except IndexError:
+        raise Exception(
+            f"Run using: {sys.argv[0]} [input directory] [output directory] [group count]"
         )
 
-        i += 12
+    # process input group files
+    for i in range(group_count):
+        data = np.load(input_path / f"{i}.npz")["data"]
+
+        # predict future satellite imagery for each array of 12 images
+        predictions = []
+        with torch.no_grad():
+            try:
+                for j in range(data.shape[0]):
+                    prediction = model(
+                        torch.from_numpy(data[j]).view(-1, 12 * 128 * 128)
+                    )
+                    predictions.append(prediction.view(12, 64, 64).detach().numpy())
+            except:
+                if not predictions:
+                    return
+
+            # save the group output
+            np.savez(
+                output_path / f"{i}.npz",
+                data=np.stack(predictions),
+            )
+            print(f"Exported {i}")
+
+
+if __name__ == "__main__":
+    main()
