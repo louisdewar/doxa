@@ -1,7 +1,9 @@
 import { faCaretDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useHistory } from 'react-router-dom/cjs/react-router-dom.min';
+import newcross from '../assets/newcross-white-orange.png';
 import './SplashHeader.scss';
+
 
 
 export default function SplashHeader({ baseUrl, scroll }) {
@@ -13,17 +15,26 @@ export default function SplashHeader({ baseUrl, scroll }) {
         <h1 className='ch-intro-title'>Climate</h1>
         <h2>Hack.<span>AI</span></h2>
 
-        <button className='ch-compete-button' onClick={() => {
+        <button className='ch-button ch-compete-button' onClick={() => {
           history.push(`${baseUrl}comingsoon`);
         }}>Compete on DOXA</button>
+        <button className='ch-button ch-linktree-button' onClick={() => {
+          window.location.href = 'https://google.com';
+        }}>LinkTree</button>
       </div>
     </div>
 
     <div className='ch-scroll-to-about'>
-      <a href="#" onClick={e => {
-        e.preventDefault();
-        scroll();
-      }}><FontAwesomeIcon icon={faCaretDown} fixedWidth /></a>
+      <div></div>
+      <div>
+        <a href="#" onClick={e => {
+          e.preventDefault();
+          scroll();
+        }}><FontAwesomeIcon icon={faCaretDown} fixedWidth /></a>
+      </div>
+      <div>
+        <img src={newcross} style={{ height: '2rem' }} />
+      </div>
     </div>
   </header>;
 }

@@ -3,23 +3,38 @@
 @import 'common/fonts';
 @import "../pages/splash-common.scss";
 
-button.ch-compete-button {
-  margin: 1rem 0;
+button.ch-button {
+  margin: 2rem 1rem 1rem 0;
   padding: 1rem 2rem;
   font-size: 1rem;
-  background-color: $ch-green;
   border: 0;
   border-radius: 3px;
   color: #fff;
   font-family: $monospace-font;
   cursor: pointer;
 
-  &:hover {
-    background-color: darken($ch-green, 5%);
+  &.ch-compete-button {
+    background-color: $ch-green;
+
+    &:hover {
+      background-color: darken($ch-green, 5%);
+    }
+
+    &:active {
+      background-color: darken($ch-green, 10%);
+    }
   }
 
-  &:active {
-    background-color: darken($ch-green, 10%);
+  &.ch-linktree-button {
+    background-color: $ch-blue;
+
+    &:hover {
+      background-color: darken($ch-blue, 5%);
+    }
+
+    &:active {
+      background-color: darken($ch-blue, 10%);
+    }
   }
 }
 
@@ -28,14 +43,10 @@ header.ch-splash-header {
   height: calc(100vh - 66px);
 
   background-color: #000;
-
   background-image: url('/competitions/climatehack/assets/globe.png');
   background-position: center;
   background-repeat: no-repeat;
-  background-size: cover;
-  border-left: inset 25vw transparent;
-  border-right: inset 25vw transparent;
-
+  background-size: contain;
 
   display: flex;
   flex-direction: column;
@@ -44,12 +55,11 @@ header.ch-splash-header {
 
   .ch-splash-header-title {
     color: #f1f5f9;
-
     display: flex;
     align-items: center;
 
     .ch-splash-header-title-content {
-      margin: 6rem 0 6rem -17.5vw;
+      margin: 6rem 0rem 6rem 10vw;
     }
 
     h1,
@@ -73,6 +83,12 @@ header.ch-splash-header {
   .ch-scroll-to-about {
     text-align: center;
     font-size: 4rem;
+    display: flex;
+
+    div {
+      flex: 1;
+      flex-basis: 0;
+    }
 
     a {
       color: #fff;

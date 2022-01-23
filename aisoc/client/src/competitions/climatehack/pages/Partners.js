@@ -1,5 +1,5 @@
-import ennovate from '../assets/ennovate.png';
-import newcross from '../assets/newcross-white.png';
+// import ennovate from '../assets/ennovate.png';
+import newcross from '../assets/newcross-white-orange.png';
 import Footer from '../components/Footer';
 import SplashNavbar from '../components/SplashNavbar';
 import './Partners.scss';
@@ -18,7 +18,7 @@ export default function Partners({ baseUrl }) {
     </header>
 
     <div className='ch-panel-container'>
-      <section className='ch-section ch-partners-sponsor-1'>
+      {/* <section className='ch-section ch-partners-sponsor-1'>
         <div className='ch-section-content'>
           <div className='ch-section-heading'>
             <img src={ennovate} />
@@ -32,8 +32,7 @@ export default function Partners({ baseUrl }) {
             </p>
           </div>
         </div>
-
-      </section>
+      </section> */}
 
       <section className='ch-section ch-partners-sponsor-2'>
         <div className='ch-section-content'>
