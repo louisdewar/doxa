@@ -28,7 +28,7 @@ $ch-green: #83C554;
 }
 
 .ch-panel-container {
-  width: 100%;
+  width: calc(100% - 2rem);
   margin: auto;
 }
 
@@ -38,13 +38,14 @@ $ch-green: #83C554;
 }
 
 section.ch-section {
-  padding: 2rem 2rem;
+  padding: 1rem 2rem;
   width: 100%;
   box-sizing: border-box;
   margin: auto;
   margin-top: 2rem;
   margin-bottom: 2rem;
-  border-radius: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 #0000, 0 0 #0000, 5px 5px #3c3f42;
 
   .ch-section-content {
     margin-left: auto;
@@ -75,6 +76,8 @@ section.ch-section {
 
 @media screen and (min-width: $breakpoint-sm) {
   section.ch-section {
+    padding: 2rem 2rem;
+
     .ch-section-heading {
       max-width: 15vw;
 
@@ -106,6 +109,12 @@ section.ch-section {
 }
 
 @media screen and (min-width: $breakpoint-lg) {
+  section.ch-section {
+    .ch-section-content .ch-section-heading h2 {
+      font-size: 2.5rem;
+    }
+  }
+
   .ch-panel-container {
     max-width: $breakpoint-lg;
   }

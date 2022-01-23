@@ -1,5 +1,6 @@
 import CompetitionHeader from 'components/CompetitionHeader';
 import CompetitionTabs from 'components/CompetitionTabs';
+import DataTab from '../components/tabs/DataTab';
 import GettingStartedTab from '../components/tabs/GettingStartedTab';
 import LeaderboardTab from '../components/tabs/LeaderboardTab';
 import OverviewTab from '../components/tabs/OverviewTab';
@@ -17,9 +18,7 @@ export default function Home({ baseUrl }) {
     },
     {
       name: 'DATA',
-      tab: <div>
-        <h2>Data</h2>
-      </div>
+      tab: <DataTab />
     },
     {
       name: 'GETTING STARTED',
