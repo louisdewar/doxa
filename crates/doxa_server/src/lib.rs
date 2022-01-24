@@ -69,7 +69,7 @@ pub async fn setup_server_from_env(
         ),
         base_mounts: vec![Mount {
             path_on_host: PathBuf::from("./dev/vm/images/python_modules.img"),
-            path_on_guest: "/usr/lib/python3.9/".to_string(),
+            path_on_guest: "/python_env".to_string(),
             read_only: true,
         }],
     };

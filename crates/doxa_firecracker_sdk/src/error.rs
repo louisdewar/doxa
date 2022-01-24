@@ -6,13 +6,6 @@ use tokio::task::JoinError;
 #[derive(Error, Display, Debug)]
 pub struct ErrorStatusCode;
 
-#[derive(From, Error, Display, Debug)]
-pub enum RequestError {
-    Hyper(hyper::Error),
-    Http(hyper::http::Error),
-    ErrorStatusCode(ErrorStatusCode),
-}
-
 #[derive(Error, Display, Debug)]
 pub struct TimeoutWaitingForSocket;
 
@@ -23,7 +16,6 @@ pub struct InvalidPath;
 #[derive(From, Error, Display, Debug)]
 pub enum SpawnError {
     IO(io::Error),
-    Request(RequestError),
     Timeout(TimeoutWaitingForSocket),
     InvalidPath(InvalidPath),
     Join(JoinError),

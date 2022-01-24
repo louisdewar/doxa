@@ -62,6 +62,7 @@ impl Competition for HelloWorldCompetiton {
         let score = match event.payload {
             HelloWorldGameEvent::RespondedIncorrectly { .. } => -1,
             HelloWorldGameEvent::RespondedSuccessfully { .. } => 1,
+            HelloWorldGameEvent::NoDoneMessage { .. } => return Ok(()),
         };
 
         context
@@ -90,8 +91,13 @@ impl Competition for HelloWorldCompetiton {
             None
         }
     }
+
+    fn build_game_client(&self) -> Self::GameClient {
+        Self::GameClient::default()
+    }
 }
 
+#[derive(Default)]
 pub struct HelloWorldGameClient;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -105,6 +111,9 @@ pub enum HelloWorldGameEvent {
         agent_output: String,
         file_output: String,
     },
+    NoDoneMessage {
+        outputed: String,
+    },
 }
 
 #[async_trait]
@@ -114,9 +123,11 @@ impl GameClient for HelloWorldGameClient {
     type GameEvent = HelloWorldGameEvent;
 
     async fn run<'a>(
+        &self,
         _match_request: Self::MatchRequest,
         context: &mut GameContext<'a, Self>,
     ) -> Result<(), doxa_executor::error::GameError<Self::Error>> {
+        context.set_max_message_time(Some(Duration::from_secs(5)));
         context.expect_n_agents(1)?;
 
         // Agents are not booted by default so we call reboot here (with zero arguments) to startup
@@ -129,8 +140,11 @@ impl GameClient for HelloWorldGameClient {
 
         let expected_output = b"echo PLEASE ECHO THIS MESSAGE";
 
+        // It needs to be in this order as the file might not exist until after the agent outputs a
+        // message
         let message = context.next_message(0).await?.to_owned();
         let file = context.take_file(0, "/output/test.txt").await?;
+        context.send_message_to_agent(0, b"taken file\n").await?;
 
         if message == expected_output && file == expected_output {
             context
@@ -155,6 +169,19 @@ impl GameClient for HelloWorldGameClient {
                     "game",
                 )
                 .await?;
+        }
+
+        let final_message = context.next_message(0).await?.to_owned();
+
+        if &final_message != b"done" {
+            context
+                .emit_game_event(
+                    HelloWorldGameEvent::NoDoneMessage {
+                        outputed: String::from_utf8_lossy(&final_message).to_string(),
+                    },
+                    "game",
+                )
+                .await?
         }
 
         Ok(())

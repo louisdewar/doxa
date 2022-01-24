@@ -19,7 +19,7 @@ use crate::{
     Settings,
 };
 
-pub const MAX_MSG_LEN: usize = 5_000;
+pub const MAX_MSG_LEN: usize = 50_000;
 
 pub struct VMAgent {
     id: String,

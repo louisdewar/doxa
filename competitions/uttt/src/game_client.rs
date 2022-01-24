@@ -10,6 +10,7 @@ use crate::model::{self, Model, ModelError, Player, Winner};
 use derive_more::{Display, Error, From};
 use serde::{Deserialize, Serialize};
 
+#[derive(Default)]
 pub struct UTTTGameClient;
 
 /// Games per side
@@ -274,6 +275,7 @@ impl GameClient for UTTTGameClient {
     type GameEvent = UTTTMatchEvent;
 
     async fn run<'a>(
+        &self,
         _match_request: (),
         context: &mut GameContext<'a, Self>,
     ) -> Result<(), GameError<Self::Error>> {

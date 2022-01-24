@@ -1,7 +1,10 @@
 use std::sync::Arc;
 
 use doxa_core::{
-    lapin::{message::Delivery, options::BasicAckOptions},
+    lapin::{
+        message::Delivery,
+        options::{BasicAckOptions, BasicNackOptions},
+    },
     tokio,
     tracing::{error, event, info, span, warn, Level},
     tracing_futures::Instrument,
@@ -30,6 +33,15 @@ impl<C: Competition> GameEventManager<C> {
     }
 
     async fn handle_game_event(&self, delivery: Delivery) {
+        // Ack the second attempt because there's a good chance it might never work and there'll be
+        // a constant nack cycle
+        if delivery.redelivered {
+            info!("event is redelivery, postively acking regardless of outcome");
+            delivery
+                .ack(BasicAckOptions::default())
+                .await
+                .expect("Failed to acknowledge MQ");
+        }
         let game_event: GameEvent<serde_json::Value> =
             serde_json::from_slice(&delivery.data).expect("Improperly formatted message");
         event!(Level::DEBUG, %game_event.game_id, %game_event.event_type, "received game event for agent");
@@ -59,8 +71,13 @@ impl<C: Competition> GameEventManager<C> {
                 warn!(?game_event, "already inserted game event into db, not inserting or notifying again as there was likely an error last time");
                 // TODO: decide whether to notify the event again.
             } else {
-                error!(?game_event, "failed to insert event into db");
-                // This will not ACK
+                error!(error=%error, debug=?error, ?game_event, "failed to insert event into db");
+                if !delivery.redelivered {
+                    delivery
+                        .nack(BasicNackOptions::default())
+                        .await
+                        .expect("Failed to acknowledge MQ");
+                }
                 return;
             }
         } else {
@@ -119,9 +136,6 @@ impl<C: Competition> GameEventManager<C> {
                     .await
                 {
                     event!(Level::ERROR, %error, debug = ?error, "on_game_event failed for agent");
-                    // This will not ACK but right now this function will not be run again
-                    // so it is somewhat pointless
-                    return;
                 }
             }
         }

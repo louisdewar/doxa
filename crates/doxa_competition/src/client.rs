@@ -14,7 +14,7 @@ use crate::{
 
 pub use crate::context::Context;
 pub use async_trait::async_trait;
-pub use doxa_executor::client::{ForfeitError, GameClient, GameContext, GameError};
+pub use doxa_executor::client::{ForfeitError, GameClient, GameContext, GameError, Mount};
 pub use doxa_mq::model::{ActivationEvent, GameEvent};
 pub use serde_json;
 
@@ -88,6 +88,11 @@ pub trait Competition: 'static + Send + Sync {
     ) -> Result<(), ContextError> {
         Ok(())
     }
+
+    /// Returns a new instance of the [`Self::GameClient`] for this competition.
+    /// If there are configuration parameters stored under `Self` then this is the place to give
+    /// them to the game client.
+    fn build_game_client(&self) -> Self::GameClient;
 
     /// Whenever ends with a fatal error during **runtime** (i.e. any errors that occur during the
     /// `run` method as part of `GameClient`.

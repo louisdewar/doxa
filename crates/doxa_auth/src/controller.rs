@@ -10,7 +10,7 @@ use crate::{
     error::{
         AcceptInviteError, CheckEnrollmentError, CompetitionNotFound, CreateUserError,
         IncorrectPassword, InvalidPassword, InviteExpired, InviteNotFound, LoginError,
-        RegistrationInviteMismatch, UserAlreadyExists, UserNotEnrolled, UserNotFound,
+        RegistrationInviteMismatch, UserAlreadyExists, UserNotFound,
     },
     password,
     token::{generate_jwt, Token},
@@ -189,12 +189,25 @@ pub fn login(
 /// If the user is enrolled then this returns `Ok(enrollment)` containing the enrollment
 /// In any other case (including both that the user is not enrolled or there has been
 /// some internal error with the database) an error is returned
+///
+/// TEMPORARILY THIS CURRENTLY ALWAYS RETURNS AN ENROLLMENT EVEN IF THE USER IS NOT ACTUALLY
+/// ENROLLED
 pub fn is_enrolled(
     conn: &PgConnection,
     user_id: i32,
     competition: String,
 ) -> Result<Enrollment, CheckEnrollmentError> {
-    action::competition::get_competition_by_name(conn, &competition)?.ok_or(CompetitionNotFound)?;
+    // TODO: properly fix.
+    // Currently this DOES NOT PERFORM AN ENROLLMENT CHECK.
+    // This is to help with some convenience issues until the enrollment process is improved.
+    let competition = action::competition::get_competition_by_name(conn, &competition)?
+        .ok_or(CompetitionNotFound)?;
 
-    Ok(action::competition::get_enrollment(conn, user_id, competition)?.ok_or(UserNotEnrolled)?)
+    Ok(Enrollment {
+        user_id,
+        competition: competition.id,
+    })
+
+    //action::competition::get_competition_by_name(conn, &competition)?.ok_or(CompetitionNotFound)?;
+    //Ok(action::competition::get_enrollment(conn, user_id, competition)?.ok_or(UserNotEnrolled)?)
 }

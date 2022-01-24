@@ -428,6 +428,41 @@ impl<C: Competition + ?Sized> Context<C> {
         .await
     }
 
+    /// Adds the game result to the database only if the game is **not outdated**.
+    pub async fn add_game_result_active(
+        &self,
+        agent: String,
+        game: i32,
+        result: i32,
+    ) -> Result<(), ContextError> {
+        self.run_query(move |conn| {
+            // TODO: use an INSERT from SELECT query to avoid the transaction
+            Ok(conn.build_transaction().repeatable_read().run(|| {
+                let game = doxa_db::action::game::get_game_by_id_required(
+                    conn,
+                    game,
+                    C::COMPETITION_NAME,
+                )?;
+
+                if game.outdated {
+                    return Ok(());
+                }
+
+                doxa_db::action::game::add_game_result(
+                    conn,
+                    &GameResult {
+                        agent,
+                        game: game.id,
+                        result,
+                    },
+                )?;
+
+                Ok(())
+            }))
+        })
+        .await?
+    }
+
     pub async fn get_user_rank(
         &self,
         user_id: i32,

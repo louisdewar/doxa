@@ -69,10 +69,10 @@ impl<T: Competition> CompetitionManager<T> {
             context.clone(),
         );
 
-        let execution_manager = ExecutionManager::<T::GameClient>::new(
+        let execution_manager = ExecutionManager::<T>::new(
             manager.settings,
-            T::COMPETITION_NAME,
             executor_permits,
+            manager.competition.clone(),
         );
 
         join!(

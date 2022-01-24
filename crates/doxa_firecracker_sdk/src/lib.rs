@@ -8,7 +8,4 @@
 pub mod error;
 pub mod spawn;
 
-mod net;
-mod request;
-
 pub use spawn::{VMOptions, VM};

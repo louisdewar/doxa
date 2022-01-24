@@ -181,7 +181,7 @@ pub async fn upload(
     .await??;
 
     // TODO: get max size from competition
-    let max_size = 50_000_000;
+    let max_size = 2_000_000_000;
 
     match process_field_upload(&mut f, field, max_size).await {
         Ok(()) => {}

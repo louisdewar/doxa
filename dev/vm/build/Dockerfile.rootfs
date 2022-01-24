@@ -18,9 +18,7 @@ COPY ./Cargo.lock .
 # Copy slim Cargo.toml
 COPY ./dev/vm/build/Cargo.toml .
 
-# RUN apk add --no-cache musl-dev
-# # The target should already be x86_64-unknown-linux-musl but we confirm here
-RUN cargo build -p doxa_vm --bin vm_executor --release --workspace # --target x86_64-unknown-linux-musl
+RUN cargo build -p doxa_vm --bin vm_executor --release --workspace
 
 RUN cp /app/target/release/vm_executor /
 

@@ -18,7 +18,8 @@ PYTHON_MODULES_IMG="$IMAGES_DIR/python_modules.img"
 SCRATCH_IMG="$IMAGES_DIR/scratch.img"
 
 # == PREPARE SOURCES
-mv "$ROOTFS_SRC/usr/local/lib/python3.9" "$PYTHON_MODULES_SRC"
+mv "$ROOTFS_SRC/python_env" "$PYTHON_MODULES_SRC"
+
 rm -rf "$ROOTFS_SRC/root/.cache"
 
 # === SCRATCH SOURCES
@@ -45,7 +46,7 @@ du -sh "$SCRATCH_SRC"
 # === ROOTFS
 echo "=== ROOTFS"
 # Allocate more space than we need to be sure
-dd if=/dev/zero of="$ROOTFS_IMG" bs=1M count=120
+dd if=/dev/zero of="$ROOTFS_IMG" bs=1M count=200
 mkfs.ext4 -U random -d "$ROOTFS_SRC" "$ROOTFS_IMG"
 
 # === PYTHON_MODULES

@@ -57,6 +57,11 @@ impl VMRecorder {
                             continue;
                         }
 
+
+                        // TODO: in future use escape_ascii
+                        // Perform escaping within the line (but don't escape the newline)
+                        let line = line.replace('\u{0}', "{NULL_BYTE}");
+
                         logs.push_str(&line);
                         logs.push('\n');
                     },

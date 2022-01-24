@@ -1,4 +1,4 @@
-use std::{marker::PhantomData, time::Duration};
+use std::{marker::PhantomData, path::PathBuf, time::Duration};
 
 use doxa_core::tokio;
 use futures::TryFutureExt;
@@ -7,7 +7,7 @@ use tokio::time::timeout;
 use crate::{
     agent::VMAgent,
     client::GameClient,
-    error::{AgentTerminated, GameContextError, NextMessageError},
+    error::{AgentTerminated, GameContextError, NextMessageError, TempDirError},
     event::ForfeitEvent,
 };
 
@@ -17,11 +17,30 @@ pub(crate) use game_event::GameEventContext;
 
 pub const DEFAULT_MAX_MESSAGE_TIME: Duration = Duration::from_secs(120);
 
+pub struct AsyncTempDir {
+    tempdir: tempfile::TempDir,
+}
+
+impl AsyncTempDir {
+    async fn new() -> Result<Self, TempDirError> {
+        let tempdir = tokio::task::spawn_blocking(tempfile::tempdir).await??;
+
+        Ok(AsyncTempDir { tempdir })
+    }
+    // Performs as best effort async cleanup
+    async fn cleanup(self) -> Result<(), TempDirError> {
+        tokio::task::spawn_blocking(|| self.tempdir.close()).await??;
+
+        Ok(())
+    }
+}
+
 pub struct GameContext<'a, C: GameClient + ?Sized> {
     pub(crate) agents: &'a mut Vec<VMAgent>,
     client: PhantomData<C>,
     max_message_time: Duration,
-    game_event_context: &'a mut GameEventContext<C>,
+    pub(crate) game_event_context: &'a mut GameEventContext<C>,
+    work_dir: Option<AsyncTempDir>,
 }
 
 impl<'a, C: GameClient> GameContext<'a, C> {
@@ -34,7 +53,25 @@ impl<'a, C: GameClient> GameContext<'a, C> {
             client: PhantomData,
             max_message_time: DEFAULT_MAX_MESSAGE_TIME,
             game_event_context,
+            work_dir: None,
         }
+    }
+
+    /// Gets a path to a temporary working directory that will be cleaned up at the end of
+    /// execution.
+    ///
+    /// The workdir is lazily created on the first invocation of this method.
+    pub async fn work_dir_path(&mut self) -> Result<PathBuf, GameContextError> {
+        Ok(match &self.work_dir {
+            Some(work_dir) => work_dir.tempdir.path().to_owned(),
+            None => {
+                let work_dir = AsyncTempDir::new().await?;
+                let path = work_dir.tempdir.path().to_owned();
+                self.work_dir = Some(work_dir);
+
+                path
+            }
+        })
     }
 
     /// The EVENT_TYPE must be a non-zero length string and cannot begin with an underscore.
@@ -102,10 +139,11 @@ impl<'a, C: GameClient> GameContext<'a, C> {
     /// This will timeout if it does not receive a message within `max_message_time` which can be
     /// configured.
     pub async fn next_message(&mut self, agent_id: usize) -> Result<&[u8], GameContextError> {
+        let max_message_time = self.max_message_time;
         let agent = self.agent_mut(agent_id)?;
 
         let msg = timeout(
-            DEFAULT_MAX_MESSAGE_TIME,
+            max_message_time,
             agent.next_message().map_err(|e| match e {
                 NextMessageError::NextEvent(e) => GameContextError::NextEvent(e),
                 NextMessageError::Terminated { stderr } => {
@@ -203,5 +241,15 @@ impl<'a, C: GameClient> GameContext<'a, C> {
                 actual: self.agents(),
             })
         }
+    }
+
+    /// Should be run before the executor goes out of scope.
+    /// This will clean any resources (e.g. workdir)
+    pub(crate) async fn cleanup(self) -> Result<(), GameContextError> {
+        if let Some(work_dir) = self.work_dir {
+            work_dir.cleanup().await?;
+        }
+
+        Ok(())
     }
 }

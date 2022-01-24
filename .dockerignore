@@ -1,6 +1,5 @@
 ./target/
 **/node_modules
-./dev/vm/images
 ./dev/doxa_storage
 ./aisoc/client/node_modules
 ./aisoc/client/build
