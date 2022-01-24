@@ -34,7 +34,7 @@ import './Splash.scss';
 export default function Splash({ baseUrl }) {
   const scrollRef = useRef(null);
 
-  const logoMargin = '0.75rem';
+  const logoMargin = '0.7rem';
   const logo = (src, p = '0rem', m = '0rem', etc = {}) => <img
     src={src}
     style={{
