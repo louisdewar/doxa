@@ -78,4 +78,3 @@ impl Scorer {
         Ok(score.score)
     }
 }
-
