@@ -57,7 +57,7 @@ steps:
       - name: dockersock
         path: /var/run/docker.sock
     commands:
-      - docker build --build-arg multiple_competitions=false --build-arg default_competition=climatehack --build-arg title="Climate Hack" -t registry.dewardt.uk/doxa/climatehack-web:drone-build-"$DRONE_BUILD_NUMBER" -f aisoc/deploy/Dockerfile.web .
+      - docker build --build-arg multiple_competitions=false --build-arg default_competition=climatehack --build-arg title="Climate Hack" --build-arg domain="climatehack.ai" -t registry.dewardt.uk/doxa/climatehack-web:drone-build-"$DRONE_BUILD_NUMBER" -f aisoc/deploy/Dockerfile.web .
   - name: publish main
     image: docker:dind
     privileged: true

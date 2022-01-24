@@ -12,10 +12,12 @@ COPY aisoc/client .
 ARG multiple_competitions
 ARG default_competition
 ARG title
+ARG domain
 
 ENV REACT_APP_DEFAULT_COMPETITION=$default_competition
 ENV REACT_APP_MULTIPLE_COMPETITIONS=$multiple_competitions
 ENV REACT_APP_TITLE=$title
+ENV REACT_APP_DOMAIN=$domain
 
 RUN echo $REACT_APP_DEFAULT_COMPETITION
 RUN echo $REACT_APP_MULTIPLE_COMPETITIONS
