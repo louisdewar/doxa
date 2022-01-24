@@ -16,9 +16,10 @@ class Model(nn.Module):
         self.output_layer = nn.Linear(in_features=384, out_features=12 * 64 * 64)
 
     def forward(self, features):
-        x = torch.relu(self.input_layer(features))
+        x = features.view(-1, 12 * 128 * 128)
+        x = torch.relu(self.input_layer(x))
         x = torch.sigmoid(self.encoder_output_layer(x))
-        x = torch.relu(self.decoder_input_layer(x))
-        x = torch.sigmoid(self.output_layer(x))
+        x = torch.sigmoid(self.decoder_input_layer(x))
+        x = torch.relu(self.output_layer(x))
 
-        return x
+        return x.view(-1, 12, 64, 64)
