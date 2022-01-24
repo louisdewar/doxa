@@ -1,0 +1,18 @@
+@import 'common/common';
+
+.ch-coming-soon-card {
+  background: linear-gradient(45deg, #30A292 20%, #00B75F 60%, #30A292 80%);
+  animation: 1s ease-in-out 0s infinite alternate card-background-pulse;
+  color: #fff;
+  border-radius: 3px;
+  margin-top: 2rem;
+  margin-bottom: 40px;
+  padding: 15px 25px;
+
+  position: relative;
+
+  a {
+    color: #fff;
+    text-underline-offset: 0.2rem;
+  }
+}

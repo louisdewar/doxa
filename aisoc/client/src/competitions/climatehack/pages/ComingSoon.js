@@ -1,6 +1,5 @@
-import Card from 'components/Card';
-import Container from 'components/Container';
 import SplashNavbar from '../components/SplashNavbar';
+import './ComingSoon.scss';
 
 
 export default function ComingSoon({ baseUrl }) {
@@ -13,15 +12,9 @@ export default function ComingSoon({ baseUrl }) {
           Coming soon
         </h1>
       </header>
-    </div>
 
-    <Container padTop={false}>
-
-      <div style={{ marginTop: '2rem', fontSize: '1.2rem' }}>
-        <span></span>
-        <span></span>
-
-        <Card>
+      <div className='ch-panel-container'>
+        <div className='ch-coming-soon-card'>
           <p>
             The official Climate Hack competition page on DOXA will launch on Friday 28th January.
           </p>
@@ -31,14 +24,8 @@ export default function ComingSoon({ baseUrl }) {
           <p>
             &mdash; <strong>The DOXA team</strong>
           </p>
-        </Card>
+        </div>
       </div>
-    </Container>
-
-
-
-
-
-
+    </div>
   </>;
 }
