@@ -1,5 +1,5 @@
 import ocfLogo from '../assets/ocf-white.png';
-import satelliteImage from '../assets/satellite-image.png';
+import satelliteImage from '../assets/satellite-image-cropped.png';
 import Footer from '../components/Footer';
 import SplashNavbar from '../components/SplashNavbar';
 import './Challenge.scss';
@@ -61,7 +61,7 @@ export default function Challenge({ baseUrl }) {
             </p>
 
             <p>
-              For example, National Grid in the UK need to have idle natural gas turbines on standby in the event of a sudden fall in solar power production, say, when a large cloud covers a solar farm. With better forecasting techniques, their use could be minimised, saving a significant volume of carbon emissions, potentially up to 100 kilotonnes a year.
+              For example, the National Grid Electricity System Operator in the UK need to have natural gas turbines on standby in the event of a sudden fall in solar power production, say, when a large cloud covers a solar farm. With better forecasting techniques, their use could be minimised, saving a significant volume of carbon emissions, potentially up to 100 kilotonnes a year.
             </p>
 
             <p>
@@ -85,7 +85,7 @@ export default function Challenge({ baseUrl }) {
           </div>
           <div>
             <p>
-              Improved PV forecasting for the National Grid has the potential to save up to 100 kilotonnes of carbon emissions per year in the UK (up to 1.3 megatonnes by 2030). OpenClimateFix also plans to deploy these solutions abroad, which should result in even more substantial carbon savings globally.
+              Improved PV forecasting for the National Grid has the potential to save up to 100 kilotonnes of carbon emissions per year in the UK (up to 1.3 megatonnes by 2030). Open Climate Fix also plans to deploy these solutions abroad, which should result in even more substantial carbon savings globally.
             </p>
           </div>
         </div>
