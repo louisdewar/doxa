@@ -1,6 +1,6 @@
 #!/bin/bash
 
-python -m venv --upgrade-deps /scorer_env
+python -m venv --upgrade-deps --copies /scorer_env
 
 source "/scorer_env/bin/activate"
 
