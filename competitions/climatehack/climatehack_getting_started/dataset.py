@@ -8,14 +8,89 @@ from torch.utils.data import IterableDataset
 
 
 class ClimateHackDataset(IterableDataset):
-    def __init__(self, dataset, samples_per_slice=1, day_limit=0, cache=True) -> None:
+    def __init__(
+        self, dataset, start_date=None, end_date=None, crops_per_slice=1, day_limit=0
+    ) -> None:
         super().__init__()
 
         self.dataset = dataset
-        self.samples_per_slice = samples_per_slice
+        self.crops_per_slice = crops_per_slice
         self.day_limit = day_limit
-        self.cache = True
         self.cached_items = []
+
+        times = self.dataset.get_index("time")
+        self.min_date = times[0].date() if start_date is None else start_date
+        self.max_date = times[-1].date() if end_date is None else end_date
+
+        if self.day_limit > 0:
+            self.max_date = min(
+                self.max_date, self.min_date + timedelta(days=self.day_limit)
+            )
+
+    def _image_times(self, start_time, end_time):
+        date = self.min_date
+        while date < self.max_date:
+            current_time = datetime.combine(date, start_time)
+            while current_time.time() < end_time:
+                yield current_time
+                current_time += timedelta(minutes=5)
+
+            date += timedelta(days=1)
+
+    def _get_crop(self, current_time):
+        # roughly over the mainland UK
+        rand_x = randrange(550, 950 - 128)
+        rand_y = randrange(375, 700 - 128)
+
+        # make a data selection
+        selection = self.dataset.sel(
+            time=slice(
+                current_time,
+                current_time + timedelta(minutes=55),
+            )
+        ).isel(
+            x=slice(rand_x, rand_x + 128),
+            y=slice(rand_y, rand_y + 128),
+        )
+
+        # get the OSGB coordinate data
+        osgb_data = np.stack(
+            [
+                selection["x_osgb"].to_numpy().astype(float32),
+                selection["y_osgb"].to_numpy().astype(float32),
+            ]
+        )
+
+        if osgb_data.shape != (2, 128, 128):
+            return None
+
+        # get the input satellite imagery
+        input_data = selection["data"].to_numpy().astype(float32)
+
+        if input_data.shape != (12, 128, 128):
+            return None
+
+        # get the target output
+        target_output = (
+            self.dataset["data"]
+            .sel(
+                time=slice(
+                    current_time + timedelta(hours=1),
+                    current_time + timedelta(hours=2, minutes=55),
+                )
+            )
+            .isel(
+                x=slice(rand_x + 32, rand_x + 96),
+                y=slice(rand_y + 32, rand_y + 96),
+            )
+            .to_numpy()
+            .astype(float32)
+        )
+
+        if target_output.shape != (24, 64, 64):
+            return None
+
+        return osgb_data, input_data, target_output
 
     def __iter__(self) -> Iterator[T_co]:
         if self.cached_items:
@@ -24,63 +99,15 @@ class ClimateHackDataset(IterableDataset):
 
             return
 
-        times = self.dataset.get_index("time")
-        start_date = times[0].date()
-        end_date = times[-1].date()
+        start_time = time(9, 0)
         end_time = time(14, 0)
 
-        if self.day_limit > 0:
-            end_date = min(end_date, start_date + timedelta(days=self.day_limit))
+        for current_time in self._image_times(start_time, end_time):
+            crops = 0
+            while crops < self.crops_per_slice:
+                crop = self._get_crop(current_time)
+                if crop:
+                    self.cached_items.append(crop)
+                    yield crop
 
-        date = start_date
-        while date < end_date:
-            current_time = datetime.combine(date, time(9, 0))
-            while current_time.time() < end_time:
-                for _ in range(self.samples_per_slice):
-                    rand_x = randrange(550, 950 - 128)
-                    rand_y = randrange(375, 700 - 128)
-
-                    selection = self.dataset.sel(
-                        time=slice(
-                            current_time,
-                            current_time + timedelta(minutes=55),
-                        )
-                    ).isel(
-                        x=slice(rand_x, rand_x + 128),
-                        y=slice(rand_y, rand_y + 128),
-                    )
-
-                    osgb_data = np.stack(
-                        [
-                            selection["x_osgb"].to_numpy().astype(float32),
-                            selection["y_osgb"].to_numpy().astype(float32),
-                        ]
-                    )
-
-                    input_data = selection["data"].to_numpy().astype(float32)
-
-                    true_output = (
-                        self.dataset["data"]
-                        .sel(
-                            time=slice(
-                                current_time + timedelta(hours=1),
-                                current_time + timedelta(hours=2, minutes=55),
-                            )
-                        )
-                        .isel(
-                            x=slice(rand_x + 32, rand_x + 96),
-                            y=slice(rand_y + 32, rand_y + 96),
-                        )
-                        .to_numpy()
-                        .astype(float32)
-                    )
-
-                    res = (osgb_data, input_data, true_output)
-                    if self.cache:
-                        self.cached_items.append(res)
-
-                    yield res
-
-                current_time += timedelta(minutes=5)
-
-            date += timedelta(days=1)
+                crops += 1

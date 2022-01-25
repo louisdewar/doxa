@@ -57,9 +57,10 @@ header.ch-splash-header {
     color: #f1f5f9;
     display: flex;
     align-items: center;
+    flex: 1;
 
     .ch-splash-header-title-content {
-      margin: 6rem 0rem 6rem 10vw;
+      margin-left: 10vw;
     }
 
     h1,
@@ -81,6 +82,8 @@ header.ch-splash-header {
   }
 
   .ch-scroll-to-about {
+    margin-top: auto;
+
     text-align: center;
     font-size: 4rem;
     display: flex;
