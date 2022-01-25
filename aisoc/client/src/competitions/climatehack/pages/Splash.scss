@@ -3,6 +3,10 @@
 @import 'common/fonts';
 @import "./splash-common.scss";
 
+:root {
+  --ch-uni-logo-margin: 0.4em;
+}
+
 section.ch-section {
   &.ch-splash-about {
     background-color: #111827;
@@ -159,6 +163,10 @@ section.ch-section {
 }
 
 @media screen and (min-width: $breakpoint-sm) {
+  :root {
+    --ch-uni-logo-margin: 0.7em;
+  }
+
   header.ch-splash-header {
     margin-top: 73px;
     height: calc(100vh - 73px);

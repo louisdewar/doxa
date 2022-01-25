@@ -34,8 +34,9 @@ import './Splash.scss';
 export default function Splash({ baseUrl }) {
   const scrollRef = useRef(null);
 
-  const logoMargin = '0.7rem';
-  const logo = (src, p = '0rem', m = '0rem', etc = {}) => <img
+  const logoMargin = getComputedStyle(document.body).getPropertyValue('--ch-uni-logo-margin');
+
+  const logo = (src, p = '0em', m = '0em', etc = {}) => <img
     src={src}
     style={{
       paddingTop: p ?? '0', paddingBottom: p ?? '0',
@@ -82,32 +83,34 @@ export default function Splash({ baseUrl }) {
               Connect with Participants from 25 Universities
             </h2>
           </div>
-          <div className='ch-splash-universities-logos'>
-            {logo(uclLogo, undefined, '0.25rem')}
-            {logo(stanfordLogo, '0.6rem')}
-            {logo(berkeleyLogo, '0.65rem', '0.2rem')}
-            {logo(oxfordLogo, '0.75rem', '0.25rem')}
-            {logo(cambridgeLogo, '0.25rem')}
-            {logo(mitLogo, '1.3rem')}
-            {logo(torontoLogo, '0.2rem', '0.6rem')}
-            {logo(harvardLogo, '0.225rem', undefined, { marginRight: '-0.4rem' })}
-            {logo(princetonLogo, '0.9rem')}
-            {logo(imperialLogo, '1rem', '-0.1rem')}
-            {logo(cornellLogo, '0.5rem', '0.5rem')}
-            {logo(caltechLogo, '0.2rem', '0.8rem')}
-            {logo(carnegieLogo, '0.65rem')}
-            {logo(uclaLogo, '1rem')}
-            {logo(columbiaLogo, '0.4rem')}
-            {logo(stAndrewsLogo, '0.25rem', '0.2rem')}
-            {logo(georgiaTechLogo, '0.9rem')}
-            {logo(edinburghLogo, '0.8rem')}
-            {logo(manchesterLogo, '0.4rem', '0.4rem')}
-            {logo(waterlooLogo, undefined, '0.3rem')}
-            {logo(michiganLogo, '1rem')}
-            {logo(warwickLogo, undefined, '2.25rem')}
-            {logo(bristolLogo, '0.4rem')}
-            {logo(illinoisLogo, '0.15rem', '0.75rem')}
-            {logo(glasgowLogo, undefined, '1.75rem')}
+          <div className='ch-splash-universities'>
+            <div className='ch-splash-universities-logos'>
+              {logo(uclLogo, undefined, '0.25em')}
+              {logo(stanfordLogo, '0.6em')}
+              {logo(berkeleyLogo, '0.65em', '0.2em')}
+              {logo(oxfordLogo, '0.75em', '0.25em')}
+              {logo(cambridgeLogo, '0.25em')}
+              {logo(mitLogo, '1em')}
+              {logo(torontoLogo, '0.2em', '0.6em')}
+              {logo(harvardLogo, '0.225em', undefined, { marginRight: '-0.4em' })}
+              {logo(princetonLogo, '0.9em')}
+              {logo(imperialLogo, '1em', '-0.1em')}
+              {logo(cornellLogo, '0.5em', '0.5em')}
+              {logo(caltechLogo, '0.2em', '0.8em')}
+              {logo(carnegieLogo, '0.65em')}
+              {logo(uclaLogo, '1em')}
+              {logo(columbiaLogo, '0.4em')}
+              {logo(stAndrewsLogo, '0.25em', '0.2em')}
+              {logo(georgiaTechLogo, '0.9em')}
+              {logo(edinburghLogo, '0.8em')}
+              {logo(manchesterLogo, '0.4em', '0.4em')}
+              {logo(waterlooLogo, undefined, '0.3em')}
+              {logo(michiganLogo, '1rem')}
+              {logo(warwickLogo, undefined, '2.25em')}
+              {logo(bristolLogo, '0.4em')}
+              {logo(illinoisLogo, '0.15em', '0.75em')}
+              {logo(glasgowLogo, undefined, '1.75em')}
+            </div>
 
             <p>
               Beyond this competition, Climate Hack.AI aims to foster a community of students interested in artificial intelligence from around the world.
