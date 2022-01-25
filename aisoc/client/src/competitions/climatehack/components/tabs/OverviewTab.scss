@@ -1,13 +1,14 @@
 .ch-tab.ch-overview-tab {
-  .leading {
+  .ch-tab-box {
     border: 1px solid #fff;
     border-radius: 3px;
-    padding: 1rem;
+    padding: 1rem 2rem;
     background-color: #1F2937;
 
-    p {
+    text-align: justify;
+
+    p.leading {
       font-weight: 700;
-      margin: 1rem;
     }
   }
 }

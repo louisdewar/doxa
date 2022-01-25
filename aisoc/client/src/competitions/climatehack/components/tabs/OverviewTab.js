@@ -7,15 +7,23 @@ export default function OverviewTab({ baseUrl }) {
   return <div className="ch-tab ch-overview-tab">
     <h2>Overview</h2>
 
-    <div className='leading'>
-      <p>
+    <div className='ch-tab-box'>
+      <p className='leading'>
         Your challenge &ndash; should you choose to accept it &ndash; is to predict the next two hours of satellite imagery from the previous hour of satellite imagery over a slightly larger area better than the current state of the art.
       </p>
-
-      <p>
-        Read more about how this can improve solar power production forecasts and potentially reduce global carbon emissions by  ~100 million tonnes of CO<sub>2</sub> a year by 2030 on <Link to={`${baseUrl}challenge`}>the challenge page</Link>.
-      </p>
     </div>
+
+    <p>
+      The ultimate end-goal is to collaborate to build the world&apos;s best near-term forecasting system for solar electricity generation, which would allow electricity system operators around the world to better schedule their grids, saving potentially ~100 million tonnes of CO<sub>2</sub> a year by 2030 if deployed worldwide.
+    </p>
+
+    <p>
+      The key to this lies in developing better satellite imagery nowcasting techniques, which would allow better cloud coverage predictions, amongst other things.  This is where you come in.
+    </p>
+
+    <p>
+      Read more about how this can improve solar power production forecasts and how your winning model could help reduce carbon emissions by ~100,000 tonnes a year if deployed by the National Grid Electricity System Operator on <Link to={`${baseUrl}challenge`}>the challenge page</Link>.
+    </p>
 
     <h3>The dataset</h3>
 
@@ -27,7 +35,7 @@ export default function OverviewTab({ baseUrl }) {
 
     <h3>Your machine learning challenge</h3>
 
-    <p className='leading'>
+    <p className='ch-tab-box'>
       From twelve 128&times;128-pixel images taken five minutes apart (one hour of data), predict the next two hours of satellite imagery for the smaller central 64&times;64-pixel region.
       <br /><br />
       <strong>Input</strong>: an hour of satellite imagery for a 128&times;128-pixel region (<code>12 timesteps &times; 128 pixels &times; 128 pixels</code>), as well as the datetime and geospatial positions of the images (which may be useful to feed into your model).
