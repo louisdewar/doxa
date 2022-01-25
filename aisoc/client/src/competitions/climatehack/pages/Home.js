@@ -1,6 +1,5 @@
 import CompetitionHeader from 'components/CompetitionHeader';
 import CompetitionTabs from 'components/CompetitionTabs';
-import DataTab from '../components/tabs/DataTab';
 import GettingStartedTab from '../components/tabs/GettingStartedTab';
 import LeaderboardTab from '../components/tabs/LeaderboardTab';
 import OverviewTab from '../components/tabs/OverviewTab';
@@ -15,11 +14,7 @@ export default function Home({ baseUrl }) {
   const tabs = [
     {
       name: 'OVERVIEW',
-      tab: <OverviewTab />
-    },
-    {
-      name: 'DATA',
-      tab: <DataTab />
+      tab: <OverviewTab baseUrl={baseUrl} />
     },
     {
       name: 'RESOURCES',

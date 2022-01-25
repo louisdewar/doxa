@@ -1,5 +1,4 @@
 import perceiverIO from '../../assets/perceiver-io.png';
-import './ResourcesTab.scss';
 
 export default function ResourcesTab() {
   return <div className="ch-tab ch-resources-tab">
