@@ -1,5 +1,6 @@
 import CompetitionHeader from 'components/CompetitionHeader';
 import CompetitionTabs from 'components/CompetitionTabs';
+import FaqTab from '../components/tabs/FaqTab';
 import GettingStartedGuideTab from '../components/tabs/GettingStartedGuideTab';
 import LeaderboardTab from '../components/tabs/LeaderboardTab';
 import OverviewTab from '../components/tabs/OverviewTab';
@@ -30,6 +31,10 @@ export default function Home({ baseUrl }) {
     {
       name: 'RULES',
       tab: <RulesTab />
+    },
+    {
+      name: 'FAQ',
+      tab: <FaqTab />
     },
   ];
 

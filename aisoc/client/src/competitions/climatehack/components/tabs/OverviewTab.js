@@ -9,7 +9,7 @@ export default function OverviewTab({ baseUrl }) {
 
     <div className='leading'>
       <p>
-        Your challenge &ndash; should you choose to accept it &ndash; is to predict the next hour of satellite imagery from the previous hour of satellite imagery better than the current state of the art.
+        Your challenge &ndash; should you choose to accept it &ndash; is to predict the next two hours of satellite imagery from the previous hour of satellite imagery over a slightly larger area better than the current state of the art.
       </p>
 
       <p>
@@ -28,11 +28,11 @@ export default function OverviewTab({ baseUrl }) {
     <h3>Your machine learning challenge</h3>
 
     <p className='leading'>
-      From twelve 128&times;128-pixel images taken five minutes apart (one hour of data), predict the next hour of satellite imagery for the smaller central 64&times;64-pixel region.
+      From twelve 128&times;128-pixel images taken five minutes apart (one hour of data), predict the next two hours of satellite imagery for the smaller central 64&times;64-pixel region.
       <br /><br />
-      <strong>Input</strong>: an hour of satellite imagery for a 128&times;128-pixel region (<code>12 timesteps &times; 128 pixels &times;128 pixels</code>), as well as the datetime and geospatial positions of the images (which may be useful to feed into your model).
+      <strong>Input</strong>: an hour of satellite imagery for a 128&times;128-pixel region (<code>12 timesteps &times; 128 pixels &times; 128 pixels</code>), as well as the datetime and geospatial positions of the images (which may be useful to feed into your model).
       <br /><br />
-      <strong>Output</strong>: the next hour of satellite imagery for the 64&times;64-pixel area at the centre of the input region (<code>12 timesteps &times; 64 pixels &times; 64 pixels</code>).
+      <strong>Output</strong>: the next two hours of satellite imagery for the 64&times;64-pixel area at the centre of the input region (<code>24 timesteps &times; 64 pixels &times; 64 pixels</code>).
     </p>
     <p>
       Note that this means the spatial extent of the input is larger than the output!

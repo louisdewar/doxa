@@ -103,10 +103,10 @@ export default function Challenge({ baseUrl }) {
               Building the world&apos;s best near-term forecasting system for solar electricity generation is a huge endeavour. This is where Climate Hack.AI comes in.
             </p>
             <p>
-              The challenge is to build on the state of the art in forecasting the next hour of satellite imagery from the last hour of satellite imagery to eventually feed into and improve solar power prediction models.
+              The challenge is to build on the state of the art in forecasting the next two hours of satellite imagery from the previous hour of satellite imagery covering 4&times; the area to eventually feed into and improve solar power prediction models.
             </p>
             <p>
-              From a series of twelve 128&times;128 images cropped out of much larger satellite images taken five minutes apart, the goal is to accurately predict the centre 64&times;64 pixels of the next twelve images, corresponding to the next hour of satellite imagery.
+              From a series of 12 images covering a 128&times;128-pixel region cropped out of a series of much larger satellite images taken five minutes apart, the goal is to accurately predict the next 24 images for the central 64&times;64-pixel area, corresponding to the next two hours of satellite imagery.
             </p>
           </div>
         </div>

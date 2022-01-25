@@ -17,7 +17,7 @@ export default function SplashHeader({ baseUrl, scroll }) {
 
         <button className='ch-button ch-compete-button' onClick={() => {
           history.push(`${baseUrl}comingsoon`);
-        }}>Compete on DOXA</button>
+        }}>Compete now</button>
         <button className='ch-button ch-linktree-button' onClick={() => {
           window.location.href = 'https://linktr.ee/climatehack.ai';
         }}>LinkTree</button>
