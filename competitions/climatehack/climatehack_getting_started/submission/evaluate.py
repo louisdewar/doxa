@@ -1,59 +1,50 @@
-import sys
-from pathlib import Path
-
 import numpy as np
 import torch
 
+from climatehack import BaseEvaluator
 from model import Model
 
 
-def main():
-    # load the trained model (in evaluation mode)
-    model = Model()
-    model.load_state_dict(torch.load("model.pt"))
-    model.eval()
+class Evaluator(BaseEvaluator):
+    def setup(self):
+        """Sets up anything required for evaluation.
 
-    print("STARTUP")
+        In this case, it loads the trained model (in evaluation mode)."""
 
-    try:
-        # get the input and output directory paths from DOXA
-        input_path = Path(sys.argv[1])
-        output_path = Path(sys.argv[2])
-    except IndexError:
-        raise Exception(
-            f"Run using: {sys.argv[0]} [input directory] [output directory]"
-        )
+        self.model = Model()
+        self.model.load_state_dict(torch.load("model.pt"))
+        self.model.eval()
 
-    # process input group files
-    while True:
-        msg = input()
-        if not msg.startswith("Process "):
-            raise ValueError(f"Unknown messsage {msg}")
+    def predict(self, coordinates: np.ndarray, data: np.ndarray) -> np.ndarray:
+        """Makes a prediction for the next two hours of satellite imagery.
 
-        checkpoint_path = msg[8:]
-        group_data = np.load(input_path / checkpoint_path)
+        Args:
+            coordinates (np.ndarray): the OSGB x and y coordinates (2, 128, 128)
+            data (np.ndarray): an array of 12 128*128 satellite images (12, 128, 128)
 
-        osgb = group_data["osgb"]
-        data = group_data["data"]
+        Returns:
+            np.ndarray: an array of 24 64*64 satellite image predictions (24, 64, 64)
+        """
 
-        # predict future satellite imagery for each array of 12 images
+        assert coordinates.shape == (2, 128, 128)
+        assert data.shape == (12, 128, 128)
+
         with torch.no_grad():
-            predictions = []
-            try:
-                for j in range(data.shape[0]):
-                    prediction = model(
-                        torch.from_numpy(data[j]).view(-1, 12 * 128 * 128)
-                    )
-                    predictions.append(prediction.view(12, 64, 64).detach().numpy())
-            except Exception as err:
-                raise Exception(f"Error while processing {checkpoint_path}: {str(err)}")
-
-            # save the group output
-            np.savez(
-                output_path / checkpoint_path,
-                data=np.stack(predictions),
+            prediction = (
+                self.model(torch.from_numpy(data).view(-1, 12 * 128 * 128))
+                .view(24, 64, 64)
+                .detach()
+                .numpy()
             )
-            print(f"Exported {checkpoint_path}")
+
+            assert prediction.shape == (24, 64, 64)
+
+            return prediction
+
+
+def main():
+    evaluator = Evaluator()
+    evaluator.evaluate()
 
 
 if __name__ == "__main__":
