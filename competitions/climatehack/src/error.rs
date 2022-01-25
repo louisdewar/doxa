@@ -22,6 +22,8 @@ pub enum ClimateHackError {
     TimeoutGroup,
     #[from(ignore)]
     WriteGroupError(io::Error),
+    #[from(forward)]
+    UnknownDataset(UnknownDataset),
 }
 
 impl From<ClimateHackError> for GameError<ClimateHackError> {
@@ -39,6 +41,7 @@ impl ForfeitError for ClimateHackError {
             ClimateHackError::TimeoutStartup => Some(0),
             ClimateHackError::TimeoutGroup => Some(0),
             ClimateHackError::WriteGroupError(_) => None,
+            ClimateHackError::UnknownDataset(_) => None,
         }
     }
 
@@ -60,8 +63,24 @@ impl ForfeitError for ClimateHackError {
                 Some("The agent too long to process an input group".into())
             }
             ClimateHackError::WriteGroupError(_) => None,
+            ClimateHackError::UnknownDataset(_) => None,
         }
     }
+}
+
+#[derive(Error, Debug, Display)]
+pub enum DatasetLoadingError {
+    ReadDir(io::Error),
+    DatasetX(io::Error),
+    DatasetY(io::Error),
+    DatasetXNotFile,
+    DatasetYNotDirectory,
+}
+
+#[derive(Error, Debug, Display)]
+#[display(fmt = "Cannot find the dataset with the name `{}`", name)]
+pub struct UnknownDataset {
+    pub name: String,
 }
 
 #[derive(Error, Debug, Display)]

@@ -1,52 +1,23 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, sync::Arc};
 
 use doxa_competition::{
     client::{async_trait, serde_json, Competition, Context, GameEvent},
     error::ContextError,
-    tokio,
 };
 
-use crate::game_client::{ClimateHackGameClient, ClimateHackGameEvent, ClimateHackMatchRequest};
+use crate::{
+    dataset::Datasets,
+    game_client::{ClimateHackGameClient, ClimateHackGameEvent, ClimateHackMatchRequest},
+};
 
 const SCORE_MULTIPLIER: u32 = 10_000_000;
-
-#[derive(Clone)]
-pub struct PhaseDataset {
-    pub true_y_path: PathBuf,
-    pub x_image_path: PathBuf,
-    pub group_count: u32,
-}
-
-impl PhaseDataset {
-    pub async fn new(true_y_path: PathBuf, x_image_path: PathBuf) -> PhaseDataset {
-        let mut entries = tokio::fs::read_dir(&true_y_path)
-            .await
-            .expect("failed to read true y path");
-
-        let mut count = 0;
-        while let Some(entry) = entries
-            .next_entry()
-            .await
-            .expect("failed to open dir entry")
-        {
-            if entry.file_name().to_string_lossy().ends_with(".npz") {
-                count += 1;
-            }
-        }
-
-        PhaseDataset {
-            true_y_path,
-            x_image_path,
-            group_count: count,
-        }
-    }
-}
 
 pub struct ClimateHackCompetition {
     // TODO: Maybe have a hashmap with a series of randomly generated human friendly names for the
     // different phases, then use that name for the leaderboard and match request
-    pub dataset: PhaseDataset,
+    pub datasets: Arc<Datasets>,
     pub python_bin: PathBuf,
+    pub primary_dataset: String,
 }
 
 #[async_trait]
@@ -65,7 +36,12 @@ impl Competition for ClimateHackCompetition {
         agent_id: String,
     ) -> Result<(), ContextError> {
         context
-            .emit_match_request(vec![agent_id], ClimateHackMatchRequest::Phase1)
+            .emit_match_request(
+                vec![agent_id],
+                ClimateHackMatchRequest {
+                    dataset: self.primary_dataset.clone(),
+                },
+            )
             .await?;
 
         Ok(())
@@ -88,13 +64,17 @@ impl Competition for ClimateHackCompetition {
         context: &Context<Self>,
         event: GameEvent<ClimateHackGameEvent>,
     ) -> Result<(), ContextError> {
-        if let ClimateHackGameEvent::FinalScore { score } = event.payload {
+        if let ClimateHackGameEvent::FinalScore { score, dataset } = event.payload {
             let agent = context.get_game_participants_ordered(event.game_id).await?[0]
                 .0
                 .clone();
             let score = (score * SCORE_MULTIPLIER as f64) as i32;
+            // context
+            //     .add_game_result_active(agent, event.game_id, score)
+            //     .await?;
+            // context.set_score_by_game_result_sum(key, agent)
             context
-                .add_game_result_active(agent, event.game_id, score)
+                .upsert_score(Some(format!("dataset_{}", dataset)), agent, score)
                 .await?;
         }
 
@@ -111,7 +91,7 @@ impl Competition for ClimateHackCompetition {
 
     fn build_game_client(&self) -> Self::GameClient {
         ClimateHackGameClient {
-            dataset: self.dataset.clone(),
+            datasets: self.datasets.clone(),
             python_bin: self.python_bin.clone(),
         }
     }

@@ -1,4 +1,4 @@
-use std::{path::PathBuf, time::Duration};
+use std::{path::PathBuf, sync::Arc, time::Duration};
 
 use doxa_competition::{
     client::{async_trait, GameClient, GameContext, GameError, Mount},
@@ -7,7 +7,7 @@ use doxa_competition::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{competition::PhaseDataset, error::ClimateHackError, support::Scorer};
+use crate::{dataset::Datasets, error::ClimateHackError, support::Scorer};
 
 /// The maximum time for an agent to complete predictions of all the images in all the series of
 /// a single group.
@@ -15,21 +15,25 @@ const MAX_SERIES_GROUP_TIME: Duration = Duration::from_secs(15 * 60);
 const MAX_STARTUP_TIME: Duration = Duration::from_secs(60);
 
 #[derive(Serialize, Deserialize)]
-pub enum ClimateHackMatchRequest {
-    Phase1,
+pub struct ClimateHackMatchRequest {
+    pub dataset: String,
 }
 
 #[derive(Serialize, Deserialize)]
 pub enum ClimateHackGameEvent {
-    // Might be useful for long running agents?
-    // Maybe for a large test set ~20 checkpoints?
-    // Checkpoint { id: u32 }
-    CheckpointScore { checkpoint: u32, score: f64 },
-    FinalScore { score: f64 },
+    CheckpointScore {
+        checkpoint: u32,
+        score: f64,
+        dataset: String,
+    },
+    FinalScore {
+        score: f64,
+        dataset: String,
+    },
 }
 
 pub struct ClimateHackGameClient {
-    pub(crate) dataset: PhaseDataset,
+    pub(crate) datasets: Arc<Datasets>,
     pub(crate) python_bin: PathBuf,
 }
 
@@ -37,11 +41,17 @@ impl ClimateHackGameClient {
     // Use inner async method for better diagnostics (avoid async_trait)
     async fn run_inner<'a>(
         &self,
-        _match_request: ClimateHackMatchRequest,
+        match_request: ClimateHackMatchRequest,
         context: &mut GameContext<'a, Self>,
     ) -> Result<(), GameError<ClimateHackError>> {
         context.expect_n_agents(1)?;
-        let group_count = self.dataset.group_count;
+        let dataset_name = match_request.dataset;
+        info!(dataset=%dataset_name, "starting climate hack evaluation");
+        let dataset = self
+            .datasets
+            .get_dataset(&dataset_name)
+            .map_err(ClimateHackError::from)?;
+        let group_count = dataset.group_count;
         let work_dir_path = context.work_dir_path().await?;
         let scorer = Scorer::new(self.python_bin.clone(), work_dir_path.join("scorer.py"))
             .await
@@ -106,7 +116,7 @@ impl ClimateHackGameClient {
 
             let group_score = scorer
                 .score(
-                    &self.dataset.true_y_path.join(format!("{}.npz", checkpoint)),
+                    &dataset.true_y_path.join(format!("{}.npz", checkpoint)),
                     group_output_path,
                 )
                 .await
@@ -118,6 +128,7 @@ impl ClimateHackGameClient {
                     ClimateHackGameEvent::CheckpointScore {
                         checkpoint,
                         score: group_score,
+                        dataset: dataset_name.clone(),
                     },
                     format!("checkpoint_{}", checkpoint),
                 )
@@ -130,7 +141,10 @@ impl ClimateHackGameClient {
 
         context
             .emit_game_event(
-                ClimateHackGameEvent::FinalScore { score: final_score },
+                ClimateHackGameEvent::FinalScore {
+                    score: final_score,
+                    dataset: dataset_name.clone(),
+                },
                 "final",
             )
             .await?;
@@ -157,9 +171,14 @@ impl GameClient for ClimateHackGameClient {
         self.run_inner(match_request, context).await
     }
 
-    fn additional_mounts(&self, _match_request: &Self::MatchRequest) -> Vec<Mount> {
+    fn additional_mounts(&self, match_request: &Self::MatchRequest) -> Vec<Mount> {
         vec![Mount {
-            path_on_host: self.dataset.x_image_path.clone(),
+            path_on_host: self
+                .datasets
+                .get_dataset(&match_request.dataset)
+                .expect("TODO: allow additionl_mounts to return an error")
+                .x_image_path
+                .clone(),
             path_on_guest: "/climatehack_test_x".to_string(),
             read_only: true,
         }]

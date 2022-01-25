@@ -1,5 +1,7 @@
+use std::sync::Arc;
+
 use clap::StructOpt;
-use climatehack::{ClimateHackCompetition, PhaseDataset};
+use climatehack::{dataset::Datasets, ClimateHackCompetition};
 use doxa_server::{tracing::warn, CompetitionSystem};
 use uttt::UTTTCompetition;
 
@@ -15,9 +17,15 @@ async fn main() -> std::io::Result<()> {
 
     let app: App = App::parse();
 
-    let dataset = PhaseDataset::new(app.dataset_y_folder, app.dataset_x_image).await;
+    let datasets = Arc::new(
+        Datasets::load_from_directory(app.climatehack_datasets_dir)
+            .await
+            .unwrap(),
+    );
+    // let dataset = PhaseDataset::new(app.dataset_y_folder, app.dataset_x_image).await;
     let climatehack = ClimateHackCompetition {
-        dataset,
+        datasets,
+        primary_dataset: app.climatehack_primary_dataset,
         python_bin: app.scorer_python_bin,
     };
 
