@@ -47,7 +47,7 @@ export default function OverviewTab({ baseUrl }) {
       &quot;Daylight&quot; hours are defined as as hours where the sun is at least 10 degrees above the horizon, as measured from the centre of the 128&times;128 pixel input image. The angle of the sun can be computed using <a href="https://pvlib-python.readthedocs.io/en/stable/generated/pvlib.solarposition.get_solarposition.html">pvlib.solarposition.get_solarposition</a>
     </p>
     <p>
-      Given the satellite images are 1,843&times;891 pixels, you can get a huge number of 128&times;128 training examples by randomly selecting 128&times;128 crops from the satellite imagery. You just want to make sure that the entire temporal extent of each example is in &quot;daylight&quot;, i.e. the sun is at least 10 degrees above the horizon as measured from the centre of the 128&times;128 crop.
+      Given the satellite images are 1,843&times;891 pixels, you can get a huge number of 128&times;128 training examples by randomly selecting 128&times;128 crops from the satellite imagery. You just want to make sure that the entire temporal extent of each example is in &quot;daylight&quot;, i.e. the sun is at least 10 degrees above the horizon as measured from the centre of each 128&times;128 crop.
     </p>
 
     <h3>Video animation</h3>

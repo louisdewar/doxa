@@ -1,13 +1,17 @@
 
 
-export default function SubmissionGuideTab() {
+export default function GettingStartedGuideTab() {
   return <div className="ch-tab">
-    <h2>Submission Guide</h2>
+    <h2>Getting Started Guide</h2>
     <p>
-      Ensure you have Python 3.7+ installed on your computer before you begin.
+      Ensure you have Python 3.9 installed on your computer before you begin.
+    </p>
+    <h3>Downloading the example project</h3>
+    <p>
+      To get started, download and extract the example project from <a href="#">GitHub</a>. The <code>training.ipynb</code> Python Jupyter notebook contains information on the dataset and how to train a basic model to submit to DOXA.
     </p>
     <p>
-      To get started, download and extract the example project from <a href="#">GitHub</a>.
+      Also, check our Open Climate Fix&apos;s <a href="https://github.com/openclimatefix/Satip/blob/main/notebooks/load_and_plot_HRV_UK_Zarr_from_GCS.ipynb">notebook</a> a more in-depth introduction to reading the satellite data and more technical details about the dataset.
     </p>
     <h3>Using the Doxa CLI</h3>
     <p>

@@ -1,11 +1,10 @@
 import CompetitionHeader from 'components/CompetitionHeader';
 import CompetitionTabs from 'components/CompetitionTabs';
-import GettingStartedTab from '../components/tabs/GettingStartedTab';
+import GettingStartedGuideTab from '../components/tabs/GettingStartedGuideTab';
 import LeaderboardTab from '../components/tabs/LeaderboardTab';
 import OverviewTab from '../components/tabs/OverviewTab';
 import ResourcesTab from '../components/tabs/ResourcesTab';
 import RulesTab from '../components/tabs/RulesTab';
-import SubmissionGuideTab from '../components/tabs/SubmissionGuideTab';
 import './Home.scss';
 
 export default function Home({ baseUrl }) {
@@ -21,12 +20,8 @@ export default function Home({ baseUrl }) {
       tab: <ResourcesTab />
     },
     {
-      name: 'GETTING STARTED',
-      tab: <GettingStartedTab />
-    },
-    {
-      name: 'SUBMISSION GUIDE',
-      tab: <SubmissionGuideTab />
+      name: 'GETTING STARTED GUIDE',
+      tab: <GettingStartedGuideTab />
     },
     {
       name: 'LEADERBOARD',
