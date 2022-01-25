@@ -2,17 +2,16 @@ from datetime import datetime, time, timedelta
 from random import randrange
 from typing import Iterator, T_co
 
+import numpy as np
 from numpy import float32
 from torch.utils.data import IterableDataset
 
 
 class ClimateHackDataset(IterableDataset):
-    def __init__(
-        self, data_array, samples_per_slice=1, day_limit=0, cache=True
-    ) -> None:
+    def __init__(self, dataset, samples_per_slice=1, day_limit=0, cache=True) -> None:
         super().__init__()
 
-        self.data_array = data_array
+        self.dataset = dataset
         self.samples_per_slice = samples_per_slice
         self.day_limit = day_limit
         self.cache = True
@@ -25,7 +24,7 @@ class ClimateHackDataset(IterableDataset):
 
             return
 
-        times = self.data_array.get_index("time")
+        times = self.dataset.get_index("time")
         start_date = times[0].date()
         end_date = times[-1].date()
         end_time = time(14, 0)
@@ -41,23 +40,31 @@ class ClimateHackDataset(IterableDataset):
                     rand_x = randrange(550, 950 - 128)
                     rand_y = randrange(375, 700 - 128)
 
-                    res = (
-                        self.data_array.sel(
-                            time=slice(
-                                current_time,
-                                current_time + timedelta(minutes=55),
-                            )
+                    selection = self.dataset.sel(
+                        time=slice(
+                            current_time,
+                            current_time + timedelta(minutes=55),
                         )
-                        .isel(
-                            x=slice(rand_x, rand_x + 128),
-                            y=slice(rand_y, rand_y + 128),
-                        )
-                        .to_numpy()
-                        .astype(float32),
-                        self.data_array.sel(
+                    ).isel(
+                        x=slice(rand_x, rand_x + 128),
+                        y=slice(rand_y, rand_y + 128),
+                    )
+
+                    osgb_data = np.stack(
+                        [
+                            selection["x_osgb"].to_numpy().astype(float32),
+                            selection["y_osgb"].to_numpy().astype(float32),
+                        ]
+                    )
+
+                    input_data = selection["data"].to_numpy().astype(float32)
+
+                    true_output = (
+                        self.dataset["data"]
+                        .sel(
                             time=slice(
                                 current_time + timedelta(hours=1),
-                                current_time + timedelta(hours=1, minutes=55),
+                                current_time + timedelta(hours=2, minutes=55),
                             )
                         )
                         .isel(
@@ -65,9 +72,10 @@ class ClimateHackDataset(IterableDataset):
                             y=slice(rand_y + 32, rand_y + 96),
                         )
                         .to_numpy()
-                        .astype(float32),
+                        .astype(float32)
                     )
 
+                    res = (osgb_data, input_data, true_output)
                     if self.cache:
                         self.cached_items.append(res)
 

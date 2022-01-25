@@ -35,8 +35,8 @@ def main():
         criterion = MS_SSIM(data_range=1024.0, size_average=True, win_size=3, channel=1)
 
         loss = criterion(
-            from_numpy(series[j]).view(12, 64, 64).unsqueeze(dim=1),
-            from_numpy(true[j]).view(12, 64, 64).unsqueeze(dim=1),
+            from_numpy(series[j]).view(24, 64, 64).unsqueeze(dim=1),
+            from_numpy(true[j]).view(24, 64, 64).unsqueeze(dim=1),
         ).item()
 
         losses += loss
@@ -49,4 +49,3 @@ if __name__ == "__main__":
         main()
     except Exception as e:
         print_error(str(e))
-

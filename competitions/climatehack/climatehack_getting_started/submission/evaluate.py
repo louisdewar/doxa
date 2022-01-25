@@ -31,7 +31,10 @@ def main():
             raise ValueError(f"Unknown messsage {msg}")
 
         checkpoint_path = msg[8:]
-        data = np.load(input_path / checkpoint_path)["data"]
+        group_data = np.load(input_path / checkpoint_path)
+
+        osgb = group_data["osgb"]
+        data = group_data["data"]
 
         # predict future satellite imagery for each array of 12 images
         with torch.no_grad():
