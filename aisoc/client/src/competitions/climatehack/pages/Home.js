@@ -4,6 +4,7 @@ import DataTab from '../components/tabs/DataTab';
 import GettingStartedTab from '../components/tabs/GettingStartedTab';
 import LeaderboardTab from '../components/tabs/LeaderboardTab';
 import OverviewTab from '../components/tabs/OverviewTab';
+import ResourcesTab from '../components/tabs/ResourcesTab';
 import RulesTab from '../components/tabs/RulesTab';
 import SubmissionGuideTab from '../components/tabs/SubmissionGuideTab';
 import './Home.scss';
@@ -19,6 +20,10 @@ export default function Home({ baseUrl }) {
     {
       name: 'DATA',
       tab: <DataTab />
+    },
+    {
+      name: 'RESOURCES',
+      tab: <ResourcesTab />
     },
     {
       name: 'GETTING STARTED',
@@ -41,7 +46,11 @@ export default function Home({ baseUrl }) {
   return <>
     <CompetitionHeader
       competitionName="Climate Hack"
-      description="Climate Hack is an alliance between the artificial intelligence societies of some of the world's best universities in the fight against climate change. Your challenge is to beat the current best nowcasting techniques for UK satellite imagery. Through improved predictions of cloud coverage and hence solar photovoltaic power output, your model could help National Grid minimise the use of idling natural gas turbines, saving potentially up to 100 kilotonnes of carbon emissions each year."
+      description={<>
+        {'Climate Hack is an alliance between the artificial intelligence societies of some of the world\'s best universities in the fight against climate change. Your challenge is to beat the current best nowcasting techniques for UK satellite imagery.'}
+        <br /><br />
+        {'By helping to improve solar photovoltaic power output predictions, your model could help the National Grid Electricity System Operator minimise the use of standby natural gas turbines, potentially saving up to 100 kilotonnes of carbon emissions a year.'}
+      </>}
     />
     <CompetitionTabs tabs={tabs} />
   </>;

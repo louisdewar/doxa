@@ -1,0 +1,23 @@
+.ch-tab.ch-resources-tab {
+
+  iframe,
+  img {
+    display: block;
+    margin: auto;
+
+    width: 100%;
+    max-width: 560px;
+    max-height: 315px;
+  }
+
+  iframe {
+    height: 315px;
+  }
+
+  img {
+    box-sizing: border-box;
+    border-radius: 3px;
+    padding: 0.75rem;
+    background-color: #fff;
+  }
+}
