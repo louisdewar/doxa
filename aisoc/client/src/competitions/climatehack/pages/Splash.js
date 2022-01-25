@@ -70,7 +70,7 @@ export default function Splash({ baseUrl }) {
               Participants have two months to apply cutting-edge machine learning techniques in order to develop the best satellite imagery prediction algorithm for use in solar photovolatic output forecasting.
             </p>
             <p>
-              The winning entry has the chance to be deployed in the UK National Grid to minimise the use of idle gas turbines, potentially resulting in significant savings in national carbon emissions.
+              The winning entry has the chance to be deployed by the UK National Grid Electricity System Operator to minimise the use of standby gas turbines, potentially resulting in carbon emission savings of up to 100 kilotonnes a year.
             </p>
           </div>
         </div>
@@ -137,10 +137,10 @@ export default function Splash({ baseUrl }) {
               Competitors are challenged to develop the best machine learning models trained on this data. Submissions are evaluated against an unseen test dataset on our own custom competition platform, <Link to={`${baseUrl}comingsoon`}>DOXA</Link>.
             </p>
             <p>
-              By improving on the state of the art in nowcasting satellite imagery, the winning model could be deployed by the British electricity system operator (National Grid) to produce significantly more accurate solar photovoltaic output forecasts.
+              By improving on the state of the art in nowcasting satellite imagery, the winning model could be deployed by the National Grid electricity system operator in the UK to produce significantly more accurate solar photovoltaic output forecasts.
             </p>
             <p>
-              This would allow them to minimise the use of idle gas turbines, potentially leading to a substantial reduction in carbon emissions.
+              This would allow them to minimise the use of standby gas turbines, potentially leading to a substantial reduction in carbon emissions.
             </p>
             <p>
               Learn more about the <Link to={`${baseUrl}challenge`}>challenge</Link>.
