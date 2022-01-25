@@ -20,6 +20,8 @@ pub struct ClimateHackMatchRequest {
 }
 
 #[derive(Serialize, Deserialize)]
+#[serde(tag = "type")]
+#[serde(rename_all = "snake_case")]
 pub enum ClimateHackGameEvent {
     CheckpointScore {
         checkpoint: u32,
