@@ -16,10 +16,15 @@ COPY ./tests tests
 
 RUN cargo build --release --locked --workspace
 
-FROM archlinux:base
+#FROM archlinux:base
 
-RUN yes | pacman -Syu
-RUN yes | pacman -S postgresql-libs
+#RUN yes | pacman -Syu
+#RUN yes | pacman -S postgresql-libs
+
+FROM virtualenv_builder
+RUN apt-get update
+RUN apt-get dist-upgrade -y
+RUN apt-get install -y libpq5
 
 WORKDIR /app
 
