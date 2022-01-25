@@ -1,13 +1,21 @@
-use crate::model::user::{self as model, Invite};
+use crate::model::user::{self as model};
 use crate::{schema as s, DieselError};
+use diesel::pg::upsert::excluded;
 use diesel::{ExpressionMethods, OptionalExtension, PgConnection, QueryDsl, RunQueryDsl};
 
-pub fn create_user(
+/// Creates a new user if they did not already exist, or updates the values if they did exist
+pub fn upsert_user(
     conn: &PgConnection,
     user: &model::InsertableUser,
 ) -> Result<model::User, DieselError> {
     diesel::insert_into(s::users::table)
         .values(user)
+        .on_conflict(s::users::id)
+        .do_update()
+        .set((
+            s::users::username.eq(excluded(s::users::username)),
+            s::users::extra.eq(excluded(s::users::extra)),
+        ))
         .get_result(conn)
 }
 
@@ -60,27 +68,4 @@ pub fn list_admins(conn: &PgConnection) -> Result<Vec<model::User>, DieselError>
     s::users::table
         .filter(s::users::columns::admin.eq(true))
         .get_results(conn)
-}
-
-pub fn create_invite(conn: &PgConnection, invite: Invite) -> Result<Invite, DieselError> {
-    diesel::insert_into(s::invites::table)
-        .values(invite)
-        .get_result(conn)
-}
-
-pub fn remove_invite(conn: &PgConnection, id: String) -> Result<Option<Invite>, DieselError> {
-    diesel::delete(s::invites::table.filter(s::invites::id.eq(id)))
-        .get_result(conn)
-        .optional()
-}
-
-pub fn get_invite(conn: &PgConnection, id: String) -> Result<Option<Invite>, DieselError> {
-    s::invites::table
-        .filter(s::invites::columns::id.eq(id))
-        .first(conn)
-        .optional()
-}
-
-pub fn list_invites(conn: &PgConnection) -> Result<Vec<Invite>, DieselError> {
-    s::invites::table.get_results(conn)
 }

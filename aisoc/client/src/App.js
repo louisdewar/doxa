@@ -1,10 +1,10 @@
 import { AuthProvider, useAuth } from 'hooks/useAuth';
 import Account from 'pages/Account';
 import Error404 from 'pages/Error404';
-import Invite from 'pages/Invite';
 import Landing from 'pages/Landing';
-import Login from 'pages/Login';
 import Logout from 'pages/Logout';
+import Authenticate from 'pages/Authenticate';
+
 import { Suspense } from 'react';
 import {
   BrowserRouter as Router, Redirect, Route, Switch
@@ -35,7 +35,7 @@ function Routes() {
   return <Router>
     <Switch>
       <Route path='/login'>
-        {auth.isLoggedIn() ? <Redirect to='/' /> : <Login />}
+        <Redirect to='/authenticate/login' />
       </Route>
       <Route path='/logout'>
         <Logout />
@@ -43,8 +43,8 @@ function Routes() {
       <Route path='/account'>
         {auth.isLoggedIn() ? <Account /> : <Redirect to='/login' />}
       </Route>
-      <Route path='/invite/:id'>
-        <Invite />
+      <Route path='/authenticate'>
+        <Authenticate />
       </Route>
 
       {multipleCompetitionsAllowed

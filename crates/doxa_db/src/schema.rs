@@ -86,8 +86,8 @@ table! {
         id -> Int4,
         admin -> Bool,
         username -> Text,
-        password -> Text,
         token_generation -> Text,
+        extra -> Jsonb,
     }
 }
 

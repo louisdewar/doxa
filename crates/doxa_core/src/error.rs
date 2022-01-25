@@ -140,3 +140,23 @@ impl_respondable_error!(
 );
 
 impl_respondable_error!(lapin::Error, INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR");
+
+impl RespondableError for autha_client::error::AuthaError {
+    fn error_code(&self) -> String {
+        self.error.clone()
+    }
+
+    fn error_message(&self) -> Option<String> {
+        self.error_message.clone()
+    }
+
+    fn status_code(&self) -> StatusCode {
+        self.status_code
+    }
+}
+
+impl_respondable_error!(
+    autha_client::error::RequestError,
+    INTERNAL_SERVER_ERROR,
+    "INTERNAL_SERVER_ERROR"
+);

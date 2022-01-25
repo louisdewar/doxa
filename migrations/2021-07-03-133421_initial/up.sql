@@ -4,8 +4,8 @@ CREATE TABLE users(
     id SERIAL PRIMARY KEY,
     admin boolean NOT NULL default false,
     username TEXT NOT NULL UNIQUE,
-    password TEXT NOT NULL,
-    token_generation TEXT NOT NULL
+    token_generation TEXT NOT NULL,
+    extra JSONB DEFAULT '{}'::jsonb NOT NULL
 );
 
 CREATE TABLE competitions(
@@ -90,12 +90,4 @@ CREATE TABLE game_results(
     game INT references games(id) NOT NULL,
     result INT NOT NULL,
     PRIMARY KEY (agent, game)
-);
-
-CREATE TABLE invites(
-    id TEXT PRIMARY KEY,
-    username TEXT,
-    enrollments TEXT[] NOT NULL default '{}',
-    expires_at timestamptz
-    -- TODO: add created_at default now()
 );

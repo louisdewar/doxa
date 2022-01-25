@@ -3,7 +3,7 @@
 
 use std::{env, path::PathBuf, sync::Arc};
 
-use doxa_auth::limiter::GenericLimiter;
+use doxa_auth::{limiter::GenericLimiter, AuthaClient};
 use doxa_core::actix_web::{web, App, HttpServer};
 use doxa_executor::settings::Mount;
 use doxa_storage::AgentRetrieval;
@@ -47,10 +47,23 @@ pub async fn setup_server_from_env(
 
     let generic_limiter = Arc::new(GenericLimiter::new(redis_pool));
 
+    let autha_base_url =
+        env::var("AUTHA_BASE_URL").unwrap_or_else(|_| "http://localhost:8080".into());
+    let autha_shared_secret =
+        env::var("AUTHA_SHARED_SECRET").unwrap_or_else(|_| "AUTHA_DEV_SHARED_SECRET".into());
+
+    let autha_client = Arc::new(AuthaClient::new(
+        autha_base_url
+            .parse()
+            .expect("AUTHA_BASE_URL was not parsable base url"),
+        autha_shared_secret,
+    ));
+
     let auth_settings = doxa_auth::Settings {
         jwt_secret: doxa_auth::settings::generate_jwt_hmac(&jwt_secret),
         allow_registration: false,
         generic_limiter: generic_limiter.clone(),
+        autha_client,
     };
 
     let storage_settings = doxa_storage::Settings {

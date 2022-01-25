@@ -2,7 +2,7 @@
 
 use clap::{Parser, Subcommand};
 
-use crate::{competition::CompetitionCommands, invite::InviteCommands, user::UserCommands};
+use crate::{competition::CompetitionCommands, user::UserCommands};
 
 #[derive(Parser)]
 pub struct Cli {
@@ -15,9 +15,6 @@ pub enum MainCommands {
     #[clap(subcommand)]
     /// Commands for managing users
     User(UserCommands),
-    #[clap(subcommand)]
-    /// Commands for managing invites
-    Invite(InviteCommands),
     #[clap(subcommand)]
     /// Commands for managing competitions
     Competition(CompetitionCommands),

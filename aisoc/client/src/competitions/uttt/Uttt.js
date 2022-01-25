@@ -5,6 +5,7 @@ import Game from './pages/Game/';
 import Home from './pages/Home/';
 import Match from './pages/Match/';
 import User from './pages/User/';
+import Error404 from 'pages/Error404';
 
 
 function Layout({ children }) {
@@ -38,6 +39,9 @@ export default function Uttt() {
       <Layout>
         <Home baseUrl={path} />
       </Layout>
+    </Route>
+    <Route>
+      <Error404 />
     </Route>
   </Switch>;
 }

@@ -1,4 +1,3 @@
-import { COMPETITIONS } from 'competitions';
 import Button from 'components/Button';
 import Card from 'components/Card';
 import Container from 'components/Container';
@@ -20,13 +19,6 @@ export default function Account() {
         {auth.user.username && <h1>Hi, {auth.user.username}!</h1>}
         {auth.user.admin && <p>
           <strong>You are an admin.</strong>
-        </p>}
-        {auth.user.competitions && <p>
-          <strong>Competition enrolments</strong>: {
-            auth.user.competitions
-              .map(competition => <Link to={`/c/${competition}/`} key={competition}>{(COMPETITIONS[competition] ?? { name: competition }).name}</Link>)
-              .reduce(((a, b) => [a, ', ', b]))
-          }
         </p>}
       </Card>
 

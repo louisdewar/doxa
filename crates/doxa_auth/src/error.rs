@@ -97,72 +97,10 @@ impl_respondable_error!(
     "New users are not currently allowed to sign up without an invite"
 );
 
-#[derive(Debug, Display, Error)]
-pub struct InviteNotFound;
-
-impl_respondable_error!(
-    InviteNotFound,
-    BAD_REQUEST,
-    "INVITE_NOT_FOUND",
-    "This invite has been used already, never existed or expired"
-);
-
-#[derive(Debug, Display, Error)]
-pub struct InviteExpired;
-
-impl_respondable_error!(
-    InviteExpired,
-    BAD_REQUEST,
-    "INVITE_EXPIRED",
-    "This invite has expired"
-);
-
-#[derive(Debug, Display, Error)]
-pub struct RegistrationInviteMismatch;
-
-impl_respondable_error!(
-    RegistrationInviteMismatch,
-    BAD_REQUEST,
-    "REGISTRATION_INVITE_MISMATCH",
-    "The fields in the registration does not match those specified as part of the invite"
-);
-
-// TODO: in future this will be an enum as `is_allowed` will do some more advanced checking and
-// return this error.
-#[derive(Debug, Display, Error)]
-pub struct InvalidPassword;
-
-impl_respondable_error!(
-    InvalidPassword,
-    BAD_REQUEST,
-    "INVALID_PASSWORD",
-    "Your password failed to meet the length requirements (not too long and not too short)"
-);
-
 #[derive(Debug, Display, Error, RespondableError, From)]
-pub enum CreateUserError {
+pub enum UpsertUserError {
     #[from]
     Diesel(DieselError),
-    #[from]
-    AlreadyExists(UserAlreadyExists),
-    #[from]
-    InvalidPassword(InvalidPassword),
-}
-
-#[derive(Debug, Display, Error, RespondableError, From)]
-pub enum AcceptInviteError {
-    #[from]
-    Mismatch(RegistrationInviteMismatch),
-    #[from]
-    InviteExpired(InviteExpired),
-    #[from]
-    InviteNotFound(InviteNotFound),
-    #[from]
-    Diesel(DieselError),
-    #[from]
-    AlreadyExists(UserAlreadyExists),
-    #[from]
-    InvalidPassword(InvalidPassword),
 }
 
 #[derive(Debug, Display, Error)]

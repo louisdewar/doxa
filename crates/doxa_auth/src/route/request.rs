@@ -1,13 +1,14 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
 #[derive(Deserialize)]
-pub struct Register {
-    pub username: String,
-    pub password: String,
+pub(crate) struct Provider {
+    pub provider_name: String,
+    pub flow_name: String,
+    pub payload: Value,
 }
 
-#[derive(Deserialize)]
-pub struct Login {
-    pub username: String,
-    pub password: String,
+#[derive(Deserialize, Serialize)]
+pub(crate) struct VerifyEmail {
+    pub verification_code: String,
 }

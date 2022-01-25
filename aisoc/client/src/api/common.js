@@ -47,10 +47,15 @@ export async function request({ url, params = {}, authToken = null, method = 'GE
     throw new Error(`Unknown method: ${method}`);
   }
 
-  const json = await response.json();
+  let json;
+  try {
+    json = await response.json();
+  } catch {
+    throw new Error('Improperly formatted error');
+  }
 
   if (response.status !== 200) {
-    throw new DoxaError(json.error_code, json.error_message, response.status);
+    throw new DoxaError(json.error_code, json.error, response.status);
   }
 
   return json;

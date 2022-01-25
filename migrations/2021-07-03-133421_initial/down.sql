@@ -1,7 +1,6 @@
 DROP VIEW IF EXISTS active_agents;
 DROP VIEW IF EXISTS active_games;
 
-DROP TABLE IF EXISTS invites;
 DROP TABLE IF EXISTS game_results;
 DROP TABLE IF EXISTS leaderboard;
 DROP TABLE IF EXISTS game_participants;

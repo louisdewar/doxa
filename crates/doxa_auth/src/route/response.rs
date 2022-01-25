@@ -1,14 +1,11 @@
 use doxa_core::chrono::{DateTime, Utc};
 use serde::Serialize;
+use serde_json::Value;
 
 #[derive(Serialize)]
-pub(crate) struct Login {
-    pub auth_token: String,
-}
-
-#[derive(Serialize)]
-pub(crate) struct InviteInfo {
-    pub username: Option<String>,
-    pub expires_at: Option<DateTime<Utc>>,
-    pub enrollments: Vec<String>,
+#[serde(tag = "type")]
+#[serde(rename_all = "snake_case")]
+pub(crate) enum ProviderFlow {
+    Authenticated { auth_token: String },
+    Incomplete { payload: Value },
 }
