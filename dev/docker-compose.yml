@@ -5,12 +5,14 @@ version: "3"
 services:
   db:
     image: postgres
-    environment:
-      - POSTGRES_PASSWORD=doxa-dev
-      - POSTGRES_USER=doxa-dev
-      - POSTGRES_DB=doxa
     volumes:
       - pg_data:/var/lib/postgresql/data
+      - ./create-multiple-postgresql-databases.sh:/docker-entrypoint-initdb.d/create-multiple-postgresql-databases.sh
+    environment:
+      # This also annoyingly creates a DB called doxa-dev (because of the username) and disabling it seems to cause an error.
+      - POSTGRES_MULTIPLE_DATABASES=autha,doxa
+      - POSTGRES_USER=doxa-dev
+      - POSTGRES_PASSWORD=doxa-dev
     ports:
       - 5432:5432
   rabbitmq:
@@ -38,6 +40,18 @@ services:
       - redis:/bitnami/redis/data
     ports:
       - 6379:6379
+  autha:
+    image: registry.dewardt.uk/autha/server:production
+    environment:
+      - DATABASE_URL=postgres://doxa-dev:doxa-dev@db/autha
+      - REDIS_URL=redis://:doxa-dev@redis:6379/1
+    volumes:
+      - ./dev_realm_config.toml:/app/config.toml
+    depends_on:
+      - redis
+      - db
+    ports:
+      - 3002:8080
 
 
 volumes:

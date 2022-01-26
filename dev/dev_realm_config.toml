@@ -1,0 +1,6 @@
+shared_secret = "AUTHA_DEV_SHARED_SECRET"
+
+
+[[providers]]
+plugin = "builtin::password"
+name = "password"

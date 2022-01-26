@@ -73,12 +73,21 @@ export async function providerFlow(providerName, flowName, payload) {
 
   return new ProviderFlowResponse(response);
 }
-export async function verifyEmail(verification_code) {
+export async function verifyEmail(verificationCode) {
   const response = await request({
     url: `${process.env.REACT_APP_API_BASE_URL}auth/verify_email`,
-    params: { verification_code },
+    params: { verification_code: verificationCode },
     method: 'POST'
   });
 
   return new ProviderFlowResponse(response);
+}
+
+export async function authorizeDelegatedLogin(authToken, verificationCode) {
+  await request({
+    authToken,
+    url: `${process.env.REACT_APP_API_BASE_URL}auth/authorize_delegated`,
+    params: { verification_code: verificationCode },
+    method: 'POST'
+  });
 }

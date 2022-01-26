@@ -12,3 +12,14 @@ pub(crate) struct Provider {
 pub(crate) struct VerifyEmail {
     pub verification_code: String,
 }
+
+#[derive(Deserialize)]
+pub(crate) struct CheckDelegated {
+    pub verification_code: String,
+    pub auth_secret: String,
+}
+
+#[derive(Deserialize)]
+pub(crate) struct AuthorizeDelegated {
+    pub verification_code: String,
+}

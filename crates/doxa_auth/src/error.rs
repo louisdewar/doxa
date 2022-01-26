@@ -185,6 +185,29 @@ pub enum GetLimiterPermitError {
     RedisPool(RedisPoolError),
 }
 
+#[derive(Debug, Display, Error, RespondableError, From)]
+pub enum DelegatedAuthError {
+    Redis(RedisError),
+    RedisPool(RedisPoolError),
+    InvalidSecret(InvalidDelegatedAuthSecret),
+    Expired(DelegatedAuthExpired),
+}
+
+#[derive(Debug, Display, Error, From)]
+pub struct InvalidDelegatedAuthSecret;
+
+impl_respondable_error!(InvalidDelegatedAuthSecret, BAD_REQUEST, "INVALID_SECRET");
+
+#[derive(Debug, Display, Error, From)]
+pub struct DelegatedAuthExpired;
+
+impl_respondable_error!(
+    DelegatedAuthExpired,
+    BAD_REQUEST,
+    "EXPIRED",
+    "The authentication flow has expired or this verification code is incorrect"
+);
+
 // TODO: find a way to include the ttl in the error message (some kind of formatting with automatic
 // conversion to a human readable time period), also find a way to include in the HTTP response
 // header (this would allow some more interesting UI stuff probably).

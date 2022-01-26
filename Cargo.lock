@@ -1031,6 +1031,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2",
+ "url",
 ]
 
 [[package]]
@@ -1038,6 +1039,7 @@ name = "doxa_cli"
 version = "0.1.0"
 dependencies = [
  "async-stream",
+ "chrono",
  "clap",
  "console",
  "derive_more",
@@ -1054,6 +1056,7 @@ dependencies = [
  "tokio",
  "tokio-util",
  "url",
+ "webbrowser",
 ]
 
 [[package]]
@@ -3569,6 +3572,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "webbrowser"
+version = "0.5.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ecad156490d6b620308ed411cfee90d280b3cbd13e189ea0d3fada8acc89158a"
+dependencies = [
+ "web-sys",
+ "widestring",
+ "winapi",
+]
+
+[[package]]
 name = "webpki"
 version = "0.21.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3596,6 +3610,12 @@ checksum = "552ceb903e957524388c4d3475725ff2c8b7960922063af6ce53c9a43da07449"
 dependencies = [
  "webpki 0.22.0",
 ]
+
+[[package]]
+name = "widestring"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c168940144dd21fd8046987c16a46a33d5fc84eec29ef9dcddc2ac9e31526b7c"
 
 [[package]]
 name = "winapi"

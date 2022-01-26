@@ -162,7 +162,7 @@ impl GameClient for ClimateHackGameClient {
 
     type GameEvent = ClimateHackGameEvent;
 
-    const AGENT_RAM_MB: u64 = 1024;
+    const AGENT_RAM_MB: u64 = 4 * 1024;
     const AGENT_SCRATCH_MB: u64 = 2 * 1024;
 
     async fn run<'a>(

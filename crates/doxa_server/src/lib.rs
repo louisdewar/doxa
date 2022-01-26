@@ -7,7 +7,7 @@ use doxa_auth::{limiter::GenericLimiter, AuthaClient};
 use doxa_core::actix_web::{web, App, HttpServer};
 use doxa_executor::settings::Mount;
 use doxa_storage::AgentRetrieval;
-use tracing::info;
+use tracing::{info, warn};
 use tracing_actix_web::TracingLogger;
 
 mod telemetry;
@@ -26,14 +26,17 @@ pub async fn setup_server_from_env(
     use_dotenv: bool,
     competition_system: CompetitionSystem,
 ) -> std::io::Result<()> {
+    telemetry::init_telemetry();
+
     if use_dotenv {
-        // TODO: do not panic when dotenv doesn't exist
-        dotenv::dotenv().expect("failed to load .env vars");
+        if let Err(e) = dotenv::dotenv() {
+            warn!(error=%e, debug=?e, "failed to read .env");
+        }
     }
 
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let mq_url = env::var("MQ_URL").expect("MQ_URL must be set");
-    let redis_url = env::var("REDIS_RATE_LIMITER_URL").expect("REDIS_RATE_LIMITER_URL must be set");
+    let redis_url = env::var("REDIS_DB_URL").expect("REDIS_DB_URL must be set");
 
     let doxa_storage_path = env::var("DOXA_STORAGE").unwrap_or_else(|_| "dev/doxa_storage".into());
     let jwt_secret = env::var("DOXA_JWT_SECRET")
@@ -45,12 +48,11 @@ pub async fn setup_server_from_env(
 
     let redis_pool = doxa_core::redis::establish_pool(redis_url, 500).await;
 
-    let generic_limiter = Arc::new(GenericLimiter::new(redis_pool));
+    let generic_limiter = Arc::new(GenericLimiter::new(redis_pool.clone()));
 
-    let autha_base_url =
-        env::var("AUTHA_BASE_URL").unwrap_or_else(|_| "http://localhost:8080".into());
-    let autha_shared_secret =
-        env::var("AUTHA_SHARED_SECRET").unwrap_or_else(|_| "AUTHA_DEV_SHARED_SECRET".into());
+    let autha_base_url = env::var("AUTHA_BASE_URL").unwrap();
+    let autha_shared_secret = env::var("AUTHA_SHARED_SECRET").unwrap();
+    let delegated_auth_redirect = env::var("DOXA_DELEGATED_AUTH_URL").unwrap();
 
     let autha_client = Arc::new(AuthaClient::new(
         autha_base_url
@@ -62,8 +64,11 @@ pub async fn setup_server_from_env(
     let auth_settings = doxa_auth::Settings {
         jwt_secret: doxa_auth::settings::generate_jwt_hmac(&jwt_secret),
         allow_registration: false,
-        generic_limiter: generic_limiter.clone(),
         autha_client,
+        redis_db: redis_pool.clone(),
+        delegated_auth_url: delegated_auth_redirect
+            .parse()
+            .expect("The delegated auth URL is not valid"),
     };
 
     let storage_settings = doxa_storage::Settings {
@@ -110,8 +115,6 @@ pub async fn setup_server(
     executor_settings: doxa_executor::Settings,
     competition_system: CompetitionSystem,
 ) -> std::io::Result<()> {
-    telemetry::init_telemetry();
-
     doxa_db::run_migrations(&doxa_db::establish_connection(database_url));
 
     let db_pool = web::Data::new(doxa_db::establish_pool(database_url));
@@ -132,7 +135,7 @@ pub async fn setup_server(
         .start(Arc::new(competition_settings))
         .await;
 
-    info!("Starting at 127.0.0.1:3001");
+    info!("Starting at 0.0.0.0:3001");
 
     HttpServer::new(move || {
         let api_scope = web::scope("/api");

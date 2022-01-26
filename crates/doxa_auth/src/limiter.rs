@@ -46,6 +46,10 @@ pub struct GenericLimiter {
     undo_inc_script: redis::Script,
 }
 
+fn limiter_key(base_key: &str, limiter_id: usize) -> String {
+    format!("LIMITER_{}-{}", base_key, limiter_id)
+}
+
 impl GenericLimiter {
     pub fn new(redis_pool: RedisPool) -> Self {
         let inc_expire_script = redis::Script::new(REDIS_RATE_LIMIT_INCR_LUA);
@@ -90,7 +94,7 @@ impl GenericLimiter {
             let (current, ttl): (u32, u64) = self
                 .inc_expire_script
                 .prepare_invoke()
-                .key(format!("{}-{}", base_key, limiter_id))
+                .key(limiter_key(base_key, limiter_id))
                 .arg(limiter.duration.as_secs())
                 .invoke_async(&mut redis)
                 .await?;
@@ -112,7 +116,7 @@ impl GenericLimiter {
                 for limiter_id in 0..end_limiter_id {
                     self.undo_inc_script
                         .prepare_invoke()
-                        .key(format!("{}-{}", base_key, limiter_id))
+                        .key(limiter_key(base_key, limiter_id))
                         .invoke_async(&mut redis)
                         .await?;
                 }
@@ -122,12 +126,12 @@ impl GenericLimiter {
                 // buckets after this one as we know that none of the previous ones have
                 // expired).
                 for (limiter_id, limiter) in limiters.iter().enumerate().skip(end_limiter_id + 1) {
-                    let ttl = redis.ttl(format!("{}-{}", base_key, limiter_id)).await?;
+                    let ttl = redis.ttl(limiter_key(base_key, limiter_id)).await?;
 
                     // Technically it's possible for the token to expire between these two calls so
                     // we check the option
                     if let Some(permits) = redis
-                        .get::<_, Option<u32>>(format!("{}-{}", base_key, limiter_id))
+                        .get::<_, Option<u32>>(limiter_key(base_key, limiter_id))
                         .await?
                     {
                         if permits > limiter.permits && max_ttl < ttl {

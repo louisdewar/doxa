@@ -52,6 +52,12 @@ pub fn upsert_user(conn: &PgConnection, user: AuthaUser) -> Result<User, UpsertU
     Ok(user)
 }
 
+pub fn generate_new_jwt_token(user: &User, key: &Hmac<Sha256>) -> String {
+    let token = Token::new_with_duration(user.id, user.token_generation.clone(), JWT_LIFE);
+
+    generate_jwt(&token, key)
+}
+
 pub fn process_authenticated_user(
     db_pool: &PgPool,
     user: AuthaUser,
@@ -59,9 +65,7 @@ pub fn process_authenticated_user(
 ) -> Result<String, UpsertUserError> {
     let user = upsert_user(&db_pool.get().unwrap(), user)?;
 
-    let token = Token::new_with_duration(user.id, user.token_generation, JWT_LIFE);
-
-    Ok(generate_jwt(&token, key))
+    Ok(generate_new_jwt_token(&user, key))
 }
 
 pub async fn handle_flow_response(
@@ -72,12 +76,8 @@ pub async fn handle_flow_response(
     let jwt_secret = settings.jwt_secret.clone();
     let response = match response {
         FlowResponse::Authenticated { user } => {
-            let jwt = web::block(move || {
-                //let conn = db_pool.get().unwrap();
-                //controller::upsert_user(&conn, user)
-                process_authenticated_user(&db_pool, user, &jwt_secret)
-            })
-            .await??;
+            let jwt = web::block(move || process_authenticated_user(&db_pool, user, &jwt_secret))
+                .await??;
 
             response::ProviderFlow::Authenticated { auth_token: jwt }
         }

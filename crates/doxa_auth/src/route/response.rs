@@ -1,4 +1,3 @@
-use doxa_core::chrono::{DateTime, Utc};
 use serde::Serialize;
 use serde_json::Value;
 
@@ -8,4 +7,12 @@ use serde_json::Value;
 pub(crate) enum ProviderFlow {
     Authenticated { auth_token: String },
     Incomplete { payload: Value },
+}
+
+#[derive(Serialize)]
+#[serde(tag = "type")]
+#[serde(rename_all = "snake_case")]
+pub(crate) enum DelegatedAuthCheck {
+    Authenticated { auth_token: String },
+    Waiting,
 }
