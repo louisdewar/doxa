@@ -1,15 +1,25 @@
-import { useState } from 'react';
+import ClimateHackAPI from 'competitions/climatehack/api';
+import { useEffect, useState } from 'react';
 import Leaderboard from '../Leaderboard';
 import './LeaderboardTab.scss';
 
 
 export default function LeaderboardTab({ baseUrl }) {
-  const leaderboard = [{ 'score': 41, 'username': 'testaccount', 'university': 'UCL' }, { 'score': 39, 'username': 'louisdewardt', 'university': 'UCL' }];
+  const [leaderboard, setLeaderboard] = useState(null);
+
+  useEffect(() => {
+    ClimateHackAPI.getLeaderboard('dataset_dapper').then(data => {
+      setLeaderboard(data);
+      console.log(data);
+    }).catch(err => {
+      console.error(err);
+    });
+  }, []);
 
   const tabs = [
     {
       name: 'ROUND 1',
-      tab: <Leaderboard baseUrl={baseUrl} leaderboard={leaderboard} />
+      tab: leaderboard && <Leaderboard baseUrl={baseUrl} leaderboard={leaderboard} />
     },
     {
       name: 'ROUND 2',
