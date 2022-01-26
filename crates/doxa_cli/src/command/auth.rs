@@ -164,15 +164,19 @@ pub async fn login(settings: &Settings) -> Result<(), CommandError> {
         auth_secret: start_response.auth_secret,
     };
 
+    spinner.set_message("Waiting for you to login...");
+
     let auth_token = loop {
+        spinner.enable_steady_tick(100);
+
         if start_response.expires < Utc::now() {
             return Err(DelegatedAuthTimeout.into());
         }
 
-        spinner.set_message("Waiting for you to login...sleeping");
         tokio::time::sleep(Duration::from_secs(5)).await;
 
-        spinner.set_message("Waiting for you to login...checking");
+        spinner.disable_steady_tick();
+
         let builder = post(settings, "auth/check_delegated", true).json(&check_request);
 
         let check_response: DelegatedAuthCheckResponse = send_request_and_parse(builder).await?;
