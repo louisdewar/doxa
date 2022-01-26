@@ -1,5 +1,4 @@
-use crate::schema::{invites, users};
-use chrono::{DateTime, Utc};
+use crate::schema::users;
 use diesel::{Insertable, Queryable};
 use serde_json::Value;
 

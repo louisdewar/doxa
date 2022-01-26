@@ -1,16 +1,15 @@
 use std::time::Duration;
 
 use chrono::{DateTime, Utc};
-use clap::{Parser, Subcommand};
+use clap::Subcommand;
 
-use dialoguer::{theme::ColorfulTheme, Input, Password};
 use indicatif::{ProgressBar, ProgressStyle};
 use serde::{Deserialize, Serialize};
 
 use crate::{
     config::{load_or_default_profile, save_profile},
     error::{CommandError, DelegatedAuthTimeout},
-    request::{post, send_request, send_request_and_parse, Settings},
+    request::{post, send_request_and_parse, Settings},
     ui,
 };
 
@@ -47,10 +46,10 @@ pub enum AuthCommands {
 //     password: String,
 // }
 
-#[derive(Deserialize)]
-struct LoginResponse {
-    auth_token: String,
-}
+// #[derive(Deserialize)]
+// struct LoginResponse {
+//     auth_token: String,
+// }
 
 pub async fn handle_subcommand(
     command: AuthCommands,

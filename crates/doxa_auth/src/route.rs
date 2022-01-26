@@ -95,4 +95,3 @@ async fn verify_email(
 
     controller::handle_flow_response(&settings, db_pool, response).await
 }
-
