@@ -7,7 +7,7 @@ export default function LeaderboardTab({ baseUrl }) {
   const [leaderboard, setLeaderboard] = useState(null);
 
   useEffect(() => {
-    UTTTAPI.getLeaderboardActive().then(leaderboardData => {
+    UTTTAPI.getDefaultLeaderboardActive().then(leaderboardData => {
       setLeaderboard(leaderboardData);
     }).catch(err => {
       console.error(err);

@@ -6,6 +6,15 @@ function roundScore(score) {
   return Math.round((score + Number.EPSILON) * 100000) / 100000;
 }
 
+function ClimateHackLeaderboardRow({  rank, score, user }) {
+  return <div className='ch-leaderboard-entry'>
+    <span className="ch-leaderboard-position">{rank}</span>
+    <span className="ch-leaderboard-username">{user.name()}</span>
+    <span className="ch-leaderboard-university">{user.university().name}</span>
+    <span className="ch-leaderboard-score">{score ? roundScore(score / 10000000) : 0}</span>
+  </div>;
+}
+
 
 export default function Leaderboard({ leaderboard }) {
   const [filter, setFilter] = useState('');
@@ -25,12 +34,6 @@ export default function Leaderboard({ leaderboard }) {
       <span className="ch-leaderboard-score">Score</span>
     </div>
 
-    {leaderboard.map((entry, i) => (entry.username.includes(filter) || entry.university.includes(filter)) && <div key={i} className='ch-leaderboard-entry'>
-      <span className="ch-leaderboard-position">{i + 1}</span>
-      {/* <Link to={`${baseUrl}user/${entry.username}`}>{entry.username}</Link> */}
-      <span className="ch-leaderboard-username">{entry.username}</span>
-      <span className="ch-leaderboard-university">{entry.university ?? 'Unknown'}</span>
-      <span className="ch-leaderboard-score">{entry.score ? roundScore(entry.score / 10000000) : 0}</span>
-    </div>)}
+    {leaderboard.map((entry, i) => (entry.user.name().includes(filter) || entry.user().university().name.includes(filter)) && <ClimateHackLeaderboardRow rank={i+1} score={entry.score} user={entry.user} />)}
   </div>;
 }

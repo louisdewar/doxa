@@ -141,7 +141,7 @@ impl<C: Competition> ExecutionManager<C> {
                             info!("started game manager");
 
                             match game_manager.run_with_cancel_check(cancel_endpoint, request_client).await {
-                                Ok(()) => event!(Level::INFO, "game manager succesfully completed"),
+                                Ok(()) => event!(Level::INFO, "game manager successfully completed"),
                                 Err(error) => {
                                     if error.forfeit().is_some() {
                                         event!(Level::INFO, forfeit=true, %error, debug = ?error, "error running game manager")

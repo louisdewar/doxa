@@ -1071,6 +1071,7 @@ dependencies = [
  "doxa_executor",
  "doxa_mq",
  "doxa_storage",
+ "doxa_user",
  "futures",
  "serde",
  "serde_json",

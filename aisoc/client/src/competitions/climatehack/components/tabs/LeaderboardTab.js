@@ -4,6 +4,7 @@ import Leaderboard from '../Leaderboard';
 import './LeaderboardTab.scss';
 
 
+
 export default function LeaderboardTab({ baseUrl }) {
   const [leaderboard, setLeaderboard] = useState(null);
 

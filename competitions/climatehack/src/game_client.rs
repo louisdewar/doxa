@@ -178,7 +178,7 @@ impl GameClient for ClimateHackGameClient {
             path_on_host: self
                 .datasets
                 .get_dataset(&match_request.dataset)
-                .expect("TODO: allow additionl_mounts to return an error")
+                .expect("TODO: allow additional_mounts to return an error")
                 .x_image_path
                 .clone(),
             path_on_guest: "/climatehack_test_x".to_string(),

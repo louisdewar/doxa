@@ -157,7 +157,7 @@ pub async fn login(settings: &Settings) -> Result<(), CommandError> {
         "{} {{spinner:.green.dim.bold}} [{{elapsed_precise}}] {{msg}} ",
         ui::step(3, total_steps)
     )));
-    spinner.set_message("Waiting for you to login...");
+    //spinner.set_message("Waiting for you to login...");
 
     let check_request = CheckDelegatedRequest {
         verification_code: start_response.verification_code,
@@ -169,16 +169,18 @@ pub async fn login(settings: &Settings) -> Result<(), CommandError> {
             return Err(DelegatedAuthTimeout.into());
         }
 
-        spinner.tick();
+        spinner.set_message("Waiting for you to login...sleeping");
         tokio::time::sleep(Duration::from_secs(5)).await;
 
+        spinner.set_message("Waiting for you to login...checking");
         let builder = post(settings, "auth/check_delegated", true).json(&check_request);
 
         let check_response: DelegatedAuthCheckResponse = send_request_and_parse(builder).await?;
         match check_response {
             DelegatedAuthCheckResponse::Authenticated { auth_token } => break auth_token,
-            DelegatedAuthCheckResponse::Waiting => continue,
+            DelegatedAuthCheckResponse::Waiting => {}
         }
+        tokio::time::sleep(Duration::from_secs(1)).await;
     };
 
     spinner.finish_with_message("Sucessfully logged in");

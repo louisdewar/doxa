@@ -4,7 +4,7 @@ use doxa_db::PgPool;
 
 use self::response::PublicUserInfo;
 
-mod response;
+pub mod response;
 
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.route("/user/info", web::post().to(current_user_info))

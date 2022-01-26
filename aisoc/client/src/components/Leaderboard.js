@@ -3,8 +3,15 @@ import { Link } from 'react-router-dom';
 import './Leaderboard.scss';
 import TextBox from './TextBox';
 
+function DefaultLeaderboardRow({ baseUrl, rank, score, user }) {
+  return <div className='leaderboard-entry'>
+    <span className="leaderboard-position">{rank}</span>
+    <span className="leaderboard-username"><Link to={`${baseUrl}user/${user.name()}`}>{user.name()}</Link></span>
+    <span className="leaderboard-score">{score}</span>
+  </div>;
+}
 
-export default function Leaderboard({ baseUrl, leaderboard }) {
+export default function Leaderboard({ baseUrl, leaderboard, LeaderboardRow = DefaultLeaderboardRow }) {
   const [filter, setFilter] = useState('');
 
   return <div className="leaderboard">
@@ -21,10 +28,6 @@ export default function Leaderboard({ baseUrl, leaderboard }) {
       <span className="leaderboard-score">Score</span>
     </div>
 
-    {leaderboard.map((entry, i) => entry.username.includes(filter) && <div key={i} className='leaderboard-entry'>
-      <span className="leaderboard-position">{i + 1}</span>
-      <span className="leaderboard-username"><Link to={`${baseUrl}user/${entry.username}`}>{entry.username}</Link></span>
-      <span className="leaderboard-score">{entry.score}</span>
-    </div>)}
+    {leaderboard.map((entry, i) => entry.user.name().includes(filter) && <LeaderboardRow key={i} baseUrl={baseUrl} rank={i+1} score={entry.score} user={entry.user} agent={entry.agent} /> )}
   </div>;
 }
