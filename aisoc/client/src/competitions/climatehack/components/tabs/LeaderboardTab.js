@@ -11,7 +11,6 @@ export default function LeaderboardTab({ baseUrl }) {
   useEffect(() => {
     ClimateHackAPI.getLeaderboard('dataset_dapper').then(data => {
       setLeaderboard(data);
-      console.log(data);
     }).catch(err => {
       console.error(err);
     });

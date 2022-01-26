@@ -23,7 +23,6 @@ export default class UserProfile {
   }
 
   university() {
-    console.log(this._university, (this.profile.extra && this.profile.extra.org) || 'UNKNOWN');
     return this._university;
   }
 }

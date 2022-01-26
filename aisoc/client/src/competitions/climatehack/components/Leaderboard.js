@@ -19,6 +19,8 @@ function ClimateHackLeaderboardRow({  rank, score, user }) {
 export default function Leaderboard({ leaderboard }) {
   const [filter, setFilter] = useState('');
 
+  const lowerFilter = filter.toLowerCase();
+
   return <div className="ch-leaderboard">
     <TextBox
       type="text"
@@ -34,6 +36,6 @@ export default function Leaderboard({ leaderboard }) {
       <span className="ch-leaderboard-score">Score</span>
     </div>
 
-    {leaderboard.map((entry, i) => (entry.user.name().includes(filter) || entry.user().university().name.includes(filter)) && <ClimateHackLeaderboardRow rank={i+1} score={entry.score} user={entry.user} />)}
+    {leaderboard.map((entry, i) => (entry.user.name().toLowerCase().includes(lowerFilter) || entry.user.university().name.toLowerCase().includes(lowerFilter)) && <ClimateHackLeaderboardRow key={i} rank={i+1} score={entry.score} user={entry.user} />)}
   </div>;
 }
