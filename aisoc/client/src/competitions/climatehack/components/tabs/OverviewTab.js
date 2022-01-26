@@ -33,6 +33,10 @@ export default function OverviewTab({ baseUrl }) {
 
     <img src={satelliteImage} style={{ width: '100%', backgroundColor: '#f1f5f9', borderRadius: '3px', boxSizing: 'border-box' }} />
 
+    <p>
+      Check the dataset out on <a href="https://console.cloud.google.com/marketplace/product/bigquery-public-data/eumetsat-seviri-rss-hrv-uk">Google Cloud Public Datasets</a>.
+    </p>
+
     <h3>Your machine learning challenge</h3>
 
     <p className='ch-tab-box'>

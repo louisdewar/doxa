@@ -3,13 +3,19 @@ from random import randrange
 from typing import Iterator, T_co
 
 import numpy as np
+import xarray as xr
 from numpy import float32
 from torch.utils.data import IterableDataset
 
 
 class ClimateHackDataset(IterableDataset):
     def __init__(
-        self, dataset, start_date=None, end_date=None, crops_per_slice=1, day_limit=0
+        self,
+        dataset: xr.Dataset,
+        start_date: datetime = None,
+        end_date: datetime = None,
+        crops_per_slice: int = 1,
+        day_limit: int = 0,
     ) -> None:
         super().__init__()
 

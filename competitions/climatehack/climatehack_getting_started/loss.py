@@ -6,7 +6,7 @@ from pytorch_msssim import MS_SSIM
 class MS_SSIMLoss(nn.Module):
     """Multi-Scale SSIM Loss"""
 
-    def __init__(self, **kwargs):
+    def __init__(self, channels=1, **kwargs):
         """
         Initialize
         Args:
@@ -15,7 +15,7 @@ class MS_SSIMLoss(nn.Module):
         """
         super(MS_SSIMLoss, self).__init__()
         self.ssim_module = MS_SSIM(
-            data_range=1024.0, size_average=True, win_size=3, channel=1, **kwargs
+            data_range=1024.0, size_average=True, win_size=3, channel=channels, **kwargs
         )
 
     def forward(self, x: torch.Tensor, y: torch.Tensor):
