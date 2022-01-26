@@ -21,10 +21,18 @@ pub struct Scorer {
 }
 
 #[derive(Deserialize)]
-struct Score {
-    score: f64,
-    #[serde(default)]
-    error: Option<String>,
+#[serde(tag = "type")]
+#[serde(rename_all = "snake_case")]
+pub enum GroupResult {
+    Success {
+        score: f64,
+        images: Vec<String>,
+    },
+    Failure {
+        error: String,
+        #[serde(default)]
+        forfeit: Option<String>,
+    },
 }
 
 impl Scorer {
@@ -52,7 +60,7 @@ impl Scorer {
         &self,
         true_values: impl AsRef<OsStr>,
         prediction: impl AsRef<OsStr>,
-    ) -> Result<f64, ScorerError> {
+    ) -> Result<(f64, Vec<String>), ScorerError> {
         let process = tokio::process::Command::new(&self.python_bin)
             .arg(&self.script_path)
             .arg(prediction)
@@ -69,12 +77,19 @@ impl Scorer {
             .await
             .map_err(ScorerError::ScriptOutput)?;
 
-        let score: Score = serde_json::from_slice(&output.stdout).map_err(ScorerError::Format)?;
+        let result: GroupResult =
+            serde_json::from_slice(&output.stdout).map_err(ScorerError::Format)?;
 
-        if let Some(e) = score.error {
-            return Err(ScorerError::ScriptError(e));
+        match result {
+            GroupResult::Failure {
+                error,
+                forfeit: None,
+            } => Err(ScorerError::InternalScriptError(error)),
+            GroupResult::Failure {
+                error,
+                forfeit: Some(forfeit),
+            } => Err(ScorerError::ForfeitError { error, forfeit }),
+            GroupResult::Success { score, images } => Ok((score, images)),
         }
-
-        Ok(score.score)
     }
 }

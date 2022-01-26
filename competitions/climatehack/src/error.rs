@@ -85,10 +85,15 @@ pub struct UnknownDataset {
 
 #[derive(Error, Debug, Display)]
 pub enum ScorerError {
+    #[display(fmt = "internal error scoring agent: {}", _0)]
+    InternalScriptError(#[error(not(source))] String),
+    #[display(fmt = "agent forfeited: {}", error)]
+    ForfeitError {
+        error: String,
+        forfeit: String,
+    },
     WriteScript(io::Error),
     Format(serde_json::Error),
-    #[display(fmt = "error scoring agent: {}", _0)]
-    ScriptError(#[error(not(source))] String),
     StartScript(io::Error),
     ScriptOutput(io::Error),
 }
@@ -100,7 +105,8 @@ impl ForfeitError for ScorerError {
             ScorerError::Format(_) => None,
             ScorerError::StartScript(_) => None,
             ScorerError::ScriptOutput(_) => None,
-            ScorerError::ScriptError(_) => Some(0),
+            ScorerError::InternalScriptError(_) => None,
+            ScorerError::ForfeitError { .. } => Some(0),
         }
     }
 
@@ -110,10 +116,8 @@ impl ForfeitError for ScorerError {
             ScorerError::Format(_) => None,
             ScorerError::StartScript(_) => None,
             ScorerError::ScriptOutput(_) => None,
-            ScorerError::ScriptError(_) => Some(
-                "The scorer failed to evaluate the predictions, ask an admin for more information"
-                    .to_string(),
-            ),
+            ScorerError::InternalScriptError(_) => None,
+            ScorerError::ForfeitError { forfeit, .. } => Some(forfeit.to_string()),
         }
     }
 }

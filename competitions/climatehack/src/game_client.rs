@@ -27,6 +27,7 @@ pub enum ClimateHackGameEvent {
         checkpoint: u32,
         score: f64,
         dataset: String,
+        images: Vec<String>,
     },
     FinalScore {
         score: f64,
@@ -116,7 +117,7 @@ impl ClimateHackGameClient {
                 .await
                 .map_err(ClimateHackError::WriteGroupError)?;
 
-            let group_score = scorer
+            let (score, images) = scorer
                 .score(
                     &dataset.true_y_path.join(format!("{}.npz", checkpoint)),
                     group_output_path,
@@ -124,13 +125,15 @@ impl ClimateHackGameClient {
                 .await
                 .map_err(ClimateHackError::Scorer)?;
 
-            total_score += group_score;
+            total_score += score;
+
             context
                 .emit_game_event(
                     ClimateHackGameEvent::CheckpointScore {
                         checkpoint,
-                        score: group_score,
+                        score,
                         dataset: dataset_name.clone(),
+                        images,
                     },
                     format!("checkpoint_{}", checkpoint),
                 )
