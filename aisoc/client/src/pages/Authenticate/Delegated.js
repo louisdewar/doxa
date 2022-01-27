@@ -19,7 +19,9 @@ export default function Delegated() {
   }, []);
 
   if (!auth.isLoggedIn()) {
-    return <Redirect to="/authenticate/login" />;
+    // TODO: There is probably a better way of doing this:
+    const redirectURL = window.location.href.substring(window.location.origin.length);
+    return <Redirect to={`/authenticate/login?post_login_redirect=${encodeURIComponent(redirectURL)}`} />;
   }
 
   // It can take a bit of time to get the user info

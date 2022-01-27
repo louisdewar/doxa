@@ -12,7 +12,7 @@ const ERROR_MESSAGES = {
   'INCORRECT_CREDENTIALS': 'Your username and/or password are incorrect.'
 };
 
-export default function Login() {
+export default function Login({ postLoginRedirect }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [handler, setHandler] = useState(null);
@@ -35,7 +35,11 @@ export default function Login() {
       if (authToken) {
         auth.setAuthToken(authToken);
 
-        history.push('/#login-success');
+        if (postLoginRedirect) {
+          history.push(postLoginRedirect);
+        } else {
+          history.push('/#login-success');
+        }
       } else {
         setHandler(response.incomplete());
       }
