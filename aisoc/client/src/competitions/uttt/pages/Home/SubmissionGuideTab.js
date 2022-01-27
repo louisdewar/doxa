@@ -4,7 +4,7 @@ export default function SubmissionGuideTab() {
   return <div className="submission-guide-tab">
     <h2>Submission Guide</h2>
     <p>
-      Ensure you have Python 3.7+ installed on your computer before you begin.
+      Ensure you have Python 3.9 installed on your computer before you begin.
     </p>
     <p>
       To get started, download and extract the example agent project from <a href="https://github.com/louisdewar/doxa/releases/download/0.1.1/uttt_getting_started.zip">GitHub</a>.
@@ -16,6 +16,9 @@ export default function SubmissionGuideTab() {
     <pre>
       python doxa_cli.py --help
     </pre>
+    <p>
+      <strong>Note</strong>: on some systems, you may have to type <code>python3</code> instead of <code>python</code>.
+    </p>
     <p>
       If you do not have the relevant Doxa CLI binary for your operating system, it will be downloaded into the <code>{'"bin"'}</code> folder.
     </p>
