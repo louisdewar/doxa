@@ -30,6 +30,16 @@
       color: #fff;
     }
 
+    &.ch-evaluation-log-forfeit {
+      background-color: #f59e0b;
+      // color: #fff;
+    }
+
+    &.ch-evaluation-log-cancelled {
+      background-color: #ee5253;
+      color: #fff;
+    }
+
     .ch-evaluation-log-card-body {
       // display: flex;
       // justify-content: space-between;
