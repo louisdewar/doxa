@@ -1,4 +1,5 @@
 from datetime import datetime, time, timedelta
+from functools import lru_cache
 from random import randrange
 from typing import Iterator, T_co
 
@@ -25,10 +26,15 @@ class ClimateHackDataset(IterableDataset):
         self.cached_items = []
 
         times = self.dataset.get_index("time")
-        self.min_date = times[0].date() if start_date is None else start_date
-        self.max_date = times[-1].date() if end_date is None else end_date
+        self.min_date = times[0].date()
+        self.max_date = times[-1].date()
 
-        if self.day_limit > 0:
+        if start_date is not None:
+            self.min_date = max(self.min_date, start_date)
+
+        if end_date is not None:
+            self.max_date = min(self.max_date, end_date)
+        elif self.day_limit > 0:
             self.max_date = min(
                 self.max_date, self.min_date + timedelta(days=self.day_limit)
             )
@@ -39,22 +45,17 @@ class ClimateHackDataset(IterableDataset):
             current_time = datetime.combine(date, start_time)
             while current_time.time() < end_time:
                 yield current_time
-                current_time += timedelta(minutes=5)
+                current_time += timedelta(minutes=20)
 
             date += timedelta(days=1)
 
-    def _get_crop(self, current_time):
+    def _get_crop(self, current_time, input_slice, target_slice):
         # roughly over the mainland UK
         rand_x = randrange(550, 950 - 128)
         rand_y = randrange(375, 700 - 128)
 
         # make a data selection
-        selection = self.dataset.sel(
-            time=slice(
-                current_time,
-                current_time + timedelta(minutes=55),
-            )
-        ).isel(
+        selection = input_slice.isel(
             x=slice(rand_x, rand_x + 128),
             y=slice(rand_y, rand_y + 128),
         )
@@ -78,13 +79,7 @@ class ClimateHackDataset(IterableDataset):
 
         # get the target output
         target_output = (
-            self.dataset["data"]
-            .sel(
-                time=slice(
-                    current_time + timedelta(hours=1),
-                    current_time + timedelta(hours=2, minutes=55),
-                )
-            )
+            target_slice["data"]
             .isel(
                 x=slice(rand_x + 32, rand_x + 96),
                 y=slice(rand_y + 32, rand_y + 96),
@@ -109,9 +104,23 @@ class ClimateHackDataset(IterableDataset):
         end_time = time(14, 0)
 
         for current_time in self._image_times(start_time, end_time):
+            input_slice = self.dataset.sel(
+                time=slice(
+                    current_time,
+                    current_time + timedelta(minutes=55),
+                )
+            )
+
+            target_slice = self.dataset.sel(
+                time=slice(
+                    current_time + timedelta(hours=1),
+                    current_time + timedelta(hours=2, minutes=55),
+                )
+            )
+
             crops = 0
             while crops < self.crops_per_slice:
-                crop = self._get_crop(current_time)
+                crop = self._get_crop(current_time, input_slice, target_slice)
                 if crop:
                     self.cached_items.append(crop)
                     yield crop
