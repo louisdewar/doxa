@@ -124,6 +124,8 @@ impl<C: Competition + ?Sized> Context<C> {
             })
             .await?;
 
+        debug!(agents=?active_agents, before=%activated_at, agent_id=%new_agent, "agents activated before");
+
         for other_agent in active_agents {
             self.emit_match_request(
                 vec![new_agent.clone(), other_agent.id.clone()],

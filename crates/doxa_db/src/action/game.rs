@@ -229,6 +229,7 @@ pub fn mark_games_with_player_as_outdated(
     use s::games::columns as g_c;
 
     diesel::update(s::games::table)
+        .filter(g_c::outdated.eq(false))
         .filter(
             g_c::id.eq_any(
                 s::game_participants::table

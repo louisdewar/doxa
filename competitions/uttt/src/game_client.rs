@@ -274,6 +274,8 @@ impl GameClient for UTTTGameClient {
 
     type GameEvent = UTTTMatchEvent;
 
+    const AGENT_RAM_MB: u64 = 1024;
+
     async fn run<'a>(
         &self,
         _match_request: (),
