@@ -1,0 +1,44 @@
+@import 'common/common';
+@import 'common/colours';
+@import 'common/fonts';
+
+
+.ch-evaluation-log {
+  .ch-evaluation-log-label {
+    font-style: italic;
+  }
+
+  .ch-evaluation-log-card {
+    font-family: $monospace-font;
+    background-color: #e2e8f0;
+    color: $off-black;
+    border-radius: 3px;
+
+    margin-bottom: 23px;
+
+    transition: transform 200ms ease-in-out, box-shadow 200ms linear;
+
+    box-shadow: 0 0 #0000, 0 0 #0000, 6px 6px #64748b;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 #0000, 0 0 #0000, 6px 6px #475569;
+    }
+
+    &.ch-evaluation-log-endpoint {
+      background-color: #374151;
+      color: #fff;
+    }
+
+    .ch-evaluation-log-card-body {
+      // display: flex;
+      // justify-content: space-between;
+      // align-items: center;
+      padding: 15px 5px 15px 20px;
+
+      svg {
+        margin-right: 10px;
+      }
+    }
+  }
+}

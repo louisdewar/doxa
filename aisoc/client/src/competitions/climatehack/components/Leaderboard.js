@@ -1,12 +1,9 @@
 import TextBox from 'components/TextBox';
 import { useState } from 'react';
+import { roundScore } from '../utils';
 import './Leaderboard.scss';
 
-function roundScore(score) {
-  return Math.round((score + Number.EPSILON) * 100000) / 100000;
-}
-
-function ClimateHackLeaderboardRow({  rank, score, user }) {
+function ClimateHackLeaderboardRow({ rank, score, user }) {
   return <div className='ch-leaderboard-entry'>
     <span className="ch-leaderboard-position">{rank}</span>
     <span className="ch-leaderboard-username">{user.name()}</span>
@@ -36,6 +33,6 @@ export default function Leaderboard({ leaderboard }) {
       <span className="ch-leaderboard-score">Score</span>
     </div>
 
-    {leaderboard.map((entry, i) => (entry.user.name().toLowerCase().includes(lowerFilter) || entry.user.university().name.toLowerCase().includes(lowerFilter)) && <ClimateHackLeaderboardRow key={i} rank={i+1} score={entry.score} user={entry.user} />)}
+    {leaderboard.map((entry, i) => (entry.user.name().toLowerCase().includes(lowerFilter) || entry.user.university().name.toLowerCase().includes(lowerFilter)) && <ClimateHackLeaderboardRow key={i} rank={i + 1} score={entry.score} user={entry.user} />)}
   </div>;
 }

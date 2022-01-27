@@ -1,5 +1,5 @@
-import { request } from './common';
 import UserProfile from 'utils/profile';
+import { request } from './common';
 
 // Maps the leaderboard from a request to a more useful object.
 // TODO: consider creating a leaderboard class
@@ -7,7 +7,7 @@ function processLeaderboard(leaderboard) {
   return leaderboard.map(entry => {
     entry.user = new UserProfile(entry.user);
     return entry;
-  }) ; 
+  });
 }
 
 export default class CompetitionAPI {
@@ -119,8 +119,8 @@ export default class CompetitionAPI {
     return data.active_agent;
   }
 
-  static async getUserScore(username) {
-    const data = await request({ url: this.USER_BASE_URL + username + '/score', method: 'GET' });
+  static async getUserScore(username, leaderboard) {
+    const data = await request({ url: `${this.USER_BASE_URL}${username}/score${leaderboard ? '/' + leaderboard : ''}`, method: 'GET' });
 
     return data;
   }
