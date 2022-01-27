@@ -7,7 +7,7 @@ export default function SubmissionGuideTab() {
       Ensure you have Python 3.7+ installed on your computer before you begin.
     </p>
     <p>
-      To get started, download and extract the example agent project from <a href="https://github.com/louisdewar/doxa/releases/download/0.0.1/uttt_getting_started.zip">GitHub</a>.
+      To get started, download and extract the example agent project from <a href="https://github.com/louisdewar/doxa/releases/download/0.1.1/uttt_getting_started.zip">GitHub</a>.
     </p>
     <h3>Using the Doxa CLI</h3>
     <p>
