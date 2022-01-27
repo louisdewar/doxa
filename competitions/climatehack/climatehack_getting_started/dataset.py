@@ -10,6 +10,14 @@ from torch.utils.data import IterableDataset
 
 
 class ClimateHackDataset(IterableDataset):
+    """
+    This is a basic dataset class to help you get started with the Climate Hack.AI
+    dataset. You are heavily encouraged to customise this to suit your needs.
+
+    Notably, you will most likely want to modify this if you aim to train
+    with the whole dataset, rather than just a small subset thereof.
+    """
+
     def __init__(
         self,
         dataset: xr.Dataset,
@@ -63,8 +71,8 @@ class ClimateHackDataset(IterableDataset):
         # get the OSGB coordinate data
         osgb_data = np.stack(
             [
-                selection["x_osgb"].to_numpy().astype(float32),
-                selection["y_osgb"].to_numpy().astype(float32),
+                selection["x_osgb"].values.astype(float32),
+                selection["y_osgb"].values.astype(float32),
             ]
         )
 
@@ -72,8 +80,7 @@ class ClimateHackDataset(IterableDataset):
             return None
 
         # get the input satellite imagery
-        input_data = selection["data"].to_numpy().astype(float32)
-
+        input_data = selection["data"].values.astype(float32)
         if input_data.shape != (12, 128, 128):
             return None
 
@@ -84,8 +91,7 @@ class ClimateHackDataset(IterableDataset):
                 x=slice(rand_x + 32, rand_x + 96),
                 y=slice(rand_y + 32, rand_y + 96),
             )
-            .to_numpy()
-            .astype(float32)
+            .values.astype(float32)
         )
 
         if target_output.shape != (24, 64, 64):
@@ -104,19 +110,20 @@ class ClimateHackDataset(IterableDataset):
         end_time = time(14, 0)
 
         for current_time in self._image_times(start_time, end_time):
-            input_slice = self.dataset.sel(
-                time=slice(
-                    current_time,
-                    current_time + timedelta(minutes=55),
-                )
-            )
+            data_slice = self.dataset.loc[
+                {
+                    "time": slice(
+                        current_time,
+                        current_time + timedelta(hours=2, minutes=55),
+                    )
+                }
+            ]
 
-            target_slice = self.dataset.sel(
-                time=slice(
-                    current_time + timedelta(hours=1),
-                    current_time + timedelta(hours=2, minutes=55),
-                )
-            )
+            if data_slice.sizes["time"] != 36:
+                continue
+
+            input_slice = data_slice.isel(time=slice(0, 12))
+            target_slice = data_slice.isel(time=slice(12, 36))
 
             crops = 0
             while crops < self.crops_per_slice:
