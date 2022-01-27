@@ -11,14 +11,20 @@ export default function User() {
   const { user } = useParams();
   const [score, setScore] = useState(null);
   const [events, setEvents] = useState(null);
+  const [error, setError] = useState(false);
 
   useEffect(async () => {
     if (score !== null) {
       setScore(null);
     }
 
-    const data = await ClimateHackAPI.getUserScore(user, 'dataset_dapper');
-    setScore(data.score || 0);
+    try {
+      const data = await ClimateHackAPI.getUserScore(user, 'dataset_dapper');
+      setScore(data.score || 0);
+    } catch {
+      setError(true);
+      return;
+    }
 
     if (events !== null) {
       setEvents(null);
@@ -28,6 +34,10 @@ export default function User() {
     setEvents(eventData || []);
     console.log(events);
   }, [user]);
+
+  if (error) {
+    return <Card>This user does not exist :-(</Card>;
+  }
 
   return <>
     <span></span><span></span><span></span><span></span> {/* a fun hack just to get a better outline colour below! */}

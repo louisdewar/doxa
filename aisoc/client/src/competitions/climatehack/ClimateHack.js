@@ -11,7 +11,7 @@ import User from './pages/User';
 
 function Layout({ children }) {
   return <>
-    <Navbar competition="climatehack" competitionName="Climate Hack" />
+    <Navbar competition="climatehack" competitionName="Climate Hack.AI" />
     <Container>{children}</Container>
   </>;
 }
