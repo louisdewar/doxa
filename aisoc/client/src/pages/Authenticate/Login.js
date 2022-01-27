@@ -1,3 +1,4 @@
+import { login } from 'api/auth';
 import { DoxaError } from 'api/common';
 import Button from 'components/Button';
 import Card from 'components/Card';
@@ -5,7 +6,6 @@ import TextBox from 'components/TextBox';
 import { useAuth } from 'hooks/useAuth';
 import { useState } from 'react';
 import { Link, Redirect, useHistory } from 'react-router-dom';
-import { login } from 'api/auth';
 
 
 const ERROR_MESSAGES = {
@@ -60,21 +60,22 @@ export default function Login() {
 
   return <>
     {error && <Card>
-      <p>Sorry — we could not log you in with those credentials! Double-check and try again.</p>
-      {typeof error === 'string'? <p>{error}</p>: null}
+      <p>Sorry &ndash; we could not log you in with those credentials! Double-check and try again.</p>
+      {typeof error === 'string' ? <p>{error}</p> : null}
     </Card>}
 
     <Card>
       <h1>Login</h1>
       <form onSubmit={handleSubmit}>
-        <TextBox type="text" value={username} setValue={setUsername} placeholder="Username or Email" /><br />
+        <TextBox type="text" value={username} setValue={setUsername} placeholder="Username or email" /><br />
         <TextBox type="password" value={password} setValue={setPassword} placeholder="Password" /><br />
-        <Button buttonProps={{ onClick: handleSubmit }}>
-            Log in
+        <Button success buttonProps={{ onClick: handleSubmit }}>
+          Log in
         </Button>
+        <span style={{ marginLeft: '1rem' }}>
+          Don&apos;t have an account? <Link to="/authenticate/register">Register</Link>.
+        </span>
       </form>
-
-      Don&apos;t have an account? <Link to="/authenticate/register">Register</Link>
     </Card>
   </>;
 }

@@ -5,8 +5,7 @@ import Card from 'components/Card';
 import TextBox from 'components/TextBox';
 import { useAuth } from 'hooks/useAuth';
 import { useMemo, useState } from 'react';
-import { Redirect } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 
 export default function Delegated() {
   const [error, setError] = useState(null);
@@ -45,19 +44,22 @@ export default function Delegated() {
       setError(true);
     }
   };
-  
+
   let errorCard = null;
   if (error !== null) {
     errorCard = <Card>
       <p>Uh oh — something went wrong with the delegated login!</p>
-      {typeof error === 'string'? <p>{error}</p>: null}
+      {typeof error === 'string' ? <p>{error}</p> : null}
     </Card>;
   }
 
   if (success) {
     return <>
       <Card>
-        <h2>Successfully authorized delegated login</h2>
+        <h2>Successfully authorised the delegated login</h2>
+        <p>
+          You may now close this window.
+        </p>
         <Link to="/">
           <Button success>Return to the hompage</Button>
         </Link>
@@ -69,16 +71,25 @@ export default function Delegated() {
     {errorCard}
 
     <Card>
-      <Link to="/">
-        <Button>Return to the hompage</Button>
-      </Link>
-      <h2>Authorize a delegated login for {auth.user.username}:</h2>
-      <p>This will let another device authenticate as you, {auth.user.username}, so make sure you trust where you got this code from.</p>
+      <h2>Authorise a delegated login</h2>
+      <p>
+        Hi {auth.user.username},
+      </p>
+      <p>
+        An application is requesting to authenticate as you on your behalf.
+      </p>
+      <p>
+        If you do not trust the source of the code below, do not authorise the login attempt.
+      </p>
+
       <form onSubmit={handleSubmit}>
         <TextBox type="text" value={verificationCode || queryVerificationCode} setValue={setVerificationCode} placeholder="Verification Code" disabled={!!queryVerificationCode} />
-        <Button buttonProps={{ onClick: handleSubmit }}>
-            Authorized delegated login
+        <Button success buttonProps={{ onClick: handleSubmit }}>
+          Authorise login
         </Button>
+        <Link to="/">
+          <Button>Return to the hompage</Button>
+        </Link>
       </form>
     </Card>
   </>;

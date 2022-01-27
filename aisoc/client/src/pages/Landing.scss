@@ -9,7 +9,7 @@
 
 .competition-summary-link {
     color: #fff;
-    text-underline-offset: 0.325rem;
+    text-underline-offset: 0.2rem !important;
     font-style: italic;
 
     @media screen and (max-width: $breakpoint-sm) {

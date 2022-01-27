@@ -1,3 +1,4 @@
+import { register } from 'api/auth';
 import { DoxaError } from 'api/common';
 import Button from 'components/Button';
 import Card from 'components/Card';
@@ -5,7 +6,6 @@ import TextBox from 'components/TextBox';
 import { useAuth } from 'hooks/useAuth';
 import { useState } from 'react';
 import { Link, Redirect, useHistory } from 'react-router-dom';
-import { register } from 'api/auth';
 
 
 
@@ -62,23 +62,22 @@ export default function Register() {
   }
 
   return <>
-    
     {error && <Card>
-      <p>Sorry — we could not register you! Double-check and try again.</p>
-      {typeof error === 'string'? <p>{error}</p>: null}
+      <p>Sorry &ndash; we could not register you! Double-check and try again.</p>
+      {typeof error === 'string' ? <p>{error}</p> : null}
     </Card>}
 
     <Card>
-      <h1>Register an new account</h1>
+      <h1>Create a new account</h1>
       <form onSubmit={handleSubmit}>
         <TextBox type="email" value={email} setValue={setEmail} placeholder="University email" /><br />
         <TextBox type="text" value={username} setValue={setUsername} placeholder="Username" /><br />
         <TextBox type="password" value={password} setValue={setPassword} placeholder="Password" /><br />
         <Button buttonProps={{ onClick: handleSubmit }}>
-            Log in
+          Register
         </Button>
+        <span style={{ marginLeft: '1rem' }}>Already have an account? <Link to="/authenticate/login">Login</Link></span>
       </form>
-      Already have an account? <Link to="/authenticate/login">Login</Link>
     </Card>
   </>;
 }
