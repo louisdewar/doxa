@@ -38,7 +38,7 @@ export default function Partners({ baseUrl }) {
         <div className='ch-section-content'>
           <div className='ch-section-heading'>
             {/* <h2>Newcross Healthcare</h2> */}
-            <img src={newcross} />
+            <a href="https://www.newcrosshealthcare.com/"><img src={newcross} /></a>
           </div>
           <div>
             <p>

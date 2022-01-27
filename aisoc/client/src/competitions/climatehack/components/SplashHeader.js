@@ -33,7 +33,7 @@ export default function SplashHeader({ baseUrl, scroll }) {
         }}><FontAwesomeIcon icon={faCaretDown} fixedWidth /></a>
       </div>
       <div>
-        <img src={newcross} style={{ height: '2rem' }} />
+        <a href="https://www.newcrosshealthcare.com/"><img src={newcross} style={{ height: '2rem' }} /></a>
       </div>
     </div>
   </header>;

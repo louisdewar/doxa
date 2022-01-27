@@ -21,7 +21,7 @@ export default function Challenge({ baseUrl }) {
       <section className='ch-section ch-challenge-ocf'>
         <div className='ch-section-content'>
           <div className='ch-section-heading'>
-            <img src={ocfLogo} />
+            <a href="https://www.openclimatefix.org/"><img src={ocfLogo} /></a>
           </div>
           <div className='ch-section-description'>
             <p>
