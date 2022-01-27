@@ -62,10 +62,10 @@ def main():
         )
         return
 
+    criterion = MS_SSIM(data_range=1023.0, size_average=True, win_size=3, channel=1)
+
     losses = 0
     for j in range(series.shape[0]):
-        criterion = MS_SSIM(data_range=1024.0, size_average=True, win_size=3, channel=1)
-
         loss = criterion(
             from_numpy(series[j]).view(24, 64, 64).unsqueeze(dim=1),
             from_numpy(true[j]).view(24, 64, 64).unsqueeze(dim=1),

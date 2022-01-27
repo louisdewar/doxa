@@ -15,7 +15,7 @@ class MS_SSIMLoss(nn.Module):
         """
         super(MS_SSIMLoss, self).__init__()
         self.ssim_module = MS_SSIM(
-            data_range=1024.0, size_average=True, win_size=3, channel=channels, **kwargs
+            data_range=1023.0, size_average=True, win_size=3, channel=channels, **kwargs
         )
 
     def forward(self, x: torch.Tensor, y: torch.Tensor):
