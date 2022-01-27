@@ -46,7 +46,7 @@ steps:
       - name: dockersock
         path: /var/run/docker.sock
     commands:
-      - docker build -t registry.dewardt.uk/doxa/web:drone-build-"$DRONE_BUILD_NUMBER" -f aisoc/deploy/Dockerfile.web .
+      - docker build --build-arg title="DOXA" -t registry.dewardt.uk/doxa/web:drone-build-"$DRONE_BUILD_NUMBER" -f aisoc/deploy/Dockerfile.web .
     when:
       target:
         - production
