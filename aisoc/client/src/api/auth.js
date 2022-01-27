@@ -1,9 +1,8 @@
-import systemIncompleteFlow from 'pages/Authenticate/SystemIncompleteFlow';
+import VerifyEmailCard from 'components/VerifyEmailCard';
 import { request } from './common';
 
 class ProviderFlowResponse {
   constructor(payload) {
-    console.log('incoming payload', payload);
     this.payload = payload;
     this.type = payload.type;
   }
@@ -16,28 +15,23 @@ class ProviderFlowResponse {
     }
   }
 
-  flowType() {
+  getFlowType() {
     return this.type;
   }
 
   incomplete(flowHandler) {
-    if (this.type === 'incomplete') {
-      // Get inner incomplete flow payload
-      const payload = this.payload.payload;
-      const type = payload.type;
+    if (this.type !== 'incomplete') return null;
 
-      let handler = systemIncompleteFlow(type, payload);
-      if (typeof flowHandler === 'function') {
-        handler = flowHandler(type, payload);
-      }
+    // Get inner incomplete flow payload
+    const payload = this.payload.payload;
+    const type = payload.type;
 
-      if (!handler) {
-        throw new Error(`Unhandled incomplete flow ${type}`);
-      }
-
-      return handler;
+    if (type === 'verify_email') {
+      return <VerifyEmailCard startLetter={payload.start_letter} domain={payload.domain} />;
+    } else if (flowHandler && typeof flowHandler === 'function') {
+      return flowHandler(type, payload);
     } else {
-      return null;
+      throw new Error(`Unhandled incomplete flow ${type}`);
     }
   }
 }
