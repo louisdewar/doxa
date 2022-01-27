@@ -41,15 +41,15 @@ class ClimateHackDataset(IterableDataset):
 
     def _image_times(self, start_time, end_time):
         date = self.min_date
-        while date < self.max_date:
+        while date <= self.max_date:
             current_time = datetime.combine(date, start_time)
-            while current_time.time() < end_time:
+            while current_time.time() <= end_time:
                 yield current_time
                 current_time += timedelta(minutes=20)
 
             date += timedelta(days=1)
 
-    def _get_crop(self, current_time, input_slice, target_slice):
+    def _get_crop(self, input_slice, target_slice):
         # roughly over the mainland UK
         rand_x = randrange(550, 950 - 128)
         rand_y = randrange(375, 700 - 128)
@@ -120,7 +120,7 @@ class ClimateHackDataset(IterableDataset):
 
             crops = 0
             while crops < self.crops_per_slice:
-                crop = self._get_crop(current_time, input_slice, target_slice)
+                crop = self._get_crop(input_slice, target_slice)
                 if crop:
                     self.cached_items.append(crop)
                     yield crop
