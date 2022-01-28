@@ -8,7 +8,7 @@ export default function GettingStartedGuideTab() {
     </p>
     <h3>Downloading the example project</h3>
     <p>
-      To get started, download and extract the example project from <a href="#">GitHub</a>. The <code>training.ipynb</code> Python Jupyter notebook contains information on the dataset and how to train a basic model to submit to DOXA.
+      To get started, download and extract the example project from <a href="https://github.com/louisdewar/doxa/releases/latest/download/climatehack_getting_started.zip">GitHub</a>. The <code>training.ipynb</code> Python Jupyter notebook contains information on the dataset and how to train a basic model to submit to DOXA.
     </p>
     <p>
       Also, check our Open Climate Fix&apos;s <a href="https://github.com/openclimatefix/Satip/blob/main/notebooks/load_and_plot_HRV_UK_Zarr_from_GCS.ipynb">notebook</a> a more in-depth introduction to reading the satellite data and more technical details about the dataset.
