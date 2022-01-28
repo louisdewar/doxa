@@ -23,6 +23,26 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/')
       with:
         files: uttt_getting_started.zip
+  release-climatehack-getting-started:
+    name: release-example-agent
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+    - name: zip
+      shell: bash
+      run: |
+        cd competitions/climatehack
+        sh ./build_getting_started_zip.sh
+        mv climatehack_getting_started.zip ../../
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: climatehack_getting_started.zip
+
   build-release-cli:
     name: build-release-cli
     runs-on: ${{ matrix.os }}
