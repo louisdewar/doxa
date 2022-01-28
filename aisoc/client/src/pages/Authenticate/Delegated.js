@@ -5,12 +5,12 @@ import Card from 'components/Card';
 import TextBox from 'components/TextBox';
 import { useAuth } from 'hooks/useAuth';
 import { useMemo, useState } from 'react';
-import { Link, Redirect } from 'react-router-dom';
+import { Link, Redirect, useHistory } from 'react-router-dom';
 
 export default function Delegated() {
   const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(false);
   const auth = useAuth();
+  const history = useHistory();
 
   const [verificationCode, setVerificationCode] = useState('');
   const queryVerificationCode = useMemo(() => {
@@ -35,7 +35,7 @@ export default function Delegated() {
     try {
       await authorizeDelegatedLogin(auth.token, verificationCode || queryVerificationCode);
 
-      setSuccess(true);
+      history.push('/authenticate/delegated/success');
     } catch (e) {
       if (e instanceof DoxaError) {
         console.error(`Failed to login (${e.error_code}): ${e.error_message}`);
@@ -47,30 +47,11 @@ export default function Delegated() {
     }
   };
 
-  let errorCard = null;
-  if (error !== null) {
-    errorCard = <Card>
+  return <>
+    {error !== null && <Card>
       <p>Uh oh — something went wrong with the delegated login!</p>
       {typeof error === 'string' ? <p>{error}</p> : null}
-    </Card>;
-  }
-
-  if (success) {
-    return <>
-      <Card>
-        <h2>Successfully authorised the delegated login</h2>
-        <p>
-          You may now close this window.
-        </p>
-        <Link to="/">
-          <Button success>Return to the hompage</Button>
-        </Link>
-      </Card>
-    </>;
-  }
-
-  return <>
-    {errorCard}
+    </Card>}
 
     <Card>
       <h2>Authorise a delegated login</h2>

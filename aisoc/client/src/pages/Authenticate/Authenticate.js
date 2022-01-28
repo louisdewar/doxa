@@ -1,12 +1,13 @@
-import Login from './Login';
 import Container from 'components/Container';
 import Navbar from 'components/Navbar';
-
-import { Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
-import VerifyEmail from './VerifyEmail';
-import Register from './Register';
-import Delegated from './Delegated';
 import { useMemo } from 'react';
+import { Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
+import Delegated from './Delegated';
+import DelegatedSuccess from './DelegatedSuccess';
+import Login from './Login';
+import Register from './Register';
+import VerifyEmail from './VerifyEmail';
+
 
 
 export default function Authenticate() {
@@ -33,6 +34,9 @@ export default function Authenticate() {
         <Route path={`${path}/register`}>
           <Register postLoginRedirect={postLoginRedirect} />
         </Route>
+        <Route path={`${path}/delegated/success`}>
+          <DelegatedSuccess />
+        </Route>
         <Route path={`${path}/delegated`}>
           <Delegated postLoginRedirect={postLoginRedirect} />
         </Route>
@@ -41,6 +45,6 @@ export default function Authenticate() {
         </Route>
       </Switch>
     </Container>
-    
+
   </>;
 }
