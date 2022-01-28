@@ -72,9 +72,9 @@ export default function Register() {
         <TextBox type="email" value={email} setValue={setEmail} placeholder="University email" /><br />
         <TextBox type="text" value={username} setValue={setUsername} placeholder="Username" /><br />
         <TextBox type="password" value={password} setValue={setPassword} placeholder="Password" style={{ marginBottom: '5px' }} /><br />
-        <p>
+        {/* <p>
           By registering, you agree to our <Link to="/terms" target="_blank" rel="noopener noreferrer">terms and conditions</Link>.
-        </p>
+        </p> */}
         <Button buttonProps={{ onClick: handleSubmit }} success disabled={!submittable}>
           Register
         </Button>
