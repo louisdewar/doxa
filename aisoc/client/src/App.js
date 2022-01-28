@@ -1,16 +1,17 @@
 import { AuthProvider, useAuth } from 'hooks/useAuth';
 import Account from 'pages/Account';
+import Authenticate from 'pages/Authenticate';
 import Error404 from 'pages/Error404';
 import Landing from 'pages/Landing';
 import Logout from 'pages/Logout';
-import Authenticate from 'pages/Authenticate';
-
+import Terms from 'pages/Terms';
 import { Suspense } from 'react';
 import {
   BrowserRouter as Router, Redirect, Route, Switch
 } from 'react-router-dom';
 import './App.scss';
 import { COMPETITIONS, DEFAULT_COMPETITION } from './competitions';
+
 
 
 
@@ -45,6 +46,9 @@ function Routes() {
       </Route>
       <Route path='/authenticate'>
         <Authenticate />
+      </Route>
+      <Route path='/terms'>
+        <Terms />
       </Route>
 
       {multipleCompetitionsAllowed
