@@ -24,7 +24,7 @@ export default function LeaderboardTab({ baseUrl }) {
     {
       name: 'ROUND 2',
       tab: <div>
-        Round 2 of Climate Hack has not started yet &mdash; check back here on 24th March!
+        Round 2 of Climate Hack.AI has not started yet &mdash; check back here on 24th March!
       </div>
     },
   ];

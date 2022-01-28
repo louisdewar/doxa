@@ -16,7 +16,7 @@ export default function ComingSoon({ baseUrl }) {
       <div className='ch-panel-container'>
         <div className='ch-coming-soon-card'>
           <p>
-            The official Climate Hack competition page on DOXA will launch on Friday 28th January.
+            The official Climate Hack.AI competition page on DOXA will launch on Friday 28th January.
           </p>
           <p>
             We look forward to seeing you then!

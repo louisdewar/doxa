@@ -40,9 +40,9 @@ export default function Home({ baseUrl }) {
 
   return <>
     <CompetitionHeader
-      competitionName="Climate Hack"
+      competitionName="Climate Hack.AI"
       description={<>
-        {'Climate Hack is an alliance between the artificial intelligence societies of some of the world\'s best universities in the fight against climate change. Your challenge is to beat the current best nowcasting techniques for UK satellite imagery.'}
+        {'Climate Hack.AI is an alliance between the artificial intelligence societies of some of the world\'s best universities in the fight against climate change. Your challenge is to beat the current best nowcasting techniques for UK satellite imagery.'}
         <br /><br />
         {'By helping to improve solar photovoltaic power output predictions, your model could help the National Grid Electricity System Operator minimise the use of standby natural gas turbines, potentially saving up to 100 kilotonnes of carbon emissions a year.'}
       </>}
