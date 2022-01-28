@@ -73,7 +73,7 @@ export default function Login({ postLoginRedirect }) {
       <form onSubmit={handleSubmit}>
         <TextBox type="text" value={username} setValue={setUsername} placeholder="Username or email" /><br />
         <TextBox type="password" value={password} setValue={setPassword} placeholder="Password" /><br />
-        <Button success buttonProps={{ onClick: handleSubmit }}>
+        <Button success buttonProps={{ onClick: handleSubmit }} disabled={!username || !password}>
           Log in
         </Button>
         <span style={{ marginLeft: '1rem' }}>

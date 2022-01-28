@@ -14,18 +14,17 @@ export default function Register() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
-
   const [handler, setHandler] = useState(null);
-
   const [error, setError] = useState(null);
-
   const auth = useAuth();
   const history = useHistory();
+
+  const submittable = username && password && email && username.length >= 3 && password.length >= 8 && email.length >= 3;
 
   const handleSubmit = async e => {
     e.preventDefault();
 
-    if (!username || !password) return;
+    if (!username || !password || !submittable) return;
 
     try {
       const response = await register(username, email, password);
@@ -76,7 +75,7 @@ export default function Register() {
         <p>
           By registering, you agree to our <Link to="/terms" target="_blank" rel="noopener noreferrer">terms and conditions</Link>.
         </p>
-        <Button buttonProps={{ onClick: handleSubmit }}>
+        <Button buttonProps={{ onClick: handleSubmit }} success disabled={!submittable}>
           Register
         </Button>
         <span style={{ marginLeft: '1rem' }}>Already have an account? <Link to="/authenticate/login">Login</Link></span>
