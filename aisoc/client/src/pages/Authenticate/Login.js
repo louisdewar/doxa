@@ -36,7 +36,7 @@ export default function Login({ postLoginRedirect }) {
         auth.setAuthToken(authToken);
 
         if (postLoginRedirect) {
-          history.push(postLoginRedirect);
+          history.push(auth.consumePostLoginRedirectUrl());
         } else {
           history.push('/#login-success');
         }

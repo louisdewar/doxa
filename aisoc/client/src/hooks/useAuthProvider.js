@@ -14,6 +14,7 @@ export function useAuthProvider() {
     setLoading(false);
     return token;
   });
+  const [postLoginRedirectUrl, setPostLoginRedirectUrl] = useState(null);
 
   const updateAuthToken = token => {
     if (!token) {
@@ -68,6 +69,13 @@ export function useAuthProvider() {
       updateAuthToken(null);
       setUser(null);
     },
-    token: authToken
+    token: authToken,
+    postLoginRedirectUrl,
+    setPostLoginRedirectUrl,
+    consumePostLoginRedirectUrl() {
+      const url = postLoginRedirectUrl;
+      setPostLoginRedirectUrl(null);
+      return url;
+    }
   };
 }

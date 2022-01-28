@@ -4,8 +4,10 @@ import Button from 'components/Button';
 import Card from 'components/Card';
 import TextBox from 'components/TextBox';
 import { useAuth } from 'hooks/useAuth';
-import { useMemo, useState } from 'react';
-import { Link, Redirect, useHistory } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useHistory } from 'react-router-dom';
+
+
 
 export default function Delegated() {
   const [error, setError] = useState(null);
@@ -18,25 +20,12 @@ export default function Delegated() {
     return queryParams.get('verification_code');
   }, []);
 
-  if (!auth.isLoggedIn()) {
-    // TODO: There is probably a better way of doing this:
-    const redirectURL = window.location.href.substring(window.location.origin.length);
-    return <Redirect to={`/authenticate/login?post_login_redirect=${encodeURIComponent(redirectURL)}`} />;
-  }
-
-  // It can take a bit of time to get the user info
-  if (!auth.user) {
-    return null;
-  }
-
-  const handleSubmit = async e => {
+  const handleSubmit = e => {
     e.preventDefault();
 
-    try {
-      await authorizeDelegatedLogin(auth.token, verificationCode || queryVerificationCode);
-
+    authorizeDelegatedLogin(auth.token, verificationCode || queryVerificationCode).then(() => {
       history.push('/authenticate/delegated/success');
-    } catch (e) {
+    }).catch(e => {
       if (e instanceof DoxaError) {
         console.error(`Failed to login (${e.error_code}): ${e.error_message}`);
         setError(e.error_message);
@@ -44,8 +33,21 @@ export default function Delegated() {
         console.error(`Failed to login: ${e}`);
       }
       setError(true);
-    }
+    });
   };
+
+  useEffect(() => {
+    if (!auth.isLoggedIn()) {
+      auth.setPostLoginRedirectUrl(window.location.href.substring(window.location.origin.length));
+      history.push('/authenticate/login');
+    }
+
+  }, [auth.isLoggedIn()]);
+
+  // It can take a bit of time to get the user info
+  if (!auth.user) {
+    return null;
+  }
 
   return <>
     {error !== null && <Card>
