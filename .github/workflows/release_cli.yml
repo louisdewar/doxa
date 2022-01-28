@@ -24,7 +24,7 @@ jobs:
       with:
         files: uttt_getting_started.zip
   release-climatehack-getting-started:
-    name: release-example-agent
+    name: release-climatehack-getting-started
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
