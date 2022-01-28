@@ -44,6 +44,10 @@ impl<C: Competition + ?Sized> Context<C> {
 }
 
 impl<C: Competition + ?Sized> Context<C> {
+    pub fn competition_id(&self) -> i32 {
+        self.competition_id
+    }
+
     /// This will create the game record in the database and then emit the match request event.
     ///
     /// The `GameClient` will recieve the match_request on initialization.
