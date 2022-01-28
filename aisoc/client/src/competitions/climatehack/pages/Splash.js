@@ -134,7 +134,7 @@ export default function Splash({ baseUrl }) {
               Climate Hack.AI is a two-month-long datathon based on climate-related data provided by our partner, OpenClimateFix.
             </p>
             <p>
-              Competitors are challenged to develop the best machine learning models trained on this data. Submissions are evaluated against an unseen test dataset on our own custom competition platform, <Link to={`${baseUrl}comingsoon`}>DOXA</Link>.
+              Competitors are challenged to develop the best machine learning models trained on this data. Submissions are evaluated against an unseen test dataset on our own custom competition platform, <Link to={`${baseUrl}compete`}>DOXA</Link>.
             </p>
             <p>
               By improving on the state of the art in nowcasting satellite imagery, the winning model could be deployed by the National Grid electricity system operator in the UK to produce significantly more accurate solar photovoltaic output forecasts.
@@ -250,7 +250,7 @@ export default function Splash({ baseUrl }) {
               Participants must be attending one of the co-hosting universities as an undergraduate, masters or PhD student at the time of the competition.
             </p>
             <p>
-              Detailed competition rules and submission instructions may be found on our competition platform, <Link to={`${baseUrl}comingsoon`}>DOXA</Link>.
+              Detailed competition rules and submission instructions may be found on our competition platform, <Link to={`${baseUrl}compete`}>DOXA</Link>.
             </p>
           </div>
         </div>
