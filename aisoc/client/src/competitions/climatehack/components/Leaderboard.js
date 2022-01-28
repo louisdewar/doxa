@@ -1,19 +1,20 @@
 import TextBox from 'components/TextBox';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { roundScore } from '../utils';
 import './Leaderboard.scss';
 
-function ClimateHackLeaderboardRow({ rank, score, user }) {
+function ClimateHackLeaderboardRow({ rank, score, user, baseUrl }) {
   return <div className='ch-leaderboard-entry'>
     <span className="ch-leaderboard-position">{rank}</span>
-    <span className="ch-leaderboard-username">{user.name()}</span>
+    <span className="ch-leaderboard-username"><Link to={`${baseUrl}user/${user.name()}`}>{user.name()}</Link></span>
     <span className="ch-leaderboard-university">{user.university().name}</span>
     <span className="ch-leaderboard-score">{score ? roundScore(score / 10000000) : 0}</span>
   </div>;
 }
 
 
-export default function Leaderboard({ leaderboard }) {
+export default function Leaderboard({ baseUrl, leaderboard }) {
   const [filter, setFilter] = useState('');
 
   const lowerFilter = filter.toLowerCase();
@@ -33,6 +34,6 @@ export default function Leaderboard({ leaderboard }) {
       <span className="ch-leaderboard-score">Score</span>
     </div>
 
-    {leaderboard.map((entry, i) => (entry.user.name().toLowerCase().includes(lowerFilter) || entry.user.university().name.toLowerCase().includes(lowerFilter)) && <ClimateHackLeaderboardRow key={i} rank={i + 1} score={entry.score} user={entry.user} />)}
+    {leaderboard.map((entry, i) => (entry.user.name().toLowerCase().includes(lowerFilter) || entry.user.university().name.toLowerCase().includes(lowerFilter)) && <ClimateHackLeaderboardRow key={i} rank={i + 1} score={entry.score} user={entry.user} baseUrl={baseUrl} />)}
   </div>;
 }
