@@ -7,7 +7,7 @@ import ClimateHackAPI from '../api';
 import EvaluationLog from '../components/EvaluationLog';
 import { roundScore } from '../utils';
 
-export default function User() {
+export default function User({ baseUrl }) {
   const auth = useAuth();
   const { user } = useParams();
   const [score, setScore] = useState(null);
@@ -59,6 +59,6 @@ export default function User() {
       </h2>
     </Card>
 
-    {events && <EvaluationLog events={events} />}
+    {events && <EvaluationLog events={events} baseUrl={baseUrl} />}
   </>;
 }
