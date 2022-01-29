@@ -25,6 +25,14 @@ const UNIVERSITIES_DOMAIN_MAP = {
     name: 'Princeton',
     logo: null
   },
+  'utoronto.ca': {
+    name: 'Toronto',
+    logo: null
+  },
+  'manchester.ac.uk': {
+    name: 'Manchester',
+    logo: null
+  },
 };
 
 function buildUniversitiesTrie(unis) {
