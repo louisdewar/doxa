@@ -1,3 +1,4 @@
+import { DoxaError } from 'api/common';
 import Card from 'components/Card';
 import { useAuth } from 'hooks/useAuth';
 import { useEffect, useState } from 'react';
@@ -12,6 +13,7 @@ export default function User() {
   const [score, setScore] = useState(null);
   const [events, setEvents] = useState(null);
   const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(async () => {
     if (score !== null) {
@@ -21,8 +23,17 @@ export default function User() {
     try {
       const data = await ClimateHackAPI.getUserScore(user, 'dataset_dapper');
       setScore(data.score || 0);
-    } catch {
+    } catch (e) {
       setError(true);
+      if (e instanceof DoxaError) {
+        if (e.error_code == 'NO_ACTIVE_AGENT') {
+          setErrorMessage('There is no active submission for this user.');
+        } else if (e.error_code == 'USER_NOT_FOUND') {
+          setErrorMessage('This user does not exist :-(');
+        } else {
+          setErrorMessage(e.error_message);
+        }
+      }
       return;
     }
 
@@ -36,7 +47,7 @@ export default function User() {
   }, [user]);
 
   if (error) {
-    return <Card>This user does not exist :-(</Card>;
+    return <Card>{errorMessage}</Card>;
   }
 
   return <>
