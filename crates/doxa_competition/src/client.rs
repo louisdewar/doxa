@@ -177,6 +177,11 @@ pub trait Competition: 'static + Send + Sync {
             "_agent/{agent_id}/activate",
             web::post().to(route::agent::activate_agent::<Self>),
         );
+
+        service.route(
+            "_agent/{agent_id}/owner",
+            web::get().to(route::agent::agent_owner::<Self>),
+        );
     }
 
     /// This function should register the `/_user/{username}/...` routes.
