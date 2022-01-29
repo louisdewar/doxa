@@ -22,7 +22,7 @@ const UNIVERSITIES_DOMAIN_MAP = {
     logo: null
   },
   'imperial.ac.uk': {
-    name: 'Princeton',
+    name: 'Imperial',
     logo: null
   },
   'utoronto.ca': {
@@ -32,6 +32,74 @@ const UNIVERSITIES_DOMAIN_MAP = {
   'manchester.ac.uk': {
     name: 'Manchester',
     logo: null
+  },
+  'ox.ac.uk': {
+    name: 'Oxford',
+    logo: null
+  },
+  'caltech.edu': {
+    name: 'Caltech',
+    logo: null,
+  },
+  'cmu.edu': {
+    name: 'Carnegie Mellon',
+    logo: null,
+  },
+  'columbia.edu': {
+    name: 'Columbia',
+    logo: null,
+  },
+  'gatech.edu': {
+    name: 'Gatech',
+    logo: null,
+  },
+  'harvard.edu': {
+    name: 'Harvard',
+    logo: null,
+  },
+  'mit.edu': {
+    name: 'MIT',
+    logo: null,
+  },
+  'stanford.edu': {
+    name: 'Stanford',
+    logo: null,
+  },
+  'bristol.ac.uk': {
+    name: 'Bristol',
+    logo: null,
+  },
+  'berkeley.edu': {
+    name: 'Berkeley',
+    logo: null,
+  },
+  'ucla.edu': {
+    name: 'UCLA',
+    logo: null,
+  },
+  'cam.ac.uk': {
+    name: 'Cambridge',
+    logo: null,
+  },
+  'ed.ac.uk': {
+    name: 'Edinburgh',
+    logo: null,
+  },
+  'illinois.edu': {
+    name: 'Illinois',
+    logo: null,
+  },
+  'umich.edu': {
+    name: 'Michigan',
+    logo: null,
+  },
+  'st-andrews.ac.uk': {
+    name: 'St Andrews',
+    logo: null,
+  },
+  'uwaterloo.ca': {
+    name: 'Waterloo',
+    logo: null,
   },
 };
 
@@ -65,7 +133,7 @@ function buildUniversitiesTrie(unis) {
 }
 
 function findUniversity(rootTrie, uniDomain) {
-  const parts = uniDomain.split('.');
+  const parts = uniDomain.toLowerCase().split('.');
 
   let trie = rootTrie;
   for (let i = parts.length - 1; i >= 0; i--) {
