@@ -1,5 +1,7 @@
 import ClimateHackAPI from 'competitions/climatehack/api';
+import { useAuth } from 'hooks/useAuth';
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import Leaderboard from '../Leaderboard';
 import './LeaderboardTab.scss';
 
@@ -7,6 +9,7 @@ import './LeaderboardTab.scss';
 
 export default function LeaderboardTab({ baseUrl }) {
   const [leaderboard, setLeaderboard] = useState(null);
+  const auth = useAuth();
 
   useEffect(() => {
     ClimateHackAPI.getLeaderboard('dataset_dapper').then(data => {
@@ -40,6 +43,7 @@ export default function LeaderboardTab({ baseUrl }) {
         className={activeTabIndex == i ? 'activeTab' : ''}
         onClick={() => setActiveTabIndex(i)}
       >{tab.name}</a>)}
+      {auth.isLoggedIn() && <Link to={`${baseUrl}user/${auth.user.username}`}>Your submission</Link>}
     </div>
 
     {tabs[activeTabIndex].tab}

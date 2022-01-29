@@ -42,7 +42,7 @@ function Routes() {
         <Logout />
       </Route>
       <Route path='/account'>
-        {auth.isLoggedIn() ? <Account /> : <Redirect to='/login' />}
+        {auth.isLoggedIn() ? <Account multipleCompetitionsAllowed={multipleCompetitionsAllowed} /> : <Redirect to='/login' />}
       </Route>
       <Route path='/authenticate'>
         <Authenticate />
