@@ -230,7 +230,7 @@ export default function Splash({ baseUrl }) {
             <div className='ch-splash-format-columns'>
               <div>
                 <p>
-                  Participants train models on the provided dataset to be submitted either individually or in teams of up to three.
+                  Participants gain access to the dataset to start training models to be submitted individually or in teams.
                 </p>
                 <p>
                   The top three competitors from each university will then be invited to the finals, along with a society representative.
@@ -238,10 +238,10 @@ export default function Splash({ baseUrl }) {
               </div>
               <div>
                 <p>
-                  Finalists gain access to an expanded training dataset and work in teams of three representing their respective universities.
+                  Teams of three finalists representing their respective universities compete to improve their models.
                 </p>
                 <p>
-                  The final models they submit will be used to determine the winning team.
+                  Their final submissions will be used to determine the winning team by a panel of judges at the in-person final events in London and New York.
                 </p>
               </div>
             </div>
@@ -250,7 +250,10 @@ export default function Splash({ baseUrl }) {
               Participants must be attending one of the co-hosting universities as an undergraduate, masters or PhD student at the time of the competition.
             </p>
             <p>
-              Detailed competition rules and submission instructions may be found on our competition platform, <Link to={`${baseUrl}compete`}>DOXA</Link>.
+              Teams may be of any size, but only a maximum of three may progress to the finals for each university, so it would be sensible to form teams of up to three people.
+            </p>
+            <p>
+              Detailed competition rules and submission instructions may be found on our competition platform, <Link to={`${baseUrl}compete#4`}>DOXA</Link>.
             </p>
           </div>
         </div>
