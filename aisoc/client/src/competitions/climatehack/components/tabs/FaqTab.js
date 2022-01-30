@@ -2,9 +2,21 @@
 
 export default function FaqTab() {
   return <div className="ch-tab">
-    <h2>FAQ</h2>
+    <h2>Frequently Asked Questions</h2>
     <p>
-      If you have any questions, join us on <a href="https://discord.gg/HTTQ8AFjJp">Discord</a>, where we have several help and FAQ channels!
+      If you have a question that has not been answered here, ask us on <a href="https://discord.gg/HTTQ8AFjJp">Discord</a>, where we have several help and FAQ channels!
+    </p>
+    <h3>Common submission issues</h3>
+    <h4>&rsaquo; I don&apos;t see my agent on the leaderboard after uploading it. What should I do?</h4>
+    <p>
+      If this happens, there was most likely an error processing your submission. If you are logged in on DOXA, you can view the <code>stderr</code> output of your agent by clicking &lsquo;Your submission&rsquo; in the leaderboard tab. Alternatively, you can view your latest submission from the account page.
+    </p>
+    <h4>&rsaquo; How can I fix a &lsquo;wrong output type&rsquo; error?</h4>
+    <p>
+      DOXA expects your code to produce NumPy arrays of type <code>numpy.float32</code>. If you return an array of type <code>numpy.float64</code> or anything else, DOXA cannot grade your submission.
+    </p>
+    <p>
+      You can usually fix this by casting your output NumPy array to the right type, e.g. by running something equivalent to <code>output.astype(numpy.float32)</code>. Recall that your model should output pixel values in the range 0.0 to 1023.0 (inclusive).
     </p>
   </div>;
 }

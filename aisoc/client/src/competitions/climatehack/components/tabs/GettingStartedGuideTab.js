@@ -6,7 +6,7 @@ export default function GettingStartedGuideTab() {
     <p>
       Ensure you have Python 3.9 installed on your computer before you begin.
     </p>
-    <h3>Getting Started Tutorial</h3>
+    <h3>Introductory tutorial</h3>
     <p>
       To help you get started, the development team at the UCL Artificial Intelligence Society have put together a short explainer video to guide you through making your first Climate Hack.AI submission to DOXA.
     </p>
