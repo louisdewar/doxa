@@ -8,6 +8,7 @@ from typing import List
 
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy import float32
 from pytorch_msssim import MS_SSIM
 from torch import from_numpy
 
@@ -55,6 +56,13 @@ def main():
     series = np.load(group_prediction)["data"]
     true = np.load(group_true)["data"]
 
+    if series.dtype != true.dtype:
+        print_error(
+            f"Bad agent output array type: {series.dtype} instead of {true.shape}.",
+            forfeit=f"An output of type {true.dtype} was expected, but {series.dtype} was received.",
+        )
+        return
+
     if series.shape != true.shape:
         print_error(
             f"Badly formed agent output arrays: {series.shape} instead of {true.shape}.",
@@ -73,9 +81,14 @@ def main():
 
         losses += loss
 
-    img = encode_image(series[randrange(series.shape[0]), randrange(24)])
-
-    print_score(losses / series.shape[0], [img])
+    print_score(
+        losses / series.shape[0],
+        [
+            encode_image(series[randrange(series.shape[0]), randrange(24)]),
+            encode_image(series[randrange(series.shape[0]), randrange(24)]),
+            encode_image(series[randrange(series.shape[0]), randrange(24)]),
+        ],
+    )
 
 
 if __name__ == "__main__":
