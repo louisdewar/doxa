@@ -1,8 +1,11 @@
+@import 'common/common';
+
 .ch-tab {
   line-height: 1.25rem;
   text-align: justify;
 
   pre {
+    text-align: left;
     border-radius: 3px;
     border: #fff 1px solid;
     margin-left: 2rem;
@@ -33,5 +36,11 @@
     border-radius: 3px;
     padding: 0.75rem;
     background-color: #fff;
+  }
+}
+
+@media screen and (max-width: $breakpoint-sm) {
+  .ch-tab {
+    font-size: 0.85rem;
   }
 }

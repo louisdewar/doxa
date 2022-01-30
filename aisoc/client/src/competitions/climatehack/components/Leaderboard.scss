@@ -31,12 +31,14 @@
       flex: 2 1 auto;
       flex-basis: 0;
       // flex: 0 0 auto;
+      min-width: 12ch;
       width: 12rem;
+      max-width: 25%;
     }
 
     .ch-leaderboard-score {
       flex: 0 0 auto;
-      width: 6rem;
+      width: 7ch;
     }
   }
 }

@@ -18,5 +18,12 @@ export default function FaqTab() {
     <p>
       You can usually fix this by casting your output NumPy array to the right type, e.g. by running something equivalent to <code>output.astype(numpy.float32)</code>. Recall that your model should output pixel values in the range 0.0 to 1023.0 (inclusive).
     </p>
+    <h4>&rsaquo; My agent crashes with &lsquo;Attempting to deserialize object on a CUDA device but torch.cuda.is_available() is False&rsquo;. What can I do?</h4>
+    <p>
+      The evaluation environment does not have a CUDA-enabled GPU, so attempting to deserialise the model with <code>load_state_dict</code> will fail. To remedy this, you can replace your <code>torch.load(&apos;model.pt&apos;)</code> call (or equivalent) with the following:
+    </p>
+    <pre>
+      torch.load(&apos;model.pt&apos;, map_location=torch.device(&apos;cpu&apos;))
+    </pre>
   </div>;
 }
