@@ -1,4 +1,4 @@
-// import ennovate from '../assets/ennovate.png';
+import ennovate from '../assets/ennovate.png';
 import newcross from '../assets/newcross-white-orange.png';
 import Footer from '../components/Footer';
 import SplashNavbar from '../components/SplashNavbar';
@@ -18,21 +18,16 @@ export default function Partners({ baseUrl }) {
     </header>
 
     <div className='ch-panel-container'>
-      {/* <section className='ch-section ch-partners-sponsor-1'>
+      <section className='ch-section ch-partners-sponsor-1'>
         <div className='ch-section-content'>
           <div className='ch-section-heading'>
             <img src={ennovate} />
           </div>
           <div>
-            <p>
-              Cupcake ipsum dolor sit amet jujubes cookie. Cookie sesame snaps bear claw gummies wafer sugar plum chocolate jelly-o. Cupcake donut topping apple pie candy canes caramels topping. I love brownie ice cream jelly beans liquorice gingerbread. I love chocolate cake lemon drops danish shortbread pastry jujubes pastry halvah. Tootsie roll halvah chocolate bar powder caramels candy sweet roll. I love tootsie roll candy sweet topping pie caramels. Sesame snaps soufflé chocolate cake biscuit marshmallow. I love pie dragée jelly powder dessert caramels carrot cake.
-            </p>
-            <p>
-              I love gummies lemon drops gummies chocolate caramels. Chocolate croissant biscuit jelly I love. Pie cookie bonbon sweet roll marzipan cookie jujubes fruitcake. Biscuit cake cotton candy jelly-o sweet. Pastry powder cotton candy cookie ice cream biscuit oat cake. Tiramisu brownie oat cake liquorice chupa chups donut gummi bears macaroon. Candy jelly-o pie tiramisu icing biscuit candy pie.
-            </p>
+
           </div>
         </div>
-      </section> */}
+      </section>
 
       <section className='ch-section ch-partners-sponsor-2'>
         <div className='ch-section-content'>
