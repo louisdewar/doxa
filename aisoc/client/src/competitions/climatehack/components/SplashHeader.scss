@@ -10,7 +10,7 @@ button.ch-button {
   border: 0;
   border-radius: 3px;
   color: #fff;
-  font-family: $monospace-font;
+  // font-family: $monospace-font;
   cursor: pointer;
 
   &.ch-compete-button {
@@ -92,6 +92,7 @@ header.ch-splash-header {
     div {
       flex: 1;
       flex-basis: 0;
+      align-self: center;
     }
 
     a {

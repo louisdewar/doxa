@@ -13,3 +13,8 @@ h5,
 h6 {
     font-family: $monospace-font;
 }
+
+/* for screen readers */
+.sr {
+    display: none;
+}

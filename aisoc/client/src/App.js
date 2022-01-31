@@ -1,18 +1,17 @@
 import { AuthProvider, useAuth } from 'hooks/useAuth';
-import Account from 'pages/Account';
-import Authenticate from 'pages/Authenticate';
-import Error404 from 'pages/Error404';
-import Landing from 'pages/Landing';
-import Logout from 'pages/Logout';
 import Terms from 'pages/Terms';
-import { Suspense } from 'react';
+import { lazy, Suspense } from 'react';
 import {
   BrowserRouter as Router, Redirect, Route, Switch
 } from 'react-router-dom';
 import './App.scss';
 import { COMPETITIONS, DEFAULT_COMPETITION } from './competitions';
 
-
+const Account = lazy(() => import('pages/Account'));
+const Authenticate = lazy(() => import('pages/Authenticate'));
+const Error404 = lazy(() => import('pages/Error404'));
+const Landing = lazy(() => import('pages/Landing'));
+const Logout = lazy(() => import('pages/Logout'));
 
 
 

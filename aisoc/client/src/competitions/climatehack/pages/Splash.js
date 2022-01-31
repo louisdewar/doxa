@@ -36,7 +36,7 @@ export default function Splash({ baseUrl }) {
 
   const logoMargin = getComputedStyle(document.body).getPropertyValue('--ch-uni-logo-margin');
 
-  const logo = (src, p = '0em', m = '0em', etc = {}) => <img
+  const logo = (src, university, p = '0em', m = '0em', etc = {}) => <img
     src={src}
     style={{
       paddingTop: p ?? '0', paddingBottom: p ?? '0',
@@ -44,6 +44,7 @@ export default function Splash({ baseUrl }) {
       marginRight: `calc(${logoMargin} - ${m})`,
       ...etc
     }}
+    alt={`${university} logo`}
   />;
 
   return <div className='ch-wrapper'>
@@ -85,31 +86,31 @@ export default function Splash({ baseUrl }) {
           </div>
           <div className='ch-splash-universities'>
             <div className='ch-splash-universities-logos'>
-              {logo(uclLogo, undefined, '0.25em')}
-              {logo(stanfordLogo, '0.6em')}
-              {logo(berkeleyLogo, '0.65em', '0.2em')}
-              {logo(oxfordLogo, '0.75em', '0.25em')}
-              {logo(cambridgeLogo, '0.25em')}
-              {logo(mitLogo, '1em')}
-              {logo(torontoLogo, '0.2em', '0.6em')}
-              {logo(harvardLogo, '0.225em', undefined, { marginRight: '-0.4em' })}
-              {logo(princetonLogo, '0.9em')}
-              {logo(imperialLogo, '1em', '-0.1em')}
-              {logo(cornellLogo, '0.5em', '0.5em')}
-              {logo(caltechLogo, '0.2em', '0.8em')}
-              {logo(carnegieLogo, '0.65em')}
-              {logo(uclaLogo, '1em')}
-              {logo(columbiaLogo, '0.4em')}
-              {logo(stAndrewsLogo, '0.25em', '0.2em')}
-              {logo(georgiaTechLogo, '0.9em')}
-              {logo(edinburghLogo, '0.8em')}
-              {logo(manchesterLogo, '0.4em', '0.4em')}
-              {logo(waterlooLogo, undefined, '0.3em')}
-              {logo(michiganLogo, '1rem')}
-              {logo(warwickLogo, undefined, '2.25em')}
-              {logo(bristolLogo, '0.4em')}
-              {logo(illinoisLogo, '0.15em', '0.75em')}
-              {logo(glasgowLogo, undefined, '1.75em')}
+              {logo(uclLogo, 'UCL', undefined, '0.25em')}
+              {logo(stanfordLogo, 'Stanford', '0.6em')}
+              {logo(berkeleyLogo, 'UC Berkeley', '0.65em', '0.2em')}
+              {logo(oxfordLogo, 'Oxford', '0.75em', '0.25em')}
+              {logo(cambridgeLogo, 'Cambridge', '0.25em')}
+              {logo(mitLogo, 'MIT', '1em')}
+              {logo(torontoLogo, 'Toronto', '0.2em', '0.6em')}
+              {logo(harvardLogo, 'Harvard', '0.225em', undefined, { marginRight: '-0.4em' })}
+              {logo(princetonLogo, 'Princeton', '0.9em')}
+              {logo(imperialLogo, 'Imperial', '1em', '-0.1em')}
+              {logo(cornellLogo, 'Cornell', '0.5em', '0.5em')}
+              {logo(caltechLogo, 'Caltech', '0.2em', '0.8em')}
+              {logo(carnegieLogo, 'Carnegie Mellon', '0.65em')}
+              {logo(uclaLogo, 'UCLA', '1em')}
+              {logo(columbiaLogo, 'Columbia', '0.4em')}
+              {logo(stAndrewsLogo, 'St Andrews', '0.25em', '0.2em')}
+              {logo(georgiaTechLogo, 'Georgia Tech', '0.9em')}
+              {logo(edinburghLogo, 'Edinburgh', '0.8em')}
+              {logo(manchesterLogo, 'Manchester', '0.4em', '0.4em')}
+              {logo(waterlooLogo, 'Waterloo', undefined, '0.3em')}
+              {logo(michiganLogo, 'Michigan', '1rem')}
+              {logo(warwickLogo, 'Warwick', undefined, '2.25em')}
+              {logo(bristolLogo, 'Bristol', '0.4em')}
+              {logo(illinoisLogo, 'Illinois', '0.15em', '0.75em')}
+              {logo(glasgowLogo, 'Glasgow', undefined, '1.75em')}
             </div>
 
             <p>

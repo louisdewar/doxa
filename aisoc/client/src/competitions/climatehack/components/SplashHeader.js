@@ -1,6 +1,7 @@
 import { faCaretDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useHistory } from 'react-router-dom/cjs/react-router-dom.min';
+import ennovate from '../assets/ennovate.png';
 import newcross from '../assets/newcross-white-orange.png';
 import './SplashHeader.scss';
 
@@ -25,7 +26,12 @@ export default function SplashHeader({ baseUrl, scroll }) {
     </div>
 
     <div className='ch-scroll-to-about'>
-      <div></div>
+      <div>
+        <a href="#">
+          <span className='sr'>Scroll down</span>
+          <img src={ennovate} style={{ width: '150px' }} alt="Ennovate logo" />
+        </a>
+      </div>
       <div>
         <a href="#" onClick={e => {
           e.preventDefault();
@@ -33,7 +39,7 @@ export default function SplashHeader({ baseUrl, scroll }) {
         }}><FontAwesomeIcon icon={faCaretDown} fixedWidth /></a>
       </div>
       <div>
-        <a href="https://www.newcrosshealthcare.com/"><img src={newcross} style={{ height: '2rem' }} /></a>
+        <a href="https://www.newcrosshealthcare.com/"><img src={newcross} style={{ height: '2rem' }} alt="Newcross Healthcare logo" /></a>
       </div>
     </div>
   </header>;
