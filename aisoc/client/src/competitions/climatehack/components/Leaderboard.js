@@ -9,7 +9,7 @@ function ClimateHackLeaderboardRow({ rank, score, user, baseUrl }) {
     <span className="ch-leaderboard-position">{rank}</span>
     <span className="ch-leaderboard-username"><Link to={`${baseUrl}user/${user.name()}`}>{user.name()}</Link></span>
     <span className="ch-leaderboard-university">{user.university().name}</span>
-    <span className="ch-leaderboard-score">{score ? roundScore(score / 10000000) : 0}</span>
+    <span className="ch-leaderboard-score">{String(score ? roundScore(score / 10000000) : 0.0).padEnd(7, '0')}</span>
   </div>;
 }
 
