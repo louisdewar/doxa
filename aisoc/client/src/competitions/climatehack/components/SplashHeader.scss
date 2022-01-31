@@ -43,7 +43,13 @@ header.ch-splash-header {
   height: calc(100vh - 66px);
 
   background-color: #000;
-  background-image: url('/competitions/climatehack/assets/globe.png');
+  background-image: url('/competitions/climatehack/assets/globe.webp');
+
+  // background-image: -webkit-image-set(url("/competitions/climatehack/assets/globe.avif") type("image/avif"),
+  //     url("/competitions/climatehack/assets/globe.png") type("image/png"));
+  // background-image: image-set(url("/competitions/climatehack/assets/globe.avif") type("image/avif"),
+  //     url("/competitions/climatehack/assets/globe.png") type("image/png"));
+
   background-position: center;
   background-repeat: no-repeat;
   background-size: contain;

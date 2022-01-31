@@ -1,4 +1,5 @@
 import ocfLogo from '../assets/ocf-white.png';
+import satelliteImageAvif from '../assets/satellite-image-cropped.avif';
 import satelliteImage from '../assets/satellite-image-cropped.png';
 import Footer from '../components/Footer';
 import SplashNavbar from '../components/SplashNavbar';
@@ -35,11 +36,6 @@ export default function Challenge({ baseUrl }) {
             <p>
               They search for well-defined machine learning challenges likely to be a large climate impact if solved. For these, they collate and release data; write software tools to make it easy for people to consume this data; run collaborative &quot;global research projects&quot;, where everyone from 16-year-olds to PhD students and corporate research labs can help solve the ML task; and then once the community has developed good solutions, help to put them into production so that emissions may be reduced as soon as possible.
             </p>
-
-
-            {/* <p>
-              OCF is working with the UK National Grid Electricity System Operator to address this challenge, and will provide 1.5 years of satellite training data, in addition to publishing their current, state-of-the-art model&apos;s weights for us to build upon.
-            </p> */}
           </div>
         </div>
       </section>
@@ -124,7 +120,11 @@ export default function Challenge({ baseUrl }) {
               <a href="https://www.openclimatefix.org/">Open Climate Fix</a> have provided just under two years of 1,843&times;891 &quot;high resolution visible&quot; satellite imagery over the UK and north-western Europe from EUMETSAT&apos;s <a href="https://www.eumetsat.int/rapid-scanning-service">Spinning Enhanced Visible and InfraRed Imager Rapid Scanning Service</a> with a spatial resolution of about 2-3 km (decreasing south to north).
             </p>
             <br />
-            <img src={satelliteImage} style={{ width: '100%', backgroundColor: '#f1f5f9', borderRadius: '3px', boxSizing: 'border-box' }} alt="Satellite image" />
+
+            <picture>
+              <source type="image/avif" srcSet={satelliteImageAvif} />
+              <img src={satelliteImage} style={{ width: '100%', height: 'auto', backgroundColor: '#f1f5f9', borderRadius: '3px', boxSizing: 'border-box' }} alt="Satellite image" />
+            </picture>
           </div>
         </div>
       </section>

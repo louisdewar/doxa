@@ -1,29 +1,54 @@
 import { useRef } from 'react';
 import { Link } from 'react-router-dom';
+import berkeleyAvifLogo from '../assets/logos/berkeley.avif';
 import berkeleyLogo from '../assets/logos/berkeley.png';
+import bristolAvifLogo from '../assets/logos/bristol.avif';
 import bristolLogo from '../assets/logos/bristol.png';
+import caltechAvifLogo from '../assets/logos/caltech.avif';
 import caltechLogo from '../assets/logos/caltech.png';
+import cambridgeAvifLogo from '../assets/logos/cambridge.avif';
 import cambridgeLogo from '../assets/logos/cambridge.png';
+import carnegieAvifLogo from '../assets/logos/carnegie-mellon.avif';
 import carnegieLogo from '../assets/logos/carnegie-mellon.png';
+import columbiaAvifLogo from '../assets/logos/columbia.avif';
 import columbiaLogo from '../assets/logos/columbia.png';
+import cornellAvifLogo from '../assets/logos/cornell.avif';
 import cornellLogo from '../assets/logos/cornell.png';
+import edinburghAvifLogo from '../assets/logos/edinburgh.avif';
 import edinburghLogo from '../assets/logos/edinburgh.png';
+import georgiaTechAvifLogo from '../assets/logos/georgia-tech.avif';
 import georgiaTechLogo from '../assets/logos/georgia-tech.png';
+import glasgowAvifLogo from '../assets/logos/glasgow.avif';
 import glasgowLogo from '../assets/logos/glasgow.png';
+import harvardAvifLogo from '../assets/logos/harvard.avif';
 import harvardLogo from '../assets/logos/harvard.png';
+import illinoisAvifLogo from '../assets/logos/illinois.avif';
 import illinoisLogo from '../assets/logos/illinois.png';
+import imperialAvifLogo from '../assets/logos/imperial.avif';
 import imperialLogo from '../assets/logos/imperial.png';
+import manchesterAvifLogo from '../assets/logos/manchester.avif';
 import manchesterLogo from '../assets/logos/manchester.png';
+import michiganAvifLogo from '../assets/logos/michigan.avif';
 import michiganLogo from '../assets/logos/michigan.png';
+import mitAvifLogo from '../assets/logos/mit.avif';
 import mitLogo from '../assets/logos/mit.png';
+import oxfordAvifLogo from '../assets/logos/oxford.avif';
 import oxfordLogo from '../assets/logos/oxford.png';
+import princetonAvifLogo from '../assets/logos/princeton.avif';
 import princetonLogo from '../assets/logos/princeton.png';
+import stAndrewsAvifLogo from '../assets/logos/st-andrews.avif';
 import stAndrewsLogo from '../assets/logos/st-andrews.png';
+import stanfordAvifLogo from '../assets/logos/stanford.avif';
 import stanfordLogo from '../assets/logos/stanford.png';
+import torontoAvifLogo from '../assets/logos/toronto.avif';
 import torontoLogo from '../assets/logos/toronto.png';
+import uclAvifLogo from '../assets/logos/ucl.avif';
 import uclLogo from '../assets/logos/ucl.png';
+import uclaAvifLogo from '../assets/logos/ucla.avif';
 import uclaLogo from '../assets/logos/ucla.png';
+import warwickAvifLogo from '../assets/logos/warwick.avif';
 import warwickLogo from '../assets/logos/warwick.png';
+import waterlooAvifLogo from '../assets/logos/waterloo.avif';
 import waterlooLogo from '../assets/logos/waterloo.png';
 import Footer from '../components/Footer';
 import SplashHeader from '../components/SplashHeader';
@@ -36,16 +61,20 @@ export default function Splash({ baseUrl }) {
 
   const logoMargin = getComputedStyle(document.body).getPropertyValue('--ch-uni-logo-margin');
 
-  const logo = (src, university, p = '0em', m = '0em', etc = {}) => <img
-    src={src}
-    style={{
-      paddingTop: p ?? '0', paddingBottom: p ?? '0',
-      marginLeft: `calc(${logoMargin} - ${m})`,
-      marginRight: `calc(${logoMargin} - ${m})`,
-      ...etc
-    }}
-    alt={`${university} logo`}
-  />;
+  const logo = (src, srcAvif, university, p = '0em', m = '0em', etc = {}) => <picture>
+    <source type="image/avif" srcSet={srcAvif} />
+
+    <img
+      src={src}
+      style={{
+        paddingTop: p ?? '0', paddingBottom: p ?? '0',
+        marginLeft: `calc(${logoMargin} - ${m})`,
+        marginRight: `calc(${logoMargin} - ${m})`,
+        ...etc
+      }}
+      alt={`${university} logo`}
+    />
+  </picture>;
 
   return <div className='ch-wrapper'>
     <SplashNavbar baseUrl={baseUrl} />
@@ -86,31 +115,31 @@ export default function Splash({ baseUrl }) {
           </div>
           <div className='ch-splash-universities'>
             <div className='ch-splash-universities-logos'>
-              {logo(uclLogo, 'UCL', undefined, '0.25em')}
-              {logo(stanfordLogo, 'Stanford', '0.6em')}
-              {logo(berkeleyLogo, 'UC Berkeley', '0.65em', '0.2em')}
-              {logo(oxfordLogo, 'Oxford', '0.75em', '0.25em')}
-              {logo(cambridgeLogo, 'Cambridge', '0.25em')}
-              {logo(mitLogo, 'MIT', '1em')}
-              {logo(torontoLogo, 'Toronto', '0.2em', '0.6em')}
-              {logo(harvardLogo, 'Harvard', '0.225em', undefined, { marginRight: '-0.4em' })}
-              {logo(princetonLogo, 'Princeton', '0.9em')}
-              {logo(imperialLogo, 'Imperial', '1em', '-0.1em')}
-              {logo(cornellLogo, 'Cornell', '0.5em', '0.5em')}
-              {logo(caltechLogo, 'Caltech', '0.2em', '0.8em')}
-              {logo(carnegieLogo, 'Carnegie Mellon', '0.65em')}
-              {logo(uclaLogo, 'UCLA', '1em')}
-              {logo(columbiaLogo, 'Columbia', '0.4em')}
-              {logo(stAndrewsLogo, 'St Andrews', '0.25em', '0.2em')}
-              {logo(georgiaTechLogo, 'Georgia Tech', '0.9em')}
-              {logo(edinburghLogo, 'Edinburgh', '0.8em')}
-              {logo(manchesterLogo, 'Manchester', '0.4em', '0.4em')}
-              {logo(waterlooLogo, 'Waterloo', undefined, '0.3em')}
-              {logo(michiganLogo, 'Michigan', '1rem')}
-              {logo(warwickLogo, 'Warwick', undefined, '2.25em')}
-              {logo(bristolLogo, 'Bristol', '0.4em')}
-              {logo(illinoisLogo, 'Illinois', '0.15em', '0.75em')}
-              {logo(glasgowLogo, 'Glasgow', undefined, '1.75em')}
+              {logo(uclLogo, uclAvifLogo, 'UCL', undefined, '0.25em')}
+              {logo(stanfordLogo, stanfordAvifLogo, 'Stanford', '0.6em')}
+              {logo(berkeleyLogo, berkeleyAvifLogo, 'UC Berkeley', '0.65em', '0.2em')}
+              {logo(oxfordLogo, oxfordAvifLogo, 'Oxford', '0.75em', '0.25em')}
+              {logo(cambridgeLogo, cambridgeAvifLogo, 'Cambridge', '0.25em')}
+              {logo(mitLogo, mitAvifLogo, 'MIT', '1em')}
+              {logo(torontoLogo, torontoAvifLogo, 'Toronto', '0.2em', '0.6em')}
+              {logo(harvardLogo, harvardAvifLogo, 'Harvard', '0.225em', undefined, { marginRight: '-0.4em' })}
+              {logo(princetonLogo, princetonAvifLogo, 'Princeton', '0.9em')}
+              {logo(imperialLogo, imperialAvifLogo, 'Imperial', '1em', '-0.1em')}
+              {logo(cornellLogo, cornellAvifLogo, 'Cornell', '0.5em', '0.5em')}
+              {logo(caltechLogo, caltechAvifLogo, 'Caltech', '0.2em', '0.8em')}
+              {logo(carnegieLogo, carnegieAvifLogo, 'Carnegie Mellon', '0.65em')}
+              {logo(uclaLogo, uclaAvifLogo, 'UCLA', '1em')}
+              {logo(columbiaLogo, columbiaAvifLogo, 'Columbia', '0.4em')}
+              {logo(stAndrewsLogo, stAndrewsAvifLogo, 'St Andrews', '0.25em', '0.2em')}
+              {logo(georgiaTechLogo, georgiaTechAvifLogo, 'Georgia Tech', '0.9em')}
+              {logo(edinburghLogo, edinburghAvifLogo, 'Edinburgh', '0.8em')}
+              {logo(manchesterLogo, manchesterAvifLogo, 'Manchester', '0.4em', '0.4em')}
+              {logo(waterlooLogo, waterlooAvifLogo, 'Waterloo', undefined, '0.3em')}
+              {logo(michiganLogo, michiganAvifLogo, 'Michigan', '1rem')}
+              {logo(warwickLogo, warwickAvifLogo, 'Warwick', undefined, '2.25em')}
+              {logo(bristolLogo, bristolAvifLogo, 'Bristol', '0.4em')}
+              {logo(illinoisLogo, illinoisAvifLogo, 'Illinois', '0.15em', '0.75em')}
+              {logo(glasgowLogo, glasgowAvifLogo, 'Glasgow', undefined, '1.75em')}
             </div>
 
             <p>

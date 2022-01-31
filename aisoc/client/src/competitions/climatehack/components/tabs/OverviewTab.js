@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import satelliteImageAvif from '../../assets/satellite-image.avif';
 import satelliteImage from '../../assets/satellite-image.png';
 import './OverviewTab.scss';
 
@@ -31,7 +32,10 @@ export default function OverviewTab({ baseUrl }) {
       <a href="https://www.openclimatefix.org/">Open Climate Fix</a> have provided &quot;high resolution visible&quot; satellite imagery taken over the UK and north-western Europe from a geostationary orbit between January 2020 and November 2021. It was sourced from EUMETSAT&apos;s <a href="https://www.eumetsat.int/rapid-scanning-service">Spinning Enhanced Visible and InfraRed Imager Rapid Scanning Service</a>. The individual images are 1,843&times;891 and have a spatial resolution of about 2-3 km (decreasing south to north). The satellite produces images every five minutes, so an hour of satellite imagery consists of 12 timesteps.
     </p>
 
-    <img src={satelliteImage} style={{ width: '100%', height: 'auto', backgroundColor: '#f1f5f9', borderRadius: '3px', boxSizing: 'border-box' }} alt="Satellite image" width="1073" height="713" />
+    <picture>
+      <source type="image/avif" srcSet={satelliteImageAvif} />
+      <img src={satelliteImage} style={{ width: '100%', height: 'auto', backgroundColor: '#f1f5f9', borderRadius: '3px', boxSizing: 'border-box' }} alt="Satellite image" width="1073" height="713" />
+    </picture>
 
     <p>
       Check the dataset out on <a href="https://console.cloud.google.com/marketplace/product/bigquery-public-data/eumetsat-seviri-rss-hrv-uk">Google Cloud Public Datasets</a>.
