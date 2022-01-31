@@ -28,7 +28,6 @@ export default function SplashHeader({ baseUrl, scroll }) {
     <div className='ch-scroll-to-about'>
       <div>
         <a href="https://entaingroup.com/newsrelease/entain-launches-global-innovation-hub-ennovate/">
-          <span className='sr'>Scroll down</span>
           <img src={ennovate} style={{ width: '150px' }} alt="Ennovate logo" />
         </a>
       </div>
@@ -36,7 +35,10 @@ export default function SplashHeader({ baseUrl, scroll }) {
         <a href="#" onClick={e => {
           e.preventDefault();
           scroll();
-        }}><FontAwesomeIcon icon={faCaretDown} fixedWidth /></a>
+        }}>
+          <span className='sr'>Scroll down</span>
+          <FontAwesomeIcon icon={faCaretDown} fixedWidth />
+        </a>
       </div>
       <div>
         <a href="https://www.newcrosshealthcare.com/"><img src={newcross} style={{ height: '2rem' }} alt="Newcross Healthcare logo" /></a>
