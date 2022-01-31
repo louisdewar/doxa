@@ -50,7 +50,10 @@ export default function OverviewTab({ baseUrl }) {
       Note that this means the spatial extent of the input is larger than the output!
     </p>
     <p>
-      For the loss function and scoring metric, Open Climate Fix recommend using the multi-scale structural similarity index measure (MS-SSIM). In their experience, MSE tends to encourage models to produce overly blurry predictions, so MS-SSIM is better. They have a PyTorch implementation of a differentiable MS-SSIM in their <a href="https://github.com/openclimatefix/nowcasting_utils/blob/main/nowcasting_utils/models/losses/StructuralSimilarity.py#L45">GitHub repository</a>.
+      For the loss function and scoring metric, Open Climate Fix recommend using the multi-scale structural similarity index measure (MS-SSIM). In their experience, MSE tends to encourage models to produce overly blurry predictions, so MS-SSIM is a better option. They have a PyTorch implementation of a differentiable MS-SSIM in their <a href="https://github.com/openclimatefix/nowcasting_utils/blob/main/nowcasting_utils/models/losses/StructuralSimilarity.py#L45">GitHub repository</a>.
+    </p>
+    <p>
+      Having said that, you are completely free to experiment with different loss metrics; the aim is to produce accurate, sharp, non-blurry images close to the ground truth, so all interesting solutions are welcome!
     </p>
     <p>
       The satellite imagery dataset includes data from all hours of the day. It is recommended that you only select &quot;daylight&quot; hours, as the submissions will be tested on &quot;daylight&quot; hours only.
