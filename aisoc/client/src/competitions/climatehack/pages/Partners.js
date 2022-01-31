@@ -21,7 +21,7 @@ export default function Partners({ baseUrl }) {
       <section className='ch-section ch-partners-sponsor-1'>
         <div className='ch-section-content'>
           <div className='ch-section-heading'>
-            <a href="https://entaingroup.com/newsrelease/entain-launches-global-innovation-hub-ennovate/"><img src={ennovate} /></a>
+            <a href="https://entaingroup.com/newsrelease/entain-launches-global-innovation-hub-ennovate/"><img src={ennovate} alt="Ennovate logo" /></a>
           </div>
           <div>
 
@@ -33,7 +33,7 @@ export default function Partners({ baseUrl }) {
         <div className='ch-section-content'>
           <div className='ch-section-heading'>
             {/* <h2>Newcross Healthcare</h2> */}
-            <a href="https://www.newcrosshealthcare.com/"><img src={newcross} /></a>
+            <a href="https://www.newcrosshealthcare.com/"><img src={newcross} alt="Newcross Healthcare logo" /></a>
           </div>
           <div>
             <p>

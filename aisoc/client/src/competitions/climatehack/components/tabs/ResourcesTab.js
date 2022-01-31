@@ -52,7 +52,7 @@ export default function ResourcesTab() {
       In the second half of 2021, DeepMind released two related papers, which have been highly influential on Open Climate Fix&apos;s approach to short-term solar forecasting: The &quot;Perceiver&quot; paper (<a href="https://arxiv.org/abs/2103.03206">Jaegle et al., 2021</a>), and the &quot;Perceiver IO&quot; paper (<a href="https://arxiv.org/abs/2107.14795">Jaegle et al., 2021b</a>). The Perceiver IO architecture (<a href="https://arxiv.org/abs/2107.14795">Jaegle et al., 2021b</a>) is shown below.
     </p>
 
-    <img src={perceiverIO} />
+    <img src={perceiverIO} alt="Perceiver IO architecture" />
 
     <p>
       The Perceiver is based on self-attention, which has proven to be an extremely powerful model for many domains. Recent breakthroughs such as OpenAI&apos;s GPT-3 and DeepMind&apos;s AlphaFold-2 use self-attention extensively.

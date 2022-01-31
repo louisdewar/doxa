@@ -21,7 +21,7 @@ export default function Challenge({ baseUrl }) {
       <section className='ch-section ch-challenge-ocf'>
         <div className='ch-section-content'>
           <div className='ch-section-heading'>
-            <a href="https://www.openclimatefix.org/"><img src={ocfLogo} /></a>
+            <a href="https://www.openclimatefix.org/"><img src={ocfLogo} alt="Open Climate Fix logo" /></a>
           </div>
           <div className='ch-section-description'>
             <p>
@@ -124,7 +124,7 @@ export default function Challenge({ baseUrl }) {
               <a href="https://www.openclimatefix.org/">Open Climate Fix</a> have provided just under two years of 1,843&times;891 &quot;high resolution visible&quot; satellite imagery over the UK and north-western Europe from EUMETSAT&apos;s <a href="https://www.eumetsat.int/rapid-scanning-service">Spinning Enhanced Visible and InfraRed Imager Rapid Scanning Service</a> with a spatial resolution of about 2-3 km (decreasing south to north).
             </p>
             <br />
-            <img src={satelliteImage} style={{ width: '100%', backgroundColor: '#f1f5f9', borderRadius: '3px', boxSizing: 'border-box' }} />
+            <img src={satelliteImage} style={{ width: '100%', backgroundColor: '#f1f5f9', borderRadius: '3px', boxSizing: 'border-box' }} alt="Satellite image" />
           </div>
         </div>
       </section>

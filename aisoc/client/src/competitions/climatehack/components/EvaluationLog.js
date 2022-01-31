@@ -92,7 +92,7 @@ function EvaluationLogCard({ event, hasForfeited }) {
         <div className='ch-evaluation-card-text'>
           <strong>Checkpoint #{event.payload.checkpoint + 1}</strong> was reached {formatTime(new Date(event.timestamp))} with a score of {roundScore(event.payload.score)}.
         </div>
-        {event.payload.images && <img src={`data:image/png;base64,${event.payload.images[0]}`} />}
+        {event.payload.images && <img src={`data:image/png;base64,${event.payload.images[0]}`} alt="Model output image" />}
       </div>
     </div>;
   }

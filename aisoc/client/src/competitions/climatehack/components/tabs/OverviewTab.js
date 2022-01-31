@@ -31,7 +31,7 @@ export default function OverviewTab({ baseUrl }) {
       <a href="https://www.openclimatefix.org/">Open Climate Fix</a> have provided &quot;high resolution visible&quot; satellite imagery taken over the UK and north-western Europe from a geostationary orbit between January 2020 and November 2021. It was sourced from EUMETSAT&apos;s <a href="https://www.eumetsat.int/rapid-scanning-service">Spinning Enhanced Visible and InfraRed Imager Rapid Scanning Service</a>. The individual images are 1,843&times;891 and have a spatial resolution of about 2-3 km (decreasing south to north). The satellite produces images every five minutes, so an hour of satellite imagery consists of 12 timesteps.
     </p>
 
-    <img src={satelliteImage} style={{ width: '100%', backgroundColor: '#f1f5f9', borderRadius: '3px', boxSizing: 'border-box' }} />
+    <img src={satelliteImage} style={{ width: '100%', backgroundColor: '#f1f5f9', borderRadius: '3px', boxSizing: 'border-box' }} alt="Satellite image" />
 
     <p>
       Check the dataset out on <a href="https://console.cloud.google.com/marketplace/product/bigquery-public-data/eumetsat-seviri-rss-hrv-uk">Google Cloud Public Datasets</a>.
@@ -50,7 +50,7 @@ export default function OverviewTab({ baseUrl }) {
       Note that this means the spatial extent of the input is larger than the output!
     </p>
     <p>
-      For the loss function and scoring metric, Open Climate Fix recommend using the multi-scale structural similarity index measure (MS-SSIM). In their experience, MSE tends to encourage models to produce overly blurry predictions, so MS-SSIM is better. They have a PyTorch implementation of a differentiable MS-SSIM <a href="https://github.com/openclimatefix/nowcasting_utils/blob/main/nowcasting_utils/models/losses/StructuralSimilarity.py#L45">here</a>.
+      For the loss function and scoring metric, Open Climate Fix recommend using the multi-scale structural similarity index measure (MS-SSIM). In their experience, MSE tends to encourage models to produce overly blurry predictions, so MS-SSIM is better. They have a PyTorch implementation of a differentiable MS-SSIM in their <a href="https://github.com/openclimatefix/nowcasting_utils/blob/main/nowcasting_utils/models/losses/StructuralSimilarity.py#L45">GitHub repository</a>.
     </p>
     <p>
       The satellite imagery dataset includes data from all hours of the day. It is recommended that you only select &quot;daylight&quot; hours, as the submissions will be tested on &quot;daylight&quot; hours only.
