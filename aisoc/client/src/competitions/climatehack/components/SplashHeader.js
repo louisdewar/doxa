@@ -27,7 +27,7 @@ export default function SplashHeader({ baseUrl, scroll }) {
 
     <div className='ch-scroll-to-about'>
       <div>
-        <a href="https://entaingroup.com/">
+        <a href="https://entaingroup.com/newsrelease/entain-launches-global-innovation-hub-ennovate/">
           <span className='sr'>Scroll down</span>
           <img src={ennovate} style={{ width: '150px' }} alt="Ennovate logo" />
         </a>

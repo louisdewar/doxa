@@ -21,7 +21,7 @@ export default function Partners({ baseUrl }) {
       <section className='ch-section ch-partners-sponsor-1'>
         <div className='ch-section-content'>
           <div className='ch-section-heading'>
-            <img src={ennovate} />
+            <a href="https://entaingroup.com/newsrelease/entain-launches-global-innovation-hub-ennovate/"><img src={ennovate} /></a>
           </div>
           <div>
 
