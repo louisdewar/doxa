@@ -6,6 +6,14 @@ export default function FaqTab() {
     <p>
       If you have a question that has not been answered here, ask us on <a href="https://discord.gg/HTTQ8AFjJp">Discord</a>, where we have several help and FAQ channels!
     </p>
+    <h3>Competition queries</h3>
+    <h4>&rsaquo; Can we participate in teams?</h4>
+    <p>
+      You can compete in the first round either as an individual or as a team of any size. We would encourage you to collaborate widely, including with other individuals and teams! Having said that, only the top three competitiors from each society may proceed to represent their university in the finals, so you may want to limit the size of your team to three.
+    </p>
+    <p>
+      The university society of which you are a member may issue additional guidelines, depending on how they choose to support you locally. For example, they may have a policy of encouraging everyone to form teams of three. While these are only guidelines, we recommend that you follow them nevertheless.
+    </p>
     <h3>Common submission issues</h3>
     <h4>&rsaquo; I don&apos;t see my agent on the leaderboard after uploading it. What should I do?</h4>
     <p>

@@ -4,13 +4,16 @@ export default function GettingStartedGuideTab() {
   return <div className="ch-tab">
     <h2>Getting Started Guide</h2>
     <p>
-      Ensure you have Python 3.9 installed on your computer before you begin.
+      Ensure you have Python 3.9 installed on your computer before you begin, as this is what the evaluation environment uses. Windows and macOS users may conveniently download it from the <a href="https://www.python.org/downloads/release/python-399/">Python website</a>.
     </p>
     <h3>Introductory tutorial</h3>
     <p>
       To help you get started, the development team at the UCL Artificial Intelligence Society have put together a short explainer video to guide you through making your first Climate Hack.AI submission to DOXA.
     </p>
     <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/c_NkwHGHwks" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
+    <p>
+      The tutorial shows how to open the Jupyter notebook in <a href="https://code.visualstudio.com/">Visual Studio Code</a>. If you want to follow along and do not have it installed, download and install it, as well as the <a href="https://marketplace.visualstudio.com/items?itemName=ms-python.python">Python extension</a>.
+    </p>
     <h3>Downloading the example project</h3>
     <p>
       To get started, download and extract the example project from <a href="https://github.com/louisdewar/doxa/releases/latest/download/climatehack_getting_started.zip">GitHub</a>. The <code>training.ipynb</code> Python Jupyter notebook contains information on the dataset and how to train a basic model to submit to DOXA.
