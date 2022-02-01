@@ -7,7 +7,6 @@ export default function RulesTab() {
       In order to participate, please ensure that you comply with the following rules:
     </p>
     <ol>
-      <li>You can make no more than four submissions per day.</li>
       <li>You must compete fairly and treat other participants with respect.</li>
       <li>You agree to license submissions under the <a href="https://opensource.org/licenses/MIT">MIT license</a> and certify that you have the right to grant this license. Specifically, you agree to grant Climate Hack.AI, co-hosting universities, Open Climate Fix and other partners of Climate Hack.AI a perpetual, worldwide, non-exclusive, no-charge, royalty-free, irrevocable license to distribute your submissions.</li>
       <li>You agree that the organisers of Climate Hack.AI reserve the right to reject any submission.</li>

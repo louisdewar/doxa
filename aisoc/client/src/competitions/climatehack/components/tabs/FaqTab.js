@@ -14,7 +14,15 @@ export default function FaqTab() {
     <p>
       The university society of which you are a member may issue additional guidelines, depending on how they choose to support you locally. For example, they may have a policy of encouraging everyone to form teams of three. While these are only guidelines, we recommend that you follow them nevertheless.
     </p>
-    <h3>Common submission issues</h3>
+    <h3>Submission-related issues</h3>
+    <h4>&rsaquo; How many submissions can I make a day?</h4>
+    <p>
+      You can make up to four submissions a day.
+    </p>
+    {/* TODO: add number of CPUs ? */}
+    <p>
+      Currently, submissions are limited to 2GiB in size; however, this limit will be increased as the competition progresses.
+    </p>
     <h4>&rsaquo; I don&apos;t see my agent on the leaderboard after uploading it. What should I do?</h4>
     <p>
       If this happens, there was most likely an error processing your submission. If you are logged in on DOXA, you can view the <code>stderr</code> output of your agent by clicking &lsquo;Your submission&rsquo; in the leaderboard tab. Alternatively, you can view your latest submission from the account page.
