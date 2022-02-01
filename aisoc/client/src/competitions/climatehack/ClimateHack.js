@@ -4,7 +4,7 @@ import { lazy } from 'react';
 import { Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
 
 const Challenge = lazy(() => import('./pages/Challenge'));
-const Game = lazy(() => import('./pages/Game'));
+const Submission = lazy(() => import('./pages/Submission'));
 const Home = lazy(() => import('./pages/Home'));
 const Partners = lazy(() => import('./pages/Partners'));
 const Splash = lazy(() => import('./pages/Splash'));
@@ -27,9 +27,9 @@ export default function ClimateHack() {
         <User baseUrl={path} />
       </Layout>
     </Route>
-    <Route path={`${path}game/:game`}>
+    <Route path={`${path}submission/:id`}>
       <Layout>
-        <Game baseUrl={path} />
+        <Submission baseUrl={path} />
       </Layout>
     </Route>
     <Route path={`${path}compete`}>

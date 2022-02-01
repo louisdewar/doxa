@@ -10,14 +10,14 @@ import EvaluationLog from '../components/EvaluationLog';
 
 export default function Game({ baseUrl }) {
   const auth = useAuth();
-  const { game } = useParams();
-  const [gameData, setGameData] = useState(null);
+  const { id } = useParams();
+  const [game, setGame] = useState(null);
   const [events, setEvents] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(async () => {
-    if (gameData !== null) {
-      setGameData(null);
+    if (game !== null) {
+      setGame(null);
     }
 
     if (events !== null) {
@@ -25,9 +25,9 @@ export default function Game({ baseUrl }) {
     }
 
     try {
-      setGameData(await ClimateHackAPI.getGame(game));
+      setGame(await ClimateHackAPI.getGame(id));
 
-      const eventData = await ClimateHackAPI.getGameEvents(game, undefined, auth.token);
+      const eventData = await ClimateHackAPI.getGameEvents(id, undefined, auth.token);
       setEvents(eventData || []);
     } catch (e) {
       if (e instanceof DoxaError) {
@@ -36,33 +36,16 @@ export default function Game({ baseUrl }) {
         setErrorMessage('Error');
       }
     }
-  }, [game]);
+  }, [id]);
 
   return <>
     <span></span><span></span><span></span><span></span> {/* a fun hack just to get a better outline colour below! */}
     <Card darker className='competitionHeader'>
-      <h2>Game #{game} {gameData && gameData.outdated && <FontAwesomeIcon icon={faTimesCircle} size='sm' fixedWidth />}</h2>
-      <div style={{ fontSize: '0.7rem' }}>
-        <p>
-          {gameData && <>
-            {gameData.queued_at && <h2>Queued at {gameData.queued_at.toString()}</h2>}
-          </>}
-        </p>
-        <p>
-          {gameData && <>
-            {gameData.started_at && <h2>Started at {gameData.started_at.toString()}</h2>}
-          </>}
-        </p>
-        <p>
-          {gameData && <>
-            {gameData.completed_at && <h2>Completed at {gameData.completed_at.toString()}</h2>}
-          </>}
-        </p>
-      </div>
+      <h2>Submission #{id} {game && game.outdated && <FontAwesomeIcon icon={faTimesCircle} size='sm' fixedWidth />}</h2>
     </Card>
 
     {errorMessage && <Card>{errorMessage}</Card>}
 
-    {events && <EvaluationLog events={events} baseUrl={baseUrl} />}
+    {events && <EvaluationLog game={game} events={events} baseUrl={baseUrl} />}
   </>;
 }

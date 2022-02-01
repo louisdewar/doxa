@@ -1,4 +1,4 @@
-import { faBan, faClock, faExclamationTriangle, faFlagCheckered, faHourglassEnd, faHourglassStart } from '@fortawesome/free-solid-svg-icons';
+import { faBan, faCheckCircle, faCircleNotch, faClock, faExclamationTriangle, faFlagCheckered, faHourglassEnd, faHourglassStart } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { formatTime } from 'utils/time';
 import { roundScore } from '../utils';
@@ -7,12 +7,25 @@ import './EvaluationLog.scss';
 
 
 function EvaluationLogCard({ event, hasForfeited }) {
+  const timestamp = new Date(event.timestamp);
+
   if (event.type == '_START' || event.type == '_END') {
     return <div className='ch-evaluation-card ch-evaluation-endpoint'>
       <div className='ch-evaluation-card-body'>
         <FontAwesomeIcon icon={event.type == '_START' ? faHourglassStart : faHourglassEnd} size='sm' fixedWidth />
-        <div className='ch-evaluation-card-text'>
-          {event.type == '_START' ? 'This submission was received' : 'Evaluation terminated'} {formatTime(new Date(event.timestamp))}.
+        <div className='ch-evaluation-card-text' title={timestamp.toLocaleString()}>
+          {event.type == '_START' ? 'Evaluation started' : 'Evaluation terminated'} {formatTime(timestamp)}.
+        </div>
+      </div>
+    </div>;
+  } else if (event.type == '_QUEUED') {
+    return <div className='ch-evaluation-card ch-evaluation-endpoint'>
+      <div className='ch-evaluation-card-body'>
+        {event.payload.started_at
+          ? <FontAwesomeIcon icon={faCheckCircle} size='sm' fixedWidth />
+          : <FontAwesomeIcon icon={faCircleNotch} size='sm' fixedWidth spin />}
+        <div className='ch-evaluation-card-text' title={event.payload.queued_at.toLocaleString()}>
+          This submission was queued {formatTime(event.payload.queued_at)}.
         </div>
       </div>
     </div>;
@@ -30,7 +43,7 @@ function EvaluationLogCard({ event, hasForfeited }) {
       <div className='ch-evaluation-card ch-evaluation-error'>
         <div className={`ch-evaluation-card-body ${event.payload ? 'ch-evaluation-error-available' : ''}`}>
           <FontAwesomeIcon icon={faExclamationTriangle} size='sm' fixedWidth />
-          <div className='ch-evaluation-card-text'>
+          <div className='ch-evaluation-card-text' title={timestamp && timestamp.toLocaleString()}>
             An error occurred while running this submission&apos;s code.
           </div>
         </div>
@@ -53,7 +66,7 @@ function EvaluationLogCard({ event, hasForfeited }) {
       <div className='ch-evaluation-card ch-evaluation-error'>
         <div className={`ch-evaluation-card-body ${event.payload ? 'ch-evaluation-error-available' : ''}`}>
           <FontAwesomeIcon icon={faExclamationTriangle} size='sm' fixedWidth />
-          <div className='ch-evaluation-card-text'>
+          <div className='ch-evaluation-card-text' title={timestamp && timestamp.toLocaleString()}>
             An error occurred during the evaluation of this submission.
           </div>
         </div>
@@ -80,7 +93,7 @@ function EvaluationLogCard({ event, hasForfeited }) {
     return <div className='ch-evaluation-card ch-evaluation-cancelled'>
       <div className='ch-evaluation-card-body'>
         <FontAwesomeIcon icon={faBan} size='sm' fixedWidth />
-        <div className='ch-evaluation-card-text'>
+        <div className='ch-evaluation-card-text' title={timestamp && timestamp.toLocaleString()}>
           The evaluation of this submission was cancelled.
         </div>
       </div>
@@ -89,8 +102,8 @@ function EvaluationLogCard({ event, hasForfeited }) {
     return <div className='ch-evaluation-card'>
       <div className='ch-evaluation-card-body'>
         <FontAwesomeIcon icon={faFlagCheckered} size='sm' fixedWidth />
-        <div className='ch-evaluation-card-text'>
-          <strong>Checkpoint #{event.payload.checkpoint + 1}</strong> was reached {formatTime(new Date(event.timestamp))} with a score of {roundScore(event.payload.score)}.
+        <div className='ch-evaluation-card-text' title={timestamp && timestamp.toLocaleString()}>
+          <strong>Checkpoint #{event.payload.checkpoint + 1}</strong> was reached {formatTime(timestamp)} with a score of {roundScore(event.payload.score)}.
         </div>
         {event.payload.images && <img src={`data:image/png;base64,${event.payload.images[0]}`} alt="Model output image" />}
       </div>
@@ -101,11 +114,18 @@ function EvaluationLogCard({ event, hasForfeited }) {
 }
 
 
-export default function EvaluationLog({ events }) {
+export default function EvaluationLog({ game, events }) {
   let hasForfeited = false;
 
   return <div className='ch-evaluation'>
     {events.length > 0 && <h3 className="ch-evaluation-label">Submission evaluation timeline</h3>}
+    {game && game.queued_at && <EvaluationLogCard event={{
+      type: '_QUEUED',
+      payload: {
+        queued_at: game.queued_at,
+        started_at: game.started_at,
+      }
+    }} hasForfeited={hasForfeited} />}
     {events.map(event => {
       if (event.type == '_FORFEIT') {
         hasForfeited = true;

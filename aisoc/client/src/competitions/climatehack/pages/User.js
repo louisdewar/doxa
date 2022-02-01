@@ -11,6 +11,7 @@ export default function User({ baseUrl }) {
   const auth = useAuth();
   const { user } = useParams();
   const [score, setScore] = useState(null);
+  const [game, setGame] = useState(null);
   const [events, setEvents] = useState(null);
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
@@ -37,13 +38,29 @@ export default function User({ baseUrl }) {
       return;
     }
 
+    if (game !== null) {
+      setGame(null);
+    }
+
     if (events !== null) {
       setEvents(null);
     }
 
-    const eventData = await ClimateHackAPI.getActiveGameEvents(user, auth.token);
-    setEvents(eventData || []);
-    console.log(events);
+    try {
+      const id = await ClimateHackAPI.getActiveGameId(user);
+
+      if (id !== null && id !== undefined) {
+        setGame(await ClimateHackAPI.getGame(id));
+
+        const gameEvents = await ClimateHackAPI.getGameEvents(id, undefined, auth.token);
+        if (gameEvents) {
+          setEvents(gameEvents || []);
+        }
+      }
+
+    } catch (e) {
+      setErrorMessage(e.error_message);
+    }
   }, [user]);
 
   if (error) {
@@ -55,10 +72,10 @@ export default function User({ baseUrl }) {
     <Card darker className='competitionHeader'>
       <h1>{user}</h1>
       <h2>
-        {roundScore(score / 10000000)}
+        {score && roundScore(score / 10000000)}
       </h2>
     </Card>
 
-    {events && <EvaluationLog events={events} baseUrl={baseUrl} />}
+    {events && <EvaluationLog game={game} events={events} baseUrl={baseUrl} />}
   </>;
 }
