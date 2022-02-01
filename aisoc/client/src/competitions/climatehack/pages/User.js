@@ -23,7 +23,7 @@ export default function User({ baseUrl }) {
 
     try {
       const data = await ClimateHackAPI.getUserScore(user, 'dataset_dapper');
-      setScore(data.score || 0);
+      setScore(data.score || 0.0);
     } catch (e) {
       setError(true);
       if (e instanceof DoxaError) {

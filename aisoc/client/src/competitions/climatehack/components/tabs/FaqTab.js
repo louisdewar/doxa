@@ -14,6 +14,10 @@ export default function FaqTab() {
     <p>
       The university society of which you are a member may issue additional guidelines, depending on how they choose to support you locally. For example, they may have a policy of encouraging everyone to form teams of three. While these are only guidelines, we recommend that you follow them nevertheless.
     </p>
+    <h4>&rsaquo; Does winning the first round mean I will win the finals?</h4>
+    <p>
+      In the finals, submissions will be graded against an expanded test set with completely unseen data, so already their rankings may vary. Furthermore, judges will be interested in more than just your MS-SSIM score; they will also be looking to evaluate your contribution to advancing the state of the art and the quality of your submission&apos;s output in other ways. It is all to play for!
+    </p>
     <h3>Submission-related issues</h3>
     <h4>&rsaquo; How many submissions can I make a day?</h4>
     <p>
@@ -22,6 +26,10 @@ export default function FaqTab() {
     {/* TODO: add number of CPUs ? */}
     <p>
       Currently, submissions are limited to 2GiB in size; however, this limit will be increased as the competition progresses.
+    </p>
+    <h4>&rsaquo; Can my model&apos;s leaderboard score change?</h4>
+    <p>
+      The dataset used to test submissions in the evaluation environment is periodically refreshed, so it is possible that your model&apos;s score may change slightly over time. The complete test set used to determine participation in the finals will be in place closer to the end of the competition, so for now, just focus on training the best model you can that performs well on unseen imagery!
     </p>
     <h4>&rsaquo; I don&apos;t see my agent on the leaderboard after uploading it. What should I do?</h4>
     <p>
