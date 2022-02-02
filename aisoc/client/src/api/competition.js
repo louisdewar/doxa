@@ -113,6 +113,10 @@ export default class CompetitionAPI {
 
   /* User */
 
+  static async getUser(username) {
+    return new UserProfile(await request({ url: `${process.env.REACT_APP_API_BASE_URL}user/info/${username}`, method: 'GET' }));
+  }
+
   static async getUserActiveAgent(username) {
     const data = await request({ url: this.USER_BASE_URL + username + '/active_agent', method: 'GET' });
 

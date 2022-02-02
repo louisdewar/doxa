@@ -14,7 +14,7 @@ function EvaluationLogCard({ event, hasForfeited }) {
       <div className='ch-evaluation-card-body'>
         <FontAwesomeIcon icon={event.type == '_START' ? faHourglassStart : faHourglassEnd} size='sm' fixedWidth />
         <div className='ch-evaluation-card-text' title={timestamp.toLocaleString()}>
-          {event.type == '_START' ? 'Evaluation started' : 'Evaluation terminated'} {formatTime(timestamp)}.
+          {event.type == '_START' ? 'Evaluation started' : 'Evaluation ended'} {formatTime(timestamp)}.
         </div>
       </div>
     </div>;
@@ -30,11 +30,11 @@ function EvaluationLogCard({ event, hasForfeited }) {
       </div>
     </div>;
   } else if (event.type == 'final') {
-    return <div className='ch-evaluation-card'>
+    return <div className='ch-evaluation-card ch-evaluation-endpoint'>
       <div className='ch-evaluation-card-body'>
         <FontAwesomeIcon icon={faClock} size='sm' fixedWidth />
         <div className='ch-evaluation-card-text'>
-          The final score for this submission is {roundScore(event.payload.score)}.
+          The final score of this submission is {roundScore(event.payload.score)}.
         </div>
       </div>
     </div>;
@@ -99,13 +99,15 @@ function EvaluationLogCard({ event, hasForfeited }) {
       </div>
     </div>;
   } else if (event.type.startsWith('checkpoint')) {
-    return <div className='ch-evaluation-card'>
-      <div className='ch-evaluation-card-body'>
+    return <div className='ch-evaluation-card ch-evaluation-checkpoint'>
+      <div className={`ch-evaluation-card-body ${event.payload ? 'ch-evaluation-checkpoint-info-available' : ''}`}>
         <FontAwesomeIcon icon={faFlagCheckered} size='sm' fixedWidth />
         <div className='ch-evaluation-card-text' title={timestamp && timestamp.toLocaleString()}>
           <strong>Checkpoint #{event.payload.checkpoint + 1}</strong> was reached {formatTime(timestamp)} with a score of {roundScore(event.payload.score)}.
         </div>
-        {event.payload.images && <img src={`data:image/png;base64,${event.payload.images[0]}`} alt="Model output image" />}
+      </div>
+      <div className='ch-evaluation-card-checkpoint-info'>
+        {event.payload.images && event.payload.images.map((img, i) => <img key={i} src={`data:image/png;base64,${img}`} alt="Model output image" />)}
       </div>
     </div>;
   }
@@ -118,7 +120,7 @@ export default function EvaluationLog({ game, events }) {
   let hasForfeited = false;
 
   return <div className='ch-evaluation'>
-    {events.length > 0 && <h3 className="ch-evaluation-label">Submission evaluation timeline</h3>}
+    {/* {events.length > 0 && <h3 className="ch-evaluation-label">Submission evaluation timeline</h3>} */}
     {game && game.queued_at && <EvaluationLogCard event={{
       type: '_QUEUED',
       payload: {

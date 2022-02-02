@@ -41,6 +41,17 @@
       // color: #fff;
     }
 
+    &.ch-evaluation-checkpoint .ch-evaluation-card-body {
+      background-color: #6b7280; // #164e63;
+      color: #fff;
+
+      border-radius: 3px;
+
+      &.ch-evaluation-checkpoint-info-available {
+        border-radius: 3px 3px 0 0;
+      }
+    }
+
     &.ch-evaluation-cancelled {
       background-color: #ee5253;
       color: #fff;
@@ -50,7 +61,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 5px 5px 5px 5px;
+      padding: 5px;
 
       svg {
         margin-right: auto;
@@ -69,6 +80,18 @@
         width: 96px;
         border-radius: 3px;
       }
+    }
+  }
+
+  .ch-evaluation-card-checkpoint-info {
+    padding: 5px 5px 5px 5px;
+
+    display: flex;
+    gap: 5px;
+
+    img {
+      width: 96px;
+      border-radius: 3px;
     }
   }
 

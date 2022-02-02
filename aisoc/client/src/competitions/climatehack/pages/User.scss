@@ -1,0 +1,54 @@
+@import 'common/common';
+@import 'common/fonts';
+
+.ch-user-info {
+  margin-bottom: 0.67em;
+
+  span {
+    font-family: $monospace-font;
+    font-size: 1.5em;
+    font-weight: bold;
+  }
+
+  span+span::before {
+    content: '|';
+    padding-left: 10px;
+    padding-right: 10px;
+    text-decoration: none;
+    display: inline-block;
+    font-style: normal;
+  }
+}
+
+.ch-user-container {
+  .ch-user-tab-selector {
+    margin-bottom: 16px;
+
+    a {
+      font-family: $monospace-font;
+      font-size: 1.1em;
+      text-decoration: none;
+      text-underline-offset: 0.2rem;
+      color: #1F2937;
+      cursor: pointer;
+
+      @media screen and (max-width: $breakpoint-sm) {
+        line-height: 1.5;
+      }
+
+      &.activeTab {
+        text-decoration: underline;
+        // font-style: italic;
+      }
+    }
+
+    a+a::before {
+      content: '|';
+      padding-left: 10px;
+      padding-right: 10px;
+      text-decoration: none;
+      display: inline-block;
+      font-style: normal;
+    }
+  }
+}
