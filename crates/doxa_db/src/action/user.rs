@@ -15,6 +15,7 @@ pub fn upsert_user(
         .set((
             s::users::username.eq(excluded(s::users::username)),
             s::users::extra.eq(excluded(s::users::extra)),
+            s::users::admin.eq(excluded(s::users::admin)),
         ))
         .get_result(conn)
 }

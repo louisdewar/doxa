@@ -8,17 +8,19 @@ use doxa_core::tokio;
 pub struct AgentRetrieval {
     client: reqwest::Client,
     download_base: String,
+    system_account_secret: String,
 }
 
 impl AgentRetrieval {
     /// `download_base` is the download URL of the storage system such that appending
     /// `{competition_name}/{agent_id}` yields the correct download URL for an agent.
-    pub fn new(download_base: String) -> AgentRetrieval {
+    pub fn new(download_base: String, system_account_secret: String) -> AgentRetrieval {
         // TODO: in future maybe configure an agent id that could never be generated but always returns a
         // 200 okay result along with a recognisable string to test the download_base url.
         AgentRetrieval {
             client: reqwest::Client::new(),
             download_base,
+            system_account_secret,
         }
     }
 
@@ -35,6 +37,7 @@ impl AgentRetrieval {
                     "{}{}/{}?active=true",
                     self.download_base, competition, agent_id
                 ))
+                .bearer_auth(&self.system_account_secret)
                 .send()
                 .await
             {

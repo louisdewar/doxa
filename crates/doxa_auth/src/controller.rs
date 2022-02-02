@@ -4,13 +4,10 @@ use actix_web::{web, HttpResponse};
 use diesel::PgConnection;
 use doxa_core::{autha_client::flow::FlowResponse, EndpointResult};
 use doxa_db::{model::competition::Enrollment, PgPool};
-use hmac::Hmac;
-use sha2::Sha256;
 
 use crate::{
     error::{CheckEnrollmentError, CompetitionNotFound, UpsertUserError},
     route::response,
-    token::{generate_jwt, Token},
 };
 
 use crate::AuthaUser;
@@ -39,11 +36,13 @@ fn new_token_generation() -> String {
 }
 
 pub fn upsert_user(conn: &PgConnection, user: AuthaUser) -> Result<User, UpsertUserError> {
+    // TODO: remove
     let token_generation = new_token_generation();
     let user = model::user::InsertableUser {
         id: user.id,
         extra: user.extra,
         username: user.username,
+        admin: user.admin,
         token_generation,
     };
 
@@ -52,34 +51,30 @@ pub fn upsert_user(conn: &PgConnection, user: AuthaUser) -> Result<User, UpsertU
     Ok(user)
 }
 
-pub fn generate_new_jwt_token(user: &User, key: &Hmac<Sha256>) -> String {
-    let token = Token::new_with_duration(user.id, user.token_generation.clone(), JWT_LIFE);
-
-    generate_jwt(&token, key)
-}
-
 pub fn process_authenticated_user(
     db_pool: &PgPool,
     user: AuthaUser,
-    key: &Hmac<Sha256>,
-) -> Result<String, UpsertUserError> {
-    let user = upsert_user(&db_pool.get().unwrap(), user)?;
+) -> Result<(), UpsertUserError> {
+    upsert_user(&db_pool.get().unwrap(), user)?;
 
-    Ok(generate_new_jwt_token(&user, key))
+    Ok(())
 }
 
 pub async fn handle_flow_response(
-    settings: &crate::Settings,
     db_pool: web::Data<PgPool>,
     response: FlowResponse,
 ) -> EndpointResult {
-    let jwt_secret = settings.jwt_secret.clone();
     let response = match response {
-        FlowResponse::Authenticated { user } => {
-            let jwt = web::block(move || process_authenticated_user(&db_pool, user, &jwt_secret))
-                .await??;
+        FlowResponse::Authenticated {
+            user,
+            refresh_token,
+        } => {
+            web::block(move || process_authenticated_user(&db_pool, user)).await??;
 
-            response::ProviderFlow::Authenticated { auth_token: jwt }
+            response::ProviderFlow::Authenticated {
+                auth_token: refresh_token.clone(),
+                refresh_token,
+            }
         }
         FlowResponse::Incomplete { payload } => response::ProviderFlow::Incomplete { payload },
     };

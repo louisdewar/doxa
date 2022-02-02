@@ -31,8 +31,8 @@ async fn main() -> std::io::Result<()> {
 
     let mut competition_system = CompetitionSystem::new();
 
-    competition_system.add_competition(UTTTCompetition, 25);
-    competition_system.add_competition(climatehack, 25);
+    competition_system.add_competition(UTTTCompetition, 15);
+    competition_system.add_competition(climatehack, 3);
 
     doxa_server::setup_server_from_env(true, competition_system).await
 }

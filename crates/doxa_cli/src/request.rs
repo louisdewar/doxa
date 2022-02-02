@@ -6,7 +6,10 @@ use serde::Deserialize;
 
 use crate::{
     config::UserProfile,
-    error::{BaseURLFormatError, DoxaError, NoDefaultUserProfile, PlainError, RequestError},
+    error::{
+        AuthorizeError, BaseURLFormatError, DoxaError, NoDefaultUserProfile, PlainError,
+        RequestError,
+    },
 };
 
 pub struct Settings {
@@ -61,38 +64,50 @@ pub fn parse_base_url(base_url: &str) -> Result<Url, BaseURLFormatError> {
     Ok(url)
 }
 
-fn to_url(settings: &Settings, endpoint: &str) -> Url {
+pub fn to_url(settings: &Settings, endpoint: &str) -> Url {
     settings.base_url.join(endpoint).unwrap()
 }
 
-fn maybe_add_auth(
+async fn maybe_add_auth(
     settings: &Settings,
     builder: RequestBuilder,
     never_auth: bool,
-) -> RequestBuilder {
+) -> Result<RequestBuilder, AuthorizeError> {
     if never_auth {
-        builder
+        Ok(builder)
     } else if let Ok(user) = &settings.user_profile {
-        builder.bearer_auth(user.auth_token.clone())
+        let access_token = crate::token::authorize(user.auth_token.clone(), settings).await?;
+
+        Ok(builder.bearer_auth(access_token.access_token))
     } else {
-        builder
+        Ok(builder)
     }
 }
 
-pub fn post(settings: &Settings, endpoint: &str, never_auth: bool) -> RequestBuilder {
+pub async fn post(
+    settings: &Settings,
+    endpoint: &str,
+    never_auth: bool,
+) -> Result<RequestBuilder, AuthorizeError> {
     maybe_add_auth(
         settings,
         settings.client.post(to_url(settings, endpoint)),
         never_auth,
     )
+    .await
 }
 
-pub fn get(settings: &Settings, endpoint: &str, never_auth: bool) -> RequestBuilder {
+pub async fn get(
+    settings: &Settings,
+    endpoint: &str,
+    never_auth: bool,
+) -> Result<RequestBuilder, AuthorizeError> {
     maybe_add_auth(
         settings,
         settings.client.get(to_url(settings, endpoint)),
         never_auth,
     )
+    .await
 }
 
 /// Sends the request without reading the response or checking the status code

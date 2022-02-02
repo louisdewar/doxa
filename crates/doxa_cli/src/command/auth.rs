@@ -82,7 +82,7 @@ pub async fn info(settings: &Settings) -> Result<(), CommandError> {
         ),
     );
 
-    let info: Info = send_request_and_parse(post(settings, "user/info", false)).await?;
+    let info: Info = send_request_and_parse(post(settings, "user/info", false).await?).await?;
 
     ui::print_step(2, total_steps, "Showing user information");
 
@@ -122,7 +122,7 @@ struct CheckDelegatedRequest {
 }
 
 pub async fn login(settings: &Settings) -> Result<(), CommandError> {
-    let builder = post(settings, "auth/start_delegated", true);
+    let builder = post(settings, "auth/start_delegated", true).await?;
 
     let total_steps = 6;
 
@@ -177,7 +177,9 @@ pub async fn login(settings: &Settings) -> Result<(), CommandError> {
 
         spinner.disable_steady_tick();
 
-        let builder = post(settings, "auth/check_delegated", true).json(&check_request);
+        let builder = post(settings, "auth/check_delegated", true)
+            .await?
+            .json(&check_request);
 
         let check_response: DelegatedAuthCheckResponse = send_request_and_parse(builder).await?;
         match check_response {
@@ -197,8 +199,14 @@ pub async fn login(settings: &Settings) -> Result<(), CommandError> {
     )));
     spinner.set_message("Successfully logged in, getting user info...");
 
-    let info: Info =
-        send_request_and_parse(post(settings, "user/info", true).bearer_auth(&auth_token)).await?;
+    let access_token = crate::token::authorize(auth_token.clone(), settings).await?;
+
+    let info: Info = send_request_and_parse(
+        post(settings, "user/info", true)
+            .await?
+            .bearer_auth(&access_token.access_token),
+    )
+    .await?;
 
     spinner.finish_with_message(format!(
         "Successfully logged in and retrived user info! Welcome {}.",

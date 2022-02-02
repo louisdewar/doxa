@@ -1,5 +1,9 @@
 shared_secret = "AUTHA_DEV_SHARED_SECRET"
+# Randomly generated and used for the JWT token `aud` field
+instance_id = "5882231bd0780eab982586b9d88c3b11"
 
+[jwt]
+secret = "a03439040f19ec0abd16bfffa35a82d1"
 
 [[providers]]
 plugin = "builtin::password"

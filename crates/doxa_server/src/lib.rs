@@ -39,12 +39,6 @@ pub async fn setup_server_from_env(
     let redis_url = env::var("REDIS_DB_URL").expect("REDIS_DB_URL must be set");
 
     let doxa_storage_path = env::var("DOXA_STORAGE").unwrap_or_else(|_| "dev/doxa_storage".into());
-    let jwt_secret = env::var("DOXA_JWT_SECRET")
-        .ok()
-        .map(|s| s.into_bytes())
-        .unwrap_or_else(doxa_auth::settings::generate_rand_jwt_secret);
-
-    info!("JWT Secret length = {}", jwt_secret.len());
 
     let redis_pool = doxa_core::redis::establish_pool(redis_url, 500).await;
 
@@ -53,22 +47,27 @@ pub async fn setup_server_from_env(
     let autha_base_url = env::var("AUTHA_BASE_URL").unwrap();
     let autha_shared_secret = env::var("AUTHA_SHARED_SECRET").unwrap();
     let delegated_auth_redirect = env::var("DOXA_DELEGATED_AUTH_URL").unwrap();
+    let system_account_secret = env::var("DOXA_SYSTEM_ACCOUNT_SECRET").unwrap();
 
-    let autha_client = Arc::new(AuthaClient::new(
-        autha_base_url
-            .parse()
-            .expect("AUTHA_BASE_URL was not parsable base url"),
-        autha_shared_secret,
-    ));
+    let autha_client = Arc::new(
+        AuthaClient::new(
+            autha_base_url
+                .parse()
+                .expect("AUTHA_BASE_URL was not parsable base url"),
+            autha_shared_secret,
+        )
+        .await
+        .expect("failed to startup autha client"),
+    );
 
     let auth_settings = doxa_auth::Settings {
-        jwt_secret: doxa_auth::settings::generate_jwt_hmac(&jwt_secret),
         allow_registration: false,
         autha_client,
         redis_db: redis_pool.clone(),
         delegated_auth_url: delegated_auth_redirect
             .parse()
             .expect("The delegated auth URL is not valid"),
+        system_account_secret,
     };
 
     let storage_settings = doxa_storage::Settings {
@@ -84,6 +83,7 @@ pub async fn setup_server_from_env(
         scratch_base_image: PathBuf::from("./dev/vm/images/scratch.img"),
         agent_retrieval: AgentRetrieval::new(
             "http://localhost:3001/api/storage/download/".to_string(),
+            auth_settings.system_account_secret.clone(),
         ),
         base_mounts: vec![Mount {
             path_on_host: PathBuf::from("./dev/vm/images/python_modules.img"),

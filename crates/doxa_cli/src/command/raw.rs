@@ -45,8 +45,8 @@ pub async fn handle_subcommand(
     }
 
     let request = match command.request_type {
-        RequestType::Get => get(settings, &command.endpoint, command.never_auth),
-        RequestType::Post => post(settings, &command.endpoint, command.never_auth),
+        RequestType::Get => get(settings, &command.endpoint, command.never_auth).await?,
+        RequestType::Post => post(settings, &command.endpoint, command.never_auth).await?,
     };
 
     println!(

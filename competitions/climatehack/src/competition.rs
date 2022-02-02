@@ -1,7 +1,11 @@
-use std::{path::PathBuf, sync::Arc};
+use std::{path::PathBuf, sync::Arc, time::Duration};
 
 use doxa_competition::{
-    client::{async_trait, serde_json, Competition, Context, GameEvent},
+    client::{
+        async_trait,
+        limiter::{LimiterConfig, TokenBucket, ONE_DAY, ONE_HOUR},
+        serde_json, Competition, Context, GameEvent,
+    },
     error::ContextError,
 };
 
@@ -49,13 +53,9 @@ impl Competition for ClimateHackCompetition {
 
     async fn on_agent_deactivated(
         &self,
-        context: &Context<Self>,
-        agent_id: String,
+        _context: &Context<Self>,
+        _agent_id: String,
     ) -> Result<(), ContextError> {
-        context
-            .remove_game_result_by_participant_and_update_scores_by_sum(None, agent_id)
-            .await?;
-
         Ok(())
     }
 
@@ -94,5 +94,21 @@ impl Competition for ClimateHackCompetition {
             datasets: self.datasets.clone(),
             python_bin: self.python_bin.clone(),
         }
+    }
+
+    fn upload_limiter(&self, key: String) -> LimiterConfig {
+        let mut limiter = LimiterConfig::new(key);
+
+        limiter
+            // 1 per minute
+            .add_limit(TokenBucket::new(Duration::from_secs(60), 1))
+            // 2 per 5 minutes
+            .add_limit(TokenBucket::new(Duration::from_secs(5 * 60), 2))
+            // 4 per hour
+            .add_limit(TokenBucket::new(ONE_HOUR, 4))
+            // 8 per day
+            .add_limit(TokenBucket::new(ONE_DAY, 8));
+
+        limiter
     }
 }

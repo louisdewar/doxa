@@ -7,7 +7,6 @@ pub mod settings;
 
 pub(crate) mod delegated;
 pub(crate) mod route;
-pub(crate) mod token;
 
 use actix_web::web::Data;
 use delegated::DelegatedAuthManager;

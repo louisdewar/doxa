@@ -15,7 +15,7 @@ python -m pip install --upgrade pip
 
 python -m pip install numpy scipy pandas scikit-learn
 python -m pip install tensorflow tf-agents[reverb]
-python -m pip install torch==1.10.1+cpu torchvision==0.11.2+cpu torchaudio==0.10.1+cpu -f https://download.pytorch.org/whl/cpu/torch_stable.html
+python -m pip install torch==1.10.2+cpu torchvision==0.11.3+cpu torchaudio==0.10.2+cpu -f https://download.pytorch.org/whl/cpu/torch_stable.html
 python -m pip install numba
  
 # Probably not required for evaluation but people may have imported these packages while training and did not separate the logic for evaluation
@@ -23,7 +23,9 @@ python -m pip install numba
 # python -m pip install ipython jupyter nose sympy
 
 
-python -m pip freeze
+python -m pip freeze > /pipfreeze.txt
+
+echo /pipfreeze.txt
 
 mkdir /home/doxa
 chown -R doxa:doxa /home/doxa

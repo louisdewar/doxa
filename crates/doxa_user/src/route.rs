@@ -46,7 +46,7 @@ async fn current_user_info(db_pool: web::Data<PgPool>, user: AuthGuard<()>) -> E
     })
     .await??;
 
-    let user_id = user.id();
+    let user_id = user.id_required()?;
     let user = web::block(move || doxa_db::action::user::get_user_by_id(&conn, user_id)).await??;
 
     let conn = web::block(move || db_pool.get()).await??;

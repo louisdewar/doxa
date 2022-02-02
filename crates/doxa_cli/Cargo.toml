@@ -5,6 +5,7 @@ edition = "2018"
 
 [dependencies]
 async-stream = "0.3.2"
+base64 = "0.13.0"
 chrono = { version = "0.4.19", features = ["serde"] }
 # async-tar = "0.4.2"
 clap = { version = "3.0.0-rc.9", features = ["derive", "cargo", "wrap_help", "unicode"] }

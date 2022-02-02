@@ -108,7 +108,7 @@ pub async fn reactivate_agent<C: Competition + ?Sized>(
         .await?
         .ok_or(AgentNotFound)?;
 
-    if !(agent.owner == user.id() || user.admin()) {
+    if !(Some(agent.owner) == user.id() || user.admin()) {
         return Err(UserNotOwner.into());
     }
 
@@ -138,7 +138,7 @@ pub async fn activate_agent<C: Competition + ?Sized>(
         .await?
         .ok_or(AgentNotFound)?;
 
-    if !(agent.owner == user.id() || user.admin()) {
+    if !(Some(agent.owner) == user.id() || user.admin()) {
         return Err(UserNotOwner.into());
     }
 
@@ -172,7 +172,7 @@ pub async fn deactivate_agent<C: Competition + ?Sized>(
         .await?
         .ok_or(AgentNotFound)?;
 
-    if !(agent.owner == user.id() || user.admin()) {
+    if !(Some(agent.owner) == user.id() || user.admin()) {
         return Err(UserNotOwner.into());
     }
 

@@ -166,6 +166,7 @@ pub async fn upload(args: UploadArgs, settings: &Settings) -> Result<(), Command
         &format!("competition/{}/_upload", competition_name),
         false,
     )
+    .await?
     .multipart(form);
 
     let response: UploadResponse = send_request_and_parse(builder).await?;

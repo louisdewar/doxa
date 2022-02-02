@@ -32,7 +32,15 @@ pub enum CommandError {
     LoadProfileConfig(LoadProfileConfigError),
     #[display(fmt = "{}", _0)]
     DelegatedAuthTimeout(DelegatedAuthTimeout),
+    AuthorizeError(AuthorizeError),
 }
+
+// #[derive(Error, Display, From, Debug)]
+// pub enum RequestError {
+//     #[from(forward)]
+//     Response(ResponseError),
+//     AuthorizeError(AuthorizeError),
+// }
 
 #[derive(Error, Display, From, Debug)]
 pub enum RequestError {
@@ -44,6 +52,20 @@ pub enum RequestError {
     Request(reqwest::Error),
     #[display(fmt = "failed to parse response: {}", _0)]
     Json(serde_json::Error),
+}
+
+#[derive(Error, Display, From, Debug)]
+pub enum AuthorizeError {
+    Response(RequestError),
+    #[display(fmt = "Please login again, your login token is corrupted")]
+    DeserializeToken(serde_json::Error),
+    #[display(fmt = "Please login again, your login token is corrupted")]
+    TooFewParts,
+    #[display(fmt = "Please login again, your login token is corrupted")]
+    Base64(base64::DecodeError),
+    NoUserProfile(NoDefaultUserProfile),
+    #[display(fmt = "Please login again, your login session has expired")]
+    TokenExpired,
 }
 
 #[derive(Error, Display, From, Debug)]

@@ -23,3 +23,8 @@ pub(crate) struct CheckDelegated {
 pub(crate) struct AuthorizeDelegated {
     pub verification_code: String,
 }
+
+#[derive(Deserialize)]
+pub(crate) struct Authorize {
+    pub refresh_token: String,
+}

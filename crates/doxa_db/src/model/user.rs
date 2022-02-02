@@ -21,4 +21,5 @@ pub struct InsertableUser {
     pub username: String,
     pub token_generation: String,
     pub extra: Value,
+    pub admin: bool,
 }

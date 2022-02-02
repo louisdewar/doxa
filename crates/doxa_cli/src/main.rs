@@ -7,6 +7,7 @@ use crate::request::{parse_base_url, Settings};
 pub mod config;
 pub mod error;
 pub mod request;
+pub mod token;
 pub mod ui;
 
 mod cli;

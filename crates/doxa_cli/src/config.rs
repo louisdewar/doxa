@@ -28,6 +28,8 @@ pub struct UserProfile {
     pub auth_token: String,
 }
 
+// TODO: add versioning to profile
+
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
 pub struct ProfileConfig {
     pub default: Option<String>,

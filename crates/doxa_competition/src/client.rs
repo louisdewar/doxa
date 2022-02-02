@@ -14,6 +14,7 @@ use crate::{
 
 pub use crate::context::Context;
 pub use async_trait::async_trait;
+pub use doxa_auth::limiter;
 pub use doxa_executor::client::{ForfeitError, GameClient, GameContext, GameError, Mount};
 pub use doxa_mq::model::{ActivationEvent, GameEvent};
 pub use serde_json;

@@ -37,46 +37,6 @@ impl_respondable_error!(
     "The authentication was not provided"
 );
 
-#[derive(Debug, Display, Error, From)]
-pub struct InvalidToken {
-    source: jwt::Error,
-}
-
-impl_respondable_error!(
-    InvalidToken,
-    UNAUTHORIZED,
-    "INVALID_TOKEN",
-    "The provided token was not valid, please login again"
-);
-
-#[derive(Debug, Display, Error)]
-pub struct ExpiredToken;
-
-impl_respondable_error!(
-    ExpiredToken,
-    UNAUTHORIZED,
-    "EXPIRED_TOKEN",
-    "Your login session has expired, please login again"
-);
-
-#[derive(Debug, Display, Error)]
-pub struct IncorrectTokenGeneration;
-
-impl_respondable_error!(
-    IncorrectTokenGeneration,
-    UNAUTHORIZED,
-    "INCORRECT_TOKEN_GENERATION",
-    "The login token is outdated so you need to login again"
-);
-
-#[derive(Debug, Display, Error, RespondableError, From)]
-pub enum TokenError {
-    #[from]
-    Expired(ExpiredToken),
-    #[from(forward)]
-    Invalid(InvalidToken),
-}
-
 #[derive(Debug, Display, Error)]
 pub struct UserAlreadyExists;
 
@@ -133,6 +93,16 @@ impl_respondable_error!(
     "The password does not match the username"
 );
 
+#[derive(Debug, Display, Error)]
+pub struct NotAccessToken;
+
+impl_respondable_error!(
+    NotAccessToken,
+    UNAUTHORIZED,
+    "INVALID_TOKEN",
+    "This token does not have permission to access this resource"
+);
+
 #[derive(Debug, Display, Error, RespondableError, From)]
 pub enum LoginError {
     #[from]
@@ -161,6 +131,16 @@ impl_respondable_error!(
     UNAUTHORIZED,
     "NOT_ENROLLED",
     "You are not enrolled in the competition"
+);
+
+#[derive(Debug, Display, Error)]
+pub struct SystemAccountsNotAllowed;
+
+impl_respondable_error!(
+    SystemAccountsNotAllowed,
+    NOT_FOUND,
+    "SYSTEM_ACCOUNT_NOT_ALLOWED",
+    "This endpoint cannot be authenticated by a system account"
 );
 
 #[derive(Debug, Display, Error, RespondableError, From)]

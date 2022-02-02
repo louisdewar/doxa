@@ -41,7 +41,7 @@ services:
     ports:
       - 6379:6379
   autha:
-    image: registry.dewardt.uk/autha/server:production
+    image: ghcr.io/louisdewar/autha:production
     environment:
       - DATABASE_URL=postgres://doxa-dev:doxa-dev@db/autha
       - REDIS_URL=redis://:doxa-dev@redis:6379/1
