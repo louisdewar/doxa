@@ -21,7 +21,7 @@ export default function FaqTab() {
     <h3>Submission-related issues</h3>
     <h4>&rsaquo; How many submissions can I make a day?</h4>
     <p>
-      You can make up to four submissions a day.
+      You can make up to eight submissions a day, four an hour and two every five minutes.
     </p>
     {/* TODO: add number of CPUs ? */}
     <p>
