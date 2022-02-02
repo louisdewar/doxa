@@ -12,11 +12,10 @@ const User = lazy(() => import('./pages/User'));
 
 function Layout({ children }) {
   return <>
-    <Navbar competition="climatehack" competitionName="Climate Hack.AI" />
+    <Navbar competition="climatehack/compete" competitionName="Climate Hack.AI" />
     <Container>{children}</Container>
   </>;
 }
-
 
 export default function ClimateHack() {
   const { path } = useRouteMatch();
