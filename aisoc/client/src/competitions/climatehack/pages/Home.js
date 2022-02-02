@@ -21,7 +21,7 @@ export default function Home({ baseUrl }) {
       tab: <ResourcesTab />
     },
     {
-      name: 'GETTING STARTED GUIDE',
+      name: 'GETTING STARTED',
       tab: <GettingStartedGuideTab />
     },
     {

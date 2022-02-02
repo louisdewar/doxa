@@ -1,4 +1,5 @@
 import Container from 'components/Container';
+import Footer from 'components/Footer';
 import Navbar from 'components/Navbar';
 import { lazy } from 'react';
 import { Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
@@ -11,10 +12,11 @@ const Splash = lazy(() => import('./pages/Splash'));
 const User = lazy(() => import('./pages/User'));
 
 function Layout({ children }) {
-  return <>
+  return <div className='main-wrapper'>
     <Navbar competition="climatehack/compete" competitionName="Climate Hack.AI" />
     <Container>{children}</Container>
-  </>;
+    <Footer />
+  </div>;
 }
 
 export default function ClimateHack() {

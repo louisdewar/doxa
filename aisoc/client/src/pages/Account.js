@@ -1,6 +1,7 @@
 import Button from 'components/Button';
 import Card from 'components/Card';
 import Container from 'components/Container';
+import Footer from 'components/Footer';
 import Navbar from 'components/Navbar';
 import { useAuth } from 'hooks/useAuth';
 import { Link, Redirect } from 'react-router-dom';
@@ -12,7 +13,7 @@ export default function Account({ multipleCompetitionsAllowed }) {
   if (!auth.isLoggedIn()) { return <Redirect to='/' />; }
   if (!auth.user) { return <></>; }
 
-  return <>
+  return <div className='main-wrapper'>
     <Navbar />
     <Container>
       <Card>
@@ -29,5 +30,6 @@ export default function Account({ multipleCompetitionsAllowed }) {
         <Button>Log out</Button>
       </Link>
     </Container>
-  </>;
+    <Footer />
+  </div>;
 }

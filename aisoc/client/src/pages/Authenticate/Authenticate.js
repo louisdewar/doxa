@@ -1,4 +1,5 @@
 import Container from 'components/Container';
+import Footer from 'components/Footer';
 import Navbar from 'components/Navbar';
 import { useAuth } from 'hooks/useAuth';
 import { Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
@@ -18,7 +19,7 @@ export default function Authenticate() {
   // Note currently post login redirect is only handled by login (even though any authenticate provider route could authenticate)
   // and it is only set by the delegated route
 
-  return <>
+  return <div className='main-wrapper'>
     <Navbar />
     <Container>
       <Switch>
@@ -42,5 +43,6 @@ export default function Authenticate() {
         </Route>
       </Switch>
     </Container>
-  </>;
+    <Footer />
+  </div>;
 }

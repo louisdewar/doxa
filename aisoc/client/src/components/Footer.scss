@@ -1,47 +1,49 @@
 @import 'common/common';
+@import 'common/fonts';
 
-.ch-footer {
+.doxa-footer {
   padding: 2rem;
   width: calc(100% - 4rem);
   margin: auto;
-  color: #fff;
+  color: #1F2937;
+
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  font-family: $monospace-font;
 
   a {
-    color: #fff;
+    color: #1F2937;
     text-underline-offset: 0.2rem;
   }
 
-  .ch-footer-copyright {
+  .doxa-footer-copyright {
     margin-left: auto;
     margin-top: 1rem;
   }
 }
 
 @media screen and (min-width: $breakpoint-sm) {
-  .ch-footer {
+  .doxa-footer {
     max-width: $breakpoint-sm;
     display: flex;
 
-    .ch-footer-copyright {
+    .doxa-footer-copyright {
       margin-top: 0;
     }
   }
 }
 
 @media screen and (min-width: $breakpoint-md) {
-  .ch-footer {
+  .doxa-footer {
     max-width: $breakpoint-md;
   }
 }
 
 @media screen and (min-width: $breakpoint-lg) {
-  .ch-footer {
+  .doxa-footer {
     max-width: $breakpoint-lg;
   }
 }
-
-// @media screen and (min-width: $breakpoint-xl) {
-//   .ch-footer {
-//     max-width: $breakpoint-xl;
-//   }
-// }

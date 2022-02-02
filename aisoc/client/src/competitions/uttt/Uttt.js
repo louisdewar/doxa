@@ -1,18 +1,20 @@
 import Container from 'components/Container';
+import Footer from 'components/Footer';
 import Navbar from 'components/Navbar';
+import Error404 from 'pages/Error404';
 import { Route, Switch, useRouteMatch } from 'react-router-dom';
 import Game from './pages/Game/';
 import Home from './pages/Home/';
 import Match from './pages/Match/';
 import User from './pages/User/';
-import Error404 from 'pages/Error404';
 
 
 function Layout({ children }) {
-  return <>
+  return <div className='main-wrapper'>
     <Navbar competition="uttt" competitionName="Ultimate Tic-Tac-Toe" />
     <Container>{children}</Container>
-  </>;
+    <Footer />
+  </div>;
 }
 
 

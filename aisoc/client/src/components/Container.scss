@@ -10,6 +10,10 @@
   margin-top: 100px;
 }
 
+.container-with-bottom-margin {
+  padding-bottom: 80px;
+}
+
 @media screen and (min-width: $breakpoint-sm) {
   .container {
     max-width: $breakpoint-sm;

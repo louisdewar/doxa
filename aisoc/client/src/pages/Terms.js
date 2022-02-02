@@ -1,10 +1,11 @@
 import Card from 'components/Card';
 import Container from 'components/Container';
+import Footer from 'components/Footer';
 import Navbar from 'components/Navbar';
 
 
 export default function Terms() {
-  return <>
+  return <div className='main-wrapper'>
     <Navbar />
     <Container>
       <Card>
@@ -26,5 +27,6 @@ export default function Terms() {
         </p>
       </Card>
     </Container>
-  </>;
+    <Footer />
+  </div>;
 }

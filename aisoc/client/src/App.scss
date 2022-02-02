@@ -18,3 +18,8 @@ h6 {
 .sr {
     display: none;
 }
+
+.main-wrapper {
+    min-height: calc(100vh - 100px);
+    position: relative;
+}

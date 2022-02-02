@@ -7,6 +7,7 @@ import {
 import './App.scss';
 import { COMPETITIONS, DEFAULT_COMPETITION } from './competitions';
 
+const About = lazy(() => import('pages/About'));
 const Account = lazy(() => import('pages/Account'));
 const Authenticate = lazy(() => import('pages/Authenticate'));
 const Error404 = lazy(() => import('pages/Error404'));
@@ -34,6 +35,9 @@ function Routes() {
   const multipleCompetitionsAllowed = process.env.REACT_APP_MULTIPLE_COMPETITIONS != 'false';
   return <Router>
     <Switch>
+      <Route path='/about'>
+        <About />
+      </Route>
       <Route path='/login'>
         <Redirect to='/authenticate/login' />
       </Route>
