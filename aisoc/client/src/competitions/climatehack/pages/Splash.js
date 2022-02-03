@@ -260,7 +260,7 @@ export default function Splash({ baseUrl }) {
             <div className='ch-splash-format-columns'>
               <div>
                 <p>
-                  Participants gain access to the dataset to start training models to be submitted individually or in teams.
+                  Participants gain access to the dataset to start training models to be submitted individually.
                 </p>
                 <p>
                   The top three competitors from each university will then be invited to the finals, along with a society representative.
@@ -280,7 +280,7 @@ export default function Splash({ baseUrl }) {
               Participants must be attending one of the co-hosting universities as an undergraduate, masters or PhD student at the time of the competition.
             </p>
             <p>
-              Teams may be of any size, but only a maximum of three may progress to the finals for each university, so it would be sensible to form teams of up to three people.
+              Submissions in the first round are individual; however, we encourage collaboration between participants. It may be a competition, but everyone is working as a team to beat climate change.
             </p>
             <p>
               Detailed competition rules and submission instructions may be found on our competition platform, <Link to={`${baseUrl}compete#4`}>DOXA</Link>.

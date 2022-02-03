@@ -9,10 +9,10 @@ export default function FaqTab() {
     <h3>Competition queries</h3>
     <h4>&rsaquo; Can we participate in teams?</h4>
     <p>
-      You can compete in the first round either as an individual or as a team of any size. We would encourage you to collaborate widely, including with other individuals and teams! Having said that, only the top three competitiors from each society may proceed to represent their university in the finals, so you may want to limit the size of your team to three.
+      Although you compete in the first round as an individual, we would encourage you to collaborate, share ideas, and discuss strategies and approaches with each other! It may be a competition, but we are united in the fight against climate change.
     </p>
     <p>
-      The university society of which you are a member may issue additional guidelines, depending on how they choose to support you locally. For example, they may have a policy of encouraging everyone to form teams of three. While these are only guidelines, we recommend that you follow them nevertheless.
+      Climate Hack.AI is also an excellent opportunity to get to know people, not just at your university, but also at world-leading universities from across the world, so definitely make the most of the intra-competition events we will be holding.
     </p>
     <h4>&rsaquo; Does winning the first round mean I will win the finals?</h4>
     <p>
