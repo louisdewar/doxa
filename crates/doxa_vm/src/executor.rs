@@ -43,6 +43,7 @@ pub const MAX_AGENT_SIZE: usize = 3_000_000_000;
 /// Maximum length for messages other than the agent file in bytes
 pub const MAX_MSG_LEN: usize = 50_000_000;
 pub const MAX_FILE_NAME_LEN: usize = 300;
+pub const STDERR_LEN: usize = 100_000;
 
 /// This is the server that runs inside of the VM.
 pub struct VMExecutor {
@@ -121,7 +122,7 @@ impl VMExecutor {
                 .stderr
                 .take()
                 .unwrap()
-                .take(MAX_MSG_LEN as u64)
+                .take(STDERR_LEN as u64)
                 .read_to_string(&mut err_output)
                 .await?;
         }

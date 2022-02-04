@@ -127,7 +127,7 @@ impl Manager {
             },
             drives: drive_sources,
             machine_config: MachineConfig {
-                vcpu_count: 2,
+                vcpu_count: 4,
                 mem_size_mib: memory_size_mib,
             },
             vsock: doxa_firecracker_sdk::spawn::Vsock {
