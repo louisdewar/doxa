@@ -8,18 +8,33 @@
     font-style: italic;
   }
 
+  .ch-leaderboard-pagination {
+    a {
+      text-decoration: underline;
+      cursor: pointer;
+
+      &.ch-leaderboard-pagination-active {
+        text-decoration: none;
+      }
+    }
+  }
+
   .ch-leaderboard-entry {
     display: flex;
     margin-bottom: 10px;
 
     .ch-leaderboard-position {
       flex: 0 0 auto;
-      width: 2rem;
+      width: 5ch;
     }
 
     .ch-leaderboard-username {
       flex: 4 1 auto;
       flex-basis: 0;
+
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
 
       a {
         color: #fff;
@@ -35,10 +50,12 @@
     .ch-leaderboard-university {
       flex: 2 1 auto;
       flex-basis: 0;
-      // flex: 0 0 auto;
-      min-width: 12ch;
-      width: 12rem;
+      min-width: 11ch;
       max-width: 25%;
+
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .ch-leaderboard-score {
