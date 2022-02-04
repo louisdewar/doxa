@@ -26,7 +26,7 @@ def print_error(error, forfeit=None):
 
 
 def encode_image(arr):
-    fig = plt.imshow(arr, cmap="viridis")
+    fig = plt.imshow(arr, cmap="viridis", vmin=0, vmax=1023)
 
     fig.axes.get_xaxis().set_visible(False)
     fig.axes.get_yaxis().set_visible(False)
