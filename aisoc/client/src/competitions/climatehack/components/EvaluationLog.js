@@ -55,7 +55,7 @@ function EvaluationLogCard({ event, hasForfeited }) {
           </>}
 
           {event.payload.stderr && <>
-            <p className="ch-evaluation-card-error-info-logs-label">You have permission to view the agent&apos;s <code>stderr</code> (max 50 MiB):</p>
+            <p className="ch-evaluation-card-error-info-logs-label">You have permission to view the agent&apos;s <code>stderr</code> (max 100 KB):</p>
             <pre className="ch-evaluation-card-error-info-logs">{event.payload.stderr}</pre>
           </>}
         </div>}
