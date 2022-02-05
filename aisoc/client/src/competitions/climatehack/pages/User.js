@@ -88,7 +88,7 @@ export default function User({ baseUrl }) {
     <Card darker className='competitionHeader'>
       <h1>{user}</h1>
       <div className='ch-user-info'>
-        {score && <span>
+        {score !== null && <span>
           {roundScore(score / 10000000)}
         </span>}
         {profile && profile._university && profile._university.name && <span>{profile._university.name}</span>}
