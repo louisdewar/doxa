@@ -72,7 +72,7 @@ export default [
         question: <>My model outputs images that look fine, but my score is low. What&apos;s wrong?</>,
         response: <>
           <p>
-            This is usually a scaling issue: the satellite image pixel values fall in the range <code>[0.0, 1023.0]</code>, but you may be returning values in the range <code>[0.0, 1.0]</code> or <code>[0.0, 255.0]</code> as is more common, which would artificially diminish your score.
+            This is usually a scaling issue: the satellite image pixel values fall in the range <code>[0.0, 1023.0]</code>, but you may be returning values in the range <code>[0.0, 1.0]</code> or <code>[0.0, 255.0]</code> as is more common, which would artificially diminish your score. The images on DOXA look fine because they are normalised before being rendered to show contrasts better.
           </p>
           <p>
             If you are certain that it is not, do reach out to us on Discord!
