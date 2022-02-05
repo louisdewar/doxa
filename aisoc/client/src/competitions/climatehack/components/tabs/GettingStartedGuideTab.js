@@ -16,10 +16,10 @@ export default function GettingStartedGuideTab() {
     </p>
     <h3>Downloading the example project</h3>
     <p>
-      To get started, download and extract the example project from <a href="https://github.com/louisdewar/doxa/releases/latest/download/climatehack_getting_started.zip">GitHub</a>. The <code>training.ipynb</code> Python Jupyter notebook contains information on the dataset and how to train a basic model to submit to DOXA.
+      To get started, download and extract the example project from <a href="https://github.com/louisdewar/doxa/releases/latest/download/climatehack_getting_started.zip">GitHub</a>. In addition to containing more information about the dataset and the challenge, the Jupyter notebook in <code>training.ipynb</code> guides you through training a basic model and making your first Climate Hack.AI submission to DOXA.
     </p>
     <p>
-      Also, check our Open Climate Fix&apos;s <a href="https://github.com/openclimatefix/Satip/blob/main/notebooks/load_and_plot_HRV_UK_Zarr_from_GCS.ipynb">notebook</a> a more in-depth introduction to reading the satellite data and more technical details about the dataset.
+      Also, make sure to check out Open Climate Fix&apos;s <a href="https://github.com/openclimatefix/Satip/blob/main/notebooks/load_and_plot_HRV_UK_Zarr_from_GCS.ipynb">notebook</a>, which provides a more in-depth introduction to reading the satellite data, as well as more technical information about the dataset.
     </p>
     <h3>Using the Doxa CLI</h3>
     <p>
@@ -45,6 +45,38 @@ export default function GettingStartedGuideTab() {
     </pre>
     <p>
       Here, <code>{'"./submission"'}</code> refers to the folder containing the code used to evaluate your trained model.
+    </p>
+    <h3>The evaluation environment</h3>
+    <p>
+      DOXA evaluates submissions inside a lightweight Linux-based virtual machine with 4 vCPUs and 6GB RAM. Submissions may be no larger than 4GB in size. The Python 3.9 packages installed in the evaluation environment include the following:
+    </p>
+    <pre>
+      cachetools (5.0.0),
+      dm-reverb (0.6.1),
+      dm-tree (0.1.6),
+      flatbuffers (2.0),
+      gym (0.21.0),
+      joblib (1.1.0),
+      keras (2.8.0),
+      Keras-Preprocessing (1.1.2),
+      numba (0.55.1),
+      numpy (1.21.5),
+      opencv-contrib-python-headless (4.5.5.62),
+      opt-einsum (3.3.0),
+      pandas (1.4.0),
+      Pillow (9.0.1),
+      scikit-learn (1.0.2),
+      scipy (1.7.3),
+      tensorboard (2.8.0),
+      tensorflow (2.8.0),
+      tf-agents (0.7.1),
+      torch (1.10.2+cpu),
+      torchaudio (0.10.2+cpu),
+      torchvision (0.11.3+cpu),
+      wrapt (1.13.3)
+    </pre>
+    <p>
+      If there is a package you want to use that is not installed in the evaluation environment, reach out to us on <a href="https://discord.gg/HTTQ8AFjJp">Discord</a> and we will try our best to accommodate any reasonable requests.
     </p>
   </div>;
 }

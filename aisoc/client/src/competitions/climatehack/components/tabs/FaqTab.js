@@ -25,7 +25,10 @@ export default function FaqTab() {
     </p>
     {/* TODO: add number of CPUs ? */}
     <p>
-      Currently, submissions are limited to 2GiB in size; however, this limit will be increased as the competition progresses.
+      Currently, submissions are limited to 4GB in size; however, this limit will be increased as the competition progresses.
+    </p>
+    <p>
+      The virtual machine environment in which submissions are evaluated has 4 vCPUs and 6GB RAM.
     </p>
     <h4>&rsaquo; Can my model&apos;s leaderboard score change?</h4>
     <p>
