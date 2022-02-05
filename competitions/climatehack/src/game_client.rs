@@ -12,6 +12,7 @@ use crate::{dataset::Datasets, error::ClimateHackError, support::Scorer};
 /// The maximum time for an agent to complete predictions of all the images in all the series of
 /// a single group.
 const MAX_SERIES_GROUP_TIME: Duration = Duration::from_secs(20 * 60);
+/// The maximum amount of time to wait until the agent starts up
 const MAX_STARTUP_TIME: Duration = Duration::from_secs(10 * 60);
 
 #[derive(Serialize, Deserialize)]
