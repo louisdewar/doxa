@@ -34,6 +34,7 @@ impl Settings {
             base_url,
             client: Client::builder()
                 .user_agent(APP_USER_AGENT)
+                .tcp_nodelay(false)
                 .build()
                 .unwrap(),
             config_dir,

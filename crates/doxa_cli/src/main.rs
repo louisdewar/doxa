@@ -48,16 +48,12 @@ async fn run(args: Cli) -> Result<(), CliError> {
     let base_url = std::env::var("DOXA_BASE_URL")
         .unwrap_or_else(|_| "https://doxa.uclaisociety.co.uk/".to_string());
 
-    // let user_profile = matches
-    //     .value_of("USER_PROFILE")
-    //     .map(|username| profiles.user_profile(username))
-    //     .unwrap_or_else(|| profiles.default_profile());
-
     let user_profile = profiles.default_profile()?;
 
     let base_url = parse_base_url(&base_url)?;
 
     let verbose = args.verbose;
+
     let settings = Settings::new(user_profile, base_url, config_dir, verbose);
 
     match args.command {

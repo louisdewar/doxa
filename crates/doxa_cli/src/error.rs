@@ -35,13 +35,6 @@ pub enum CommandError {
     AuthorizeError(AuthorizeError),
 }
 
-// #[derive(Error, Display, From, Debug)]
-// pub enum RequestError {
-//     #[from(forward)]
-//     Response(ResponseError),
-//     AuthorizeError(AuthorizeError),
-// }
-
 #[derive(Error, Display, From, Debug)]
 pub enum RequestError {
     #[display(fmt = "server returned error: {}", _0)]

@@ -16,6 +16,10 @@ pub fn warn<S: Display>(msg: S) {
     println!("{} {}", style("WARN:").yellow().bold(), style(msg).yellow());
 }
 
+pub fn info<S: Display>(msg: S) {
+    println!("{} {}", style("INFO:").white().bold(), style(msg).white());
+}
+
 pub fn print_step<A: Display, B: Display, C: Display>(current: A, total: B, msg: C) {
     println!("{} {}", step(current, total), msg);
 }

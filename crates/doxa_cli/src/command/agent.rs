@@ -134,11 +134,11 @@ pub async fn upload(args: UploadArgs, settings: &Settings) -> Result<(), Command
     upload_bar.set_style(ProgressStyle::default_bar()
         .template("{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta})")
         .progress_chars("#>-"));
-    let mut uploaded = 0;
 
     let mut stream = FramedRead::new(BufStream::new(agent_tar_file), BytesCodec::new());
 
     let file_stream = async_stream::stream! {
+        let mut uploaded = 0;
         while let Some(chunk) = stream.next().await {
             if let Ok(chunk) = &chunk {
                 uploaded += chunk.len() as u64;
