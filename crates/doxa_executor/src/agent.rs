@@ -95,7 +95,7 @@ impl VMAgent {
 
         match async {
             timeout(
-                Duration::from_secs(60),
+                Duration::from_secs(60 * 10),
                 vm.send_agent(agent_name, agent_size, agent_response.bytes_stream()),
             )
             .await
