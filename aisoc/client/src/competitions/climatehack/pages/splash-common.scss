@@ -45,8 +45,8 @@ section.ch-section {
   margin: auto;
   margin-top: 2rem;
   margin-bottom: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 0 #0000, 0 0 #0000, 5px 5px #3c3f42;
+  border-radius: 5px;
+  box-shadow: 0 0 #0000, 0 0 #0000, 6px 6px #3c3f42;
 
   .ch-section-content {
     margin-left: auto;
@@ -65,7 +65,7 @@ section.ch-section {
         margin-top: 0;
         margin-bottom: 0;
         font-size: 2em;
-        font-family: 'Playfair Display', serif;
+        // font-family: 'Playfair Display', serif;
       }
 
       img {

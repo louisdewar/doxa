@@ -143,7 +143,10 @@ export default function Splash({ baseUrl }) {
             </div>
 
             <p>
-              Beyond this competition, Climate Hack.AI aims to foster a community of students interested in artificial intelligence from around the world.
+              Climate Hack.AI is open to all students at any of the co-hosting universities, no matter their level of machine learning experience. This is an incredible opportunity to learn something new, as societies will be releasing educational resources over the course of the competition.
+            </p>
+            <p>
+              Beyond this datathon, Climate Hack.AI aims to foster a community of students interested in artificial intelligence from around the world.
             </p>
             <p>
               Throughout the competition, there will be plenty of internal and cross-university events for students to meet each other and showcase their knowledge of AI, including in-person and virtual social events, mini-competitions and cross-university tutorials.
@@ -161,16 +164,16 @@ export default function Splash({ baseUrl }) {
           </div>
           <div className='ch-splash-tangible-impact-description'>
             <p>
-              Climate Hack.AI is a two-month-long datathon based on climate-related data provided by our partner, OpenClimateFix.
+              Climate Hack.AI is a two-month-long datathon based on climate-related data provided by our partner, Open Climate Fix.
             </p>
             <p>
-              Competitors are challenged to develop the best machine learning models trained on this data. Submissions are evaluated against an unseen test dataset on our own custom competition platform, <Link to={`${baseUrl}compete`}>DOXA</Link>.
+              Competitors are challenged to train the best machine learning models using 108GB of satellite imagery. Submissions are evaluated against an unseen test dataset on our own custom competition platform, <Link to={`${baseUrl}compete`}>DOXA</Link>.
             </p>
             <p>
               By improving on the state of the art in nowcasting satellite imagery, the winning model could be deployed by the National Grid electricity system operator in the UK to produce significantly more accurate solar photovoltaic output forecasts.
             </p>
             <p>
-              This would allow them to minimise the use of standby gas turbines, potentially leading to a substantial reduction in carbon emissions.
+              This would allow them to minimise the use of standby gas turbines, potentially leading to a substantial reduction in carbon emissions of up to 100 kilotonnes a year.
             </p>
             <p>
               Learn more about the <Link to={`${baseUrl}challenge`}>challenge</Link>.
