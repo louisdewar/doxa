@@ -58,10 +58,29 @@ export async function register(username, email, password) {
   return response;
 }
 
-export async function providerFlow(providerName, flowName, payload) {
+export async function requestResetPassword(email) {
+  const response = await providerFlow('password', 'request_reset_password', { email });
+
+  return response;
+}
+
+export async function resetPassword(verificationCode, newPassword) {
+  const response = await providerFlow('password', 'reset_password', { verification_code: verificationCode, new_password: newPassword });
+
+  return response;
+}
+
+export async function changePassword(authToken, oldPassword, newPassword) {
+  const response = await providerFlow('password', 'change_password', { old_password: oldPassword, new_password: newPassword }, authToken);
+
+  return response;
+}
+
+export async function providerFlow(providerName, flowName, payload, authToken) {
   const response = await request({
     url: `${process.env.REACT_APP_API_BASE_URL}auth/provider_flow`,
     params: { flow_name: flowName, provider_name: providerName, payload },
+    authToken,
     method: 'POST'
   });
 

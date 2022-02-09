@@ -8,7 +8,9 @@ import DelegatedSuccess from './DelegatedSuccess';
 import Login from './Login';
 import Register from './Register';
 import VerifyEmail from './VerifyEmail';
-
+import ForgotPassword from './ForgotPassword';
+import ResetCallback from './ResetCallback';
+import ChangePassword from './ChangePassword';
 
 
 export default function Authenticate() {
@@ -31,6 +33,15 @@ export default function Authenticate() {
         </Route>
         <Route path={`${path}/register`}>
           <Register postLoginRedirect={auth.postLoginRedirectUrl} />
+        </Route>
+        <Route path={`${path}/forgot_password`}>
+          <ForgotPassword postLoginRedirect={auth.postLoginRedirectUrl} />
+        </Route>
+        <Route path={`${path}/reset_callback`}>
+          <ResetCallback postLoginRedirect={auth.postLoginRedirectUrl} />
+        </Route>
+        <Route path={`${path}/change_password`}>
+          <ChangePassword postLoginRedirect={auth.postLoginRedirectUrl} />
         </Route>
         <Route path={`${path}/delegated/success`}>
           <DelegatedSuccess />

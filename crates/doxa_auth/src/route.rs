@@ -1,4 +1,4 @@
-use actix_web::{web, HttpResponse};
+use actix_web::{web, HttpRequest, HttpResponse};
 use doxa_core::EndpointResult;
 use doxa_db::PgPool;
 
@@ -82,12 +82,22 @@ async fn provider_flow(
     db_pool: web::Data<PgPool>,
     body: web::Json<request::Provider>,
     settings: web::Data<Settings>,
+    req: HttpRequest,
 ) -> EndpointResult {
     let autha = &settings.autha_client;
     let body = body.into_inner();
+    let bearer_auth = req
+        .headers()
+        .get("Authorization")
+        .and_then(|header| Some(header.to_str().ok()?.to_owned()));
 
     let response = autha
-        .provider_flow(&body.provider_name, &body.flow_name, body.payload)
+        .provider_flow(
+            &body.provider_name,
+            &body.flow_name,
+            body.payload,
+            bearer_auth,
+        )
         .await??;
 
     controller::handle_flow_response(db_pool, response).await

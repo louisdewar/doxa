@@ -28,7 +28,6 @@ export default function Register() {
 
     try {
       const response = await register(username, email, password);
-      console.log(response);
 
       const authToken = response.authToken();
 

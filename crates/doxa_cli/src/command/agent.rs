@@ -137,19 +137,23 @@ pub async fn upload(args: UploadArgs, settings: &Settings) -> Result<(), Command
 
     let mut stream = FramedRead::new(BufStream::new(agent_tar_file), BytesCodec::new());
 
-    let file_stream = async_stream::stream! {
-        let mut uploaded = 0;
-        while let Some(chunk) = stream.next().await {
-            if let Ok(chunk) = &chunk {
-                uploaded += chunk.len() as u64;
-                upload_bar.set_position(uploaded);
+    let file_stream = {
+        let upload_bar = upload_bar.clone();
+        async_stream::stream! {
+            let mut uploaded = 0;
+            while let Some(chunk) = stream.next().await {
+                if let Ok(chunk) = &chunk {
+                    uploaded += chunk.len() as u64;
+                    upload_bar.set_position(uploaded);
+                    upload_bar.tick();
 
-                if (uploaded >= file_len) {
-                    upload_bar.finish_with_message("uploaded");
+                    if (uploaded >= file_len) {
+                        upload_bar.finish_with_message("uploaded");
+                    }
                 }
-            }
 
-            yield chunk;
+                yield chunk;
+            }
         }
     };
 
@@ -166,10 +170,17 @@ pub async fn upload(args: UploadArgs, settings: &Settings) -> Result<(), Command
         &format!("competition/{}/_upload", competition_name),
         false,
     )
-    .await?
+    .await
+    .map_err(|e| {
+        upload_bar.finish_and_clear();
+        e
+    })?
     .multipart(form);
 
-    let response: UploadResponse = send_request_and_parse(builder).await?;
+    let response: UploadResponse = send_request_and_parse(builder).await.map_err(|e| {
+        upload_bar.finish_and_clear();
+        e
+    })?;
 
     ui::print_step(
         4,

@@ -167,7 +167,7 @@ pub async fn login(settings: &Settings) -> Result<(), CommandError> {
     spinner.set_message("Waiting for you to login...");
 
     let auth_token = loop {
-        spinner.enable_steady_tick(100);
+        spinner.enable_steady_tick(600);
 
         if start_response.expires < Utc::now() {
             return Err(DelegatedAuthTimeout.into());
@@ -175,7 +175,7 @@ pub async fn login(settings: &Settings) -> Result<(), CommandError> {
 
         tokio::time::sleep(Duration::from_secs(5)).await;
 
-        spinner.disable_steady_tick();
+        spinner.enable_steady_tick(60);
 
         let builder = post(settings, "auth/check_delegated", true)
             .await?

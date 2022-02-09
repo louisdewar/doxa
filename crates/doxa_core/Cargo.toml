@@ -16,8 +16,8 @@ tracing-futures = "0.2.5"
 chrono = { version = "0.4.19", features = ["serde"] }
 deadpool-redis = "0.10.1"
 redis = { version = "0.21.4", features = ["tokio-comp"] }
-autha_client = { git = "https://github.com/louisdewar/autha", rev = "431d53ccbef22702b6fe26db7505208fc765a1a7" }
-# autha_client = { path = "../../../autha/client" }
+autha_client = { git = "https://github.com/louisdewar/autha", rev = "b2963f2b43e548d822758daebcb296ac96ce1e21" }
+#autha_client = { path = "../../../autha/client" }
 
 [features]
 default = ["lapin/rustls"]
