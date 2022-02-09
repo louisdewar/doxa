@@ -3,6 +3,7 @@ import { useAuth } from 'hooks/useAuth';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Leaderboard from '../Leaderboard';
+import UniversityLeaderboard from '../UniversityLeaderboard';
 import './LeaderboardTab.scss';
 
 
@@ -21,15 +22,19 @@ export default function LeaderboardTab({ baseUrl }) {
 
   const tabs = [
     {
-      name: 'ROUND 1',
+      name: 'PARTICIPANTS',
       tab: leaderboard && <Leaderboard baseUrl={baseUrl} leaderboard={leaderboard} />
     },
     {
-      name: 'ROUND 2',
-      tab: <div>
-        Round 2 of Climate Hack.AI has not started yet &mdash; check back here on 24th March!
-      </div>
+      name: 'UNIVERSITIES',
+      tab: leaderboard && <UniversityLeaderboard baseUrl={baseUrl} leaderboard={leaderboard} />
     },
+    // {
+    //   name: 'ROUND 2',
+    //   tab: <div>
+    //     Round 2 of Climate Hack.AI has not started yet &mdash; check back here on 24th March!
+    //   </div>
+    // },
   ];
 
   const [activeTabIndex, setActiveTabIndex] = useState(0);

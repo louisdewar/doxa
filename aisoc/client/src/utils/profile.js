@@ -50,7 +50,7 @@ const UNIVERSITIES_DOMAIN_MAP = {
     logo: null,
   },
   'gatech.edu': {
-    name: 'Gatech',
+    name: 'Georgia Tech',
     logo: null,
   },
   'harvard.edu': {
@@ -70,7 +70,7 @@ const UNIVERSITIES_DOMAIN_MAP = {
     logo: null,
   },
   'berkeley.edu': {
-    name: 'Berkeley',
+    name: 'UC Berkeley',
     logo: null,
   },
   'ucla.edu': {
@@ -101,6 +101,10 @@ const UNIVERSITIES_DOMAIN_MAP = {
     name: 'Waterloo',
     logo: null,
   },
+  'cornell.edu': {
+    name: 'Cornell',
+    logo: null
+  }
 };
 
 function buildUniversitiesTrie(unis) {

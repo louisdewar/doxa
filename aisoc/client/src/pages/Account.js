@@ -25,7 +25,7 @@ export default function Account({ multipleCompetitionsAllowed }) {
           <Link to={`${multipleCompetitionsAllowed ? '/c/climatehack/' : '/'}user/${auth.user.username}`}>View your latest Climate Hack.AI submission</Link>
         </p>}
 
-        <p><Link to="/authenticate/change_password">Change you password</Link></p>
+        <p><Link to="/authenticate/change_password">Change your password</Link></p>
       </Card>
 
       <Link to="/logout">
