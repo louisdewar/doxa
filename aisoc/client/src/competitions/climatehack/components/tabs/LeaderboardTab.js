@@ -48,7 +48,7 @@ export default function LeaderboardTab({ baseUrl }) {
         className={activeTabIndex == i ? 'activeTab' : ''}
         onClick={() => setActiveTabIndex(i)}
       >{tab.name}</a>)}
-      {auth.isLoggedIn() && auth.user && auth.user.username && <Link to={`${baseUrl}user/${auth.user.username}`}>Your submission</Link>}
+      {auth.isLoggedIn() && auth.user && auth.user.username && <Link to={`${baseUrl}user/${auth.user.username}`}>YOUR SUBMISSION</Link>}
     </div>
 
     {tabs[activeTabIndex].tab}
