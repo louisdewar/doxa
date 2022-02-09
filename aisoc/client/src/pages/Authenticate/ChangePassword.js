@@ -20,11 +20,11 @@ export default function ResetCallback() {
   const [error, setError] = useState(null);
   const auth = useAuth();
 
-  
+
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
 
-  const submittable = currentPassword && newPassword;
+  const submittable = currentPassword && newPassword && newPassword.length >= 8;
 
   const handleSubmit = async e => {
     e.preventDefault();

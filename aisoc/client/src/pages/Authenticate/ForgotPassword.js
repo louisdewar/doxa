@@ -72,11 +72,10 @@ export default function ForgotPassword() {
       <h1>Reset your password</h1>
       <form onSubmit={handleSubmit}>
         <TextBox type="email" value={email} setValue={setEmail} placeholder="Account email" /><br />
-        <br />
         <Button buttonProps={{ onClick: handleSubmit }} success disabled={!submittable}>
           Send email
         </Button>
-        <span style={{ marginLeft: '1rem' }}>Remembered your password? <Link to="/authenticate/login">Login</Link></span>
+        <span style={{ marginLeft: '1rem' }}>Remembered your password? <Link to="/authenticate/login">Login</Link>.</span>
       </form>
     </Card>
   </>;

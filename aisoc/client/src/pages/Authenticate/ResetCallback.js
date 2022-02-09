@@ -17,7 +17,7 @@ function PasswordReset() {
 export default function ResetCallback() {
   const [handler, setHandler] = useState(null);
   const [error, setError] = useState(null);
-  
+
   const [verificationCode, setVerificationCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const queryVerificationCode = useMemo(() => {
