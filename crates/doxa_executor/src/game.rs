@@ -52,6 +52,7 @@ impl<C: GameClient> GameManager<C> {
         let vm_agent_settings = VMAgentSettings {
             agent_ram_mb: C::AGENT_RAM_MB,
             scratch_size_mb: C::AGENT_SCRATCH_MB,
+            swap_size_mb: C::AGENT_SWAP_MB,
             mounts,
         };
 

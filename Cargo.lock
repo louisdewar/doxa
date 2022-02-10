@@ -435,7 +435,7 @@ dependencies = [
 [[package]]
 name = "autha_client"
 version = "0.1.0"
-source = "git+https://github.com/louisdewar/autha?rev=b2963f2b43e548d822758daebcb296ac96ce1e21#b2963f2b43e548d822758daebcb296ac96ce1e21"
+source = "git+https://github.com/louisdewar/autha?rev=acf8f0756ac6130953d06202ddf53e78d321cabb#acf8f0756ac6130953d06202ddf53e78d321cabb"
 dependencies = [
  "derive_more",
  "jsonwebtoken",

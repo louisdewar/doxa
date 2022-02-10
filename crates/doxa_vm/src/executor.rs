@@ -275,6 +275,10 @@ impl VMExecutor {
             .await
             .map_err(HandleMountsError::FindDrives)?;
 
+        mount::swapon()
+            .await
+            .map_err(HandleMountsError::ActivateSwap)?;
+
         let supported = SupportedFilesystems::new().expect("failed to get supported file systems");
 
         for (uuid, path_on_guest, read_only) in mount_request.mounts {

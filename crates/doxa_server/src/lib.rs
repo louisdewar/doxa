@@ -60,6 +60,16 @@ pub async fn setup_server_from_env(
         .expect("failed to startup autha client"),
     );
 
+    if let Ok(username) = env::var("DOXA_BOOTSTRAP_ADMIN") {
+        warn!(username=%username, "bootstrapping a user to become admin (unset this enironment variable after the user is an admin)");
+        autha_client
+            .make_admin_by_username(username.clone())
+            .await
+            .expect("failed to send request to autha when making user admin")
+            .expect("failed to make user admin");
+        info!(username=%username, "user is now an admin");
+    }
+
     let auth_settings = doxa_auth::Settings {
         allow_registration: false,
         autha_client,

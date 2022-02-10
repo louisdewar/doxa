@@ -19,6 +19,16 @@ async fn main() {
     let verbose = args.verbose;
     if let Err(e) = run(args).await {
         if let CliError::Command(CommandError::Request(RequestError::Doxa(doxa))) = &e {
+            if doxa.error_code == "INVALID_TOKEN" {
+                ui::error(
+                    "Please login again, your authentication token is invalid or has expired",
+                );
+
+                if !verbose {
+                    return;
+                }
+            }
+
             if let Some(message) = &doxa.message {
                 ui::error(message);
                 if verbose {

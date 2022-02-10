@@ -1,5 +1,7 @@
 //! Everything relating to drives used by DOXA and mounting them in VMs.
 
+pub(crate) const SWAP_UUID: &str = "9e5cfaba-005d-4f79-9391-4f1df84bfd4f";
+
 use std::{
     collections::HashMap,
     path::{Path, PathBuf},
@@ -50,17 +52,62 @@ pub async fn create_scratch_on_host(
     } else {
         Err(RunCommandError::BadExitCode(status))
     }
+}
 
-    // const KB_BLOCK_ZEROS: [u8; 2048] = [0; 2048];
-    // let mut file = tokio::fs::OpenOptions::new()
-    //     .append(true)
-    //     .open(destination)
-    //     .await?;
+pub async fn create_swapfile_on_host(
+    destination: impl AsRef<Path>,
+    size_mb: u64,
+) -> Result<(), RunCommandError> {
+    let status = tokio::process::Command::new("dd")
+        .arg("if=/dev/zero")
+        .arg("bs=1M")
+        .arg(format!("count={}", size_mb))
+        .arg(format!("of={}", destination.as_ref().to_string_lossy()))
+        .stdout(Stdio::null())
+        .stdin(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn()?
+        .wait()
+        .await?;
 
-    // // We write in block sizes of 2048, there are 512 of those in an mb
-    // for _ in 0..(size_mb * 512) {
-    //     file.write_all(&KB_BLOCK_ZEROS).await?;
-    // }
+    if !status.success() {
+        return Err(RunCommandError::BadExitCode(status));
+    }
+
+    let status = tokio::process::Command::new("mkswap")
+        .arg("-U")
+        .arg(SWAP_UUID)
+        .arg(destination.as_ref())
+        .stdout(Stdio::null())
+        .stdin(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn()?
+        .wait()
+        .await?;
+
+    if !status.success() {
+        return Err(RunCommandError::BadExitCode(status));
+    }
+
+    Ok(())
+}
+
+pub async fn swapon() -> Result<(), RunCommandError> {
+    let status = tokio::process::Command::new("/sbin/swapon")
+        .arg("-U")
+        .arg(SWAP_UUID)
+        .stdout(Stdio::null())
+        .stdin(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn()?
+        .wait()
+        .await?;
+
+    if status.success() {
+        Ok(())
+    } else {
+        Err(RunCommandError::BadExitCode(status))
+    }
 }
 
 fn process_blkid_line(line: &[u8]) -> Option<(&[u8], &[u8])> {

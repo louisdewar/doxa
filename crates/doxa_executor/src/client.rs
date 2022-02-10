@@ -7,8 +7,9 @@ use serde::{de::DeserializeOwned, Serialize};
 pub use crate::error::ForfeitError;
 pub use crate::{context::GameContext, error::GameError};
 
-pub const DEFAULT_AGENT_RAM_MB: u64 = 256;
+pub const DEFAULT_AGENT_RAM_MB: u64 = 512;
 pub const DEFAULT_AGENT_SCRATCH_MB: u64 = 256;
+pub const DEFAULT_AGENT_SWAP_MB: u64 = 256;
 
 /// Maintains the game state, sending input to agents and handling the output.
 #[async_trait]
@@ -40,6 +41,10 @@ pub trait GameClient: Send + Sync + 'static {
     /// Scratch space is mounted at /scratch and is used to store agent files while they download
     /// among other uses.
     const AGENT_SCRATCH_MB: u64 = DEFAULT_AGENT_SCRATCH_MB;
+
+    /// The amount of swap space that an agent will receive.
+    /// This will add to the total amount of memory that an agent will have, but typically swap will be slower as it is a file on disk.
+    const AGENT_SWAP_MB: u64 = DEFAULT_AGENT_SCRATCH_MB;
 
     /// An optional list of additional mounts for the VM (defaults to empty vec)
     fn additional_mounts(&self, _match_request: &Self::MatchRequest) -> Vec<Mount> {

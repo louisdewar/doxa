@@ -21,7 +21,6 @@ sudo mount "$ROOTFS_IMG" "$ROOTFS_DIR"
 cd ../../
 cargo build --bin vm_executor --target x86_64-unknown-linux-musl
 
-
 sudo cp ./target/x86_64-unknown-linux-musl/debug/vm_executor "$ROOTFS_DIR/sbin/vm_executor"
 
 sudo umount "$ROOTFS_IMG"

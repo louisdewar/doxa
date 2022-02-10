@@ -42,6 +42,7 @@ pub struct VMManagerArgs {
     pub kernel_boot_args: String,
     pub firecracker_path: PathBuf,
     pub memory_size_mib: u64,
+    pub swap_size_mib: u64,
     pub scratch_source_path: PathBuf,
     pub scratch_size_mib: u64,
     pub mounts: Vec<Mount>,
@@ -65,6 +66,7 @@ impl Manager {
             kernel_boot_args,
             firecracker_path,
             memory_size_mib,
+            swap_size_mib,
             scratch_source_path,
             scratch_size_mib,
             mut mounts,
@@ -80,10 +82,14 @@ impl Manager {
         tokio::fs::copy(original_rootfs, &rootfs_path).await?;
 
         let scratch_path = dir.path().join("scratch");
-
         mount::create_scratch_on_host(scratch_source_path, &scratch_path, scratch_size_mib)
             .await
             .map_err(ManagerError::CreateScratch)?;
+
+        let swap_path = dir.path().join("swap");
+        mount::create_swapfile_on_host(&swap_path, swap_size_mib)
+            .await
+            .map_err(ManagerError::CreateSwap)?;
 
         mounts.push(Mount {
             path_on_host: scratch_path,
@@ -100,6 +106,13 @@ impl Manager {
             drive_id: "rootfs".into(),
             path_on_host: rootfs_path.to_string_lossy().to_string(),
             is_root_device: true,
+            is_read_only: false,
+        });
+
+        drive_sources.push(DriveSource {
+            drive_id: "swap".into(),
+            path_on_host: swap_path.to_string_lossy().to_string(),
+            is_root_device: false,
             is_read_only: false,
         });
 

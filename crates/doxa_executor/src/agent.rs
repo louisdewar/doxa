@@ -38,6 +38,7 @@ pub enum AgentEvent<'a> {
 pub struct VMAgentSettings {
     pub agent_ram_mb: u64,
     pub scratch_size_mb: u64,
+    pub swap_size_mb: u64,
     /// All mounts excluding the scratch and rootfs which are mounted automatically
     pub mounts: Vec<Mount>,
 }
@@ -88,6 +89,7 @@ impl VMAgent {
             memory_size_mib: vm_agent_settings.agent_ram_mb,
             scratch_source_path: settings.scratch_base_image.clone(),
             scratch_size_mib: vm_agent_settings.scratch_size_mb,
+            swap_size_mib: vm_agent_settings.swap_size_mb,
             mounts: vm_agent_settings.mounts,
         };
 
