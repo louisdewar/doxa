@@ -360,10 +360,12 @@ impl VMExecutor {
                 download_location.to_str().unwrap(),
                 &format!("--directory={}", output_dir.to_str().unwrap()),
             ])
+            .uid(DOXA_UID)
+            .gid(DOXA_GID)
             .spawn()
             .expect("Couldn't spawn tar");
 
-        let status = timeout(Duration::from_secs(60), tar_process.wait())
+        let status = timeout(Duration::from_secs(60 * 2), tar_process.wait())
             .await
             .map_err(|_| ReceieveAgentError::Timeout {
                 during: "tar extraction".to_string(),
