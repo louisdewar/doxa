@@ -1,7 +1,7 @@
 import ClimateHackAPI from 'competitions/climatehack/api';
 import { useAuth } from 'hooks/useAuth';
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useHistory, useParams } from 'react-router-dom';
 import Leaderboard from '../Leaderboard';
 import UniversityLeaderboard from '../UniversityLeaderboard';
 import './LeaderboardTab.scss';
@@ -9,25 +9,20 @@ import './LeaderboardTab.scss';
 
 
 export default function LeaderboardTab({ baseUrl }) {
+  const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [leaderboard, setLeaderboard] = useState(null);
   const auth = useAuth();
-
-  useEffect(() => {
-    ClimateHackAPI.getLeaderboard('dataset_dapper').then(data => {
-      setLeaderboard(data);
-    }).catch(err => {
-      console.error(err);
-    });
-  }, []);
 
   const tabs = [
     {
       name: 'PARTICIPANTS',
-      tab: leaderboard && <Leaderboard baseUrl={baseUrl} leaderboard={leaderboard} />
+      tab: leaderboard && <Leaderboard baseUrl={baseUrl} leaderboard={leaderboard} />,
+      slug: 'participants'
     },
     {
       name: 'UNIVERSITIES',
-      tab: leaderboard && <UniversityLeaderboard baseUrl={baseUrl} leaderboard={leaderboard} />
+      tab: leaderboard && <UniversityLeaderboard baseUrl={baseUrl} leaderboard={leaderboard} />,
+      slug: 'universities'
     },
     // {
     //   name: 'ROUND 2',
@@ -37,7 +32,30 @@ export default function LeaderboardTab({ baseUrl }) {
     // },
   ];
 
-  const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const { subtab } = useParams();
+  const history = useHistory();
+
+  useEffect(() => {
+    if (subtab) {
+      setActiveTabIndex(tabs.findIndex(x => x.slug == subtab));
+    }
+  }, []);
+
+  useEffect(() => {
+    history.push(`${baseUrl}compete/leaderboard/${tabs[activeTabIndex].slug}`);
+  }, [activeTabIndex]);
+
+  useEffect(() => {
+    ClimateHackAPI.getLeaderboard('dataset_dapper').then(data => {
+      setLeaderboard(data);
+    }).catch(err => {
+      console.error(err);
+    });
+  }, []);
+
+
+
+
 
   return <div className="ch-tab ch-leaderboard-tab">
     <h2>Leaderboard</h2>

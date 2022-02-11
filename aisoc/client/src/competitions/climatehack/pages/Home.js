@@ -1,5 +1,5 @@
 import CompetitionHeader from 'components/CompetitionHeader';
-import CompetitionTabs from 'components/CompetitionTabs';
+import CompetitionTabs from '../components/CompetitionTabs';
 import FaqTab from '../components/tabs/FaqTab';
 import GettingStartedGuideTab from '../components/tabs/GettingStartedGuideTab';
 import LeaderboardTab from '../components/tabs/LeaderboardTab';
@@ -14,27 +14,33 @@ export default function Home({ baseUrl }) {
   const tabs = [
     {
       name: 'OVERVIEW',
-      tab: <OverviewTab baseUrl={baseUrl} />
+      tab: <OverviewTab baseUrl={baseUrl} />,
+      slug: 'overview'
     },
     {
       name: 'RESOURCES',
-      tab: <ResourcesTab />
+      tab: <ResourcesTab />,
+      slug: 'resources'
     },
     {
       name: 'GETTING STARTED',
-      tab: <GettingStartedGuideTab />
+      tab: <GettingStartedGuideTab />,
+      slug: 'getting-started'
     },
     {
       name: 'LEADERBOARD',
-      tab: <LeaderboardTab baseUrl={baseUrl} />
+      tab: <LeaderboardTab baseUrl={baseUrl} />,
+      slug: 'leaderboard'
     },
     {
       name: 'RULES',
-      tab: <RulesTab />
+      tab: <RulesTab />,
+      slug: 'rules'
     },
     {
       name: 'FAQ',
-      tab: <FaqTab />
+      tab: <FaqTab />,
+      slug: 'faq'
     },
   ];
 
@@ -49,6 +55,6 @@ export default function Home({ baseUrl }) {
         Make sure to join our <a href="https://discord.gg/HTTQ8AFjJp">Discord</a> and follow us on <a href="https://linktr.ee/climatehack.ai">social media</a> to receive updates throughout the competition.
       </>}
     />
-    <CompetitionTabs tabs={tabs} />
+    <CompetitionTabs tabs={tabs} baseUrl={baseUrl} />
   </>;
 }

@@ -33,7 +33,7 @@ export default function ClimateHack() {
         <Submission baseUrl={path} />
       </Layout>
     </Route>
-    <Route path={`${path}compete`}>
+    <Route path={`${path}compete/:tab?/:subtab?`}>
       <Layout>
         <Home baseUrl={path} />
       </Layout>
