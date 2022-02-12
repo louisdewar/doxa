@@ -10,7 +10,7 @@ export default function OverviewTab({ baseUrl }) {
 
     <div className='ch-tab-box'>
       <p className='leading'>
-        Your challenge &ndash; should you choose to accept it &ndash; is to predict the next two hours of satellite imagery from the previous hour of satellite imagery over a slightly larger area better than the current state of the art.
+        Your challenge &ndash; should you choose to accept it &ndash; is to predict the next two hours of satellite imagery from the previous hour of satellite imagery over quadruple the area better than the current state of the art.
       </p>
     </div>
 
@@ -44,26 +44,22 @@ export default function OverviewTab({ baseUrl }) {
     <h3>Your machine learning challenge</h3>
 
     <p className='ch-tab-box'>
-      From twelve 128&times;128-pixel images taken five minutes apart (one hour of data), predict the next two hours of satellite imagery for the smaller central 64&times;64-pixel region.
+      From twelve 128&times;128-pixel images taken five minutes apart (one hour of data), predict the next two hours of satellite imagery for the smaller central 64&times;64-pixel region. The aim is for solutions to produce accurate, sharp, non-blurry images close to the ground truth.
       <br /><br />
       <strong>Input</strong>: an hour of satellite imagery for a 128&times;128-pixel region (<code>12 timesteps &times; 128 pixels &times; 128 pixels</code>), as well as the datetime and geospatial positions of the images (which may be useful to feed into your model).
       <br /><br />
       <strong>Output</strong>: the next two hours of satellite imagery for the 64&times;64-pixel area at the centre of the input region (<code>24 timesteps &times; 64 pixels &times; 64 pixels</code>).
-    </p>
-    <p>
-      Note that this means the spatial extent of the input is larger than the output!
+      <br /><br />
+      Note that this means the spatial extent of the input is four times larger than that of the output!
     </p>
     <p>
       For the loss function and scoring metric, Open Climate Fix recommend using the multi-scale structural similarity index measure (MS-SSIM). In their experience, MSE tends to encourage models to produce overly blurry predictions, so MS-SSIM is a better option. They have a PyTorch implementation of a differentiable MS-SSIM in their <a href="https://github.com/openclimatefix/nowcasting_utils/blob/main/nowcasting_utils/models/losses/StructuralSimilarity.py#L45">GitHub repository</a>.
     </p>
     <p>
-      Having said that, you are completely free to experiment with different loss metrics; the aim is to produce accurate, sharp, non-blurry images close to the ground truth, so all interesting solutions are welcome!
+      Having said that, you are completely free to experiment with different loss metrics (e.g. MAE, PSRN, etc) or even a combination thereof; while MS-SSIM is currently used on the leaderboard, all interesting solutions that output clear, accurate image sequences are welcome! Producing sharp images useful in cloud coverage and solar photovoltaic output forecasting should be prioritised over purely maximising submissions&apos; MS-SSIM scores.
     </p>
     <p>
-      The satellite imagery dataset includes data from all hours of the day. It is recommended that you only select &quot;daylight&quot; hours, as the submissions will be tested on &quot;daylight&quot; hours only.
-    </p>
-    <p>
-      &quot;Daylight&quot; hours are defined as as hours where the sun is at least 10 degrees above the horizon, as measured from the centre of the 128&times;128 pixel input image. The angle of the sun can be computed using <a href="https://pvlib-python.readthedocs.io/en/stable/generated/pvlib.solarposition.get_solarposition.html">pvlib.solarposition.get_solarposition</a>
+      The satellite imagery dataset includes data from all hours of the day. It is recommended that you only select &quot;daylight&quot; hours, as the submissions will be tested on &quot;daylight&quot; hours only. &quot;Daylight&quot; hours are defined as as hours where the sun is at least 10 degrees above the horizon, as measured from the centre of the 128&times;128 pixel input image. The angle of the sun can be computed using <a href="https://pvlib-python.readthedocs.io/en/stable/generated/pvlib.solarposition.get_solarposition.html">pvlib.solarposition.get_solarposition</a>
     </p>
     <p>
       Given the satellite images are 1,843&times;891 pixels, you can get a huge number of 128&times;128 training examples by randomly selecting 128&times;128 crops from the satellite imagery. You just want to make sure that the entire temporal extent of each example is in &quot;daylight&quot;, i.e. the sun is at least 10 degrees above the horizon as measured from the centre of each 128&times;128 crop.
