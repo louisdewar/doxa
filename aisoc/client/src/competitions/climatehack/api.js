@@ -1,3 +1,4 @@
+import { request } from 'api/common';
 import CompetitionAPI from 'api/competition';
 
 export default class ClimateHackAPI extends CompetitionAPI {
@@ -22,5 +23,9 @@ export default class ClimateHackAPI extends CompetitionAPI {
     }
 
     return null;
+  }
+
+  static async reactivateAgent(agent, authToken) {
+    await request({ url: this.AGENT_BASE_URL + agent + '/reactivate', method: 'POST', authToken });
   }
 }

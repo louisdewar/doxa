@@ -13,6 +13,7 @@ export default function User({ baseUrl }) {
   const { user } = useParams();
   const [profile, setProfile] = useState(null);
   const [score, setScore] = useState(null);
+  const [activeAgent, setActiveAgent] = useState(null);
   const [game, setGame] = useState(null);
   const [events, setEvents] = useState(null);
   const [error, setError] = useState(false);
@@ -40,6 +41,7 @@ export default function User({ baseUrl }) {
 
       const data = await ClimateHackAPI.getUserScore(user, 'dataset_dapper');
       setScore(data.score || 0.0);
+      setActiveAgent(data.agent);
     } catch (e) {
       setError(true);
       if (e instanceof DoxaError) {
@@ -105,6 +107,20 @@ export default function User({ baseUrl }) {
           className={activeTabIndex == i ? 'activeTab' : ''}
           onClick={() => setActiveTabIndex(i)}
         >{tab.name}</a>)}
+        {auth.user && auth.user.admin && activeAgent && <a
+          href="#"
+          onClick={async e => {
+            e.preventDefault();
+            try {
+              await ClimateHackAPI.reactivateAgent(activeAgent, auth.token);
+              location.reload();
+            } catch {
+              console.error(`Could not reactivate agent ${activeAgent}`);
+            }
+          }}
+        >
+          Reactivate
+        </a>}
       </div>
 
       {tabs[activeTabIndex].tab}
