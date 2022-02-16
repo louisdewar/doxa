@@ -63,6 +63,8 @@ export default function GettingStartedGuideTab() {
       numpy (1.21.5),
       opencv-contrib-python-headless (4.5.5.62),
       opt-einsum (3.3.0),
+      einops (0.4.0),
+      perceiver-pytorch (0.8.3),
       pandas (1.4.0),
       Pillow (9.0.1),
       scikit-learn (1.0.2),
