@@ -1,4 +1,4 @@
-import { request } from 'api/common';
+import { request, requestGet } from 'api/common';
 import CompetitionAPI from 'api/competition';
 
 export default class ClimateHackAPI extends CompetitionAPI {
@@ -27,5 +27,10 @@ export default class ClimateHackAPI extends CompetitionAPI {
 
   static async reactivateAgent(agent, authToken) {
     await request({ url: this.AGENT_BASE_URL + agent + '/reactivate', method: 'POST', authToken });
+  }
+
+  static async downloadAgent(agent, authToken) {
+    const response = await requestGet({ url: this.STORAGE_DOWNLOAD_BASE_URL + agent, authToken });
+    return await response.blob();
   }
 }

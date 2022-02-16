@@ -32,6 +32,10 @@ export default class CompetitionAPI {
     return `${process.env.REACT_APP_API_BASE_URL}competition/${this.COMPETITION_ID}/_user/`;
   }
 
+  static get STORAGE_DOWNLOAD_BASE_URL() {
+    return `${process.env.REACT_APP_API_BASE_URL}storage/download/${this.COMPETITION_ID}/`;
+  }
+
   /* Agent */
 
   static async getAgentGames(agent) {

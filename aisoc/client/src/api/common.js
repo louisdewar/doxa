@@ -7,7 +7,7 @@ export class DoxaError extends Error {
   }
 }
 
-async function requestGet({ url, params = {}, authToken = null }) {
+export async function requestGet({ url, params = {}, authToken = null }) {
   const searchParams = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
     searchParams.append(key, value);
@@ -21,7 +21,7 @@ async function requestGet({ url, params = {}, authToken = null }) {
   });
 }
 
-async function requestPost({ url, params = {}, authToken = null }) {
+export async function requestPost({ url, params = {}, authToken = null }) {
   const headers = {
     'Content-Type': 'application/json'
   };

@@ -1,3 +1,5 @@
+import { faArrowCircleDown, faSync } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { DoxaError } from 'api/common';
 import Card from 'components/Card';
 import { useAuth } from 'hooks/useAuth';
@@ -107,20 +109,46 @@ export default function User({ baseUrl }) {
           className={activeTabIndex == i ? 'activeTab' : ''}
           onClick={() => setActiveTabIndex(i)}
         >{tab.name}</a>)}
-        {auth.user && auth.user.admin && activeAgent && <a
-          href="#"
-          onClick={async e => {
-            e.preventDefault();
-            try {
-              await ClimateHackAPI.reactivateAgent(activeAgent, auth.token);
-              location.reload();
-            } catch {
-              console.error(`Could not reactivate agent ${activeAgent}`);
-            }
-          }}
-        >
-          Reactivate
-        </a>}
+        {auth.user && auth.user.admin && activeAgent && <>
+          <a
+            href="#"
+            onClick={async e => {
+              e.preventDefault();
+              try {
+                await ClimateHackAPI.reactivateAgent(activeAgent, auth.token);
+                location.reload();
+              } catch {
+                console.error(`Could not reactivate agent ${activeAgent}`);
+              }
+            }}
+          >
+            <FontAwesomeIcon icon={faSync} size='sm' fixedWidth />
+          </a>
+
+          <a
+            href="#"
+            onClick={async e => {
+              e.preventDefault();
+              try {
+                e.target.style = 'display: none';
+                const blob = await ClimateHackAPI.downloadAgent(activeAgent, auth.token);
+                e.target.style = 'display: inline-block';
+
+                const link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                link.download = `${activeAgent}.tar.gz`;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+              } catch {
+                console.error(`Could not download agent ${activeAgent}`);
+              }
+            }}
+          >
+            <FontAwesomeIcon icon={faArrowCircleDown} size='sm' fixedWidth />
+          </a>
+
+        </>}
       </div>
 
       {tabs[activeTabIndex].tab}
