@@ -11,9 +11,9 @@ const Partners = lazy(() => import('./pages/Partners'));
 const Splash = lazy(() => import('./pages/Splash'));
 const User = lazy(() => import('./pages/User'));
 
-function Layout({ children }) {
+function Layout({ children, baseUrl }) {
   return <div className='main-wrapper'>
-    <Navbar competition="climatehack/compete" competitionName="Climate Hack.AI" />
+    <Navbar competition="climatehack" competitionName="Climate Hack.AI" competitionLink={`${baseUrl}compete`} />
     <Container>{children}</Container>
     <Footer />
   </div>;
@@ -24,17 +24,17 @@ export default function ClimateHack() {
 
   return <Switch>
     <Route path={`${path}user/:user`}>
-      <Layout>
+      <Layout baseUrl={path}>
         <User baseUrl={path} />
       </Layout>
     </Route>
     <Route path={`${path}submission/:id`}>
-      <Layout>
+      <Layout baseUrl={path}>
         <Submission baseUrl={path} />
       </Layout>
     </Route>
     <Route path={`${path}compete/:tab?/:subtab?`}>
-      <Layout>
+      <Layout baseUrl={path}>
         <Home baseUrl={path} />
       </Layout>
     </Route>
