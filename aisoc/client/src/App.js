@@ -1,5 +1,4 @@
 import { AuthProvider, useAuth } from 'hooks/useAuth';
-import Terms from 'pages/Terms';
 import { lazy, Suspense } from 'react';
 import {
   BrowserRouter as Router, Redirect, Route, Switch
@@ -13,6 +12,7 @@ const Authenticate = lazy(() => import('pages/Authenticate'));
 const Error404 = lazy(() => import('pages/Error404'));
 const Landing = lazy(() => import('pages/Landing'));
 const Logout = lazy(() => import('pages/Logout'));
+const Rules = lazy(() => import('competitions/climatehack/pages/Rules'));
 
 
 
@@ -50,8 +50,8 @@ function Routes() {
       <Route path='/authenticate'>
         <Authenticate />
       </Route>
-      <Route path='/terms'>
-        <Terms />
+      <Route path='/rules'>
+        <Rules />
       </Route>
 
       {multipleCompetitionsAllowed

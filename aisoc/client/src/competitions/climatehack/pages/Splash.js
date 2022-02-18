@@ -286,7 +286,7 @@ export default function Splash({ baseUrl }) {
               Submissions in the first round are individual; however, we encourage collaboration between participants. It may be a competition, but everyone is working as a team to beat climate change.
             </p>
             <p>
-              Detailed competition rules and submission instructions may be found on our competition platform, <Link to={`${baseUrl}compete#4`}>DOXA</Link>.
+              Participants must abide by the <Link to="/rules" target="_blank" rel="noopener noreferrer">competition rules</Link>. Detailed competition submission instructions may be found on our competition platform, <Link to={`${baseUrl}compete#4`}>DOXA</Link>.
             </p>
           </div>
         </div>
@@ -296,7 +296,7 @@ export default function Splash({ baseUrl }) {
         <div className='ch-section-content ch-section-content'>
           <div className='ch-section-heading ch-section-heading'>
             <h2>
-              Joint Final in New York and London
+              Joint Final in London and New York
             </h2>
           </div>
           <div className='ch-splash-joint-final-description'>

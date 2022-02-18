@@ -72,5 +72,13 @@ export default function OverviewTab({ baseUrl }) {
     </p>
 
     <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/IOp-tj-IJpk" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
+
+    <h3>Rules</h3>
+    <p>
+      In order to participate, you must comply with the <Link to='/rules'>competition rules</Link>. We encourage collaboration: you are free to talk about, develop and share solutions with other participants! Just note that only the top-three competitors from each university will be put forward to the final. Compete fairly and treat other participants with respect.
+    </p>
+    <p>
+      Have fun, and happy model training!
+    </p>
   </div>;
 }

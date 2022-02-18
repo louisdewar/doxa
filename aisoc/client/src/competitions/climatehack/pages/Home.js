@@ -5,7 +5,6 @@ import GettingStartedGuideTab from '../components/tabs/GettingStartedGuideTab';
 import LeaderboardTab from '../components/tabs/LeaderboardTab';
 import OverviewTab from '../components/tabs/OverviewTab';
 import ResourcesTab from '../components/tabs/ResourcesTab';
-import RulesTab from '../components/tabs/RulesTab';
 import './Home.scss';
 
 export default function Home({ baseUrl }) {
@@ -32,11 +31,11 @@ export default function Home({ baseUrl }) {
       tab: <LeaderboardTab baseUrl={baseUrl} />,
       slug: 'leaderboard'
     },
-    {
-      name: 'RULES',
-      tab: <RulesTab />,
-      slug: 'rules'
-    },
+    // {
+    //   name: 'RULES',
+    //   tab: <RulesTab />,
+    //   slug: 'rules'
+    // },
     {
       name: 'FAQ',
       tab: <FaqTab />,
