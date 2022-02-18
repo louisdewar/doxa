@@ -122,6 +122,20 @@ pub enum GameContextError {
     RebootError(AgentLifecycleManagerError),
     #[display(fmt = "failed to take a file from inside the VM")]
     TakeFile(TakeFileManagerError),
+    #[display(fmt = "error creating/cleaning up the tempdir for the workspace")]
+    WorkDir(TempDirError),
+}
+
+impl GameContextError {
+    pub fn is_message_receive_timeout(&self) -> bool {
+        matches!(&self, GameContextError::TimeoutWaitingForMessage { .. })
+    }
+}
+
+#[derive(Display, Error, From, Debug)]
+pub enum TempDirError {
+    JoinError(tokio::task::JoinError),
+    IO(io::Error),
 }
 
 impl ForfeitError for GameContextError {
@@ -142,6 +156,7 @@ impl ForfeitError for GameContextError {
             // TODO: In future both these errors should probably be forfeits
             GameContextError::RebootError(_) => None,
             GameContextError::TakeFile(_) => None,
+            GameContextError::WorkDir(_) => None,
         }
     }
 
@@ -163,6 +178,7 @@ impl ForfeitError for GameContextError {
             GameContextError::ReservedEventType => None,
             GameContextError::RebootError(_) => None,
             GameContextError::TakeFile(_) => None,
+            GameContextError::WorkDir(_) => None,
         }
     }
 }

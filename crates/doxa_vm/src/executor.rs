@@ -32,17 +32,18 @@ use crate::{
 use self::agent::RunningAgent;
 
 mod agent;
-mod spawn;
+pub mod spawn;
 
 /// The UID of the unprivileged DOXA user whose home directory is `/home/doxa`
 pub const DOXA_UID: u32 = 1000;
 pub const DOXA_GID: u32 = 1000;
 
 /// An upper bound on the agent tar size for sanity reasons, measured in bytes
-pub const MAX_AGENT_SIZE: usize = 50_000_000;
+pub const MAX_AGENT_SIZE: usize = 3_000_000_000;
 /// Maximum length for messages other than the agent file in bytes
-pub const MAX_MSG_LEN: usize = 5_000;
+pub const MAX_MSG_LEN: usize = 50_000_000;
 pub const MAX_FILE_NAME_LEN: usize = 300;
+pub const STDERR_LEN: usize = 100_000;
 
 /// This is the server that runs inside of the VM.
 pub struct VMExecutor {
@@ -121,7 +122,7 @@ impl VMExecutor {
                 .stderr
                 .take()
                 .unwrap()
-                .take(MAX_MSG_LEN as u64)
+                .take(STDERR_LEN as u64)
                 .read_to_string(&mut err_output)
                 .await?;
         }
@@ -274,6 +275,10 @@ impl VMExecutor {
             .await
             .map_err(HandleMountsError::FindDrives)?;
 
+        mount::swapon()
+            .await
+            .map_err(HandleMountsError::ActivateSwap)?;
+
         let supported = SupportedFilesystems::new().expect("failed to get supported file systems");
 
         for (uuid, path_on_guest, read_only) in mount_request.mounts {
@@ -355,10 +360,12 @@ impl VMExecutor {
                 download_location.to_str().unwrap(),
                 &format!("--directory={}", output_dir.to_str().unwrap()),
             ])
+            .uid(DOXA_UID)
+            .gid(DOXA_GID)
             .spawn()
             .expect("Couldn't spawn tar");
 
-        let status = timeout(Duration::from_secs(60), tar_process.wait())
+        let status = timeout(Duration::from_secs(60 * 2), tar_process.wait())
             .await
             .map_err(|_| ReceieveAgentError::Timeout {
                 during: "tar extraction".to_string(),
@@ -369,6 +376,10 @@ impl VMExecutor {
         }
 
         stream.send_full_message(b"RECEIVED").await?;
+
+        tokio::fs::remove_file(download_location)
+            .await
+            .expect("Couldn't delete agent tar");
 
         Ok(())
     }

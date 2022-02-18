@@ -1,0 +1,108 @@
+@import 'common/common';
+@import 'common/colours';
+@import 'common/fonts';
+@import "../pages/splash-common.scss";
+
+button.ch-button {
+  margin: 2rem 1rem 1rem 0;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  border: 0;
+  border-radius: 3px;
+  color: #fff;
+  // font-family: $monospace-font;
+  cursor: pointer;
+
+  &.ch-compete-button {
+    background-color: $ch-green;
+
+    &:hover {
+      background-color: darken($ch-green, 5%);
+    }
+
+    &:active {
+      background-color: darken($ch-green, 10%);
+    }
+  }
+
+  &.ch-linktree-button {
+    background-color: $ch-blue;
+
+    &:hover {
+      background-color: darken($ch-blue, 5%);
+    }
+
+    &:active {
+      background-color: darken($ch-blue, 10%);
+    }
+  }
+}
+
+header.ch-splash-header {
+  margin-top: 65px;
+  height: calc(100vh - 66px);
+
+  background-color: #000;
+  background-image: url('/competitions/climatehack/assets/globe.webp');
+
+  // background-image: -webkit-image-set(url("/competitions/climatehack/assets/globe.avif") type("image/avif"),
+  //     url("/competitions/climatehack/assets/globe.png") type("image/png"));
+  // background-image: image-set(url("/competitions/climatehack/assets/globe.avif") type("image/avif"),
+  //     url("/competitions/climatehack/assets/globe.png") type("image/png"));
+
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: left;
+
+  .ch-splash-header-title {
+    color: #f1f5f9;
+    display: flex;
+    align-items: center;
+    flex: 1;
+
+    .ch-splash-header-title-content {
+      margin-left: 10vw;
+    }
+
+    h1,
+    h2 {
+      margin-top: 0;
+      margin-bottom: 0;
+      font-size: 3.5rem;
+
+      text-decoration: underline;
+      text-decoration-color: $ch-primary-accent-transparent;
+      text-underline-offset: 0.1rem;
+    }
+
+    h2 {
+      span {
+        font-weight: 300;
+      }
+    }
+  }
+
+  .ch-scroll-to-about {
+    margin-top: auto;
+    padding: 0.5rem;
+
+    text-align: center;
+    font-size: 4rem;
+    display: flex;
+
+    div {
+      flex: 1;
+      flex-basis: 0;
+      align-self: center;
+    }
+
+    a {
+      color: #fff;
+    }
+  }
+}

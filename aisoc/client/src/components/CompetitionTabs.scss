@@ -1,3 +1,4 @@
+@import 'common/common';
 @import 'common/colours';
 @import 'common/fonts';
 
@@ -10,6 +11,10 @@
       text-decoration: none;
       text-underline-offset: 0.2rem;
       color: #1F2937;
+
+      @media screen and (max-width: $breakpoint-sm) {
+        line-height: 1.5;
+      }
 
       &.activeTab {
         text-decoration: underline;

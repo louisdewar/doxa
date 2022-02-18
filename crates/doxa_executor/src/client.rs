@@ -1,14 +1,15 @@
 use std::error;
 
 use async_trait::async_trait;
-use doxa_vm::mount::Mount;
+pub use doxa_vm::mount::Mount;
 use serde::{de::DeserializeOwned, Serialize};
 
 pub use crate::error::ForfeitError;
 pub use crate::{context::GameContext, error::GameError};
 
-pub const DEFAULT_AGENT_RAM_MB: u64 = 256;
+pub const DEFAULT_AGENT_RAM_MB: u64 = 512;
 pub const DEFAULT_AGENT_SCRATCH_MB: u64 = 256;
+pub const DEFAULT_AGENT_SWAP_MB: u64 = 256;
 
 /// Maintains the game state, sending input to agents and handling the output.
 #[async_trait]
@@ -32,23 +33,27 @@ pub trait GameClient: Send + Sync + 'static {
     /// This defaults to [`DEFAULT_AGENT_RAM_MB`].
     /// NOTE: this is the total amount of ram including that which is used by the guest OS not just
     /// the agent.
-    const AGENT_RAM: u64 = DEFAULT_AGENT_RAM_MB;
+    const AGENT_RAM_MB: u64 = DEFAULT_AGENT_RAM_MB;
 
     /// The amount of scratch space that an agent's VM is given measured in mega-bytes.
     /// This defaults to [`DEFAULT_AGENT_SCRATCH_MB`].
     ///
     /// Scratch space is mounted at /scratch and is used to store agent files while they download
     /// among other uses.
-    const AGENT_SCRATCH: u64 = DEFAULT_AGENT_SCRATCH_MB;
+    const AGENT_SCRATCH_MB: u64 = DEFAULT_AGENT_SCRATCH_MB;
+
+    /// The amount of swap space that an agent will receive.
+    /// This will add to the total amount of memory that an agent will have, but typically swap will be slower as it is a file on disk.
+    const AGENT_SWAP_MB: u64 = DEFAULT_AGENT_SCRATCH_MB;
 
     /// An optional list of additional mounts for the VM (defaults to empty vec)
-    fn additional_mounts(_match_request: &Self::MatchRequest) -> Vec<Mount> {
+    fn additional_mounts(&self, _match_request: &Self::MatchRequest) -> Vec<Mount> {
         vec![]
     }
 
     /// Runs the game until completion.
-    /// TODO: allow this method to take in the competition
     async fn run<'a>(
+        &self,
         match_request: Self::MatchRequest,
         context: &mut GameContext<'a, Self>,
     ) -> Result<(), GameError<Self::Error>>;

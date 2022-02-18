@@ -3,16 +3,16 @@ use std::{future::Future, pin::Pin};
 use actix_web::{web, HttpResponse};
 use doxa_core::RespondableError;
 
-use crate::error::UserNotAdmin;
+use crate::error::{SystemAccountsNotAllowed, UserNotAdmin};
 
 pub struct AuthGuard<T: AuthGuardInner = ()> {
-    user: i32,
+    user: Option<i32>,
     is_admin: bool,
     inner: T,
 }
 
 impl<T: AuthGuardInner> AuthGuard<T> {
-    pub fn new(user: i32, is_admin: bool, inner: T) -> Self {
+    pub fn new(user: Option<i32>, is_admin: bool, inner: T) -> Self {
         AuthGuard {
             user,
             is_admin,
@@ -20,8 +20,12 @@ impl<T: AuthGuardInner> AuthGuard<T> {
         }
     }
 
-    pub fn id(&self) -> i32 {
+    pub fn id(&self) -> Option<i32> {
         self.user
+    }
+
+    pub fn id_required(&self) -> Result<i32, SystemAccountsNotAllowed> {
+        self.user.ok_or(SystemAccountsNotAllowed)
     }
 
     pub fn admin(&self) -> bool {

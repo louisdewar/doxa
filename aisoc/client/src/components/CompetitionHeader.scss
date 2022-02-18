@@ -1,4 +1,5 @@
-@import '../common/colours';
+@import 'common/common';
+@import 'common/colours';
 
 .competitionHeader {
   h1 {
@@ -6,6 +7,12 @@
     text-decoration: underline;
     font-size: 3rem;
     margin-top: 0;
+
+    @media screen and (max-width: $breakpoint-sm) {
+      font-size: 2rem;
+      text-underline-offset: 0.4rem;
+      line-height: 1.5;
+    }
   }
 
   p {

@@ -1,0 +1,40 @@
+@import 'common/fonts';
+
+.ch-uni-leaderboard {
+  font-family: $monospace-font;
+
+  .ch-uni-leaderboard-header {
+    font-weight: bold;
+    font-style: italic;
+  }
+
+  .ch-uni-leaderboard-entry {
+    display: flex;
+    margin-bottom: 10px;
+    gap: 0.25rem;
+
+    .ch-uni-leaderboard-position {
+      flex: 0 0 auto;
+      width: 4ch;
+    }
+
+    .ch-uni-leaderboard-university {
+      flex: 4 1 auto;
+      flex-basis: 0;
+
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ch-uni-leaderboard-participants {
+      flex: 1 1 auto;
+      flex-basis: 0;
+    }
+
+    .ch-uni-leaderboard-score {
+      flex: 0 0 auto;
+      width: 10ch;
+    }
+  }
+}

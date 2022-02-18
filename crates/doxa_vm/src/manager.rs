@@ -5,6 +5,7 @@ use crate::error::{
 use crate::manager::ManagerError::TimeoutWaitingForVMConnection;
 use crate::mount::{self, Mount, MountRequest};
 use crate::recorder::VMRecorder;
+use doxa_firecracker_sdk::spawn::{BootSource, DriveSource, MachineConfig};
 use std::time::Duration;
 use std::{io, path::PathBuf};
 use tokio::time::timeout;
@@ -41,6 +42,7 @@ pub struct VMManagerArgs {
     pub kernel_boot_args: String,
     pub firecracker_path: PathBuf,
     pub memory_size_mib: u64,
+    pub swap_size_mib: u64,
     pub scratch_source_path: PathBuf,
     pub scratch_size_mib: u64,
     pub mounts: Vec<Mount>,
@@ -64,6 +66,7 @@ impl Manager {
             kernel_boot_args,
             firecracker_path,
             memory_size_mib,
+            swap_size_mib,
             scratch_source_path,
             scratch_size_mib,
             mut mounts,
@@ -79,22 +82,14 @@ impl Manager {
         tokio::fs::copy(original_rootfs, &rootfs_path).await?;
 
         let scratch_path = dir.path().join("scratch");
-
         mount::create_scratch_on_host(scratch_source_path, &scratch_path, scratch_size_mib)
             .await
             .map_err(ManagerError::CreateScratch)?;
 
-        let mut vm = VMOptions {
-            memory_size_mib,
-            vcpus: 1,
-            kernel_image_path: kernel_img,
-            kernel_boot_args,
-            rootfs_path,
-            rootfs_read_only: false,
-            socket: dir.path().join("socket"),
-        }
-        .spawn(firecracker_path)
-        .await?;
+        let swap_path = dir.path().join("swap");
+        mount::create_swapfile_on_host(&swap_path, swap_size_mib)
+            .await
+            .map_err(ManagerError::CreateSwap)?;
 
         mounts.push(Mount {
             path_on_host: scratch_path,
@@ -106,13 +101,28 @@ impl Manager {
             mounts: Vec::with_capacity(mounts.len()),
         };
 
+        let mut drive_sources = Vec::with_capacity(mounts.len() + 1);
+        drive_sources.push(DriveSource {
+            drive_id: "rootfs".into(),
+            path_on_host: rootfs_path.to_string_lossy().to_string(),
+            is_root_device: true,
+            is_read_only: false,
+        });
+
+        drive_sources.push(DriveSource {
+            drive_id: "swap".into(),
+            path_on_host: swap_path.to_string_lossy().to_string(),
+            is_root_device: false,
+            is_read_only: false,
+        });
+
         for (i, mount) in mounts.into_iter().enumerate() {
-            vm.mount_drive(
-                format!("drive_{}", i),
-                mount.path_on_host.to_string_lossy().to_string(),
-                mount.read_only,
-            )
-            .await?;
+            drive_sources.push(DriveSource {
+                drive_id: format!("drive_{}", i),
+                path_on_host: mount.path_on_host.to_string_lossy().to_string(),
+                is_root_device: false,
+                is_read_only: mount.read_only,
+            });
 
             let uuid = mount::get_image_uuid(mount.path_on_host)
                 .await
@@ -123,6 +133,30 @@ impl Manager {
                 .push((uuid, mount.path_on_guest, mount.read_only));
         }
 
+        let vm_options = VMOptions {
+            boot_source: BootSource {
+                kernel_image_path: kernel_img.to_string_lossy().to_string(),
+                boot_args: kernel_boot_args,
+            },
+            drives: drive_sources,
+            machine_config: MachineConfig {
+                vcpu_count: 4,
+                mem_size_mib: memory_size_mib,
+            },
+            vsock: doxa_firecracker_sdk::spawn::Vsock {
+                vsock_id: "1".into(),
+                guest_cid: 3,
+                uds_path: dir.path().join("v.sock").to_string_lossy().to_string(),
+            },
+        };
+
+        let vm_options_path = dir.path().join("vm_options.json");
+        vm_options.save(&vm_options_path).await?;
+
+        // Begin listening for connections on port 1001 before VM boots up
+        let listener = UnixListener::bind(dir.path().join("v.sock_1001")).unwrap();
+        let mut vm = VM::spawn(vm_options_path, firecracker_path).await?;
+
         let stdout = vm.firecracker_process().stdout.take().unwrap();
         let stderr = vm.firecracker_process().stderr.take().unwrap();
 
@@ -130,7 +164,7 @@ impl Manager {
 
         // We wrap this section because if there's an error we probably want the VM logs for
         // debugging and it's quite a hassle to write that code for each error.
-        let stream = match Self::startup_process(&mut vm, &dir, &mount_request).await {
+        let stream = match Self::startup_process(listener, &mount_request).await {
             Ok(stream) => stream,
             Err(e) => {
                 let logs = recorder.retrieve_logs().await;
@@ -152,23 +186,10 @@ impl Manager {
     }
 
     async fn startup_process(
-        vm: &mut VM,
-        dir: &TempDir,
+        listener: UnixListener,
         mount_request: &MountRequest,
     ) -> Result<Stream<UnixStream>, ManagerError> {
-        // Begin listening for connections on port 1001
-        let listener = UnixListener::bind(dir.path().join("v.sock_1001")).unwrap();
-
-        vm.create_vsock(
-            "1".to_string(),
-            3,
-            dir.path().join("v.sock").to_string_lossy().to_string(),
-        )
-        .await?;
-
-        vm.instance_start().await?;
-
-        let (stream, _addr) = timeout(Duration::from_secs(30), listener.accept())
+        let (stream, _addr) = timeout(Duration::from_secs(45), listener.accept())
             .await
             .map_err(|_| TimeoutWaitingForVMConnection)??;
 

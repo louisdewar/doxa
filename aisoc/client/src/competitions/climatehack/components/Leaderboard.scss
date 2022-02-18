@@ -1,0 +1,66 @@
+@import 'common/fonts';
+
+.ch-leaderboard {
+  font-family: $monospace-font;
+
+  .ch-leaderboard-header {
+    font-weight: bold;
+    font-style: italic;
+  }
+
+  .ch-leaderboard-pagination {
+    a {
+      text-decoration: underline;
+      cursor: pointer;
+
+      &.ch-leaderboard-pagination-active {
+        text-decoration: none;
+      }
+    }
+  }
+
+  .ch-leaderboard-entry {
+    display: flex;
+    margin-bottom: 10px;
+    gap: 0.25rem;
+
+    .ch-leaderboard-position {
+      flex: 0 0 auto;
+      width: 4ch;
+    }
+
+    .ch-leaderboard-username {
+      flex: 4 1 auto;
+      flex-basis: 0;
+
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      a {
+        color: #fff;
+        text-underline-offset: 0.2rem;
+      }
+
+      .ch-leaderboard-username-highlighted {
+        font-weight: 700;
+        text-decoration: none;
+      }
+    }
+
+    .ch-leaderboard-university {
+      flex: 2 1 auto;
+      flex-basis: 0;
+      min-width: 11ch;
+
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ch-leaderboard-score {
+      flex: 0 0 auto;
+      width: 10ch;
+    }
+  }
+}

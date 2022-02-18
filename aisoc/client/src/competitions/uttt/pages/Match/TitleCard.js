@@ -29,6 +29,6 @@ export default function TitleCard({ players, scores, baseUrl, completedAt, cance
     <p className='completed'>
       <FontAwesomeIcon icon={faClock} size='sm' fixedWidth /> This match {end}.<br />
       {duration && <><FontAwesomeIcon icon={faHourglassEnd} size='sm' fixedWidth /> This match lasted {duration}.</>}
-    </p>
-  </Card>;
+    </p >
+  </Card >;
 }

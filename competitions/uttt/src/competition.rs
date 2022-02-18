@@ -80,4 +80,8 @@ impl Competition for UTTTCompetition {
     ) -> Option<serde_json::Value> {
         Some(serde_json::to_value(game_event).expect("failed to serialize game event"))
     }
+
+    fn build_game_client(&self) -> Self::GameClient {
+        Self::GameClient::default()
+    }
 }

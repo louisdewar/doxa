@@ -7,5 +7,8 @@ edition = "2021"
 
 doxa_server = { path = "../../crates/doxa_server" }
 uttt = { path = "../../competitions/uttt" }
+climatehack = { path = "../../competitions/climatehack" }
 
 actix-web = "4.0.0-beta.14"
+clap = { version = "3.0.10", features = ["derive", "env"] }
+dotenv = "0.15.0"

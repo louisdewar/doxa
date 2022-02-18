@@ -51,9 +51,15 @@ impl<C: Competition> Context<C> {
     /// This sets the agent's active field to false, and sets the outdated field to true for every
     /// game that this agent participated in.
     async fn deactivate_agent_db(&self, agent_id: String) -> Result<AgentUpload, ContextError> {
+        let competition_id = self.competition_id();
+
         self.run_query(move |conn| {
             let agent = doxa_db::action::storage::mark_agent_deactive_by_id(conn, agent_id)?;
-            doxa_db::action::game::mark_games_with_player_as_outdated(conn, agent.owner)?;
+            doxa_db::action::game::mark_games_with_player_as_outdated(
+                conn,
+                agent.owner,
+                competition_id,
+            )?;
             Ok(agent)
         })
         .await
@@ -102,11 +108,16 @@ impl<C: Competition> AgentActivationManager<C> {
         {
             let span = span!(Level::INFO, "deactiving agent before activating new one", old_agent = %deactivated_agent.id);
 
+            let competition_id = self.context.competition_id();
             self.context
                 .run_query({
                     let user = deactivated_agent.owner;
                     move |conn| {
-                        doxa_db::action::game::mark_games_with_player_as_outdated(conn, user)
+                        doxa_db::action::game::mark_games_with_player_as_outdated(
+                            conn,
+                            user,
+                            competition_id,
+                        )
                     }
                 })
                 .await?;

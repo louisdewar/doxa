@@ -1,5 +1,6 @@
 import Card from 'components/Card';
 import Container from 'components/Container';
+import Footer from 'components/Footer';
 import Navbar from 'components/Navbar';
 import { Link } from 'react-router-dom';
 import './Landing.scss';
@@ -7,7 +8,7 @@ import './Landing.scss';
 
 
 export default function Landing({ competitions }) {
-  return <>
+  return <div className='main-wrapper'>
     <Navbar />
     <Container>
       {location.hash && location.hash.length > 1 && location.hash.includes('invite-success') && <Card darker>
@@ -41,5 +42,6 @@ export default function Landing({ competitions }) {
         </h2>
       </Card>)}
     </Container>
-  </>;
+    <Footer />
+  </div>;
 }

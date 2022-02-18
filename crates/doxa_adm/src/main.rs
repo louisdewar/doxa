@@ -6,7 +6,6 @@ use doxa_db::diesel::PgConnection;
 // mod agent;
 mod cli;
 mod competition;
-mod invite;
 mod user;
 
 fn get_db_connection() -> PgConnection {
@@ -25,7 +24,6 @@ fn main() {
 
     match args.command {
         cli::MainCommands::User(subcommand) => user::handle_subcommand(subcommand, &connection),
-        cli::MainCommands::Invite(subcommand) => invite::handle_subcommand(subcommand, &connection),
         cli::MainCommands::Competition(subcommand) => {
             competition::handle_subcommand(subcommand, &connection)
         }

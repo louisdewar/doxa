@@ -1,0 +1,199 @@
+@import 'common/common';
+@import 'common/colours';
+@import 'common/fonts';
+@import "./splash-common.scss";
+
+:root {
+  --ch-uni-logo-margin: 0.4em;
+}
+
+section.ch-section {
+  &.ch-splash-about {
+    background-color: #111827;
+
+    .ch-section-content>div p:first-child {
+      @include bigBoldParagraph;
+    }
+  }
+
+  &.ch-splash-universities {
+    background-color: $ch-blue;
+
+    .ch-splash-universities-logos {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+
+      img {
+        box-sizing: border-box;
+        height: 3rem;
+      }
+    }
+  }
+
+  &.ch-splash-format {
+    background-color: #282a2d;
+
+    .ch-splash-format-description {
+      text-align: center;
+
+      h3,
+      p {
+        text-align: left;
+      }
+
+      p a {
+        color: #fff;
+        text-underline-offset: 0.1rem;
+      }
+
+      .ch-splash-format-columns {
+        display: flex;
+        justify-content: center;
+
+        h3 {
+          text-align: center;
+        }
+
+        p {
+          text-align: center;
+        }
+
+        div {
+          padding: 1rem;
+        }
+
+        &>* {
+          flex: 1;
+        }
+      }
+
+      svg {
+        width: 56%;
+      }
+    }
+  }
+
+  &.ch-splash-prizes {
+    background-color: $ch-green;
+
+    // .ch-section-heading {
+    //   h2 {
+    //     font-size: 2.5rem;
+    //   }
+    // }
+
+    .ch-splash-prizes-descriptions {
+      text-align: center;
+      width: 100%;
+
+      .ch-splash-prizes-descriptions-label {
+        text-align: center;
+      }
+
+      span {
+        font-weight: bold;
+        font-size: 3rem;
+      }
+
+      .ch-splash-prizes-columns {
+        display: flex;
+        justify-content: center;
+        text-align: center;
+
+        h3 {
+          font-weight: normal;
+          font-size: 0.9rem;
+        }
+
+        span {
+          font-size: 1.5rem;
+        }
+
+        &>* {
+          flex: 1;
+        }
+      }
+    }
+  }
+
+  &.ch-splash-tangible-impact {
+    background-color: #f1f5f9;
+    color: #000;
+
+    .ch-section-heading h2,
+    a {
+      color: $ch-blue;
+      text-underline-offset: 0.05rem;
+    }
+
+    .ch-splash-tangible-impact-description>p:first-child {
+      @include bigBoldParagraph;
+    }
+  }
+
+  &.ch-splash-joint-final {
+    background-color: #f1f5f9;
+    color: #000;
+
+    .ch-section-heading h2,
+    a {
+      color: $ch-blue;
+      text-underline-offset: 0.1rem;
+    }
+
+    .ch-splash-joint-final-description>p:first-child {
+      @include bigBoldParagraph;
+    }
+  }
+
+  &.ch-splash-community-connection {
+    background-color: #f1f5f9;
+
+    .ch-section-heading h2 {
+      color: $ch-blue;
+      text-underline-offset: 0.05rem;
+    }
+
+    .ch-splash-tangible-impact-description>p:first-child {
+      @include bigBoldParagraph;
+    }
+  }
+}
+
+@media screen and (min-width: $breakpoint-sm) {
+  :root {
+    --ch-uni-logo-margin: 0.7em;
+  }
+
+  header.ch-splash-header {
+    margin-top: 73px;
+    height: calc(100vh - 73px);
+
+    .ch-splash-header-title h1,
+    .ch-splash-header-title h2 {
+      font-size: 6rem;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-weight: 400;
+
+      span {
+        font-weight: 700;
+      }
+    }
+  }
+
+  section.ch-section {
+    &.ch-splash-universities .ch-splash-universities-logos img {
+      height: 3.7rem;
+    }
+  }
+}
+
+@media screen and (min-width: $breakpoint-lg) {
+  section.ch-section {
+    &.ch-splash-universities .ch-splash-universities-logos img {
+      height: 4.5rem;
+    }
+  }
+}

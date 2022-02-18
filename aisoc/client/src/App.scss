@@ -1,3 +1,4 @@
+@import 'common/common';
 @import 'common/fonts';
 
 code {
@@ -11,4 +12,14 @@ h4,
 h5,
 h6 {
     font-family: $monospace-font;
+}
+
+/* for screen readers */
+.sr {
+    display: none;
+}
+
+.main-wrapper {
+    min-height: calc(100vh - 100px);
+    position: relative;
 }

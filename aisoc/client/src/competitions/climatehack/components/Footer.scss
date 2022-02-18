@@ -1,0 +1,47 @@
+@import 'common/common';
+
+.ch-footer {
+  padding: 2rem;
+  width: calc(100% - 4rem);
+  margin: auto;
+  color: #fff;
+
+  a {
+    color: #fff;
+    text-underline-offset: 0.2rem;
+  }
+
+  .ch-footer-copyright {
+    margin-left: auto;
+    margin-top: 1rem;
+  }
+}
+
+@media screen and (min-width: $breakpoint-sm) {
+  .ch-footer {
+    max-width: $breakpoint-sm;
+    display: flex;
+
+    .ch-footer-copyright {
+      margin-top: 0;
+    }
+  }
+}
+
+@media screen and (min-width: $breakpoint-md) {
+  .ch-footer {
+    max-width: $breakpoint-md;
+  }
+}
+
+@media screen and (min-width: $breakpoint-lg) {
+  .ch-footer {
+    max-width: $breakpoint-lg;
+  }
+}
+
+// @media screen and (min-width: $breakpoint-xl) {
+//   .ch-footer {
+//     max-width: $breakpoint-xl;
+//   }
+// }

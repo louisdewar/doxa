@@ -7,7 +7,7 @@ export class DoxaError extends Error {
   }
 }
 
-async function requestGet({ url, params = {}, authToken = null }) {
+export async function requestGet({ url, params = {}, authToken = null }) {
   const searchParams = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
     searchParams.append(key, value);
@@ -21,7 +21,7 @@ async function requestGet({ url, params = {}, authToken = null }) {
   });
 }
 
-async function requestPost({ url, params = {}, authToken = null }) {
+export async function requestPost({ url, params = {}, authToken = null }) {
   const headers = {
     'Content-Type': 'application/json'
   };
@@ -47,10 +47,15 @@ export async function request({ url, params = {}, authToken = null, method = 'GE
     throw new Error(`Unknown method: ${method}`);
   }
 
-  const json = await response.json();
+  let json;
+  try {
+    json = await response.json();
+  } catch {
+    throw new Error('Improperly formatted error');
+  }
 
   if (response.status !== 200) {
-    throw new DoxaError(json.error_code, json.error_message, response.status);
+    throw new DoxaError(json.error_code, json.error, response.status);
   }
 
   return json;

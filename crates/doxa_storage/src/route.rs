@@ -4,6 +4,7 @@ use crate::route::request::DownloadParams;
 use actix_files::NamedFile;
 use actix_multipart::{Field, Multipart};
 use actix_web::{web, HttpRequest, HttpResponse};
+use doxa_auth::error::UserNotAdmin;
 use doxa_auth::limiter::Limiter;
 use doxa_auth::{error::CompetitionNotFound, guard::AuthGuard};
 use doxa_core::tokio::fs::File;
@@ -45,7 +46,12 @@ pub async fn download(
     path: web::Path<(String, String)>,
     query: web::Query<DownloadParams>,
     req: HttpRequest,
+    user: AuthGuard,
 ) -> EndpointResult {
+    if !user.admin() {
+        return Err(UserNotAdmin.into());
+    }
+
     let (competition_name, agent_id) = path.into_inner();
 
     let require_active = query.active;
@@ -120,9 +126,10 @@ pub async fn upload(
     auth: AuthGuard<()>,
     limiter: &Limiter,
 ) -> EndpointResult {
+    let user_id = auth.id_required()?;
+
     // Check if the user is enrolled
     let enrollment = web::block({
-        let user_id = auth.id();
         let competition = competition.clone();
         let pool = pool.clone();
         let conn = web::block(move || pool.get()).await??;
@@ -134,7 +141,7 @@ pub async fn upload(
 
     if !auth.admin() {
         limiter
-            .get_permit(format!("{}-{}", competition, auth.id()))
+            .get_permit(format!("{}-{}", competition, user_id))
             .await?
             .map_err(TooManyUploadAttempts::from)?;
     }
@@ -164,7 +171,6 @@ pub async fn upload(
         .map_err(CouldNotWriteFile::from)?;
 
     web::block({
-        let user_id = auth.id();
         let pool = pool.clone();
         let id = id.clone();
         let conn = web::block(move || pool.get()).await??;
@@ -181,7 +187,7 @@ pub async fn upload(
     .await??;
 
     // TODO: get max size from competition
-    let max_size = 50_000_000;
+    let max_size = 4_000_000_000;
 
     match process_field_upload(&mut f, field, max_size).await {
         Ok(()) => {}
@@ -227,7 +233,7 @@ pub async fn upload(
         pool,
         &competition,
         enrollment.competition,
-        auth.id(),
+        user_id,
         uploaded_agent.uploaded_at,
     )
     .await

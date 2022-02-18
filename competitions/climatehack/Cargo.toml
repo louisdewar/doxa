@@ -1,0 +1,11 @@
+[package]
+name = "climatehack"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+derive_more = "0.99.16"
+doxa_competition = { path = "../../crates/doxa_competition" }
+futures = "0.3.17"
+serde = "1.0.130"

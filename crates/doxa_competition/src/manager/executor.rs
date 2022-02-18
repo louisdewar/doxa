@@ -1,4 +1,4 @@
-use std::{marker::PhantomData, sync::Arc};
+use std::sync::Arc;
 
 use doxa_executor::{
     client::{ForfeitError, GameClient},
@@ -15,34 +15,33 @@ use doxa_mq::model::MatchRequest;
 use futures::future::FutureExt;
 use futures::StreamExt;
 
-use crate::Settings;
+use crate::{client::Competition, Settings};
 
 /// Listens for execution events and then spawns games.
-pub struct ExecutionManager<C: GameClient> {
-    client: PhantomData<C>,
+pub struct ExecutionManager<C: Competition> {
     settings: Arc<Settings>,
-    competition_name: &'static str,
     executor_permits: usize,
+    competition: Arc<C>,
 }
 
-impl<C: GameClient> ExecutionManager<C> {
+impl<C: Competition> ExecutionManager<C> {
     pub(crate) fn new(
         settings: Arc<Settings>,
-        competition_name: &'static str,
         executor_permits: usize,
+        competition: Arc<C>,
     ) -> Self {
         assert!(executor_permits > 0);
 
         ExecutionManager {
-            client: PhantomData,
             settings,
-            competition_name,
             executor_permits,
+            competition,
         }
     }
 
     /// Spawns a task then listens for match request
     pub async fn start(self) {
+        let competition_name = C::COMPETITION_NAME;
         let connection = self
             .settings
             .mq_pool
@@ -51,14 +50,16 @@ impl<C: GameClient> ExecutionManager<C> {
             .expect("Failed to get MQ connection");
 
         let mut consumer =
-            doxa_mq::action::get_match_request_consumer(&connection, self.competition_name)
+            doxa_mq::action::get_match_request_consumer(&connection, competition_name)
                 .await
                 .unwrap();
 
         info!(
-            competition =%self.competition_name,
+            competition =%competition_name,
             "execution event listener",
         );
+
+        let game_client = Arc::new(self.competition.build_game_client());
 
         tokio::spawn(async move {
             let executor_settings = self.settings.executor_settings.clone();
@@ -68,9 +69,10 @@ impl<C: GameClient> ExecutionManager<C> {
                 let permit = executor_limiter.clone().acquire_owned().await.unwrap();
                 // TODO: remove expects and convert to error logging
                 let (_, delivery) = message.expect("Error connecting to MQ");
-                let match_request: MatchRequest<C::MatchRequest> =
-                    doxa_mq::action::deserialize(&delivery.data)
-                        .expect("Improperly formatted message");
+                let match_request: MatchRequest<
+                    <<C as Competition>::GameClient as GameClient>::MatchRequest,
+                > = doxa_mq::action::deserialize(&delivery.data)
+                    .expect("Improperly formatted message");
                 let game_id = match_request.game_id;
 
                 let span = span!(
@@ -78,24 +80,24 @@ impl<C: GameClient> ExecutionManager<C> {
                     "handle match request",
                     game_id = %game_id,
                     agents = ?match_request.agents,
-                    competition_name = %self.competition_name,
+                    competition_name = %competition_name,
                 );
 
                 let event_channel =
-                    doxa_mq::action::game_event_channel(&connection, self.competition_name)
+                    doxa_mq::action::game_event_channel(&connection, competition_name)
                         .await
                         .unwrap();
-                let event_channel_name =
-                    doxa_mq::action::game_event_queue_name(self.competition_name);
+                let event_channel_name = doxa_mq::action::game_event_queue_name(competition_name);
 
                 tokio::spawn({
                     let cancel_endpoint = format!(
                         "{}{}/_game/{}/cancelled",
-                        self.settings.competitions_base_url, self.competition_name, game_id
+                        self.settings.competitions_base_url, competition_name, game_id
                     );
                     let request_client = self.settings.request_client.clone();
                     let executor_settings = executor_settings.clone();
-                    let competition_name = self.competition_name;
+                    let competition_name = competition_name;
+                    let game_client = game_client.clone();
                     async move {
                             // In future there can be some smarter code in the event that the
                             // code below fails or the server unexpected shutsdown, we need to
@@ -106,12 +108,13 @@ impl<C: GameClient> ExecutionManager<C> {
                                 .await
                                 .expect("Failed to acknowledge MQ");
 
-                            let game_manager = match GameManager::<C>::new(
+                            let game_manager = match GameManager::<C::GameClient>::new(
                                 executor_settings,
                                 event_channel,
                                 event_channel_name,
                                 competition_name,
                                 match_request,
+                                game_client
                             )
                             .await
                             {
@@ -138,7 +141,7 @@ impl<C: GameClient> ExecutionManager<C> {
                             info!("started game manager");
 
                             match game_manager.run_with_cancel_check(cancel_endpoint, request_client).await {
-                                Ok(()) => event!(Level::INFO, "game manager succesfully completed"),
+                                Ok(()) => event!(Level::INFO, "game manager successfully completed"),
                                 Err(error) => {
                                     if error.forfeit().is_some() {
                                         event!(Level::INFO, forfeit=true, %error, debug = ?error, "error running game manager")

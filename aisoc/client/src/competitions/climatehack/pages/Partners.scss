@@ -1,0 +1,52 @@
+@import "common/common";
+@import "common/colours";
+@import "./splash-common.scss";
+
+.ch-partners-header {
+  margin-top: 75px;
+  color: #fff;
+  padding: 3rem 1rem;
+
+  background-image: url('/competitions/climatehack/assets/challenge-header.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  h1,
+  h2 {
+    font-size: 3rem;
+    margin: 0;
+  }
+
+  h2 {
+    font-weight: 100;
+  }
+
+}
+
+section.ch-section {
+  &.ch-partners-sponsor-1 {
+    color: #fff;
+    background-color: #111827;
+
+    .ch-section-heading h2 {
+      color: $ch-blue;
+    }
+  }
+
+  &.ch-partners-sponsor-2 {
+    color: #fff;
+    background-color: $ch-blue;
+  }
+}
+
+@media screen and (min-width: $breakpoint-sm) {
+  .ch-partners-header {
+    padding: 6rem;
+
+    h1,
+    h2 {
+      font-size: 5rem;
+    }
+  }
+}

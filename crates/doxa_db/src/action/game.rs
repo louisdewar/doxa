@@ -224,11 +224,14 @@ pub fn get_user_active_games(
 pub fn mark_games_with_player_as_outdated(
     conn: &PgConnection,
     user: i32,
+    competition: i32,
 ) -> Result<(), DieselError> {
     use s::game_participants::columns as p_c;
     use s::games::columns as g_c;
 
     diesel::update(s::games::table)
+        .filter(g_c::outdated.eq(false))
+        .filter(g_c::competition.eq(competition))
         .filter(
             g_c::id.eq_any(
                 s::game_participants::table

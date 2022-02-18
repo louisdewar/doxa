@@ -1,10 +1,12 @@
 [package]
 name = "doxa_cli"
-version = "0.1.0"
+version = "0.1.2"
 edition = "2018"
 
 [dependencies]
 async-stream = "0.3.2"
+base64 = "0.13.0"
+chrono = { version = "0.4.19", features = ["serde"] }
 # async-tar = "0.4.2"
 clap = { version = "3.0.0-rc.9", features = ["derive", "cargo", "wrap_help", "unicode"] }
 console = "0.15.0"
@@ -22,3 +24,4 @@ tempfile = "3.2.0"
 tokio = { version = "1.11.0", features = ["rt-multi-thread", "rt", "macros", "fs"] }
 tokio-util = "0.6.9"
 url = "2.2.2"
+webbrowser = "0.5.5"

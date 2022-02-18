@@ -48,7 +48,7 @@ export default function ErrorCard({ forfeit, error, players, baseUrl, canShowFor
           </>}
 
           {forfeit.payload.stderr && <>
-            <p className="logs-message">You have permission to view the <code>stderr</code> of <PlayerLink username={players[forfeit.payload.agent].username} baseUrl={baseUrl} playerClass={PLAYER_CLASS[forfeit.payload.agent]} />&apos;s agent (max 50MiB):</p>
+            <p className="logs-message">You have permission to view the <code>stderr</code> of <PlayerLink username={players[forfeit.payload.agent].username} baseUrl={baseUrl} playerClass={PLAYER_CLASS[forfeit.payload.agent]} />&apos;s agent (max 100 KB):</p>
             <pre className="logs">{forfeit.payload.stderr}</pre>
           </>}
         </>}

@@ -10,6 +10,7 @@ doxa_mq = { path = "../doxa_mq" }
 doxa_db = { path = "../doxa_db" }
 doxa_auth = { path = "../doxa_auth" }
 doxa_storage = { path = "../doxa_storage" }
+doxa_user = { path = "../doxa_user" }
 
 async-trait = "0.1.51"
 futures = "0.3.17"

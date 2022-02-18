@@ -107,7 +107,7 @@ pub async fn game_events<C: Competition + ?Sized>(
 
     let (is_admin, agent_id) = user
             .map(|user| {
-                let agent_id = participants.iter().find(|p| p.user == user.id()).map(|p| {
+                let agent_id = participants.iter().find(|p| Some(p.user) == user.id()).map(|p| {
                     // The current user was a participant in the game, we are now finding their
                     // agent ID in game which is equal to the position within the Vec.
                     start_event.payload

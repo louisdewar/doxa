@@ -1,0 +1,129 @@
+@import 'common/common';
+
+$ch-salmon: #EC5764;
+$ch-blue: #115FD4;
+$ch-blue-transparent: #115FD4F0;
+
+$ch-primary-accent: #CBEF9D;
+$ch-primary-accent-transparent: #CBEF9DF0;
+
+$ch-green: #83C554;
+
+.ch-wrapper {
+  background-color: #000; //#111827
+  color: #fff;
+  height: 100%;
+  width: 100%;
+  min-height: 100vh;
+  font-family: 'IBM Plex Sans', sans-serif;
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'IBM Plex Sans', sans-serif;
+  }
+}
+
+.ch-panel-container {
+  width: calc(100% - 2rem);
+  margin: auto;
+  min-height: 100vh;
+}
+
+@mixin bigBoldParagraph() {
+  font-weight: 700;
+  text-align: left;
+}
+
+section.ch-section {
+  padding: 1rem 2rem 2rem 2rem;
+  width: 100%;
+  box-sizing: border-box;
+  margin: auto;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  border-radius: 5px;
+  box-shadow: 0 0 #0000, 0 0 #0000, 6px 6px #3c3f42;
+
+  .ch-section-content {
+    margin-left: auto;
+    margin-right: auto;
+
+    P {
+      margin-top: 16px;
+      margin-bottom: 0;
+    }
+
+    .ch-section-heading {
+      margin-top: 16px;
+      margin-bottom: 16px;
+
+      h2 {
+        margin-top: 0;
+        margin-bottom: 0;
+        font-size: 2em;
+        // font-family: 'Playfair Display', serif;
+      }
+
+      img {
+        width: 100%;
+      }
+    }
+  }
+}
+
+@media screen and (min-width: $breakpoint-sm) {
+  section.ch-section {
+    padding: 2rem 2rem;
+
+    .ch-section-heading {
+      max-width: 15vw;
+
+      h2,
+      img {
+        width: 15vw;
+      }
+    }
+
+    .ch-section-content {
+      display: flex;
+      gap: 4rem;
+    }
+  }
+
+  .ch-panel-container {
+    max-width: $breakpoint-sm;
+  }
+}
+
+@media screen and (min-width: $breakpoint-md) {
+  .ch-panel-container {
+    max-width: $breakpoint-md;
+
+    p {
+      text-align: justify;
+    }
+  }
+}
+
+@media screen and (min-width: $breakpoint-lg) {
+  section.ch-section {
+    .ch-section-content .ch-section-heading {
+      max-width: 300px;
+
+      h2,
+      img {
+        font-size: 2.5rem;
+        width: 20vw;
+        max-width: 300px;
+      }
+    }
+  }
+
+  .ch-panel-container {
+    max-width: $breakpoint-lg;
+  }
+}

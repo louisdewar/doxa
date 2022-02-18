@@ -1,14 +1,15 @@
 import { useAuth } from 'hooks/useAuth';
+import { Link } from 'react-router-dom';
 import './Navbar.scss';
 
-export default function Navbar({ competition, competitionName }) {
+export default function Navbar({ competition, competitionName, competitionLink }) {
   const auth = useAuth();
 
   return <nav className='nav'>
-    <a href="/">DOXA</a>
-    {competitionName && <a href={`/c/${competition}/`} className='navbar-active'>{competitionName}</a>}
+    <Link to="/">DOXA</Link>
+    {competitionName && <Link to={competitionLink ?? `/c/${competition}/`} className='navbar-active'>{competitionName}</Link>}
     {auth.isLoggedIn()
-      ? <a href='/account' className='account'>ACCOUNT</a>
-      : <a href='/login' className='account'>LOGIN</a>}
+      ? <Link to='/account' className='account'>ACCOUNT</Link>
+      : <Link to='/login' className='account'>LOGIN</Link>}
   </nav>;
 }

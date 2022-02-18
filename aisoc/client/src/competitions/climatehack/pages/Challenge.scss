@@ -1,0 +1,111 @@
+@import "common/common";
+@import "common/colours";
+@import "./splash-common.scss";
+
+header.ch-challenge-header {
+  margin-top: 75px;
+  color: #fff;
+  padding: 3rem 1rem;
+
+  background-image: url('/competitions/climatehack/assets/challenge-header.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  h1,
+  h2 {
+    font-size: 3rem;
+    margin: 0;
+  }
+
+  h2 {
+    font-weight: 100;
+  }
+
+}
+
+section.ch-section {
+  &.ch-challenge-pv {
+    background-color: #f1f5f9;
+    color: #000;
+
+    .ch-section-heading h2 {
+      color: #2563eb;
+    }
+
+    .ch-section-description>p:first-child {
+      @include bigBoldParagraph;
+    }
+  }
+
+  &.ch-challenge-ocf {
+    background-color: #141006;
+
+    .ch-section-heading h2 {
+      color: $ch-primary-accent;
+    }
+
+    .ch-section-description>p:first-child {
+      @include bigBoldParagraph;
+    }
+  }
+
+  &.ch-challenge-impact {
+    padding: 2rem 2rem 8rem 2rem;
+
+    background-image: url('/competitions/climatehack/assets/challenge-solar-panels.png');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+
+    .ch-section-heading h2 {
+      color: #fff;
+    }
+
+    .ch-section-description>p:first-child {
+      @include bigBoldParagraph;
+    }
+  }
+
+  &.ch-challenge-ml-task {
+    // padding: 2rem 2rem 8rem 2rem;
+
+    background-image: url('/competitions/climatehack/assets/challenge-solar-panels.png');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+
+    .ch-section-heading h2 {
+      color: #fff;
+    }
+
+    .ch-section-description>p:first-child {
+      @include bigBoldParagraph;
+    }
+  }
+
+  &.ch-challenge-satellite-img {
+
+    color: #000;
+    background-color: #f1f5f9;
+
+    .ch-section-heading h2 {
+      color: $ch-blue;
+    }
+
+    .ch-section-description>p:first-child {
+      @include bigBoldParagraph;
+    }
+  }
+}
+
+@media screen and (min-width: $breakpoint-sm) {
+  header.ch-challenge-header {
+    padding: 6rem;
+
+    h1,
+    h2 {
+      font-size: 5rem;
+    }
+  }
+}

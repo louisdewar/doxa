@@ -5,9 +5,7 @@ edition = "2018"
 
 [dependencies]
 tempfile = "3.2.0"
-hyperlocal = "0.8"
-hyper = "0.14.11"
-tokio = { version = "1.10.0", features = ["process", "fs"] }
+tokio = { version = "1.10.0", features = ["process", "fs", "io-util"] }
 serde = { version = "1.0.127", features = ["derive"] }
 serde_json = "1.0.66"
 derive_more = "0.99"

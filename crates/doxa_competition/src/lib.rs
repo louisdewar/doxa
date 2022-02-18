@@ -14,6 +14,7 @@ pub mod settings;
 
 pub use settings::Settings;
 
+pub use doxa_core::tokio;
 pub use doxa_core::tracing;
 
 use doxa_core::tracing::{error, info};

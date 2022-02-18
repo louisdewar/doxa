@@ -1,4 +1,4 @@
-import { acceptInvite, getInviteInfo, getUserInfo, login } from 'api/auth';
+import { getUserInfo } from 'api/auth';
 import { useEffect, useState } from 'react';
 
 
@@ -14,6 +14,7 @@ export function useAuthProvider() {
     setLoading(false);
     return token;
   });
+  const [postLoginRedirectUrl, setPostLoginRedirectUrl] = useState(null);
 
   const updateAuthToken = token => {
     if (!token) {
@@ -55,21 +56,26 @@ export function useAuthProvider() {
     isLoggedIn() {
       return !!authToken;
     },
-    async login(username, password) {
-      const token = await login(username, password);
+    setAuthToken(token) {
       updateAuthToken(token);
       refresh(token);
     },
+    // async login(username, password) {
+    //   const token = await login(username, password);
+    //   updateAuthToken(token);
+    //   refresh(token);
+    // },
     logout() {
       updateAuthToken(null);
       setUser(null);
     },
-    async getInviteInfo(id) {
-      return await getInviteInfo(id);
-    },
-    async acceptInvite(id, username, password) {
-      return await acceptInvite(id, username, password);
-    },
-    token: authToken
+    token: authToken,
+    postLoginRedirectUrl,
+    setPostLoginRedirectUrl,
+    consumePostLoginRedirectUrl() {
+      const url = postLoginRedirectUrl;
+      setPostLoginRedirectUrl(null);
+      return url;
+    }
   };
 }

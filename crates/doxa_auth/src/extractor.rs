@@ -1,5 +1,7 @@
-use doxa_core::{error::RespondableErrorWrapper, tokio};
-use doxa_db::PgPool;
+use doxa_core::{
+    autha_client::{error::AuthaError, jwt::Scope},
+    error::RespondableErrorWrapper,
+};
 
 use std::future::Future;
 use std::pin::Pin;
@@ -7,10 +9,7 @@ use std::pin::Pin;
 use actix_web::{dev, web, FromRequest, HttpRequest};
 
 use crate::{
-    error::{
-        IncorrectTokenGeneration, InvalidAuthenticationHeader, MissingAuthentication,
-        UserNotFoundAuth,
-    },
+    error::{InvalidAuthenticationHeader, MissingAuthentication, NotAccessToken},
     guard::AuthGuard,
     settings::Settings,
 };
@@ -20,7 +19,6 @@ impl FromRequest for AuthGuard<()> {
     type Future = Pin<Box<dyn Future<Output = Result<Self, Self::Error>>>>;
 
     fn from_request(req: &HttpRequest, _payload: &mut dev::Payload) -> Self::Future {
-        let pool = req.app_data::<web::Data<PgPool>>().unwrap().clone();
         let settings = req.app_data::<web::Data<Settings>>().unwrap().clone();
 
         let auth_header = req
@@ -40,23 +38,24 @@ impl FromRequest for AuthGuard<()> {
                 None => return Err(MissingAuthentication.into()),
             };
 
-            let token = crate::token::parse_token(&auth_header[7..], &settings.jwt_secret)?;
+            let token = &auth_header[7..];
 
-            let id = token.user();
-            // TODO: Maybe handle case where user ID does not exist as a special case although in
-            // practise this is probably just an INTERNAL_SERVER_ERROR
-            let user = tokio::task::spawn_blocking(move || {
-                let conn = pool.get().unwrap();
-                doxa_db::action::user::get_user_by_id_optional(&conn, id)
-            })
-            .await??
-            .ok_or(UserNotFoundAuth)?;
-
-            if token.generation() != user.token_generation {
-                return Err(IncorrectTokenGeneration.into());
+            if token == settings.system_account_secret {
+                return Ok(AuthGuard::new(None, true, ()));
             }
 
-            Ok(AuthGuard::new(token.user(), user.admin, ()))
+            let token = settings
+                .autha_client
+                .verify_jwt(token)
+                .map_err(AuthaError::from)?;
+
+            if !token.has_scope(&Scope::Access) {
+                return Err(NotAccessToken.into());
+            }
+
+            let admin = token.has_scope(&Scope::Admin);
+
+            Ok(AuthGuard::new(Some(token.user()), admin, ()))
         })
     }
 }

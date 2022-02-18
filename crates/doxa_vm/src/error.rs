@@ -22,6 +22,8 @@ pub enum ManagerError {
     #[from(ignore)]
     CreateScratch(RunCommandError),
     #[from(ignore)]
+    CreateSwap(RunCommandError),
+    #[from(ignore)]
     GetImageUUID(RunCommandError),
     #[from]
     Mount(MountError),
@@ -110,6 +112,7 @@ pub(crate) enum HandleMountsError {
     IO(io::Error),
     InvalidFormatting,
     ReadMessageError(ReadMessageError),
+    #[from(ignore)]
     FindDrives(RunCommandError),
     #[display(
         fmt = "UUID not found (UUID=\"{}\", mount path=\"{}\")",
@@ -120,6 +123,8 @@ pub(crate) enum HandleMountsError {
         uuid: String,
         mount_path: String,
     },
+    #[from(ignore)]
+    ActivateSwap(RunCommandError),
 }
 
 #[derive(Debug, Error, From, Display)]

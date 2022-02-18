@@ -19,7 +19,7 @@ use crate::{
     Settings,
 };
 
-pub const MAX_MSG_LEN: usize = 5_000;
+pub const MAX_MSG_LEN: usize = 50_000;
 
 pub struct VMAgent {
     id: String,
@@ -38,6 +38,7 @@ pub enum AgentEvent<'a> {
 pub struct VMAgentSettings {
     pub agent_ram_mb: u64,
     pub scratch_size_mb: u64,
+    pub swap_size_mb: u64,
     /// All mounts excluding the scratch and rootfs which are mounted automatically
     pub mounts: Vec<Mount>,
 }
@@ -88,6 +89,7 @@ impl VMAgent {
             memory_size_mib: vm_agent_settings.agent_ram_mb,
             scratch_source_path: settings.scratch_base_image.clone(),
             scratch_size_mib: vm_agent_settings.scratch_size_mb,
+            swap_size_mib: vm_agent_settings.swap_size_mb,
             mounts: vm_agent_settings.mounts,
         };
 
@@ -95,7 +97,7 @@ impl VMAgent {
 
         match async {
             timeout(
-                Duration::from_secs(60),
+                Duration::from_secs(60 * 10),
                 vm.send_agent(agent_name, agent_size, agent_response.bytes_stream()),
             )
             .await

@@ -11,9 +11,8 @@ derive_more = "0.99"
 doxa_core = { path = "../doxa_core" }
 diesel = { version = "1.4.4", features = ["postgres", "r2d2"] }
 serde = { version = "1.0", features = ["derive"] }
-sha2 = "0.9"
-hmac = "0.11"
-jwt = "0.14"
 bcrypt-pbkdf = "0.6.1"
-base64 = "0.13.0"
 rand = "0.8.4"
+serde_json = "1.0.78"
+url = "2.2.2"
+base64 = "0.13.0"

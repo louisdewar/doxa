@@ -7,28 +7,32 @@ set -e
 groupadd --gid 1000 doxa
 useradd --uid 1000 --gid 1000 doxa
 
+python -m venv --upgrade-deps /python_env
+
+source "/python_env/bin/activate"
+
 python -m pip install --upgrade pip
 
-pip3 install numpy scipy pandas scikit-learn
-pip3 install tensorflow tf-agents[reverb]
-pip3 install torch==1.10.1+cpu torchvision==0.11.2+cpu torchaudio==0.10.1+cpu -f https://download.pytorch.org/whl/cpu/torch_stable.html
-pip3 install numba
+python -m pip install numpy scipy pandas scikit-learn numba
+python -m pip install tensorflow tf-agents[reverb]
+python -m pip install --use-deprecated=html5lib torch==1.10.2+cpu torchvision==0.11.3+cpu torchaudio==0.10.2+cpu -f https://download.pytorch.org/whl/cpu/torch_stable.html
+python -m pip install opencv-contrib-python-headless
+python -m pip install einops perceiver-pytorch
 
 # Probably not required for evaluation but people may have imported these packages while training and did not separate the logic for evaluation
-pip3 install matplotlib seaborn
-pip3 install ipython jupyter nose sympy
+# python -m pip install matplotlib seaborn
+# python -m pip install ipython jupyter nose sympy
 
 
-pip3 freeze
+python -m pip freeze > /pipfreeze.txt
+
+echo /pipfreeze.txt:
+cat /pipfreeze.txt
 
 mkdir /home/doxa
 chown -R doxa:doxa /home/doxa
 
-# Create output dir for competitions that use it
-mkdir /output
-chown -R doxa:doxa /output
-
 ln -s /scratch/agent /home/doxa/agent
-ln -s /usr/local/bin/python /usr/bin/python
+ln -s /scratch/output /output
 
 echo "Done setup"

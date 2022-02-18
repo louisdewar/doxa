@@ -24,6 +24,16 @@ image_id=$(docker create doxa-rootfs-builder-img)
 
 # Copy images from inside container
 mkdir -p images
+
+rm -f -- images/CACHEDIR.TAG
+
+cat > images/CACHEDIR.TAG<< EOF
+Signature: 8a477f597d28d172789f06886806bc55
+# This file is a cache directory tag created by DOXA.
+# For information about cache directory tags, see:
+#	http://www.brynosaurus.com/cachedir/
+EOF
+
 docker cp "$image_id":/images/rootfs.img ./images/rootfs.img
 docker cp "$image_id":/images/scratch.img ./images/scratch.img
 docker cp "$image_id":/images/python_modules.img ./images/python_modules.img

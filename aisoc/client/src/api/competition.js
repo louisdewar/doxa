@@ -1,5 +1,14 @@
+import UserProfile from 'utils/profile';
 import { request } from './common';
 
+// Maps the leaderboard from a request to a more useful object.
+// TODO: consider creating a leaderboard class
+function processLeaderboard(leaderboard) {
+  return leaderboard.map(entry => {
+    entry.user = new UserProfile(entry.user);
+    return entry;
+  });
+}
 
 export default class CompetitionAPI {
 
@@ -21,6 +30,10 @@ export default class CompetitionAPI {
 
   static get USER_BASE_URL() {
     return `${process.env.REACT_APP_API_BASE_URL}competition/${this.COMPETITION_ID}/_user/`;
+  }
+
+  static get STORAGE_DOWNLOAD_BASE_URL() {
+    return `${process.env.REACT_APP_API_BASE_URL}storage/download/${this.COMPETITION_ID}/`;
   }
 
   /* Agent */
@@ -90,13 +103,23 @@ export default class CompetitionAPI {
 
   /* Leaderboard */
 
-  static async getLeaderboardActive() {
+  static async getDefaultLeaderboardActive() {
     const data = await request({ url: this.LEADERBOARD_BASE_URL + 'active', method: 'GET' });
 
-    return data.leaderboard;
+    return processLeaderboard(data.leaderboard);
+  }
+
+  static async getLeaderboard(leaderboard) {
+    const data = await request({ url: `${this.LEADERBOARD_BASE_URL}active/${leaderboard}`, method: 'GET' });
+
+    return processLeaderboard(data.leaderboard);
   }
 
   /* User */
+
+  static async getUser(username) {
+    return new UserProfile(await request({ url: `${process.env.REACT_APP_API_BASE_URL}user/info/${username}`, method: 'GET' }));
+  }
 
   static async getUserActiveAgent(username) {
     const data = await request({ url: this.USER_BASE_URL + username + '/active_agent', method: 'GET' });
@@ -104,8 +127,8 @@ export default class CompetitionAPI {
     return data.active_agent;
   }
 
-  static async getUserScore(username) {
-    const data = await request({ url: this.USER_BASE_URL + username + '/score', method: 'GET' });
+  static async getUserScore(username, leaderboard) {
+    const data = await request({ url: `${this.USER_BASE_URL}${username}/score${leaderboard ? '/' + leaderboard : ''}`, method: 'GET' });
 
     return data;
   }

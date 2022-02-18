@@ -1,5 +1,7 @@
 import Container from 'components/Container';
+import Footer from 'components/Footer';
 import Navbar from 'components/Navbar';
+import Error404 from 'pages/Error404';
 import { Route, Switch, useRouteMatch } from 'react-router-dom';
 import Game from './pages/Game/';
 import Home from './pages/Home/';
@@ -8,10 +10,11 @@ import User from './pages/User/';
 
 
 function Layout({ children }) {
-  return <>
+  return <div className='main-wrapper'>
     <Navbar competition="uttt" competitionName="Ultimate Tic-Tac-Toe" />
     <Container>{children}</Container>
-  </>;
+    <Footer />
+  </div>;
 }
 
 
@@ -38,6 +41,9 @@ export default function Uttt() {
       <Layout>
         <Home baseUrl={path} />
       </Layout>
+    </Route>
+    <Route>
+      <Error404 />
     </Route>
   </Switch>;
 }

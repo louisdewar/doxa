@@ -1,0 +1,61 @@
+@import 'common/colours';
+@import 'common/fonts';
+@import "../pages/splash-common.scss";
+
+nav.ch-navbar {
+  color: #fff;
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  background-color: #000;
+  z-index: 100;
+
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  // font-size: 1rem;
+  font-weight: 700;
+
+  padding: 25px 0;
+
+  a {
+    position: relative;
+    font-family: 'IBM Plex Sans', sans-serif;
+    color: #FFFFFF;
+    text-decoration: none;
+    margin: 0 15px;
+
+    &.ch-navbar-title {
+      margin-right: auto;
+      font-size: 0.9rem;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-weight: 400;
+
+      span {
+        font-weight: 700;
+      }
+    }
+
+    &.ch-navbar-active,
+    &:hover:not(.ch-navbar-title) {
+      color: $ch-primary-accent;
+
+      &::after {
+        background-color: $ch-primary-accent;
+      }
+    }
+
+  }
+}
+
+@media screen and (min-width: 640px) {
+  nav.ch-navbar {
+    font-size: 0.9rem;
+    padding: 25px 20px;
+
+    a.ch-navbar-title {
+      font-size: 1.4rem;
+    }
+  }
+}

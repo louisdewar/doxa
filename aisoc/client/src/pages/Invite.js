@@ -1,6 +1,7 @@
 import Button from 'components/Button';
 import Card from 'components/Card';
 import Container from 'components/Container';
+import Footer from 'components/Footer';
 import Navbar from 'components/Navbar';
 import TextBox from 'components/TextBox';
 import { useAuth } from 'hooks/useAuth';
@@ -43,7 +44,7 @@ export default function Invite() {
   }, [setInvite]);
 
   if (notFound) {
-    return <>
+    return <div className='main-wrapper'>
       <Navbar />
       <Container>
         <Card>
@@ -54,11 +55,12 @@ export default function Invite() {
           <Button>Return to the hompage</Button>
         </Link>
       </Container>
-    </>;
+      <Footer />
+    </div>;
   }
 
   if (!invite) {
-    return <>
+    return <div className='main-wrapper'>
       <Navbar />
       <Container>
         <Card>
@@ -69,10 +71,11 @@ export default function Invite() {
           <Button>Return to the hompage</Button>
         </Link>
       </Container>
-    </>;
+      <Footer />
+    </div>;
   }
 
-  return <>
+  return <div className='main-wrapper'>
     <Navbar />
     <Container>
       {showError && <Card>
@@ -121,8 +124,6 @@ export default function Invite() {
         </form>
       </Card>
     </Container>
-
-
-
-  </>;
+    <Footer />
+  </div>;
 }

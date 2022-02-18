@@ -197,7 +197,7 @@ pub async fn reactivate_agent<C: Competition + ?Sized>(
         .await?
         .ok_or(UserNotFound)?;
 
-    if !(user.id == user_auth.id() || user_auth.admin()) {
+    if !(Some(user.id) == user_auth.id() || user_auth.admin()) {
         return Err(UserNotOwner.into());
     }
 
@@ -232,7 +232,7 @@ pub async fn deactivate_agent<C: Competition + ?Sized>(
         .await?
         .ok_or(UserNotFound)?;
 
-    if !(user.id == user_auth.id() || user_auth.admin()) {
+    if !(Some(user.id) == user_auth.id() || user_auth.admin()) {
         return Err(UserNotOwner.into());
     }
 

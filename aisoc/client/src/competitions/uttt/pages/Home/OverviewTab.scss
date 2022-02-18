@@ -1,11 +1,28 @@
+@import 'common/common';
+
 .overview-tab {
     box-sizing: border-box;
-    display: flow-root;
 
     .overview-tab-game-demo {
-        float: right;
-        width: 45%;
         margin: auto;
-        margin-left: 1rem;
+    }
+
+    @media screen and (min-width: $breakpoint-sm) {
+        display: flex;
+
+        .overview-tab-description {
+            flex: 1;
+        }
+
+        .overview-tab-game-demo {
+            margin-left: 1rem;
+            width: 40%;
+        }
+    }
+
+    @media screen and (min-width: $breakpoint-lg) {
+        .overview-tab-game-demo {
+            width: 30%;
+        }
     }
 }

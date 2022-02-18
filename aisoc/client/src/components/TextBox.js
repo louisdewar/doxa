@@ -1,6 +1,6 @@
 import './TextBox.scss';
 
-export default function TextBox({ value, setValue, placeholder, type, className, disabled }) {
+export default function TextBox({ value, setValue, placeholder, type, className, disabled, style }) {
 
   const handleValueChange = e => {
     setValue(e.target.value);
@@ -13,5 +13,6 @@ export default function TextBox({ value, setValue, placeholder, type, className,
     value={value}
     onChange={handleValueChange}
     disabled={disabled}
+    style={style}
   />;
 }

@@ -1,0 +1,45 @@
+@import 'common/common';
+
+.ch-tab {
+  line-height: 1.25rem;
+  text-align: justify;
+
+  pre {
+    text-align: left;
+    border-radius: 3px;
+    border: #fff 1px solid;
+    margin-left: 2rem;
+    padding: 0.5rem 1rem 0.5rem 1rem;
+    white-space: pre-wrap;
+  }
+
+  a {
+    text-underline-offset: 0.1rem;
+  }
+
+  iframe,
+  img {
+    display: block;
+    margin: auto;
+
+    width: 100%;
+    max-width: 560px;
+  }
+
+  iframe {
+    height: 315px;
+  }
+
+  img {
+    box-sizing: border-box;
+    border-radius: 3px;
+    padding: 0.75rem;
+    background-color: #fff;
+  }
+}
+
+@media screen and (max-width: $breakpoint-sm) {
+  .ch-tab {
+    font-size: 0.85rem;
+  }
+}

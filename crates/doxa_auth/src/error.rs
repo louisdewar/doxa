@@ -37,46 +37,6 @@ impl_respondable_error!(
     "The authentication was not provided"
 );
 
-#[derive(Debug, Display, Error, From)]
-pub struct InvalidToken {
-    source: jwt::Error,
-}
-
-impl_respondable_error!(
-    InvalidToken,
-    UNAUTHORIZED,
-    "INVALID_TOKEN",
-    "The provided token was not valid, please login again"
-);
-
-#[derive(Debug, Display, Error)]
-pub struct ExpiredToken;
-
-impl_respondable_error!(
-    ExpiredToken,
-    UNAUTHORIZED,
-    "EXPIRED_TOKEN",
-    "Your login session has expired, please login again"
-);
-
-#[derive(Debug, Display, Error)]
-pub struct IncorrectTokenGeneration;
-
-impl_respondable_error!(
-    IncorrectTokenGeneration,
-    UNAUTHORIZED,
-    "INCORRECT_TOKEN_GENERATION",
-    "The login token is outdated so you need to login again"
-);
-
-#[derive(Debug, Display, Error, RespondableError, From)]
-pub enum TokenError {
-    #[from]
-    Expired(ExpiredToken),
-    #[from(forward)]
-    Invalid(InvalidToken),
-}
-
 #[derive(Debug, Display, Error)]
 pub struct UserAlreadyExists;
 
@@ -97,72 +57,10 @@ impl_respondable_error!(
     "New users are not currently allowed to sign up without an invite"
 );
 
-#[derive(Debug, Display, Error)]
-pub struct InviteNotFound;
-
-impl_respondable_error!(
-    InviteNotFound,
-    BAD_REQUEST,
-    "INVITE_NOT_FOUND",
-    "This invite has been used already, never existed or expired"
-);
-
-#[derive(Debug, Display, Error)]
-pub struct InviteExpired;
-
-impl_respondable_error!(
-    InviteExpired,
-    BAD_REQUEST,
-    "INVITE_EXPIRED",
-    "This invite has expired"
-);
-
-#[derive(Debug, Display, Error)]
-pub struct RegistrationInviteMismatch;
-
-impl_respondable_error!(
-    RegistrationInviteMismatch,
-    BAD_REQUEST,
-    "REGISTRATION_INVITE_MISMATCH",
-    "The fields in the registration does not match those specified as part of the invite"
-);
-
-// TODO: in future this will be an enum as `is_allowed` will do some more advanced checking and
-// return this error.
-#[derive(Debug, Display, Error)]
-pub struct InvalidPassword;
-
-impl_respondable_error!(
-    InvalidPassword,
-    BAD_REQUEST,
-    "INVALID_PASSWORD",
-    "Your password failed to meet the length requirements (not too long and not too short)"
-);
-
 #[derive(Debug, Display, Error, RespondableError, From)]
-pub enum CreateUserError {
+pub enum UpsertUserError {
     #[from]
     Diesel(DieselError),
-    #[from]
-    AlreadyExists(UserAlreadyExists),
-    #[from]
-    InvalidPassword(InvalidPassword),
-}
-
-#[derive(Debug, Display, Error, RespondableError, From)]
-pub enum AcceptInviteError {
-    #[from]
-    Mismatch(RegistrationInviteMismatch),
-    #[from]
-    InviteExpired(InviteExpired),
-    #[from]
-    InviteNotFound(InviteNotFound),
-    #[from]
-    Diesel(DieselError),
-    #[from]
-    AlreadyExists(UserAlreadyExists),
-    #[from]
-    InvalidPassword(InvalidPassword),
 }
 
 #[derive(Debug, Display, Error)]
@@ -195,6 +93,16 @@ impl_respondable_error!(
     "The password does not match the username"
 );
 
+#[derive(Debug, Display, Error)]
+pub struct NotAccessToken;
+
+impl_respondable_error!(
+    NotAccessToken,
+    UNAUTHORIZED,
+    "INVALID_TOKEN",
+    "This token does not have permission to access this resource"
+);
+
 #[derive(Debug, Display, Error, RespondableError, From)]
 pub enum LoginError {
     #[from]
@@ -225,6 +133,16 @@ impl_respondable_error!(
     "You are not enrolled in the competition"
 );
 
+#[derive(Debug, Display, Error)]
+pub struct SystemAccountsNotAllowed;
+
+impl_respondable_error!(
+    SystemAccountsNotAllowed,
+    NOT_FOUND,
+    "SYSTEM_ACCOUNT_NOT_ALLOWED",
+    "This endpoint cannot be authenticated by a system account"
+);
+
 #[derive(Debug, Display, Error, RespondableError, From)]
 pub enum CheckEnrollmentError {
     #[from]
@@ -246,6 +164,29 @@ pub enum GetLimiterPermitError {
     Redis(RedisError),
     RedisPool(RedisPoolError),
 }
+
+#[derive(Debug, Display, Error, RespondableError, From)]
+pub enum DelegatedAuthError {
+    Redis(RedisError),
+    RedisPool(RedisPoolError),
+    InvalidSecret(InvalidDelegatedAuthSecret),
+    Expired(DelegatedAuthExpired),
+}
+
+#[derive(Debug, Display, Error, From)]
+pub struct InvalidDelegatedAuthSecret;
+
+impl_respondable_error!(InvalidDelegatedAuthSecret, BAD_REQUEST, "INVALID_SECRET");
+
+#[derive(Debug, Display, Error, From)]
+pub struct DelegatedAuthExpired;
+
+impl_respondable_error!(
+    DelegatedAuthExpired,
+    BAD_REQUEST,
+    "EXPIRED",
+    "The authentication flow has expired or this verification code is incorrect"
+);
 
 // TODO: find a way to include the ttl in the error message (some kind of formatting with automatic
 // conversion to a human readable time period), also find a way to include in the HTTP response

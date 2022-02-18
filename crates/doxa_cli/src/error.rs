@@ -30,6 +30,9 @@ pub enum CommandError {
     /// This also exists here (and in CLI error) because some commands modify the profile
     #[display(fmt = "failed to load user profiles: {}", _0)]
     LoadProfileConfig(LoadProfileConfigError),
+    #[display(fmt = "{}", _0)]
+    DelegatedAuthTimeout(DelegatedAuthTimeout),
+    AuthorizeError(AuthorizeError),
 }
 
 #[derive(Error, Display, From, Debug)]
@@ -43,6 +46,24 @@ pub enum RequestError {
     #[display(fmt = "failed to parse response: {}", _0)]
     Json(serde_json::Error),
 }
+
+#[derive(Error, Display, From, Debug)]
+pub enum AuthorizeError {
+    Response(RequestError),
+    #[display(fmt = "Please login again, your login token is corrupted")]
+    DeserializeToken(serde_json::Error),
+    #[display(fmt = "Please login again, your login token is corrupted")]
+    TooFewParts,
+    #[display(fmt = "Please login again, your login token is corrupted")]
+    Base64(base64::DecodeError),
+    NoUserProfile(NoDefaultUserProfile),
+    #[display(fmt = "Please login again, your login session has expired")]
+    TokenExpired,
+}
+
+#[derive(Error, Display, From, Debug)]
+#[display(fmt = "You took too long to login, this authentication has timed out")]
+pub struct DelegatedAuthTimeout;
 
 #[derive(Display, Error, Debug, Clone)]
 #[display(

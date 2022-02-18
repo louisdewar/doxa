@@ -1,3 +1,8 @@
+FROM python:3.9-slim as virtualenv_builder
+
+COPY ./aisoc/deploy/make_scorer_virtualenv.sh /make_scorer_virtualenv.sh
+RUN /make_scorer_virtualenv.sh
+
 FROM rust:latest as server_builder
 WORKDIR /app
 
@@ -11,10 +16,15 @@ COPY ./tests tests
 
 RUN cargo build --release --locked --workspace
 
-FROM archlinux:base
+#FROM archlinux:base
 
-RUN yes | pacman -Syu
-RUN yes | pacman -S postgresql-libs
+#RUN yes | pacman -Syu
+#RUN yes | pacman -S postgresql-libs
+
+FROM virtualenv_builder
+
+RUN apt-get update && apt-get upgrade -y && apt-get --no-install-recommends install -y libpq5 && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 
 WORKDIR /app
 
@@ -25,7 +35,8 @@ COPY ./dev/vm/vmlinux dev/vm/vmlinux
 
 COPY --from=server_builder /app/target/release/aisoc_server /app/doxa
 COPY --from=server_builder /app/target/release/doxa_adm /app/doxa_adm
+COPY --from=virtualenv_builder /scorer_env /app/scorer_env
 
 EXPOSE 3001
 
-ENTRYPOINT ["/app/doxa"]
+ENTRYPOINT ["/app/doxa", "--scorer-python-bin", "/app/scorer_env/bin/python"]

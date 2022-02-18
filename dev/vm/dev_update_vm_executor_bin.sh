@@ -16,9 +16,10 @@ sudo umount "$ROOTFS_DIR" || echo 'Did not need to unmount rootfs'
 mkdir -p "$ROOTFS_DIR"
 sudo mount "$ROOTFS_IMG" "$ROOTFS_DIR"
 
+# NOTE: this is currently built using MUSL despite the VMs being debian based, this is because of
+# an issue where this builds with a too recent version of glibc
 cd ../../
 cargo build --bin vm_executor --target x86_64-unknown-linux-musl
-
 
 sudo cp ./target/x86_64-unknown-linux-musl/debug/vm_executor "$ROOTFS_DIR/sbin/vm_executor"
 

@@ -22,7 +22,7 @@ class BaseAgent:
         """
 
         self.player = player
-        self.opponent = "B" if player == "R" else "B"
+        self.opponent = "B" if player == "R" else "R"
 
     def make_move(
         self,

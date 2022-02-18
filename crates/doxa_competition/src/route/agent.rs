@@ -1,5 +1,6 @@
 use doxa_auth::guard::AuthGuard;
 use doxa_core::{actix_web::web, error::HttpResponse, EndpointResult};
+use doxa_user::PublicBasicUserInfo;
 use serde_json::json;
 
 use crate::{
@@ -8,6 +9,23 @@ use crate::{
 };
 
 use super::limits::CompetitionLimits;
+
+/// The default route for `_agent/{agent_id}/owner`.
+pub async fn agent_owner<C: Competition + ?Sized>(
+    path: web::Path<String>,
+    context: web::Data<Context<C>>,
+) -> EndpointResult {
+    let agent_id = path.into_inner();
+
+    let agent = context
+        .get_agent(agent_id.clone())
+        .await?
+        .ok_or(AgentNotFound)?;
+
+    let user = context.get_user_by_id(agent.owner).await?;
+
+    Ok(HttpResponse::Ok().json(PublicBasicUserInfo::from(user)))
+}
 
 /// The default route for `_agent/{agent_id}/games`.
 pub async fn agent_games<C: Competition + ?Sized>(
@@ -90,7 +108,7 @@ pub async fn reactivate_agent<C: Competition + ?Sized>(
         .await?
         .ok_or(AgentNotFound)?;
 
-    if !(agent.owner == user.id() || user.admin()) {
+    if !(Some(agent.owner) == user.id() || user.admin()) {
         return Err(UserNotOwner.into());
     }
 
@@ -120,7 +138,7 @@ pub async fn activate_agent<C: Competition + ?Sized>(
         .await?
         .ok_or(AgentNotFound)?;
 
-    if !(agent.owner == user.id() || user.admin()) {
+    if !(Some(agent.owner) == user.id() || user.admin()) {
         return Err(UserNotOwner.into());
     }
 
@@ -154,7 +172,7 @@ pub async fn deactivate_agent<C: Competition + ?Sized>(
         .await?
         .ok_or(AgentNotFound)?;
 
-    if !(agent.owner == user.id() || user.admin()) {
+    if !(Some(agent.owner) == user.id() || user.admin()) {
         return Err(UserNotOwner.into());
     }
 

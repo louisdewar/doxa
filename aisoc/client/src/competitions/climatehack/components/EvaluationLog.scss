@@ -1,0 +1,136 @@
+@import 'common/common';
+@import 'common/colours';
+@import 'common/fonts';
+
+
+.ch-evaluation {
+  .ch-evaluation-label {
+    font-style: italic;
+  }
+
+  .ch-evaluation-card {
+    font-family: $monospace-font;
+    background-color: #e2e8f0;
+    color: $off-black;
+    border-radius: 3px;
+
+    margin-bottom: 23px;
+
+    transition: transform 200ms ease-in-out, box-shadow 200ms linear;
+
+    box-shadow: 0 0 #0000, 0 0 #0000, 6px 6px #64748b;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 #0000, 0 0 #0000, 6px 6px #475569;
+    }
+
+    &.ch-evaluation-endpoint {
+      background-color: #374151;
+      color: #fff;
+    }
+
+    &.ch-evaluation-error .ch-evaluation-card-body {
+      background-color: #f59e0b;
+      border-radius: 3px;
+
+      &.ch-evaluation-error-available {
+        border-radius: 3px 3px 0 0;
+      }
+
+      // color: #fff;
+    }
+
+    &.ch-evaluation-checkpoint .ch-evaluation-card-body {
+      background-color: #6b7280; // #164e63;
+      color: #fff;
+
+      border-radius: 3px;
+
+      &.ch-evaluation-checkpoint-info-available {
+        border-radius: 3px 3px 0 0;
+      }
+    }
+
+    &.ch-evaluation-cancelled {
+      background-color: #ee5253;
+      color: #fff;
+    }
+
+    .ch-evaluation-card-body {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px;
+
+      svg {
+        margin-right: auto;
+        padding-left: 15px;
+        padding-right: 15px;
+      }
+
+      .ch-evaluation-card-text {
+        flex: 1;
+        flex-basis: 1;
+        padding: 10px;
+      }
+
+      img {
+        margin-left: auto;
+        width: 96px;
+        border-radius: 3px;
+      }
+    }
+  }
+
+  .ch-evaluation-card-checkpoint-info {
+    padding: 5px 5px 5px 5px;
+
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+
+    @media screen and (max-width: $breakpoint-sm) {
+      justify-content: space-between;
+    }
+
+    img {
+      width: 96px;
+      border-radius: 3px;
+    }
+  }
+
+  .ch-evaluation-card-error-info {
+    padding: 0 1rem 1rem 1rem;
+
+    pre.ch-evaluation-card-error-info-logs {
+      text-align: left;
+      padding: 10px;
+      border-radius: 3px;
+      margin-bottom: 0;
+
+      max-height: 500px;
+      max-width: 100%;
+      overflow: auto;
+
+      background-color: #cbd5e1;
+    }
+
+    p.ch-evaluation-card-error-info-logs-label {
+      text-align: left;
+      font-style: italic;
+
+      code {
+        color: $error;
+        font-weight: bold;
+        font-style: normal;
+      }
+    }
+
+    &.error-output {
+      border-left: 20px solid #0e7490;
+      border-radius: 3px;
+      padding: 5px;
+    }
+  }
+}

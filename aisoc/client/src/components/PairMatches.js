@@ -18,7 +18,8 @@ export default function PairMatches({ baseUrl, matches, MatchComponent }) {
 
     <div className='pair-matches-entry pair-matches-header'>
       <span className="pair-matches-position">#</span>
-      <span className="pair-matches-username">Users</span>
+      <span className="pair-matches-player-1">Player 1</span>
+      <span className="pair-matches-player-2">Player 2</span>
       <span className="pair-matches-time">Completed <FontAwesomeIcon icon={faClock} size="sm" /></span>
       <span className="pair-matches-match-link">Match</span>
     </div>
