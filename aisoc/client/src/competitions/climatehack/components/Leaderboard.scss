@@ -1,3 +1,4 @@
+@import 'common/common';
 @import 'common/fonts';
 
 .ch-leaderboard {
@@ -30,7 +31,7 @@
     }
 
     .ch-leaderboard-username {
-      flex: 4 1 auto;
+      flex: 3 1 auto;
       flex-basis: 0;
 
       white-space: nowrap;
@@ -45,6 +46,19 @@
       .ch-leaderboard-username-highlighted {
         font-weight: 700;
         text-decoration: none;
+      }
+    }
+
+    .ch-leaderboard-time {
+      flex: 2 2 auto;
+      flex-basis: 0;
+
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      @media screen and (max-width: $breakpoint-sm) {
+        display: none;
       }
     }
 

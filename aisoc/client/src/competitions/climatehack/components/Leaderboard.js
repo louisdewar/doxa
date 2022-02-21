@@ -1,19 +1,23 @@
+import { faClock } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
 import TextBox from 'components/TextBox';
 import { useAuth } from 'hooks/useAuth';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { formatTime } from 'utils/time';
 import { roundScore } from '../utils';
 import './Leaderboard.scss';
 
 const PAGE_SIZE = 20;
 
 
-function ClimateHackLeaderboardRow({ rank, score, user, baseUrl, highlightUser }) {
+function ClimateHackLeaderboardRow({ rank, score, user, time, baseUrl, highlightUser }) {
   return <div className='ch-leaderboard-entry'>
     <span className="ch-leaderboard-position">{rank}</span>
     <span className={`ch-leaderboard-username ${highlightUser ? 'ch-leaderboard-username-highlighted' : ''}`}><Link to={`${baseUrl}user/${user.name()}`}>{user.name()}</Link></span>
     <span className="ch-leaderboard-university">{user.university().name}</span>
+    <span className="ch-leaderboard-time">{formatTime(time)}</span>
     <span className="ch-leaderboard-score">{String(score ? roundScore(score / 10000000) : 0.0).padEnd(7, '0')}</span>
   </div>;
 }
@@ -39,6 +43,7 @@ export default function Leaderboard({ baseUrl, leaderboard }) {
       <span className="ch-leaderboard-position">#</span>
       <span className="ch-leaderboard-username">Username</span>
       <span className="ch-leaderboard-university">University</span>
+      <span className="ch-leaderboard-time">Completed <FontAwesomeIcon icon={faClock} size="sm" /></span>
       <span className="ch-leaderboard-score">Score</span>
     </div>
 
@@ -47,6 +52,7 @@ export default function Leaderboard({ baseUrl, leaderboard }) {
       rank={i + 1}
       score={entry.score}
       user={entry.user}
+      time={entry.activated_at}
       baseUrl={baseUrl}
       highlightUser={auth.user && auth.user.username && auth.user.username == entry.user}
     />)}

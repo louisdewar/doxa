@@ -407,7 +407,7 @@ impl<C: Competition + ?Sized> Context<C> {
     pub async fn get_leaderboard(
         &self,
         key: Option<String>,
-    ) -> Result<Vec<(User, LeaderboardScore)>, ContextError> {
+    ) -> Result<Vec<(User, LeaderboardScore, AgentUpload)>, ContextError> {
         let competition_id = self.competition_id;
         self.run_query(move |conn| {
             doxa_db::action::leaderboard::active_leaderboard(conn, competition_id, key)
