@@ -1,11 +1,10 @@
 import ClimateHackAPI from 'competitions/climatehack/api';
 import { useAuth } from 'hooks/useAuth';
 import { useEffect, useState } from 'react';
-import { Link, useHistory, useParams } from 'react-router-dom';
+import { Link, useHistory, useLocation, useParams } from 'react-router-dom';
 import Leaderboard from '../Leaderboard';
 import UniversityLeaderboard from '../UniversityLeaderboard';
 import './LeaderboardTab.scss';
-
 
 
 export default function LeaderboardTab({ baseUrl }) {
@@ -33,11 +32,14 @@ export default function LeaderboardTab({ baseUrl }) {
   ];
 
   const { subtab } = useParams();
+  const location = useLocation();
   const history = useHistory();
 
   useEffect(() => {
     if (subtab) {
       setActiveTabIndex(tabs.findIndex(x => x.slug == subtab));
+    } else if (location.pathname.endsWith('/leaderboard') || location.pathname.endsWith('/leaderboard/')) {
+      history.push(`${baseUrl}compete/leaderboard/${tabs[activeTabIndex].slug}`);
     }
   }, []);
 
@@ -52,10 +54,6 @@ export default function LeaderboardTab({ baseUrl }) {
       console.error(err);
     });
   }, []);
-
-
-
-
 
   return <div className="ch-tab ch-leaderboard-tab">
     <h2>Leaderboard</h2>
