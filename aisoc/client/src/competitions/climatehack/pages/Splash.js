@@ -239,12 +239,12 @@ export default function Splash({ baseUrl }) {
           <div className='ch-splash-format-description'>
             <div className='ch-splash-format-columns'>
               <div>
-                <h3>Launch</h3>
-                <h4>28th January</h4>
+                <h3>First round</h3>
+                <h4>Fri 28th January (18:00 GMT) until Wed 16th March (23:59 GMT)</h4>
               </div>
               <div>
                 <h3>In-person finals</h3>
-                <h4>24-26th March</h4>
+                <h4>Thu 24th March until Sat 26th March</h4>
               </div>
             </div>
 
