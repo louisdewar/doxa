@@ -90,14 +90,17 @@ impl ClimateHackGameClient {
                 .send_message_to_agent(0, format!("Process {}.npz\n", checkpoint).as_bytes())
                 .await?;
 
-            let message = context.next_message(0).await?;
-            let expected = format!("Exported {}.npz", checkpoint);
+            let start = std::time::Instant::now();
+            loop {
+                context.set_max_message_time(Some(MAX_SERIES_GROUP_TIME - start.elapsed()));
+                let message = context.next_message(0).await?;
+                let expected = format!("Exported {}.npz", checkpoint);
 
-            if message != expected.as_bytes() {
-                return Err(GameError::Client(ClimateHackError::InvalidMessage {
-                    message: String::from_utf8_lossy(message).to_string(),
-                    expected,
-                }));
+                if message != expected.as_bytes() {
+                    debug!(expected=%expected, message=%String::from_utf8_lossy(message), "got invalid message (ignoring)");
+                } else {
+                    break;
+                }
             }
 
             let group_output_path = work_dir_path.join(format!("{}.npz", checkpoint));
