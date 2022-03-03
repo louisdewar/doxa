@@ -10,7 +10,7 @@ export default function OverviewTab({ baseUrl }) {
 
     <div className='ch-tab-box'>
       <p className='leading'>
-        Your challenge &ndash; should you choose to accept it &ndash; is to predict the next two hours of satellite imagery from the previous hour of satellite imagery over quadruple the area better than the current state of the art.
+        Your challenge &ndash; should you choose to accept it &ndash; is to predict the next two hours of satellite imagery from the previous hour of satellite imagery over quadruple the area better than the current state of the art before submissions close on Wed 16th March (23:59 GMT).
       </p>
     </div>
 

@@ -1,3 +1,5 @@
+import { faHourglassHalf } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ClimateHackAPI from 'competitions/climatehack/api';
 import { useAuth } from 'hooks/useAuth';
 import { useEffect, useState } from 'react';
@@ -57,6 +59,14 @@ export default function LeaderboardTab({ baseUrl }) {
 
   return <div className="ch-tab ch-leaderboard-tab">
     <h2>Leaderboard</h2>
+
+    {new Date() < new Date('2022-03-16 23:59') && <p style={{
+      backgroundColor: '#1F2937',
+      padding: '0.5rem 0.75rem',
+      borderRadius: '3px'
+    }}>
+      <FontAwesomeIcon icon={faHourglassHalf} size="sm" />&nbsp;&nbsp;Submissions are open until Wed 16th March (23:59 GMT).
+    </p>}
 
     <div className="ch-leaderboard-tab-selector">
       {tabs.map((tab, i) => <a
