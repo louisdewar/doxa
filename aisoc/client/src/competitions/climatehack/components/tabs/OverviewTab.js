@@ -46,7 +46,7 @@ export default function OverviewTab({ baseUrl }) {
     <p className='ch-tab-box'>
       From twelve 128&times;128-pixel images taken five minutes apart (one hour of data), predict the next two hours of satellite imagery for the smaller central 64&times;64-pixel region. The aim is for solutions to produce accurate, sharp, non-blurry images close to the ground truth.
       <br /><br />
-      <strong>Input</strong>: an hour of satellite imagery for a 128&times;128-pixel region (<code>12 timesteps &times; 128 pixels &times; 128 pixels</code>), as well as the datetime and geospatial positions of the images (which may be useful to feed into your model).
+      <strong>Input</strong>: an hour of satellite imagery for a 128&times;128-pixel region (<code>12 timesteps &times; 128 pixels &times; 128 pixels</code>), as well as the geospatial positions of the images (which may be useful to feed into your model).
       <br /><br />
       <strong>Output</strong>: the next two hours of satellite imagery for the 64&times;64-pixel area at the centre of the input region (<code>24 timesteps &times; 64 pixels &times; 64 pixels</code>).
       <br /><br />
