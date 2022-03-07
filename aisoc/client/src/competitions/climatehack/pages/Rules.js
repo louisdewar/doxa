@@ -138,7 +138,7 @@ Shall mean the data or datasets provided by the Data Provider and available from
             <li>{`Competition Entities
 Shall mean the Competition Organiser, the Competition Sponsors, the Data Provider and their respective parent companies, subsidiaries and affiliates`}</li>
             <li>{`Competition Finals
-Shall mean the finals of the Competition that will be held on 24 to 26 March 2022 in London for Participating Universities based in the United Kingdom and New York for Participating Universities based in the United States of America or other such date as communicated by the Competition Organiser from time to time.`}</li>
+Shall mean the finals of the Competition that will be held on 24 to 26 March 2022 in London for Participating Universities based in the United Kingdom and Boston for Participating Universities based in the United States of America or other such date as communicated by the Competition Organiser from time to time.`}</li>
             <li>{`Competition Organiser
 Shall mean University College London Artificial Intelligence Society`}</li>
             <li>{`Competition Period
