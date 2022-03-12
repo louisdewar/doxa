@@ -1,6 +1,7 @@
 use std::error;
 
 use async_trait::async_trait;
+pub use doxa_vm::backend::{firecracker, VMBackend};
 pub use doxa_vm::mount::Mount;
 use serde::{de::DeserializeOwned, Serialize};
 
@@ -52,9 +53,9 @@ pub trait GameClient: Send + Sync + 'static {
     }
 
     /// Runs the game until completion.
-    async fn run<'a>(
+    async fn run<'a, B: VMBackend>(
         &self,
         match_request: Self::MatchRequest,
-        context: &mut GameContext<'a, Self>,
+        context: &mut GameContext<'a, Self, B>,
     ) -> Result<(), GameError<Self::Error>>;
 }

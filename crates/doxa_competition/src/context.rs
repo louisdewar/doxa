@@ -55,6 +55,7 @@ impl<C: Competition + ?Sized> Context<C> {
         &self,
         agents: Vec<String>,
         match_request: <C::GameClient as GameClient>::MatchRequest,
+        execution_profile: &str,
     ) -> Result<(), ContextError> {
         let db = self.db_connection().await?;
         let competition = self.competition_id;
@@ -93,8 +94,13 @@ impl<C: Competition + ?Sized> Context<C> {
             game_id: game.id,
         };
 
-        doxa_mq::action::emit_match_request(&connection, &match_request, C::COMPETITION_NAME)
-            .await?;
+        doxa_mq::action::emit_match_request(
+            &connection,
+            &match_request,
+            C::COMPETITION_NAME,
+            execution_profile,
+        )
+        .await?;
 
         Ok(())
     }
@@ -134,6 +140,7 @@ impl<C: Competition + ?Sized> Context<C> {
             self.emit_match_request(
                 vec![new_agent.clone(), other_agent.id.clone()],
                 match_request_generator(),
+                "basic",
             )
             .await?;
 
@@ -141,6 +148,7 @@ impl<C: Competition + ?Sized> Context<C> {
                 self.emit_match_request(
                     vec![other_agent.id.clone(), new_agent.clone()],
                     match_request_generator(),
+                    "basic",
                 )
                 .await?;
             }

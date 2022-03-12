@@ -1,6 +1,7 @@
 use std::{marker::PhantomData, path::PathBuf, time::Duration};
 
 use doxa_core::tokio;
+use doxa_vm::backend::VMBackend;
 use futures::TryFutureExt;
 use tokio::time::timeout;
 
@@ -35,17 +36,17 @@ impl AsyncTempDir {
     }
 }
 
-pub struct GameContext<'a, C: GameClient + ?Sized> {
-    pub(crate) agents: &'a mut Vec<VMAgent>,
+pub struct GameContext<'a, C: GameClient + ?Sized, B: VMBackend> {
+    pub(crate) agents: &'a mut Vec<VMAgent<B>>,
     client: PhantomData<C>,
     max_message_time: Duration,
     pub(crate) game_event_context: &'a mut GameEventContext<C>,
     work_dir: Option<AsyncTempDir>,
 }
 
-impl<'a, C: GameClient> GameContext<'a, C> {
+impl<'a, C: GameClient, B: VMBackend> GameContext<'a, C, B> {
     pub(crate) fn new(
-        agents: &'a mut Vec<VMAgent>,
+        agents: &'a mut Vec<VMAgent<B>>,
         game_event_context: &'a mut GameEventContext<C>,
     ) -> Self {
         GameContext {
@@ -116,7 +117,7 @@ impl<'a, C: GameClient> GameContext<'a, C> {
         self.agents.len()
     }
 
-    fn agent_mut(&mut self, agent_id: usize) -> Result<&mut VMAgent, GameContextError> {
+    fn agent_mut(&mut self, agent_id: usize) -> Result<&mut VMAgent<B>, GameContextError> {
         if agent_id >= self.agents() {
             return Err(GameContextError::UnknownAgent {
                 id: agent_id,

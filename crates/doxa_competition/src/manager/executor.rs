@@ -1,7 +1,10 @@
 use std::sync::Arc;
 
 use doxa_executor::{
-    client::{ForfeitError, GameClient},
+    client::{
+        firecracker::{self, FirecrackerBackendSettings},
+        ForfeitError, GameClient,
+    },
     error::GameManagerError,
     game::GameManager,
 };
@@ -19,6 +22,7 @@ use crate::{client::Competition, Settings};
 
 /// Listens for execution events and then spawns games.
 pub struct ExecutionManager<C: Competition> {
+    //firecracker_settings: Arc<FirecrackerBackendSettings>,
     settings: Arc<Settings>,
     executor_permits: usize,
     competition: Arc<C>,
@@ -26,6 +30,7 @@ pub struct ExecutionManager<C: Competition> {
 
 impl<C: Competition> ExecutionManager<C> {
     pub(crate) fn new(
+        //firecracker_settings: Arc<FirecrackerBackendSettings>,
         settings: Arc<Settings>,
         executor_permits: usize,
         competition: Arc<C>,
@@ -33,6 +38,7 @@ impl<C: Competition> ExecutionManager<C> {
         assert!(executor_permits > 0);
 
         ExecutionManager {
+            //  firecracker_settings,
             settings,
             executor_permits,
             competition,
@@ -50,7 +56,7 @@ impl<C: Competition> ExecutionManager<C> {
             .expect("Failed to get MQ connection");
 
         let mut consumer =
-            doxa_mq::action::get_match_request_consumer(&connection, competition_name)
+            doxa_mq::action::get_match_request_consumer(&connection, competition_name, "basic")
                 .await
                 .unwrap();
 
@@ -62,7 +68,7 @@ impl<C: Competition> ExecutionManager<C> {
         let game_client = Arc::new(self.competition.build_game_client());
 
         tokio::spawn(async move {
-            let executor_settings = self.settings.executor_settings.clone();
+            let executor_settings = self.settings.clone();
             let executor_limiter = Arc::new(Semaphore::new(self.executor_permits));
 
             while let Some(message) = consumer.next().await {
@@ -95,9 +101,17 @@ impl<C: Competition> ExecutionManager<C> {
                         self.settings.competitions_base_url, competition_name, game_id
                     );
                     let request_client = self.settings.request_client.clone();
-                    let executor_settings = executor_settings.clone();
+                    let executor_settings = self.settings.executor_settings.clone();
                     let competition_name = competition_name;
                     let game_client = game_client.clone();
+                    let firecracker_settings = self.settings.firecracker_settings.clone();
+                    // let firecracker_settings = firecracker::FirecrackerBackendSettings {
+                    //     kernel_img: executor_settings.kernel_img.clone(),
+                    //     kernel_boot_args: executor_settings.kernel_boot_args.clone(),
+                    //     firecracker_path: executor_settings.firecracker_path.clone(),
+                    //     vcpus: 6,
+                    //     original_rootfs: executor_settings.rootfs.clone(),
+                    // };
                     async move {
                             // In future there can be some smarter code in the event that the
                             // code below fails or the server unexpected shutsdown, we need to
@@ -108,8 +122,9 @@ impl<C: Competition> ExecutionManager<C> {
                                 .await
                                 .expect("Failed to acknowledge MQ");
 
-                            let game_manager = match GameManager::<C::GameClient>::new(
+                            let game_manager = match GameManager::<C::GameClient, firecracker::FirecrackerBackend>::new(
                                 executor_settings,
+                                firecracker_settings,
                                 event_channel,
                                 event_channel_name,
                                 competition_name,

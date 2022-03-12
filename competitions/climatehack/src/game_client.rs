@@ -1,7 +1,7 @@
 use std::{path::PathBuf, sync::Arc, time::Duration};
 
 use doxa_competition::{
-    client::{async_trait, GameClient, GameContext, GameError, Mount},
+    client::{async_trait, GameClient, GameContext, GameError, Mount, VMBackend},
     tokio::{self, io::AsyncWriteExt},
     tracing::{debug, info},
 };
@@ -43,10 +43,10 @@ pub struct ClimateHackGameClient {
 
 impl ClimateHackGameClient {
     // Use inner async method for better diagnostics (avoid async_trait)
-    async fn run_inner<'a>(
+    async fn run_inner<'a, B: VMBackend>(
         &self,
         match_request: ClimateHackMatchRequest,
-        context: &mut GameContext<'a, Self>,
+        context: &mut GameContext<'a, Self, B>,
     ) -> Result<(), GameError<ClimateHackError>> {
         context.expect_n_agents(1)?;
         let dataset_name = match_request.dataset;
@@ -67,6 +67,8 @@ impl ClimateHackGameClient {
                 vec!["/climatehack_test_x".to_string(), "/output".to_string()],
             )
             .await?;
+
+        // TODO: do this in a loop and ignore invalid messages
         context.set_max_message_time(Some(MAX_STARTUP_TIME));
         let message = context.next_message(0).await.map_err(|e| {
             if e.is_message_receive_timeout() {
@@ -173,10 +175,10 @@ impl GameClient for ClimateHackGameClient {
     const AGENT_SCRATCH_MB: u64 = 8 * 1024;
     const AGENT_SWAP_MB: u64 = 6 * 1024;
 
-    async fn run<'a>(
+    async fn run<'a, B: VMBackend>(
         &self,
         match_request: ClimateHackMatchRequest,
-        context: &mut GameContext<'a, Self>,
+        context: &mut GameContext<'a, Self, B>,
     ) -> Result<(), GameError<Self::Error>> {
         self.run_inner(match_request, context).await
     }

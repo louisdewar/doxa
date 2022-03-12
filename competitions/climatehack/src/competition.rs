@@ -4,7 +4,7 @@ use doxa_competition::{
     client::{
         async_trait,
         limiter::{LimiterConfig, TokenBucket, ONE_DAY, ONE_HOUR},
-        serde_json, Competition, Context, GameEvent,
+        serde_json, AgentUpload, Competition, Context, GameEvent,
     },
     error::ContextError,
 };
@@ -37,14 +37,15 @@ impl Competition for ClimateHackCompetition {
     async fn on_agent_activated(
         &self,
         context: &Context<Self>,
-        agent_id: String,
+        agent: AgentUpload,
     ) -> Result<(), ContextError> {
         context
             .emit_match_request(
-                vec![agent_id],
+                vec![agent.id],
                 ClimateHackMatchRequest {
                     dataset: self.primary_dataset.clone(),
                 },
+                &agent.execution_environment,
             )
             .await?;
 
@@ -54,7 +55,7 @@ impl Competition for ClimateHackCompetition {
     async fn on_agent_deactivated(
         &self,
         _context: &Context<Self>,
-        _agent_id: String,
+        _agent: AgentUpload,
     ) -> Result<(), ContextError> {
         Ok(())
     }

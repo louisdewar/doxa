@@ -6,7 +6,11 @@ use crate::{
 };
 use async_trait::async_trait;
 use doxa_auth::limiter::{LimiterConfig, TokenBucket};
-use doxa_executor::{client::GameClient, context::GameContext};
+use doxa_db::model::storage::AgentUpload;
+use doxa_executor::{
+    client::{GameClient, VMBackend},
+    context::GameContext,
+};
 
 use serde::{Deserialize, Serialize};
 
@@ -28,9 +32,11 @@ impl Competition for HelloWorldCompetiton {
     async fn on_agent_activated(
         &self,
         context: &Context<Self>,
-        agent_id: String,
+        agent: AgentUpload,
     ) -> Result<(), ContextError> {
-        context.emit_match_request(vec![agent_id], ()).await?;
+        context
+            .emit_match_request(vec![agent.id], (), &agent.execution_environment)
+            .await?;
 
         Ok(())
     }
@@ -38,7 +44,7 @@ impl Competition for HelloWorldCompetiton {
     async fn on_agent_deactivated(
         &self,
         _context: &Context<Self>,
-        _agent_id: String,
+        _agent: AgentUpload,
     ) -> Result<(), ContextError> {
         Ok(())
     }
@@ -122,10 +128,10 @@ impl GameClient for HelloWorldGameClient {
     type MatchRequest = ();
     type GameEvent = HelloWorldGameEvent;
 
-    async fn run<'a>(
+    async fn run<'a, B: VMBackend>(
         &self,
         _match_request: Self::MatchRequest,
-        context: &mut GameContext<'a, Self>,
+        context: &mut GameContext<'a, Self, B>,
     ) -> Result<(), doxa_executor::error::GameError<Self::Error>> {
         context.set_max_message_time(Some(Duration::from_secs(5)));
         context.expect_n_agents(1)?;

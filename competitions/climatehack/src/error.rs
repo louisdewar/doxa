@@ -74,6 +74,7 @@ pub enum DatasetLoadingError {
     DatasetX(io::Error),
     DatasetY(io::Error),
     DatasetXNotFile,
+    DatasetXNotDirectory,
     DatasetYNotDirectory,
 }
 

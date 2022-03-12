@@ -1,0 +1,15 @@
+[package]
+name = "doxa_execution_node"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+doxa_competition = { path = "../doxa_competition/" }
+doxa_executor = { path = "../doxa_executor/" }
+doxa_vm = { path = "../doxa_vm/" }
+doxa_core = { path = "../doxa_core/" }
+doxa_mq = { path = "../doxa_mq/" }
+reqwest = "0.11.9"
+serde = "1.0.136"
+url = { version = "2.2.2", features = ["serde"] }
+futures-util = "0.3.21"

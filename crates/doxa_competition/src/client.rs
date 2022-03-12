@@ -15,7 +15,10 @@ use crate::{
 pub use crate::context::Context;
 pub use async_trait::async_trait;
 pub use doxa_auth::limiter;
-pub use doxa_executor::client::{ForfeitError, GameClient, GameContext, GameError, Mount};
+pub use doxa_db::model::storage::AgentUpload;
+pub use doxa_executor::client::{
+    ForfeitError, GameClient, GameContext, GameError, Mount, VMBackend,
+};
 pub use doxa_mq::model::{ActivationEvent, GameEvent};
 pub use serde_json;
 
@@ -68,14 +71,14 @@ pub trait Competition: 'static + Send + Sync {
     async fn on_agent_activated(
         &self,
         context: &Context<Self>,
-        agent: String,
+        agent: AgentUpload,
     ) -> Result<(), ContextError>;
 
     /// Runs whenever an agent has been deactivated.
     async fn on_agent_deactivated(
         &self,
         context: &Context<Self>,
-        agent: String,
+        agent: AgentUpload,
     ) -> Result<(), ContextError>;
 
     /// Whenever a game ends without an error.

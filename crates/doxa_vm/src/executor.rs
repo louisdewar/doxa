@@ -12,12 +12,10 @@ use sys_mount::{MountFlags, SupportedFilesystems};
 use tokio::{
     self,
     fs::{File, OpenOptions},
-    io::{AsyncReadExt, AsyncWriteExt},
+    io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt},
     task::{self, JoinHandle},
     time::timeout,
 };
-
-use tokio_vsock::VsockStream;
 
 use crate::{
     error::{
@@ -46,21 +44,16 @@ pub const MAX_FILE_NAME_LEN: usize = 300;
 pub const STDERR_LEN: usize = 100_000;
 
 /// This is the server that runs inside of the VM.
-pub struct VMExecutor {
-    stream: Stream<VsockStream>,
+pub struct VMExecutor<S: AsyncWrite + AsyncRead + Unpin + Send + 'static> {
+    stream: Stream<S>,
     execution_root: PathBuf,
     execution_config: ExecutionConfig,
     agent: Option<RunningAgent>,
 }
 
-impl VMExecutor {
-    pub fn start(cid: u32, port: u32) -> JoinHandle<()> {
+impl<S: AsyncWrite + AsyncRead + Unpin + Send + 'static> VMExecutor<S> {
+    pub fn start(stream: S) -> JoinHandle<()> {
         task::spawn(async move {
-            let stream = VsockStream::connect(cid, port)
-                .await
-                .expect("Couldn't connect to stream");
-
-            println!("VM executor connected");
             let mut stream = Stream::from_socket(stream);
 
             Self::handle_mounts(&mut stream).await.unwrap();
@@ -245,7 +238,7 @@ impl VMExecutor {
         Ok(())
     }
 
-    async fn handle_mounts(stream: &mut Stream<VsockStream>) -> Result<(), HandleMountsError> {
+    async fn handle_mounts(stream: &mut Stream<S>) -> Result<(), HandleMountsError> {
         let mut mount_msg = Vec::with_capacity(500);
         stream
             .next_full_message(&mut mount_msg, MAX_MSG_LEN)
@@ -257,6 +250,11 @@ impl VMExecutor {
                 .position(|b| *b == b'_')
                 .ok_or(HandleMountsError::InvalidFormatting)?,
         );
+
+        if prefix == b"NOMOUNTREQUEST" {
+            println!("Got NOMOUNTREQUEST skipping mounting");
+            return Ok(());
+        }
 
         if prefix != b"MOUNTREQUEST" {
             println!(
@@ -275,9 +273,16 @@ impl VMExecutor {
             .await
             .map_err(HandleMountsError::FindDrives)?;
 
-        mount::swapon()
-            .await
-            .map_err(HandleMountsError::ActivateSwap)?;
+        let mut swap_msg = mount_msg;
+        stream.next_full_message(&mut swap_msg, MAX_MSG_LEN).await?;
+
+        if swap_msg == b"SWAPON" {
+            mount::swapon()
+                .await
+                .map_err(HandleMountsError::ActivateSwap)?;
+        } else if swap_msg != b"NO SWAP" {
+            return Err(HandleMountsError::InvalidSwapMessage);
+        }
 
         let supported = SupportedFilesystems::new().expect("failed to get supported file systems");
 
@@ -308,7 +313,7 @@ impl VMExecutor {
     /// Download the agent to `{output_dir}/download/agent_name.tar[.gz]`
     /// Then extract the tar file to `{output_dir}` and delete the downloaded tar.
     async fn receive_agent(
-        stream: &mut Stream<VsockStream>,
+        stream: &mut Stream<S>,
         output_dir: &Path,
     ) -> Result<(), ReceieveAgentError> {
         // == Name message

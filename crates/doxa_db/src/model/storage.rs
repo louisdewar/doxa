@@ -15,6 +15,8 @@ pub struct AgentUpload {
     pub deleted: bool,
     pub failed: bool,
     pub active: bool,
+    pub execution_environment: String,
+    pub file_size: i32,
 }
 
 #[derive(Debug, Clone, Insertable)]

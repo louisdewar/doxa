@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use doxa_competition::{
-    client::{async_trait, ForfeitError, GameClient, GameContext, GameError},
+    client::{async_trait, ForfeitError, GameClient, GameContext, GameError, VMBackend},
     tracing::debug,
 };
 
@@ -149,8 +149,8 @@ impl ForfeitError for UTTTError {
 }
 
 impl UTTTGameClient {
-    async fn run_once<E: FnMut(UTTTGameEvent)>(
-        context: &mut GameContext<'_, Self>,
+    async fn run_once<E: FnMut(UTTTGameEvent), B: VMBackend>(
+        context: &mut GameContext<'_, Self, B>,
         mut on_event: E,
     ) -> Result<Winner, GameError<UTTTError>> {
         let mut model = Model::new();
@@ -276,10 +276,10 @@ impl GameClient for UTTTGameClient {
 
     const AGENT_RAM_MB: u64 = 1024;
 
-    async fn run<'a>(
+    async fn run<'a, B: VMBackend>(
         &self,
         _match_request: (),
-        context: &mut GameContext<'a, Self>,
+        context: &mut GameContext<'a, Self, B>,
     ) -> Result<(), GameError<Self::Error>> {
         context.expect_n_agents(2)?;
 

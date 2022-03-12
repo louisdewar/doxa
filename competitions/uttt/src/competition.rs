@@ -1,5 +1,5 @@
 use doxa_competition::{
-    client::{async_trait, serde_json, Competition, Context, GameEvent},
+    client::{async_trait, serde_json, AgentUpload, Competition, Context, GameEvent},
     error::ContextError,
 };
 
@@ -20,9 +20,9 @@ impl Competition for UTTTCompetition {
     async fn on_agent_activated(
         &self,
         context: &Context<Self>,
-        agent_id: String,
+        agent: AgentUpload,
     ) -> Result<(), ContextError> {
-        context.pair_matching(agent_id, true, || ()).await?;
+        context.pair_matching(agent.id, true, || ()).await?;
 
         Ok(())
     }
@@ -30,10 +30,10 @@ impl Competition for UTTTCompetition {
     async fn on_agent_deactivated(
         &self,
         context: &Context<Self>,
-        agent_id: String,
+        agent: AgentUpload,
     ) -> Result<(), ContextError> {
         context
-            .remove_game_result_by_participant_and_update_scores_by_sum(None, agent_id)
+            .remove_game_result_by_participant_and_update_scores_by_sum(None, agent.id)
             .await?;
 
         Ok(())

@@ -6,8 +6,9 @@ use doxa_core::{
     tokio,
 };
 use doxa_vm::{
+    backend::VMBackend,
     error::{AgentLifecycleManagerError, TakeFileManagerError, VMShutdownError},
-    manager::VMManagerArgs,
+    manager::VMManagerSettings,
     mount::Mount,
     stream::MessageReader,
     Manager as VM,
@@ -21,9 +22,9 @@ use crate::{
 
 pub const MAX_MSG_LEN: usize = 50_000;
 
-pub struct VMAgent {
+pub struct VMAgent<B: VMBackend> {
     id: String,
-    vm_manager: VM,
+    vm_manager: doxa_vm::manager::Manager<B>,
     message_reader: MessageReader,
     /// Whether the process is running or not
     running: bool,
@@ -43,14 +44,15 @@ pub struct VMAgentSettings {
     pub mounts: Vec<Mount>,
 }
 
-impl VMAgent {
+impl<B: VMBackend> VMAgent<B> {
     pub async fn new(
         competition: &str,
         agent_id: String,
         storage: &doxa_storage::AgentRetrieval,
         settings: &Settings,
         vm_agent_settings: VMAgentSettings,
-    ) -> Result<VMAgent, AgentErrorLogContext> {
+        backend_settings: B::BackendSettings,
+    ) -> Result<VMAgent<B>, AgentErrorLogContext> {
         let agent_response = storage.download_agent(&agent_id, competition).await?;
 
         if agent_response.status() == StatusCode::GONE {
@@ -81,19 +83,27 @@ impl VMAgent {
             .content_length()
             .ok_or(AgentError::CouldNotExtractFileSize)?;
 
-        let vm_args = VMManagerArgs {
-            original_rootfs: settings.rootfs.clone(),
-            kernel_img: settings.kernel_img.clone(),
-            kernel_boot_args: settings.kernel_boot_args.clone(),
-            firecracker_path: settings.firecracker_path.clone(),
-            memory_size_mib: vm_agent_settings.agent_ram_mb,
+        // let vm_args = VMManagerArgs {
+        //     original_rootfs: settings.rootfs.clone(),
+        //     kernel_img: settings.kernel_img.clone(),
+        //     kernel_boot_args: settings.kernel_boot_args.clone(),
+        //     firecracker_path: settings.firecracker_path.clone(),
+        //     memory_size_mib: vm_agent_settings.agent_ram_mb,
+        //     scratch_source_path: settings.scratch_base_image.clone(),
+        //     scratch_size_mib: vm_agent_settings.scratch_size_mb,
+        //     swap_size_mib: vm_agent_settings.swap_size_mb,
+        //     mounts: vm_agent_settings.mounts,
+        // };
+
+        let vm_settings = VMManagerSettings {
+            swap_size_mib: vm_agent_settings.swap_size_mb,
             scratch_source_path: settings.scratch_base_image.clone(),
             scratch_size_mib: vm_agent_settings.scratch_size_mb,
-            swap_size_mib: vm_agent_settings.swap_size_mb,
+            memory_size_mib: vm_agent_settings.agent_ram_mb,
             mounts: vm_agent_settings.mounts,
         };
 
-        let mut vm = VM::new(vm_args).await?;
+        let mut vm = VM::new(vm_settings, backend_settings).await?;
 
         match async {
             timeout(
