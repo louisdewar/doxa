@@ -59,7 +59,7 @@ impl VMBackend for FirecrackerBackend {
 
     type Socket = UnixStream;
 
-    const SUPPORTS_MOUNTING_IMAGES: bool = false;
+    const SUPPORTS_MOUNTING_IMAGES: bool = true;
 
     async fn spawn(
         tempdir: &std::path::Path,
