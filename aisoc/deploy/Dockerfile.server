@@ -39,4 +39,4 @@ COPY --from=virtualenv_builder /scorer_env /app/scorer_env
 
 EXPOSE 3001
 
-ENTRYPOINT ["/app/doxa", "--scorer-python-bin", "/app/scorer_env/bin/python"]
+ENTRYPOINT ["/app/doxa", "--scorer-python-bin", "/app/scorer_env/bin/python", "main"]
