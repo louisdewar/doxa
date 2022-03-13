@@ -34,11 +34,6 @@ fi
 python -m pip install opencv-contrib-python-headless fastai
 python -m pip install einops perceiver-pytorch pytorch_lightning huggingface_hub antialiased_cnns transformers py7zr
 
-# Probably not required for evaluation but people may have imported these packages while training and did not separate the logic for evaluation
-# python -m pip install matplotlib seaborn
-# python -m pip install ipython jupyter nose sympy
-
-
 python -m pip freeze > /pipfreeze.txt
 
 echo /pipfreeze.txt:
