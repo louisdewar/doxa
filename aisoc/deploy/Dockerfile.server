@@ -34,7 +34,7 @@ WORKDIR /app
 
 # COPY --from=virtualenv_builder /scorer_env /app/scorer_env
 # COPY --from=server_builder /app/target/debug/aisoc_server /app/doxa
-COPY --from=server_builder /app/target/debug/aisoc_server /app/doxa
+COPY --from=server_builder /app/target/release/aisoc_server /app/doxa
 
 EXPOSE 3001
 
