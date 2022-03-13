@@ -1,4 +1,4 @@
-import { faClock } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faClock } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
 import TextBox from 'components/TextBox';
@@ -9,13 +9,14 @@ import { formatTime } from 'utils/time';
 import { roundScore } from '../utils';
 import './Leaderboard.scss';
 
+
 const PAGE_SIZE = 20;
 
 
 function ClimateHackLeaderboardRow({ rank, score, user, time, baseUrl, highlightUser }) {
   return <div className='ch-leaderboard-entry'>
     <span className="ch-leaderboard-position">{rank}</span>
-    <span className={`ch-leaderboard-username ${highlightUser ? 'ch-leaderboard-username-highlighted' : ''}`}><Link to={`${baseUrl}user/${user.name()}`}>{user.name()}</Link></span>
+    <span className={`ch-leaderboard-username ${highlightUser ? 'ch-leaderboard-username-highlighted' : ''}`}><Link to={`${baseUrl}user/${user.name()}`}>{user.name()}</Link> {user.profile.admin && <FontAwesomeIcon icon={faCheck} fixedWidth size="sm" />}</span>
     <span className="ch-leaderboard-university">{user.university().name}</span>
     <span className="ch-leaderboard-time">{formatTime(time)}</span>
     <span className="ch-leaderboard-score">{String(score ? roundScore(score / 10000000) : 0.0).padEnd(7, '0')}</span>
