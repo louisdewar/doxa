@@ -1,8 +1,10 @@
-use std::{io, path::PathBuf};
+use std::{io, path::PathBuf, process::Stdio};
 
 use doxa_core::tokio;
 use rand::Rng;
 use tokio::fs::{File, OpenOptions};
+
+use crate::error::ExtractDoxaYamlError;
 
 /// 8 would mean a u64 equivalent of randomness which should be plenty.
 const FILE_NAME_LENGTH: usize = 10;
@@ -43,6 +45,37 @@ impl LocalStorage {
             .open(folder.join(&file_name))
             .await
             .map(|f| (f, file_name))
+    }
+
+    pub async fn file_size(&self, competition_name: &str, agent_id: &str) -> io::Result<u64> {
+        let path = self.root.join(&competition_name).join(&agent_id);
+
+        let size = tokio::fs::metadata(&path).await?.len();
+
+        Ok(size)
+    }
+
+    pub async fn read_doxa_yaml(
+        &self,
+        competition_name: &str,
+        agent_id: &str,
+    ) -> Result<serde_yaml::Value, ExtractDoxaYamlError> {
+        let path = self.root.join(&competition_name).join(&agent_id);
+
+        let process = tokio::process::Command::new("tar")
+            .arg("-zxOvf")
+            .arg(path)
+            .arg("doxa.yaml")
+            .stdin(Stdio::null())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::null())
+            .output()
+            .await?;
+
+        let stdout = process.stdout;
+        let value = serde_yaml::from_slice(&stdout)?;
+
+        Ok(value)
     }
 
     /// Returns the size of the deleted file in bytes

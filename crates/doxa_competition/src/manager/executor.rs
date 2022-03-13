@@ -1,10 +1,7 @@
 use std::sync::Arc;
 
 use doxa_executor::{
-    client::{
-        firecracker::{self, FirecrackerBackendSettings},
-        ForfeitError, GameClient,
-    },
+    client::{firecracker, ForfeitError, GameClient},
     error::GameManagerError,
     game::GameManager,
 };

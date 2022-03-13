@@ -15,11 +15,28 @@ COPY ./aisoc/server aisoc/server
 COPY ./tests tests
 
 RUN cargo build --release --locked --workspace
+# tmp debug
+# RUN cargo build --locked --workspace
 
-#FROM archlinux:base
+RUN strip target/release/aisoc_server
 
-#RUN yes | pacman -Syu
-#RUN yes | pacman -S postgresql-libs
+FROM nvidia/cuda:11.4.0-runtime-ubuntu20.04 as gpu_execution_node
+
+# RUN apt-get update && apt-get upgrade -y && apt-get --no-install-recommends install -y libpq5 && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get upgrade -y && apt-get --no-install-recommends install -y libpq5 && apt-get install software-properties-common curl -y && add-apt-repository ppa:deadsnakes/ppa && apt-get install python3.9 python3.9-venv -y && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN ln -s $(which python3.9) /usr/bin/python
+
+COPY ./aisoc/deploy/make_scorer_virtualenv.sh /make_scorer_virtualenv.sh
+RUN /make_scorer_virtualenv.sh
+
+WORKDIR /app
+
+# COPY --from=virtualenv_builder /scorer_env /app/scorer_env
+# COPY --from=server_builder /app/target/debug/aisoc_server /app/doxa
+COPY --from=server_builder /app/target/debug/aisoc_server /app/doxa
+
+EXPOSE 3001
 
 FROM virtualenv_builder
 

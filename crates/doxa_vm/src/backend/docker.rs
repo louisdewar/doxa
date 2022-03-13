@@ -1,13 +1,22 @@
-use std::path::{Path, PathBuf};
+use std::{
+    collections::HashMap,
+    path::{Path, PathBuf},
+    time::Duration,
+};
 
 pub use bollard::auth::DockerCredentials;
-use bollard::{container::RemoveContainerOptions, image::CreateImageOptions, models::HostConfig};
+use bollard::{
+    container::RemoveContainerOptions,
+    image::CreateImageOptions,
+    models::{DeviceRequest, HostConfig},
+};
 
 use futures_util::TryStreamExt;
 use tokio::{
     io::empty,
     net::{UnixListener, UnixStream},
 };
+use tracing::info;
 
 use crate::{
     error::{ManagerError, VMShutdownError},
@@ -54,6 +63,7 @@ impl VMBackend for DockerBackend {
         let docker = backend_settings.docker;
         let image = backend_settings.image;
 
+        info!("test1");
         docker
             .create_image(
                 Some(CreateImageOptions {
@@ -67,7 +77,9 @@ impl VMBackend for DockerBackend {
             .await
             .map_err(ManagerError::Bollard)?;
 
-        let doxa_sock_host = tempdir.join("doxa.sock");
+        let sock_folder = tempdir.join("sock");
+        tokio::fs::create_dir_all(&sock_folder).await?;
+        let doxa_sock_host = sock_folder.join("doxa.sock");
         let listener = UnixListener::bind(&doxa_sock_host)?;
 
         let mut binds: Vec<_> = mounts
@@ -81,10 +93,16 @@ impl VMBackend for DockerBackend {
                 )
             })
             .collect();
-        binds.push(format!(
-            "{}:/doxa.sock:rw",
-            doxa_sock_host.to_string_lossy()
-        ));
+        binds.push(dbg!(format!(
+            "{}:/doxa_sock:rw",
+            sock_folder.to_string_lossy()
+        )));
+
+        let mut volumes = HashMap::new();
+        volumes.insert(
+            sock_folder.to_string_lossy().to_string(),
+            Default::default(),
+        );
 
         let container_config = bollard::container::Config {
             attach_stdout: Some(true),
@@ -92,6 +110,7 @@ impl VMBackend for DockerBackend {
             network_disabled: Some(true),
             tty: Some(true),
             image: Some(image),
+            volumes: Some(volumes),
             host_config: Some(HostConfig {
                 // ignore ram_mib
                 memory: backend_settings.memory_limit_bytes,
@@ -101,12 +120,19 @@ impl VMBackend for DockerBackend {
                 runtime: backend_settings.runtime,
                 binds: Some(binds),
                 publish_all_ports: Some(true),
+                device_requests: Some(vec![DeviceRequest {
+                    driver: Some("".to_string()),
+                    count: Some(-1),
+                    device_ids: None,
+                    capabilities: Some(vec![vec!["gpu".to_string()]]),
+                    options: None,
+                }]),
                 ..Default::default()
             }),
             entrypoint: Some(vec![
                 "/sbin/vm_executor".to_string(),
                 "unix_listen".to_string(),
-                "/doxa.sock".into(),
+                "/doxa_sock/doxa.sock".into(),
                 // "tcp_listen".to_string(),
                 // "--bind".into(),
                 // "127.0.0.1".into(),
@@ -118,10 +144,13 @@ impl VMBackend for DockerBackend {
             ..Default::default()
         };
 
+        info!("test3");
+
         let container = docker
             .create_container::<String, String>(None, container_config)
             .await
             .map_err(ManagerError::Bollard)?;
+        info!("test4");
 
         let container_id = container.id;
 
@@ -130,7 +159,8 @@ impl VMBackend for DockerBackend {
             .await
             .map_err(ManagerError::Bollard)?;
 
-        dbg!(&container_id);
+        info!("test5");
+        info!(%container_id, "started container");
         Ok(DockerBackend {
             docker,
             container_id,
@@ -160,6 +190,7 @@ impl VMBackend for DockerBackend {
 
     /// Connects to the VM manager inside the VM.
     async fn connect(&mut self) -> Result<Stream<Self::Socket>, ManagerError> {
+        // TODO: timeout
         let (stream, _) = self.listener.accept().await?;
         let mut stream = Stream::from_socket(stream);
         stream.send_full_message(b"NOMOUNTREQUEST_").await?;

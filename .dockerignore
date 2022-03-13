@@ -4,3 +4,6 @@
 ./aisoc/client/node_modules
 ./aisoc/client/build
 ./.git
+
+# TEMP
+# ./dev/vm/images

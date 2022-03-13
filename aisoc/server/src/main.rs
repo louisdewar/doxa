@@ -5,7 +5,6 @@ use climatehack::{dataset::Datasets, ClimateHackCompetition};
 use doxa_execution_node::manager::docker::{self, Docker, DockerCredentials};
 use doxa_executor::settings::AgentRetrieval;
 use doxa_server::{tracing::warn, CompetitionSystem};
-use url::Url;
 use uttt::UTTTCompetition;
 
 mod cli;
@@ -86,7 +85,7 @@ async fn main() -> std::io::Result<()> {
                 mq_pool,
                 executor_settings: Arc::new(doxa_executor::Settings {
                     agent_retrieval: AgentRetrieval::new(
-                        "http://doxa.uclaisociety.co.uk/api/storage/download/".to_string(),
+                        "https://doxa.uclaisociety.co.uk/api/storage/download/".to_string(),
                         system_account_secret,
                     ),
                     scratch_base_image: PathBuf::from("./dev/vm/images/scratch.img"),

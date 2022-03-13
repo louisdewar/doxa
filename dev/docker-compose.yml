@@ -22,7 +22,7 @@ services:
       - 15672:15672
     environment:
       - RABBITMQ_DEFAULT_USER=doxa
-      - RABBITMQ_DEFAULT_PASSWORD=doxa-dev
+      - RABBITMQ_DEFAULT_PASS=doxa-dev
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq/
       - rabbitmq_log:/var/log/rabbitmq

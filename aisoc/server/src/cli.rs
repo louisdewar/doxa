@@ -30,7 +30,7 @@ pub enum Subcommands {
         runtime: Option<String>,
         #[clap(long, env)]
         docker_username: Option<String>,
-        #[clap(long)]
+        #[clap(long, env)]
         docker_password: Option<String>,
     },
 }

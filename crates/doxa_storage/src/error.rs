@@ -47,6 +47,17 @@ impl_respondable_error!(
 );
 
 #[derive(Debug, Display, Error, From)]
+pub struct CouldNotDetermineSize {
+    reason: std::io::Error,
+}
+
+impl_respondable_error!(
+    CouldNotDetermineSize,
+    INTERNAL_SERVER_ERROR,
+    "INTERNAL_SERVER_ERROR"
+);
+
+#[derive(Debug, Display, Error, From)]
 pub struct UploadMultipartError {
     reason: MultipartError,
 }
@@ -132,6 +143,13 @@ pub enum AgentDownloadError {
     CompetitionNotFound(CompetitionNotFound),
     #[from]
     AgentNotFound(AgentNotFound),
+}
+
+#[derive(Debug, Display, Error, From)]
+pub enum ExtractDoxaYamlError {
+    IO(std::io::Error),
+    Missing,
+    Format(serde_yaml::Error),
 }
 
 #[derive(Debug, Display, Error, RespondableError, From)]

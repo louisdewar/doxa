@@ -4,6 +4,7 @@ use doxa_core::{
     actix_web::http::header::{ContentDisposition, CONTENT_DISPOSITION},
     error::StatusCode,
     tokio,
+    tracing::warn,
 };
 use doxa_vm::{
     backend::VMBackend,
@@ -64,6 +65,7 @@ impl<B: VMBackend> VMAgent<B> {
         }
 
         if agent_response.status() != StatusCode::OK {
+            warn!(status=%agent_response.status(), "bad status code");
             return Err(AgentError::BadStatusCode.into());
         }
 

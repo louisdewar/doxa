@@ -3,6 +3,7 @@ use std::{ffi::OsStr, path::PathBuf, process::Stdio};
 use doxa_competition::{
     client::serde_json,
     tokio::{self, io::AsyncWriteExt},
+    tracing::warn,
 };
 use serde::Deserialize;
 
@@ -67,7 +68,7 @@ impl Scorer {
             .arg(true_values)
             .stdin(Stdio::null())
             .stdout(Stdio::piped())
-            .stderr(Stdio::null())
+            .stderr(Stdio::piped())
             .spawn()
             .map_err(ScorerError::StartScript)?;
 
@@ -76,6 +77,10 @@ impl Scorer {
             .wait_with_output()
             .await
             .map_err(ScorerError::ScriptOutput)?;
+
+        if !output.stderr.is_empty() {
+            warn!(stderr=%String::from_utf8_lossy(&output.stderr) , "scorer has stderr");
+        }
 
         let result: GroupResult =
             serde_json::from_slice(&output.stdout).map_err(ScorerError::Format)?;
