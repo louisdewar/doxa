@@ -30,14 +30,23 @@ export default function Leaderboard({ baseUrl, leaderboard }) {
   const [filter, setFilter] = useState('');
   const lowerFilter = filter.toLowerCase();
 
-  const pages = Math.ceil(leaderboard.length / PAGE_SIZE);
+  leaderboard.forEach((e, i) => {
+    e._rank = i + 1;
+  });
+
+  const filteredLeaderboard = leaderboard.filter(entry => (entry.user.name().toLowerCase().includes(lowerFilter) || entry.user.university().name.toLowerCase().includes(lowerFilter)));
+
+  const pages = Math.ceil(filteredLeaderboard.length / PAGE_SIZE);
 
   return <div className="ch-leaderboard">
     <TextBox
       type="text"
       placeholder="Filter by username or university"
       value={filter}
-      setValue={setFilter}
+      setValue={v => {
+        setPage(0);
+        setFilter(v);
+      }}
     />
 
     <div className='ch-leaderboard-entry ch-leaderboard-header'>
@@ -48,9 +57,9 @@ export default function Leaderboard({ baseUrl, leaderboard }) {
       <span className="ch-leaderboard-score">Score</span>
     </div>
 
-    {leaderboard.map((entry, i) => i >= page * PAGE_SIZE && i < (page + 1) * PAGE_SIZE && (entry.user.name().toLowerCase().includes(lowerFilter) || entry.user.university().name.toLowerCase().includes(lowerFilter)) && <ClimateHackLeaderboardRow
+    {filteredLeaderboard.map((entry, i) => i >= page * PAGE_SIZE && i < (page + 1) * PAGE_SIZE && <ClimateHackLeaderboardRow
       key={i}
-      rank={i + 1}
+      rank={entry._rank}
       score={entry.score}
       user={entry.user}
       time={entry.activated_at}
