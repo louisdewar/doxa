@@ -24,11 +24,11 @@ python -m pip install numpy scipy pandas scikit-learn numba
 python -m pip install tensorflow tf-agents[reverb] tensorflow-addons[tensorflow]
 
 if [ -z ${GPU+x} ]; then
-    echo "Installing GPU packages (cuda)"
-    python -m pip install --use-deprecated=html5lib torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html
-else
     echo "Installing CPU packages"
-    python -m pip install --use-deprecated=html5lib torch==1.10.2+cpu torchvision==0.11.3+cpu torchaudio==0.10.2+cpu -f https://download.pytorch.org/whl/cpu/torch_stable.html
+    python -m pip install torch==1.8.2+cpu torchvision==0.9.2+cpu torchaudio==0.8.2 -f https://download.pytorch.org/whl/lts/1.8/torch_lts.html
+else
+    echo "Installing GPU packages (cuda)"
+    python -m pip install torch==1.8.2+cu111 torchvision==0.9.2+cu111 torchaudio==0.8.2 -f https://download.pytorch.org/whl/lts/1.8/torch_lts.html
 fi
 
 python -m pip install opencv-contrib-python-headless fastai
