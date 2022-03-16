@@ -1,12 +1,12 @@
-use std::{io, ops::Range};
+use std::{io, mem::size_of, ops::Range};
 
 use futures_util::StreamExt;
 use tokio::io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt};
 
 use derive_more::{Display, Error, From};
 
-// TODO: In future a potentially better encoding system would be for every message to start with 4 bytes
-// indicating the length of the message removing the needs for special separator characters
+pub type MessageLen = u64;
+const MESSAGE_LEN_BYTES: usize = size_of::<MessageLen>();
 
 pub struct Stream<T: AsyncRead + AsyncWrite + Unpin> {
     stream: T,
@@ -26,7 +26,7 @@ enum BufData {
     /// There is a message part ready to be read
     Part(Range<usize>),
     /// The message has just started (we just received the length header)
-    MessageStart(usize),
+    MessageStart(MessageLen),
     /// The message has ended. The previous parts of the message have already been returned.
     MessageEnd,
     /// There is no message part in the buffer, there may or may not be a partial or complete header.
@@ -65,13 +65,13 @@ impl<T: AsyncRead + AsyncWrite + Unpin> Stream<T> {
         let message_len = match self.message_len {
             Some(len) => len,
             None => {
-                // Need 4 bytes of data to get message len
-                if self.message_len.is_none() && unprocessed_bytes < 4 {
+                // Need MESSAGE_LEN_BYTES bytes of data to get message len
+                if self.message_len.is_none() && unprocessed_bytes < MESSAGE_LEN_BYTES {
                     // There needs to be enough room to read the 4 bytes of the length if there isn't
                     // enough room we copy the bytes we have received to the start of the buffer.
                     // If remaining space is less than the remaining bytes of the header we need more
                     // room.
-                    if self.buf.len() - self.buf_end < 4 - unprocessed_bytes {
+                    if self.buf.len() - self.buf_end < MESSAGE_LEN_BYTES - unprocessed_bytes {
                         let (start, data) = self.buf.split_at_mut(self.buf_offset);
                         start[0..unprocessed_bytes].copy_from_slice(&data[0..unprocessed_bytes]);
                         self.buf_offset = 0;
@@ -81,15 +81,17 @@ impl<T: AsyncRead + AsyncWrite + Unpin> Stream<T> {
                     return BufData::WaitingForData;
                 }
 
-                let mut len_bytes = [0; 4];
-                len_bytes.copy_from_slice(&self.buf[self.buf_offset..(self.buf_offset + 4)]);
-                let message_len = u32::from_be_bytes(len_bytes);
-                self.buf_offset += 4;
+                let mut len_bytes = [0; MESSAGE_LEN_BYTES];
+                len_bytes.copy_from_slice(
+                    &self.buf[self.buf_offset..(self.buf_offset + MESSAGE_LEN_BYTES)],
+                );
+                let message_len = MessageLen::from_be_bytes(len_bytes);
+                self.buf_offset += MESSAGE_LEN_BYTES;
                 self.message_len = Some(message_len as usize);
 
                 assert_eq!(self.message_index, 0);
 
-                return BufData::MessageStart(message_len as usize);
+                return BufData::MessageStart(message_len);
             }
         };
 
@@ -153,7 +155,7 @@ impl<T: AsyncRead + AsyncWrite + Unpin> Stream<T> {
                 MessagePart::StartMessage {
                     length: message_len,
                 } => {
-                    if message_len != expected_len {
+                    if message_len as usize != expected_len {
                         return Err(ReadMessageError::IncorrectLength { message_len });
                     }
                 }
@@ -182,8 +184,7 @@ impl<T: AsyncRead + AsyncWrite + Unpin> Stream<T> {
         }
     }
 
-    async fn send_msg_header(&mut self, len: usize) -> io::Result<()> {
-        let len: u32 = len as u32;
+    async fn send_msg_header(&mut self, len: MessageLen) -> io::Result<()> {
         self.stream.write_all(&len.to_be_bytes()).await?;
 
         Ok(())
@@ -191,7 +192,7 @@ impl<T: AsyncRead + AsyncWrite + Unpin> Stream<T> {
 
     /// Sends a full message from a single slice.
     pub async fn send_full_message(&mut self, msg: &[u8]) -> io::Result<()> {
-        self.send_msg_header(msg.len()).await?;
+        self.send_msg_header(msg.len() as MessageLen).await?;
         AsyncWriteExt::write_all(&mut self.stream, msg).await?;
 
         Ok(())
@@ -206,7 +207,8 @@ impl<T: AsyncRead + AsyncWrite + Unpin> Stream<T> {
         prefix: &[u8],
         msg: &[u8],
     ) -> io::Result<()> {
-        self.send_msg_header(msg.len() + prefix.len()).await?;
+        self.send_msg_header((msg.len() + prefix.len()) as MessageLen)
+            .await?;
 
         AsyncWriteExt::write_all(&mut self.stream, prefix).await?;
         AsyncWriteExt::write_all(&mut self.stream, msg).await?;
@@ -248,7 +250,7 @@ impl<T: AsyncRead + AsyncWrite + Unpin> Stream<T> {
         stream: &mut S,
         length: usize,
     ) -> Result<(), SendStreamError<E>> {
-        self.send_msg_header(length).await?;
+        self.send_msg_header(length as MessageLen).await?;
 
         let mut n = 0;
         while let Some(bytes) = stream.next().await {
@@ -286,13 +288,13 @@ impl<T: AsyncRead + AsyncWrite + Unpin> Stream<T> {
                 MessagePart::StartMessage {
                     length: message_len,
                 } => {
-                    if message_len > max_msg_len {
+                    if message_len as usize > max_msg_len {
                         return Err(ReadMessageError::IncorrectLength { message_len });
                     }
 
-                    if buf.capacity() < message_len {
+                    if buf.capacity() < message_len as usize {
                         // buf.len() should equal 0 due to the above truncate
-                        buf.reserve_exact(message_len);
+                        buf.reserve_exact(message_len as usize);
                     }
                 }
                 MessagePart::Bytes(_bytes) => {
@@ -330,7 +332,7 @@ impl<T: AsyncRead + AsyncWrite + Unpin> Stream<T> {
                 MessagePart::StartMessage {
                     length: message_len,
                 } => {
-                    if message_len > max_msg_len {
+                    if message_len as usize > max_msg_len {
                         return Err(ReadMessageError::IncorrectLength { message_len });
                     }
                 }
@@ -381,14 +383,14 @@ impl<T: AsyncRead + AsyncWrite + Unpin> Stream<T> {
 
 /// A cancellation safe way to a single message
 pub struct MessageReader {
-    len: Option<usize>,
-    max_msg_len: usize,
+    len: Option<MessageLen>,
+    max_msg_len: MessageLen,
     msg_buf: Vec<u8>,
     completed: bool,
 }
 
 impl MessageReader {
-    pub fn new(mut msg_buf: Vec<u8>, max_msg_len: usize) -> Self {
+    pub fn new(mut msg_buf: Vec<u8>, max_msg_len: MessageLen) -> Self {
         msg_buf.truncate(0);
 
         MessageReader {
@@ -443,9 +445,9 @@ impl MessageReader {
                             return Err(ReadMessageError::IncorrectLength { message_len });
                         }
 
-                        if self.msg_buf.capacity() < message_len {
+                        if self.msg_buf.capacity() < message_len as usize {
                             // self.msg_buf.len() should equal 0 due to the truncate in Self::new
-                            self.msg_buf.reserve_exact(message_len);
+                            self.msg_buf.reserve_exact(message_len as usize);
                         }
 
                         self.len = Some(message_len);
@@ -470,7 +472,7 @@ impl MessageReader {
                 }
                 MessagePart::Bytes(bytes) => self.msg_buf.extend_from_slice(bytes),
                 MessagePart::EndMessage => {
-                    if self.msg_buf.len() != message_len {
+                    if self.msg_buf.len() != message_len as usize {
                         panic!(
                             "final message buf len ({}) did not equal expected message len ({})",
                             self.msg_buf.len(),
@@ -492,7 +494,7 @@ impl MessageReader {
 }
 
 pub enum MessagePart<'a> {
-    StartMessage { length: usize },
+    StartMessage { length: MessageLen },
     Bytes(&'a [u8]),
     EndMessage,
 }
@@ -534,7 +536,7 @@ pub enum ReadMessageError {
     #[from(forward)]
     Part(ReadPartError),
     IncorrectLength {
-        message_len: usize,
+        message_len: MessageLen,
     },
     /// Part of the current message has already been read
     MessagePartlyRead,

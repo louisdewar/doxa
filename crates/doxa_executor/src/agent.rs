@@ -11,7 +11,7 @@ use doxa_vm::{
     error::{AgentLifecycleManagerError, TakeFileManagerError, VMShutdownError},
     manager::VMManagerSettings,
     mount::Mount,
-    stream::MessageReader,
+    stream::{MessageLen, MessageReader},
     Manager as VM,
 };
 use tokio::time::timeout;
@@ -132,7 +132,7 @@ impl<B: VMBackend> VMAgent<B> {
         let agent = VMAgent {
             vm_manager: vm,
             id: agent_id,
-            message_reader: MessageReader::new(Vec::new(), MAX_MSG_LEN),
+            message_reader: MessageReader::new(Vec::new(), MAX_MSG_LEN as MessageLen),
             running: false,
         };
 

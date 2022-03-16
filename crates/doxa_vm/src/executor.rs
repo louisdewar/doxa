@@ -23,7 +23,7 @@ use crate::{
         ReceieveAgentError, TakeFileError,
     },
     mount::{self, MountRequest},
-    stream::{MessageReader, Stream},
+    stream::{MessageLen, MessageReader, Stream},
     ExecutionConfig,
 };
 
@@ -83,7 +83,7 @@ impl<S: AsyncWrite + AsyncRead + Unpin + Send + 'static> VMExecutor<S> {
                 agent: None,
             };
 
-            let mut message_reader = MessageReader::new(Vec::new(), MAX_MSG_LEN);
+            let mut message_reader = MessageReader::new(Vec::new(), MAX_MSG_LEN as MessageLen);
 
             // Change next_full_message to return a struct that impl's future and is cancellable
             loop {

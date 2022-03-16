@@ -68,18 +68,27 @@ impl ClimateHackGameClient {
             )
             .await?;
 
-        // TODO: do this in a loop and ignore invalid messages
-        context.set_max_message_time(Some(MAX_STARTUP_TIME));
-        let message = context.next_message(0).await.map_err(|e| {
-            if e.is_message_receive_timeout() {
-                GameError::Client(ClimateHackError::TimeoutStartup)
-            } else {
-                e.into()
-            }
-        })?;
+        let start = std::time::Instant::now();
+        loop {
+            context.set_max_message_time(Some(
+                MAX_STARTUP_TIME
+                    .checked_sub(start.elapsed())
+                    .ok_or(ClimateHackError::TimeoutStartup)?,
+            ));
+            let message = context.next_message(0).await.map_err(|e| {
+                if e.is_message_receive_timeout() {
+                    GameError::Client(ClimateHackError::TimeoutStartup)
+                } else {
+                    e.into()
+                }
+            })?;
 
-        if message != b"STARTUP" {
-            return Err(ClimateHackError::TimeoutGroup.into());
+            if message != b"STARTUP" {
+                // return Err(ClimateHackError::TimeoutGroup.into());
+                debug!(message=%String::from_utf8_lossy(message), "got invalid startup message (ignoring)");
+            } else {
+                break;
+            }
         }
 
         context.set_max_message_time(Some(MAX_SERIES_GROUP_TIME));
@@ -94,7 +103,11 @@ impl ClimateHackGameClient {
 
             let start = std::time::Instant::now();
             loop {
-                context.set_max_message_time(Some(MAX_SERIES_GROUP_TIME - start.elapsed()));
+                context.set_max_message_time(Some(
+                    MAX_SERIES_GROUP_TIME
+                        .checked_sub(start.elapsed())
+                        .ok_or(ClimateHackError::TimeoutGroup)?,
+                ));
                 let message = context.next_message(0).await?;
                 let expected = format!("Exported {}.npz", checkpoint);
 
@@ -172,7 +185,7 @@ impl GameClient for ClimateHackGameClient {
     type GameEvent = ClimateHackGameEvent;
 
     const AGENT_RAM_MB: u64 = 6 * 1024;
-    const AGENT_SCRATCH_MB: u64 = 8 * 1024;
+    const AGENT_SCRATCH_MB: u64 = 16 * 1024;
     const AGENT_SWAP_MB: u64 = 6 * 1024;
 
     async fn run<'a, B: VMBackend>(

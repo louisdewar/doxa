@@ -31,7 +31,7 @@ else
     python -m pip install torch==1.8.2+cu111 torchvision==0.9.2+cu111 torchaudio==0.8.2 -f https://download.pytorch.org/whl/lts/1.8/torch_lts.html
 fi
 
-python -m pip install opencv-contrib-python-headless fastai pytorch-msssim timm kornia[x] wwf axial_attention
+python -m pip install opencv-contrib-python-headless fastai pytorch-msssim timm kornia[x] wwf axial_attention tensorflow_probability ruamel.yaml
 python -m pip install einops perceiver-pytorch pytorch_lightning huggingface_hub antialiased_cnns transformers py7zr
 
 python -m pip freeze > /pipfreeze.txt
