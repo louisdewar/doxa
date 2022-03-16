@@ -1,4 +1,4 @@
-use crate::error::{AgentGone, CouldNotDetermineSize, TooManyUploadAttempts};
+use crate::error::{AgentGone, CouldNotDetermineSize, SubmissionsClosed, TooManyUploadAttempts};
 use crate::error::{AgentUploadError, FileTooLarge};
 use crate::route::request::DownloadParams;
 use actix_files::NamedFile;
@@ -7,6 +7,7 @@ use actix_web::{web, HttpRequest, HttpResponse};
 use doxa_auth::error::UserNotAdmin;
 use doxa_auth::limiter::Limiter;
 use doxa_auth::{error::CompetitionNotFound, guard::AuthGuard};
+use doxa_core::chrono::{DateTime, Utc};
 use doxa_core::tokio::fs::File;
 use doxa_core::tokio::io::AsyncWriteExt;
 use doxa_core::tracing::error;
@@ -140,6 +141,10 @@ pub async fn upload(
     let competition_id = enrollment.competition;
 
     if !auth.admin() {
+        if Utc::now() > DateTime::parse_from_rfc2822("Thu, 17 Mar 2022 00:05:00 GMT").unwrap() {
+            return Err(SubmissionsClosed.into());
+        }
+
         limiter
             .get_permit(format!("{}-{}", competition, user_id))
             .await?

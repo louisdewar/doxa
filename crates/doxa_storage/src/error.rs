@@ -80,6 +80,16 @@ impl_respondable_error!(
 );
 
 #[derive(Debug, Display, Error)]
+pub struct SubmissionsClosed;
+
+impl_respondable_error!(
+    SubmissionsClosed,
+    BAD_REQUEST,
+    "SUBMISSIONS_CLOSED",
+    "This competition is closed to new submissions"
+);
+
+#[derive(Debug, Display, Error)]
 #[display(fmt = "Invalid extension (ext = `{}`)", extension)]
 pub struct InvalidExtension {
     pub extension: String,
