@@ -37,7 +37,7 @@ pub const DOXA_UID: u32 = 1000;
 pub const DOXA_GID: u32 = 1000;
 
 /// An upper bound on the agent tar size for sanity reasons, measured in bytes
-pub const MAX_AGENT_SIZE: usize = 3_000_000_000;
+pub const MAX_AGENT_SIZE: usize = 8_000_000_000;
 /// Maximum length for messages other than the agent file in bytes
 pub const MAX_MSG_LEN: usize = 50_000_000;
 pub const MAX_FILE_NAME_LEN: usize = 300;
