@@ -65,7 +65,6 @@ impl<C: Competition> ExecutionManager<C> {
         let game_client = Arc::new(self.competition.build_game_client());
 
         tokio::spawn(async move {
-            let executor_settings = self.settings.clone();
             let executor_limiter = Arc::new(Semaphore::new(self.executor_permits));
 
             while let Some(message) = consumer.next().await {

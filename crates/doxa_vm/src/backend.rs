@@ -35,4 +35,3 @@ pub trait VMBackend: Sized + Send + Sync {
 
     async fn shutdown(self) -> Result<(), VMShutdownError>;
 }
-
