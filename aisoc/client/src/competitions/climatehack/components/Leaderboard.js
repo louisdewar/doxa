@@ -53,7 +53,7 @@ export default function Leaderboard({ baseUrl, leaderboard }) {
       <span className="ch-leaderboard-position">#</span>
       <span className="ch-leaderboard-username">Username</span>
       <span className="ch-leaderboard-university">University</span>
-      <span className="ch-leaderboard-time">Completed <FontAwesomeIcon icon={faClock} size="sm" /></span>
+      <span className="ch-leaderboard-time">Submitted <FontAwesomeIcon icon={faClock} size="sm" /></span>
       <span className="ch-leaderboard-score">Score</span>
     </div>
 
@@ -62,7 +62,7 @@ export default function Leaderboard({ baseUrl, leaderboard }) {
       rank={entry._rank}
       score={entry.score}
       user={entry.user}
-      time={entry.activated_at}
+      time={entry.uploaded_at}
       baseUrl={baseUrl}
       highlightUser={auth.user && auth.user.username && auth.user.username == entry.user}
     />)}
