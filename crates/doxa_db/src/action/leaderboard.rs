@@ -115,6 +115,7 @@ pub fn active_leaderboard(
         .filter(s::leaderboard::columns::key.eq(key))
         .inner_join(s::users::table.on(s::users::id.eq(view::active_agents::owner)))
         .order_by(s::leaderboard::score.desc())
+        .order_by(view::active_agents::uploaded_at.desc())
         .select((
             s::users::all_columns,
             s::leaderboard::all_columns,
