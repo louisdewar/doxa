@@ -141,9 +141,9 @@ pub async fn upload(
     let competition_id = enrollment.competition;
 
     if !auth.admin() {
-        if Utc::now() > DateTime::parse_from_rfc2822("Thu, 17 Mar 2022 00:05:00 GMT").unwrap() {
-            return Err(SubmissionsClosed.into());
-        }
+        // if Utc::now() > DateTime::parse_from_rfc2822("Thu, 17 Mar 2022 00:05:00 GMT").unwrap() {
+        //     return Err(SubmissionsClosed.into());
+        // }
 
         limiter
             .get_permit(format!("{}-{}", competition, user_id))
