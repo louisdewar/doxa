@@ -4,7 +4,7 @@ export default [
     group: 'Competition queries',
     questions: [
       {
-        question: 'When do submissions for the first round close?',
+        question: 'When do submissions for the qualifying round close?',
         response: <>
           <p>
             Submissions close at 23:59 GMT on Wednesday 16th March.

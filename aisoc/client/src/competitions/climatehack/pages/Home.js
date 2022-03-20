@@ -51,10 +51,6 @@ export default function Home({ baseUrl }) {
         <br /><br />
         {'By helping to improve solar photovoltaic power output predictions, your model could help the National Grid Electricity System Operator minimise the use of standby natural gas turbines, potentially saving up to 100 kilotonnes of carbon emissions a year.'}
         <br /><br />
-        {new Date() < new Date('2022-03-16 23:59') && <>
-          Submissions are currently open &ndash; you have until <strong>Wed 16th March (23:59 GMT)</strong> to get your entry in!
-        </>}
-        <br /><br />
         Make sure to join our <a href="https://discord.gg/HTTQ8AFjJp">Discord</a> and follow us on <a href="https://linktr.ee/climatehack.ai">social media</a> to receive updates throughout the competition.
       </>}
     />
