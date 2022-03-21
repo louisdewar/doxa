@@ -25,7 +25,7 @@ python -m pip install tensorflow tf-agents[reverb] tensorflow-addons[tensorflow]
 
 if [ -z ${GPU+x} ]; then
     echo "Installing CPU packages"
-    python -m pip install torch==1.10.2+cpu torchvision==0.9.2+cpu torchaudio==0.8.2 -f https://download.pytorch.org/whl/lts/1.8/torch_lts.html
+    python -m pip install torch==1.10.2+cpu torchvision==0.11.3+cpu torchaudio==0.10.2+cpu -f https://download.pytorch.org/whl/cpu/torch_stable.html
 else
     echo "Installing GPU packages (cuda)"
     python -m pip install torch==1.10.2+cu113 torchvision==0.11.3+cu113 torchaudio==0.10.2+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html
