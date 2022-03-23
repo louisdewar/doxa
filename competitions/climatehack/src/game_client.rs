@@ -6,6 +6,7 @@ use doxa_competition::{
     tracing::{debug, info},
 };
 use serde::{Deserialize, Serialize};
+use serde_json::Value as JsonValue;
 
 use crate::{dataset::Datasets, error::ClimateHackError, support::Scorer};
 
@@ -29,6 +30,10 @@ pub enum ClimateHackGameEvent {
         score: f64,
         dataset: String,
         images: Vec<String>,
+        #[serde(default)]
+        metrics: JsonValue,
+        #[serde(default)]
+        sequences: JsonValue,
     },
     FinalScore {
         score: f64,
@@ -136,7 +141,7 @@ impl ClimateHackGameClient {
                 .await
                 .map_err(ClimateHackError::WriteGroupError)?;
 
-            let (score, images) = scorer
+            let (score, images, metrics, sequences) = scorer
                 .score(
                     &dataset.true_y_path.join(format!("{}.npz", checkpoint)),
                     group_output_path,
@@ -153,6 +158,8 @@ impl ClimateHackGameClient {
                         score,
                         dataset: dataset_name.clone(),
                         images,
+                        metrics,
+                        sequences,
                     },
                     format!("checkpoint_{}", checkpoint),
                 )
