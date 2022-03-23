@@ -7,12 +7,7 @@ set -e
 groupadd --gid 1000 doxa
 useradd --uid 1000 --gid 1000 doxa
 
-#PYTHON_BIN=$(which python3.9 | /dev/null && which python3.9 || echo "python")
-
 PYTHON_BIN=python3.9
-
-#curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-#"${PYTHON_BIN}" get-pip.py
 
 "${PYTHON_BIN}" -m venv --upgrade-deps /python_env
 
@@ -32,7 +27,7 @@ else
 fi
 
 python -m pip install opencv-contrib-python-headless fastai pytorch-msssim timm kornia[x] wwf axial_attention tensorflow_probability ruamel.yaml
-python -m pip install einops perceiver-pytorch pytorch_lightning huggingface_hub antialiased_cnns transformers py7zr
+python -m pip install einops perceiver-pytorch pytorch_lightning huggingface_hub antialiased_cnns transformers py7zr scikit-video
 
 python -m pip freeze > /pipfreeze.txt
 
