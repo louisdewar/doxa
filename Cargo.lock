@@ -744,6 +744,7 @@ dependencies = [
  "doxa_competition",
  "futures",
  "serde",
+ "serde_json",
 ]
 
 [[package]]
