@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
-use clap::Parser;
+use clap::{Parser, Subcommand};
+use url::Url;
 
 #[derive(Parser)]
 pub struct App {
@@ -14,4 +15,22 @@ pub struct App {
     #[clap(long, env)]
     /// The path to the python binary that is used for running the scorer script
     pub scorer_python_bin: PathBuf,
+
+    #[clap(subcommand)]
+    pub subcommands: Subcommands,
+}
+
+#[derive(Subcommand)]
+pub enum Subcommands {
+    Main,
+    ExecutionNode {
+        #[clap(long, env)]
+        api_base_url: Url,
+        #[clap(long, env)]
+        runtime: Option<String>,
+        #[clap(long, env)]
+        docker_username: Option<String>,
+        #[clap(long, env)]
+        docker_password: Option<String>,
+    },
 }

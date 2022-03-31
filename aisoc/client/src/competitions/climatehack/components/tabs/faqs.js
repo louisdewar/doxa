@@ -4,6 +4,14 @@ export default [
     group: 'Competition queries',
     questions: [
       {
+        question: 'When do submissions for the qualifying round close?',
+        response: <>
+          <p>
+            Submissions close at 23:59 GMT on Wednesday 16th March.
+          </p>
+        </>
+      },
+      {
         question: 'Can we participate in teams?',
         response: <>
           <p>
@@ -38,6 +46,17 @@ export default [
           </p>
           <p>
             The virtual machine environment in which submissions are evaluated has 4 vCPUs and 6GB RAM.
+          </p>
+        </>,
+      },
+      {
+        question: <>Training directly off the Zarr dataset seems to be fairly slow. Is there anything I can do?</>,
+        response: <>
+          <p>
+            Unfortunately, it seems that indexing directly into the EUMETSAT Zarr dataset can be glacially slow due to the dask arrays used internally. Before you start training any models, you may want to consider preprocessing the dataset into ~5GB chunks of daylight satellite imagery (potentially taken only over Great Britain) stored in a much faster format, such as NumPy <code>.npz</code> (multi-array) or <code>.npy</code> (single-array) binary files.
+          </p>
+          <p>
+            You may wish to perform additional steps, such as clipping the data to be definitively in the range <code>[0.0, 1023.0]</code>, at this stage.
           </p>
         </>,
       },
@@ -87,6 +106,23 @@ export default [
           </p>
           <pre>
             torch.load(&apos;model.pt&apos;, map_location=torch.device(&apos;cpu&apos;))
+          </pre>
+        </>,
+      },
+      {
+        question: <>I cannot install pytorch-msssim to use inside a Jupyter notebook using conda. Is there a fix?</>,
+        response: <>
+          <p>
+            If you cannot install it using <code>conda</code> directly, try to install it using <code>pip</code>, e.g.
+          </p>
+          <pre>
+            pip install pytorch-msssim
+          </pre>
+          <p>
+            Failing that, you may wish to try directly putting the installation command inside the Jupyter notebook, such as by adding the following cell at the top of your notebook.
+          </p>
+          <pre>
+            !pre install pytorch-msssim
           </pre>
         </>,
       },

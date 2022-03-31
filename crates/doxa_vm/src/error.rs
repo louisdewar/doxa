@@ -27,6 +27,9 @@ pub enum ManagerError {
     GetImageUUID(RunCommandError),
     #[from]
     Mount(MountError),
+    Bollard(bollard::errors::Error),
+    DockerMissingResponse,
+    MissingBridgeNetwork,
 }
 
 #[derive(Error, Display, Debug)]
@@ -111,6 +114,7 @@ pub(crate) enum ReceieveAgentError {
 pub(crate) enum HandleMountsError {
     IO(io::Error),
     InvalidFormatting,
+    InvalidSwapMessage,
     ReadMessageError(ReadMessageError),
     #[from(ignore)]
     FindDrives(RunCommandError),
@@ -166,6 +170,7 @@ pub enum VMRecorderError {
 pub enum VMShutdownError {
     #[from(forward)]
     Firecracker(ShutdownError),
+    Bollard(bollard::errors::Error),
     #[from]
     Logs(VMRecorderError),
 }

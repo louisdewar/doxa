@@ -1,4 +1,4 @@
-use crate::error::{AgentGone, TooManyUploadAttempts};
+use crate::error::{AgentGone, CouldNotDetermineSize, TooManyUploadAttempts}; // SubmissionsClosed,
 use crate::error::{AgentUploadError, FileTooLarge};
 use crate::route::request::DownloadParams;
 use actix_files::NamedFile;
@@ -7,6 +7,7 @@ use actix_web::{web, HttpRequest, HttpResponse};
 use doxa_auth::error::UserNotAdmin;
 use doxa_auth::limiter::Limiter;
 use doxa_auth::{error::CompetitionNotFound, guard::AuthGuard};
+// use doxa_core::chrono::{DateTime, Utc};
 use doxa_core::tokio::fs::File;
 use doxa_core::tokio::io::AsyncWriteExt;
 use doxa_core::tracing::error;
@@ -140,6 +141,10 @@ pub async fn upload(
     let competition_id = enrollment.competition;
 
     if !auth.admin() {
+        // if Utc::now() > DateTime::parse_from_rfc2822("Thu, 17 Mar 2022 00:05:00 GMT").unwrap() {
+        //     return Err(SubmissionsClosed.into());
+        // }
+
         limiter
             .get_permit(format!("{}-{}", competition, user_id))
             .await?
@@ -187,7 +192,7 @@ pub async fn upload(
     .await??;
 
     // TODO: get max size from competition
-    let max_size = 4_000_000_000;
+    let max_size = 7_000_000_000;
 
     match process_field_upload(&mut f, field, max_size).await {
         Ok(()) => {}
@@ -209,11 +214,28 @@ pub async fn upload(
         }
     }
 
+    let execution_environment =
+        crate::controller::get_execution_environment(&storage, &competition, &id).await;
+
+    // We want file size in kb
+    let file_size_kb = (storage
+        .file_size(&competition, &id)
+        .await
+        .map_err(CouldNotDetermineSize::from)?
+        / 1024) as i32;
+
     let uploaded_agent = web::block({
         let pool = pool.clone();
         let conn = web::block(move || pool.get()).await??;
         let id = id.clone();
-        move || crate::controller::mark_upload_as_complete(&conn, id)
+        move || {
+            crate::controller::mark_upload_as_complete(
+                &conn,
+                id,
+                execution_environment,
+                file_size_kb,
+            )
+        }
     })
     .await??;
 

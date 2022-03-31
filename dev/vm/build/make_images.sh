@@ -51,7 +51,7 @@ mkfs.ext4 -U random -d "$ROOTFS_SRC" "$ROOTFS_IMG"
 
 # === PYTHON_MODULES
 echo "=== PYTHON_MODULES"
-dd if=/dev/zero of="$PYTHON_MODULES_IMG" bs=1M count=3300
+dd if=/dev/zero of="$PYTHON_MODULES_IMG" bs=1M count=4600
 mkfs.ext4 -U random -d "$PYTHON_MODULES_SRC" "$PYTHON_MODULES_IMG"
 # Shrink image to exact size
 # For some reason this isn't actually shrinking the image file (it says it's already shrunk)

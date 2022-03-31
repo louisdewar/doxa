@@ -123,7 +123,7 @@ impl<C: Competition> AgentActivationManager<C> {
                 .await?;
 
             self.competition
-                .on_agent_deactivated(&self.context, deactivated_agent.id)
+                .on_agent_deactivated(&self.context, deactivated_agent)
                 .instrument(span)
                 .await
                 .map_err(|error| {
@@ -137,7 +137,7 @@ impl<C: Competition> AgentActivationManager<C> {
         }
 
         self.competition
-            .on_agent_activated(&self.context, agent_id)
+            .on_agent_activated(&self.context, agent)
             .await?;
 
         Ok(())
@@ -147,7 +147,7 @@ impl<C: Competition> AgentActivationManager<C> {
     async fn deactivate_agent(&self, agent_id: String) -> Result<(), ContextError> {
         let agent = self.context.deactivate_agent_db(agent_id).await?;
         self.competition
-            .on_agent_deactivated(&self.context, agent.id)
+            .on_agent_deactivated(&self.context, agent)
             .await?;
 
         Ok(())

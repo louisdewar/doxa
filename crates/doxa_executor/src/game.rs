@@ -4,6 +4,7 @@ use std::time::Duration;
 use doxa_core::tracing::{debug, error};
 use doxa_core::{lapin::Channel, tracing::info};
 use doxa_mq::model::MatchRequest;
+use doxa_vm::backend::VMBackend;
 use futures::{
     future::{join_all, try_join_all},
     TryFutureExt,
@@ -20,16 +21,17 @@ use crate::{
 
 use doxa_core::tokio;
 
-pub struct GameManager<C: GameClient> {
+pub struct GameManager<C: GameClient, B: VMBackend> {
     client: Arc<C>,
-    agents: Vec<VMAgent>,
+    agents: Vec<VMAgent<B>>,
     client_match_request: C::MatchRequest,
     game_event_context: GameEventContext<C>,
 }
 
-impl<C: GameClient> GameManager<C> {
+impl<C: GameClient, B: VMBackend> GameManager<C, B> {
     pub async fn new(
         settings: Arc<Settings>,
+        backend_settings: B::BackendSettings,
         event_channel: Channel,
         event_queue_name: String,
         competition_name: &'static str,
@@ -67,6 +69,7 @@ impl<C: GameClient> GameManager<C> {
                     &settings.agent_retrieval,
                     &settings,
                     vm_agent_settings.clone(),
+                    backend_settings.clone(),
                 )
                 .map_err(move |e| (index, e))
             });
@@ -111,7 +114,7 @@ impl<C: GameClient> GameManager<C> {
     /// Runs the game to completion
     async fn run(
         game_client: &C,
-        mut agents: Vec<VMAgent>,
+        mut agents: Vec<VMAgent<B>>,
         client_match_request: C::MatchRequest,
         game_event_context: &'_ mut GameEventContext<C>,
     ) -> Result<(), GameError<C::Error>> {

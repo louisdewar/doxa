@@ -47,6 +47,17 @@ impl_respondable_error!(
 );
 
 #[derive(Debug, Display, Error, From)]
+pub struct CouldNotDetermineSize {
+    reason: std::io::Error,
+}
+
+impl_respondable_error!(
+    CouldNotDetermineSize,
+    INTERNAL_SERVER_ERROR,
+    "INTERNAL_SERVER_ERROR"
+);
+
+#[derive(Debug, Display, Error, From)]
 pub struct UploadMultipartError {
     reason: MultipartError,
 }
@@ -66,6 +77,16 @@ impl_respondable_error!(
     BAD_REQUEST,
     "FILE_TOO_LARGE",
     "The upload exceeds the maximum size for this user"
+);
+
+#[derive(Debug, Display, Error)]
+pub struct SubmissionsClosed;
+
+impl_respondable_error!(
+    SubmissionsClosed,
+    BAD_REQUEST,
+    "SUBMISSIONS_CLOSED",
+    "This competition is closed to new submissions"
 );
 
 #[derive(Debug, Display, Error)]
@@ -132,6 +153,13 @@ pub enum AgentDownloadError {
     CompetitionNotFound(CompetitionNotFound),
     #[from]
     AgentNotFound(AgentNotFound),
+}
+
+#[derive(Debug, Display, Error, From)]
+pub enum ExtractDoxaYamlError {
+    IO(std::io::Error),
+    Missing,
+    Format(serde_yaml::Error),
 }
 
 #[derive(Debug, Display, Error, RespondableError, From)]

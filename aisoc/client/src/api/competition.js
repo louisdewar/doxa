@@ -6,6 +6,8 @@ import { request } from './common';
 function processLeaderboard(leaderboard) {
   return leaderboard.map(entry => {
     entry.user = new UserProfile(entry.user);
+    entry.uploaded_at = new Date(entry.uploaded_at);
+    entry.activated_at = new Date(entry.activated_at);
     return entry;
   });
 }

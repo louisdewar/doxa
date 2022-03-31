@@ -1,0 +1,24 @@
+version: "3"
+
+services:
+  execution_node:
+    image: registry.dewardt.uk/doxa/server:latest
+    privileged: true
+    environment:
+      - RUNTIME=doxa
+      - DOCKER_USERNAME=doxa
+      - DOCKER_PASSWORD=jqpoaa98EgcKvf
+      - MQ_URL=amqp://doxa:352231adaa2f6d9a94a2155353630134@doxa.uclaisociety.co.uk:5672/%2f
+    entrypoint:
+      - --scorer-python-bin
+      - /app/scorer_env/bin/python
+      - --climatehack-datasets-dir
+      - /climatehack_datasets
+      - --climatehack-primary-dataset
+      - dapper
+      - execution-node
+      - http://doxa.uclaisociety.co.uk/api
+    volumes:
+      - .env:/app/.env
+      - /home/paperspace/climatehack_datasets:/climatehack_datasets
+      - /var/run/docker.sock:/var/run/docker.sock

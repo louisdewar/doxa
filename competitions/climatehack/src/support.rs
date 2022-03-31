@@ -1,10 +1,11 @@
 use std::{ffi::OsStr, path::PathBuf, process::Stdio};
 
 use doxa_competition::{
-    client::serde_json,
     tokio::{self, io::AsyncWriteExt},
+    tracing::warn,
 };
 use serde::Deserialize;
+use serde_json::Value as JsonValue;
 
 use crate::error::ScorerError;
 
@@ -27,6 +28,10 @@ pub enum GroupResult {
     Success {
         score: f64,
         images: Vec<String>,
+        #[serde(default)]
+        metrics: JsonValue,
+        #[serde(default)]
+        sequences: JsonValue,
     },
     Failure {
         error: String,
@@ -60,14 +65,14 @@ impl Scorer {
         &self,
         true_values: impl AsRef<OsStr>,
         prediction: impl AsRef<OsStr>,
-    ) -> Result<(f64, Vec<String>), ScorerError> {
+    ) -> Result<(f64, Vec<String>, JsonValue, JsonValue), ScorerError> {
         let process = tokio::process::Command::new(&self.python_bin)
             .arg(&self.script_path)
             .arg(prediction)
             .arg(true_values)
             .stdin(Stdio::null())
             .stdout(Stdio::piped())
-            .stderr(Stdio::null())
+            .stderr(Stdio::piped())
             .spawn()
             .map_err(ScorerError::StartScript)?;
 
@@ -76,6 +81,10 @@ impl Scorer {
             .wait_with_output()
             .await
             .map_err(ScorerError::ScriptOutput)?;
+
+        if !output.stderr.is_empty() {
+            warn!(stderr=%String::from_utf8_lossy(&output.stderr) , "scorer has stderr");
+        }
 
         let result: GroupResult =
             serde_json::from_slice(&output.stdout).map_err(ScorerError::Format)?;
@@ -89,7 +98,12 @@ impl Scorer {
                 error,
                 forfeit: Some(forfeit),
             } => Err(ScorerError::ForfeitError { error, forfeit }),
-            GroupResult::Success { score, images } => Ok((score, images)),
+            GroupResult::Success {
+                score,
+                images,
+                metrics,
+                sequences,
+            } => Ok((score, images, metrics, sequences)),
         }
     }
 }

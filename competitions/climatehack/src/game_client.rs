@@ -1,11 +1,12 @@
 use std::{path::PathBuf, sync::Arc, time::Duration};
 
 use doxa_competition::{
-    client::{async_trait, GameClient, GameContext, GameError, Mount},
+    client::{async_trait, GameClient, GameContext, GameError, Mount, VMBackend},
     tokio::{self, io::AsyncWriteExt},
     tracing::{debug, info},
 };
 use serde::{Deserialize, Serialize};
+use serde_json::Value as JsonValue;
 
 use crate::{dataset::Datasets, error::ClimateHackError, support::Scorer};
 
@@ -29,6 +30,10 @@ pub enum ClimateHackGameEvent {
         score: f64,
         dataset: String,
         images: Vec<String>,
+        #[serde(default)]
+        metrics: JsonValue,
+        #[serde(default)]
+        sequences: JsonValue,
     },
     FinalScore {
         score: f64,
@@ -43,10 +48,10 @@ pub struct ClimateHackGameClient {
 
 impl ClimateHackGameClient {
     // Use inner async method for better diagnostics (avoid async_trait)
-    async fn run_inner<'a>(
+    async fn run_inner<'a, B: VMBackend>(
         &self,
         match_request: ClimateHackMatchRequest,
-        context: &mut GameContext<'a, Self>,
+        context: &mut GameContext<'a, Self, B>,
     ) -> Result<(), GameError<ClimateHackError>> {
         context.expect_n_agents(1)?;
         let dataset_name = match_request.dataset;
@@ -67,17 +72,28 @@ impl ClimateHackGameClient {
                 vec!["/climatehack_test_x".to_string(), "/output".to_string()],
             )
             .await?;
-        context.set_max_message_time(Some(MAX_STARTUP_TIME));
-        let message = context.next_message(0).await.map_err(|e| {
-            if e.is_message_receive_timeout() {
-                GameError::Client(ClimateHackError::TimeoutStartup)
-            } else {
-                e.into()
-            }
-        })?;
 
-        if message != b"STARTUP" {
-            return Err(ClimateHackError::TimeoutGroup.into());
+        let start = std::time::Instant::now();
+        loop {
+            context.set_max_message_time(Some(
+                MAX_STARTUP_TIME
+                    .checked_sub(start.elapsed())
+                    .ok_or(ClimateHackError::TimeoutStartup)?,
+            ));
+            let message = context.next_message(0).await.map_err(|e| {
+                if e.is_message_receive_timeout() {
+                    GameError::Client(ClimateHackError::TimeoutStartup)
+                } else {
+                    e.into()
+                }
+            })?;
+
+            if message != b"STARTUP" {
+                // return Err(ClimateHackError::TimeoutGroup.into());
+                debug!(message=%String::from_utf8_lossy(message), "got invalid startup message (ignoring)");
+            } else {
+                break;
+            }
         }
 
         context.set_max_message_time(Some(MAX_SERIES_GROUP_TIME));
@@ -90,14 +106,21 @@ impl ClimateHackGameClient {
                 .send_message_to_agent(0, format!("Process {}.npz\n", checkpoint).as_bytes())
                 .await?;
 
-            let message = context.next_message(0).await?;
-            let expected = format!("Exported {}.npz", checkpoint);
+            let start = std::time::Instant::now();
+            loop {
+                context.set_max_message_time(Some(
+                    MAX_SERIES_GROUP_TIME
+                        .checked_sub(start.elapsed())
+                        .ok_or(ClimateHackError::TimeoutGroup)?,
+                ));
+                let message = context.next_message(0).await?;
+                let expected = format!("Exported {}.npz", checkpoint);
 
-            if message != expected.as_bytes() {
-                return Err(GameError::Client(ClimateHackError::InvalidMessage {
-                    message: String::from_utf8_lossy(message).to_string(),
-                    expected,
-                }));
+                if message != expected.as_bytes() {
+                    debug!(expected=%expected, message=%String::from_utf8_lossy(message), "got invalid message (ignoring)");
+                } else {
+                    break;
+                }
             }
 
             let group_output_path = work_dir_path.join(format!("{}.npz", checkpoint));
@@ -118,7 +141,7 @@ impl ClimateHackGameClient {
                 .await
                 .map_err(ClimateHackError::WriteGroupError)?;
 
-            let (score, images) = scorer
+            let (score, images, metrics, sequences) = scorer
                 .score(
                     &dataset.true_y_path.join(format!("{}.npz", checkpoint)),
                     group_output_path,
@@ -135,6 +158,8 @@ impl ClimateHackGameClient {
                         score,
                         dataset: dataset_name.clone(),
                         images,
+                        metrics,
+                        sequences,
                     },
                     format!("checkpoint_{}", checkpoint),
                 )
@@ -167,13 +192,13 @@ impl GameClient for ClimateHackGameClient {
     type GameEvent = ClimateHackGameEvent;
 
     const AGENT_RAM_MB: u64 = 6 * 1024;
-    const AGENT_SCRATCH_MB: u64 = 8 * 1024;
+    const AGENT_SCRATCH_MB: u64 = 16 * 1024;
     const AGENT_SWAP_MB: u64 = 6 * 1024;
 
-    async fn run<'a>(
+    async fn run<'a, B: VMBackend>(
         &self,
         match_request: ClimateHackMatchRequest,
-        context: &mut GameContext<'a, Self>,
+        context: &mut GameContext<'a, Self, B>,
     ) -> Result<(), GameError<Self::Error>> {
         self.run_inner(match_request, context).await
     }

@@ -22,6 +22,21 @@ RUN cargo build -p doxa_vm --bin vm_executor --release --workspace
 
 RUN cp /app/target/release/vm_executor /
 
+FROM rootfs_base as rootfs
+
+COPY --from=vm_executor /vm_executor /sbin/vm_executor
+
+RUN mkdir -p /scratch/agent && \
+  chown -R 1000:1000 /scratch/agent && \
+  chmod -R 770 /scratch/agent && \
+  mkdir -p /scratch/output && \
+  chown -R 1000:1000 /scratch/output && \
+  chmod -R 770 /scratch/output
+
+EXPOSE 1134
+
+ENTRYPOINT ["/sbin/vm_executor", "tcp_listen"]
+
 FROM ubuntu:latest AS rootfs_builder
 
 RUN apt-get install e2fsprogs

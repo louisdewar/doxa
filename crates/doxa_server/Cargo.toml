@@ -13,7 +13,7 @@ doxa_executor = { path = "../doxa_executor" }
 doxa_core = { path = "../doxa_core" }
 doxa_user = { path = "../doxa_user" }
 
-tracing-actix-web = "0.5.0-beta.5"
+tracing-actix-web = "0.5.1"
 tracing = "0.1.19"
 opentelemetry = { version = "0.16", features = ["rt-tokio-current-thread"] }
 opentelemetry-jaeger = { version = "0.15", features = ["rt-tokio-current-thread"] }

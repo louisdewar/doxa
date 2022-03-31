@@ -1,20 +1,14 @@
+use crate::backend::VMBackend;
 use crate::error::{
-    AgentLifecycleManagerError, ManagerErrorLogContext, MountError, TakeFileManagerError,
-    VMShutdownError,
+    AgentLifecycleManagerError, ManagerErrorLogContext, TakeFileManagerError, VMShutdownError,
 };
-use crate::manager::ManagerError::TimeoutWaitingForVMConnection;
-use crate::mount::{self, Mount, MountRequest};
+use crate::mount::{self, Mount};
 use crate::recorder::VMRecorder;
-use doxa_firecracker_sdk::spawn::{BootSource, DriveSource, MachineConfig};
 use std::time::Duration;
 use std::{io, path::PathBuf};
 use tokio::time::timeout;
 
-use doxa_firecracker_sdk::{VMOptions, VM};
-use tokio::{
-    net::{UnixListener, UnixStream},
-    task,
-};
+use tokio::task;
 
 use tracing::trace;
 
@@ -28,27 +22,24 @@ use tempfile::{tempdir, TempDir};
 
 const MAX_LOGS_LEN: usize = 50_000_000;
 
-/// Manages lifecycle of and communciation with a single VM.
-pub struct Manager {
-    vm: VM,
-    tempdir: TempDir,
-    stream: Stream<UnixStream>,
-    recorder: VMRecorder,
-}
-
-pub struct VMManagerArgs {
-    pub original_rootfs: PathBuf,
-    pub kernel_img: PathBuf,
-    pub kernel_boot_args: String,
-    pub firecracker_path: PathBuf,
-    pub memory_size_mib: u64,
+pub struct VMManagerSettings {
     pub swap_size_mib: u64,
     pub scratch_source_path: PathBuf,
     pub scratch_size_mib: u64,
+    pub memory_size_mib: u64,
     pub mounts: Vec<Mount>,
 }
 
-impl Manager {
+/// Manages lifecycle of and communciation with a single VM.
+pub struct Manager<B: VMBackend> {
+    backend: B,
+    tempdir: TempDir,
+    // Backend::Stream
+    stream: Stream<B::Socket>,
+    recorder: VMRecorder,
+}
+
+impl<B: VMBackend> Manager<B> {
     /// Spawns up the firecracker process and waits for the process to connect.
     /// This will copy the rootfs to a tempdir so that the VM is allowed write permissions.
     /// In future it will be a good idea to figure out properly how to make a rootfs that can be
@@ -59,18 +50,17 @@ impl Manager {
     /// The scratch source path is used as a base for the scratch image, it is not modified in any
     /// way.
     /// The path on guest is a String since it's serialized as such before sending across.
-    pub async fn new(args: VMManagerArgs) -> Result<Self, ManagerErrorLogContext> {
-        let VMManagerArgs {
-            original_rootfs,
-            kernel_img,
-            kernel_boot_args,
-            firecracker_path,
-            memory_size_mib,
+    pub async fn new(
+        manager_settings: VMManagerSettings,
+        backend_settings: B::BackendSettings,
+    ) -> Result<Self, ManagerErrorLogContext> {
+        let VMManagerSettings {
             swap_size_mib,
             scratch_source_path,
             scratch_size_mib,
+            memory_size_mib,
             mut mounts,
-        } = args;
+        } = manager_settings;
 
         // TODO: consider that when Drop is called for the tempdir by default it will be blocking,
         // maybe implement a custom Drop for manager that calls spawn_blocking?
@@ -78,93 +68,115 @@ impl Manager {
         // it will probably only be a problem if it's being run on the main webserver process.
         let dir = task::spawn_blocking(tempdir).await??;
 
-        let rootfs_path = dir.path().join("rootfs");
-        tokio::fs::copy(original_rootfs, &rootfs_path).await?;
-
-        let scratch_path = dir.path().join("scratch");
-        mount::create_scratch_on_host(scratch_source_path, &scratch_path, scratch_size_mib)
-            .await
-            .map_err(ManagerError::CreateScratch)?;
+        if B::SUPPORTS_MOUNTING_IMAGES {
+            let scratch_path = dir.path().join("scratch");
+            mount::create_scratch_on_host(scratch_source_path, &scratch_path, scratch_size_mib)
+                .await
+                .map_err(ManagerError::CreateScratch)?;
+            mounts.push(Mount {
+                path_on_host: scratch_path,
+                path_on_guest: "/scratch".to_string(),
+                read_only: false,
+            });
+        }
 
         let swap_path = dir.path().join("swap");
         mount::create_swapfile_on_host(&swap_path, swap_size_mib)
             .await
             .map_err(ManagerError::CreateSwap)?;
 
-        mounts.push(Mount {
-            path_on_host: scratch_path,
-            path_on_guest: "/scratch".to_string(),
-            read_only: false,
-        });
+        // let mut mount_request = MountRequest {
+        //     mounts: Vec::with_capacity(mounts.len()),
+        // };
 
-        let mut mount_request = MountRequest {
-            mounts: Vec::with_capacity(mounts.len()),
-        };
+        // let mut drive_sources = Vec::with_capacity(mounts.len() + 1);
+        // drive_sources.push(DriveSource {
+        //     drive_id: "rootfs".into(),
+        //     path_on_host: rootfs_path.to_string_lossy().to_string(),
+        //     is_root_device: true,
+        //     is_read_only: false,
+        // });
 
-        let mut drive_sources = Vec::with_capacity(mounts.len() + 1);
-        drive_sources.push(DriveSource {
-            drive_id: "rootfs".into(),
-            path_on_host: rootfs_path.to_string_lossy().to_string(),
-            is_root_device: true,
-            is_read_only: false,
-        });
+        // drive_sources.push(DriveSource {
+        //     drive_id: "swap".into(),
+        //     path_on_host: swap_path.to_string_lossy().to_string(),
+        //     is_root_device: false,
+        //     is_read_only: false,
+        // });
 
-        drive_sources.push(DriveSource {
-            drive_id: "swap".into(),
-            path_on_host: swap_path.to_string_lossy().to_string(),
-            is_root_device: false,
-            is_read_only: false,
-        });
+        // for (i, mount) in mounts.into_iter().enumerate() {
+        //     drive_sources.push(DriveSource {
+        //         drive_id: format!("drive_{}", i),
+        //         path_on_host: mount.path_on_host.to_string_lossy().to_string(),
+        //         is_root_device: false,
+        //         is_read_only: mount.read_only,
+        //     });
 
-        for (i, mount) in mounts.into_iter().enumerate() {
-            drive_sources.push(DriveSource {
-                drive_id: format!("drive_{}", i),
-                path_on_host: mount.path_on_host.to_string_lossy().to_string(),
-                is_root_device: false,
-                is_read_only: mount.read_only,
-            });
+        //     let uuid = mount::get_image_uuid(mount.path_on_host)
+        //         .await
+        //         .map_err(ManagerError::GetImageUUID)?;
 
-            let uuid = mount::get_image_uuid(mount.path_on_host)
-                .await
-                .map_err(ManagerError::GetImageUUID)?;
+        //     mount_request
+        //         .mounts
+        //         .push((uuid, mount.path_on_guest, mount.read_only));
+        // }
 
-            mount_request
-                .mounts
-                .push((uuid, mount.path_on_guest, mount.read_only));
-        }
+        // let vm_options = VMOptions {
+        //     boot_source: BootSource {
+        //         kernel_image_path: kernel_img.to_string_lossy().to_string(),
+        //         boot_args: kernel_boot_args,
+        //     },
+        //     drives: drive_sources,
+        //     machine_config: MachineConfig {
+        //         vcpu_count: 4,
+        //         mem_size_mib: memory_size_mib,
+        //     },
+        //     vsock: doxa_firecracker_sdk::spawn::Vsock {
+        //         vsock_id: "1".into(),
+        //         guest_cid: 3,
+        //         uds_path: dir.path().join("v.sock").to_string_lossy().to_string(),
+        //     },
+        // };
 
-        let vm_options = VMOptions {
-            boot_source: BootSource {
-                kernel_image_path: kernel_img.to_string_lossy().to_string(),
-                boot_args: kernel_boot_args,
-            },
-            drives: drive_sources,
-            machine_config: MachineConfig {
-                vcpu_count: 4,
-                mem_size_mib: memory_size_mib,
-            },
-            vsock: doxa_firecracker_sdk::spawn::Vsock {
-                vsock_id: "1".into(),
-                guest_cid: 3,
-                uds_path: dir.path().join("v.sock").to_string_lossy().to_string(),
-            },
-        };
+        // let vm_options_path = dir.path().join("vm_options.json");
+        // vm_options.save(&vm_options_path).await?;
 
-        let vm_options_path = dir.path().join("vm_options.json");
-        vm_options.save(&vm_options_path).await?;
+        // let mut vm = VM::spawn(vm_options_path, firecracker_path).await?;
 
-        // Begin listening for connections on port 1001 before VM boots up
-        let listener = UnixListener::bind(dir.path().join("v.sock_1001")).unwrap();
-        let mut vm = VM::spawn(vm_options_path, firecracker_path).await?;
+        // let stdout = vm.firecracker_process().stdout.take().unwrap();
+        // let stderr = vm.firecracker_process().stderr.take().unwrap();
 
-        let stdout = vm.firecracker_process().stdout.take().unwrap();
-        let stderr = vm.firecracker_process().stderr.take().unwrap();
+        // let recorder = VMRecorder::start(stdout, stderr, MAX_LOGS_LEN);
 
-        let recorder = VMRecorder::start(stdout, stderr, MAX_LOGS_LEN);
+        // // Begin listening for connections on port 1001
+        // let listener = UnixListener::bind(dir.path().join("v.sock_1001")).unwrap();
 
-        // We wrap this section because if there's an error we probably want the VM logs for
-        // debugging and it's quite a hassle to write that code for each error.
-        let stream = match Self::startup_process(listener, &mount_request).await {
+        // // We wrap this section because if there's an error we probably want the VM logs for
+        // // debugging and it's quite a hassle to write that code for each error.
+        // let stream = match Self::startup_process(listener, &mount_request).await {
+        //     Ok(stream) => stream,
+        //     Err(e) => {
+        //         let logs = recorder.retrieve_logs().await;
+
+        //         return Err(ManagerErrorLogContext {
+        //             source: e,
+        //             logs: Some(logs),
+        //         });
+        //     }
+        // };
+
+        let mut backend = B::spawn(
+            dir.path(),
+            backend_settings,
+            memory_size_mib,
+            mounts,
+            swap_path,
+        )
+        .await?;
+
+        let recorder = backend.take_recorder(MAX_LOGS_LEN);
+
+        let stream = match backend.connect().await {
             Ok(stream) => stream,
             Err(e) => {
                 let logs = recorder.retrieve_logs().await;
@@ -177,7 +189,7 @@ impl Manager {
         };
 
         let manager = Manager {
-            vm,
+            backend,
             tempdir: dir,
             stream,
             recorder,
@@ -185,36 +197,36 @@ impl Manager {
         Ok(manager)
     }
 
-    async fn startup_process(
-        listener: UnixListener,
-        mount_request: &MountRequest,
-    ) -> Result<Stream<UnixStream>, ManagerError> {
-        let (stream, _addr) = timeout(Duration::from_secs(45), listener.accept())
-            .await
-            .map_err(|_| TimeoutWaitingForVMConnection)??;
+    // async fn startup_process(
+    //     listener: UnixListener,
+    //     mount_request: &MountRequest,
+    // ) -> Result<Stream<UnixStream>, ManagerError> {
+    //     let (stream, _addr) = timeout(Duration::from_secs(45), listener.accept())
+    //         .await
+    //         .map_err(|_| crate::error::ManagerError::TimeoutWaitingForVMConnection)??;
 
-        let mut stream = Stream::from_socket(stream);
+    //     let mut stream = Stream::from_socket(stream);
 
-        Self::mount_drives(&mut stream, mount_request).await?;
+    //     Self::mount_drives(&mut stream, mount_request).await?;
 
-        Ok(stream)
-    }
+    //     Ok(stream)
+    // }
 
-    async fn mount_drives(
-        stream: &mut Stream<UnixStream>,
-        mount_request: &MountRequest,
-    ) -> Result<(), MountError> {
-        stream
-            .send_prefixed_full_message(
-                b"MOUNTREQUEST_",
-                serde_json::to_vec(mount_request).unwrap().as_ref(),
-            )
-            .await?;
+    // async fn mount_drives(
+    //     stream: &mut Stream<UnixStream>,
+    //     mount_request: &MountRequest,
+    // ) -> Result<(), MountError> {
+    //     stream
+    //         .send_prefixed_full_message(
+    //             b"MOUNTREQUEST_",
+    //             serde_json::to_vec(mount_request).unwrap().as_ref(),
+    //         )
+    //         .await?;
 
-        stream.expect_exact_msg(b"MOUNTED").await?;
+    //     stream.expect_exact_msg(b"MOUNTED").await?;
 
-        Ok(())
-    }
+    //     Ok(())
+    // }
 
     /// Sends the agent and then waits for the VM to spawn it
     pub async fn send_agent<S: futures_util::Stream<Item = Result<bytes::Bytes, E>> + Unpin, E>(
@@ -253,13 +265,12 @@ impl Manager {
 
     fn map_args(args: Vec<String>) -> Vec<u8> {
         args.into_iter()
-            .map(|arg| {
+            .flat_map(|arg| {
                 let mut v = Vec::with_capacity(1 + arg.len());
                 v.push(b'\0');
                 v.extend(arg.as_bytes());
                 v
             })
-            .flatten()
             .collect()
     }
 
@@ -345,13 +356,13 @@ impl Manager {
     /// Get access to the underlying stream
     /// TODO: in future have an abstraction around this and
     /// make stream pub(crate)
-    pub fn stream_mut(&mut self) -> &mut Stream<UnixStream> {
+    pub fn stream_mut(&mut self) -> &mut Stream<B::Socket> {
         &mut self.stream
     }
 
     /// Shutdown the VM and retrieve the logs
     pub async fn shutdown(self) -> Result<String, VMShutdownError> {
-        self.vm.shutdown().await?;
+        self.backend.shutdown().await?;
         let tempdir = self.tempdir;
         tokio::task::spawn_blocking(move || tempdir.close()).await??;
 

@@ -14,6 +14,7 @@ pub struct Datasets {
 impl Datasets {
     pub async fn load_from_directory(
         datasets_directory: impl AsRef<Path>,
+        x_train_image: bool,
     ) -> Result<Self, DatasetLoadingError> {
         let mut read_dir = tokio::fs::read_dir(&datasets_directory)
             .await
@@ -33,14 +34,27 @@ impl Datasets {
                 .to_string();
             info!(%dataset_name, "discovered climatehack dataset");
             let dataset_path = entry.path();
-            let x_train = dataset_path.join("x-train.img");
+            let x_train = if x_train_image {
+                let x_train = dataset_path.join("x-train.img");
 
-            let x_train_meta = tokio::fs::metadata(&x_train)
-                .await
-                .map_err(DatasetLoadingError::DatasetX)?;
-            if !x_train_meta.is_file() {
-                return Err(DatasetLoadingError::DatasetXNotFile);
-            }
+                let x_train_meta = tokio::fs::metadata(&x_train)
+                    .await
+                    .map_err(DatasetLoadingError::DatasetX)?;
+                if !x_train_meta.is_file() {
+                    return Err(DatasetLoadingError::DatasetXNotFile);
+                }
+                x_train
+            } else {
+                let x_train = dataset_path.join("x-train");
+
+                let x_train_meta = tokio::fs::metadata(&x_train)
+                    .await
+                    .map_err(DatasetLoadingError::DatasetX)?;
+                if !x_train_meta.is_dir() {
+                    return Err(DatasetLoadingError::DatasetXNotDirectory);
+                }
+                x_train
+            };
 
             let y_train = dataset_path.join("testset-y");
             let y_train_meta = tokio::fs::metadata(&y_train)

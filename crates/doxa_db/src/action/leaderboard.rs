@@ -2,6 +2,7 @@ use diesel::JoinOnDsl;
 use diesel::{ExpressionMethods, OptionalExtension, PgConnection, QueryDsl, RunQueryDsl};
 
 use crate::model::leaderboard::{InsertableLeaderboardScore, LeaderboardScore};
+use crate::model::storage::AgentUpload;
 use crate::model::user::User;
 use crate::schema as s;
 use crate::view;
@@ -106,7 +107,7 @@ pub fn active_leaderboard(
     conn: &PgConnection,
     competition: i32,
     key: Option<String>,
-) -> Result<Vec<(User, LeaderboardScore)>, DieselError> {
+) -> Result<Vec<(User, LeaderboardScore, AgentUpload)>, DieselError> {
     let key = key.unwrap_or_else(|| DEFAULT_LEADERBOARD_KEY.to_string());
     view::active_agents::table
         .filter(view::active_agents::competition.eq(competition))
@@ -114,6 +115,11 @@ pub fn active_leaderboard(
         .filter(s::leaderboard::columns::key.eq(key))
         .inner_join(s::users::table.on(s::users::id.eq(view::active_agents::owner)))
         .order_by(s::leaderboard::score.desc())
-        .select((s::users::all_columns, s::leaderboard::all_columns))
+        .then_order_by(view::active_agents::uploaded_at.asc())
+        .select((
+            s::users::all_columns,
+            s::leaderboard::all_columns,
+            view::active_agents::all_columns,
+        ))
         .get_results(conn)
 }

@@ -5,12 +5,12 @@ use std::{env, path::PathBuf, sync::Arc};
 
 use doxa_auth::{limiter::GenericLimiter, AuthaClient};
 use doxa_core::actix_web::{web, App, HttpServer};
-use doxa_executor::settings::Mount;
+use doxa_executor::{client::firecracker::FirecrackerBackendSettings, settings::Mount};
 use doxa_storage::AgentRetrieval;
 use tracing::{info, warn};
 use tracing_actix_web::TracingLogger;
 
-mod telemetry;
+pub mod telemetry;
 
 pub use doxa_competition::CompetitionSystem;
 pub use doxa_core::tracing;
@@ -86,10 +86,6 @@ pub async fn setup_server_from_env(
     };
 
     let executor_settings = doxa_executor::Settings {
-        firecracker_path: PathBuf::from("./dev/vm/firecracker"),
-        kernel_img: PathBuf::from("./dev/vm/vmlinux"),
-        kernel_boot_args: "console=ttyS0 reboot=k panic=1 pci=off".to_string(),
-        rootfs: PathBuf::from("./dev/vm/images/rootfs.img"),
         scratch_base_image: PathBuf::from("./dev/vm/images/scratch.img"),
         agent_retrieval: AgentRetrieval::new(
             "http://localhost:3001/api/storage/download/".to_string(),
@@ -133,6 +129,13 @@ pub async fn setup_server(
     doxa_mq::wait_for_mq(&mq_pool).await;
 
     let competition_settings = doxa_competition::Settings {
+        firecracker_settings: FirecrackerBackendSettings {
+            firecracker_path: PathBuf::from("./dev/vm/firecracker"),
+            kernel_img: PathBuf::from("./dev/vm/vmlinux"),
+            kernel_boot_args: "console=ttyS0 reboot=k panic=1 pci=off".to_string(),
+            original_rootfs: PathBuf::from("./dev/vm/images/rootfs.img"),
+            vcpus: 6,
+        },
         executor_settings: Arc::new(executor_settings),
         mq_pool: Arc::clone(&mq_pool),
         pg_pool: Arc::clone(&db_pool),

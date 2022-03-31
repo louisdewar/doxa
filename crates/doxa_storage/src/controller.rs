@@ -35,8 +35,10 @@ pub fn register_upload_start(
 pub fn mark_upload_as_complete(
     conn: &PgConnection,
     id: String,
+    execution_environment: String,
+    file_size: i32,
 ) -> Result<AgentUpload, DieselError> {
-    action::storage::mark_upload_as_complete(conn, id)
+    action::storage::mark_upload_as_complete(conn, id, execution_environment, file_size)
 }
 
 pub fn mark_upload_as_failed(conn: &PgConnection, id: String) -> Result<AgentUpload, DieselError> {
@@ -94,6 +96,36 @@ pub async fn delete_old_uploads(
     debug!(total_bytes=%total_bytes, "freed space from agents");
 
     Ok(())
+}
+
+pub async fn get_execution_environment(
+    storage: &LocalStorage,
+    competition: &str,
+    agent_id: &str,
+) -> String {
+    let yaml = match storage.read_doxa_yaml(competition, agent_id).await {
+        Ok(yaml) => yaml,
+        Err(e) => {
+            warn!(error=%e, debug=?e, "failed to read doxa yaml");
+            return "basic".to_string();
+        }
+    };
+
+    if let serde_yaml::Value::Mapping(map) = yaml {
+        if let Some(environment) = map.get(&"execution_environment".into()) {
+            if let serde_yaml::Value::String(environment) = environment {
+                if environment == "gpu" {
+                    return "gpu".to_string();
+                } else if environment == "basic" {
+                    warn!(execution_environment=?environment, "execution_environment wasn't basic or gpu");
+                }
+            } else {
+                warn!(execution_environment=?environment, "execution_environment wasn't a string");
+            }
+        }
+    }
+
+    "basic".to_string()
 }
 
 // pub struct DeleteStatistics {

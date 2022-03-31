@@ -12,6 +12,8 @@ table! {
         deleted -> Bool,
         failed -> Bool,
         active -> Bool,
+        execution_environment -> Text,
+        file_size -> Int4,
     }
 }
 

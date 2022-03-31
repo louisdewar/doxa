@@ -1,4 +1,4 @@
-import { faBan, faCheckCircle, faCircleNotch, faClock, faExclamationTriangle, faFlagCheckered, faHourglassEnd, faHourglassStart } from '@fortawesome/free-solid-svg-icons';
+import { faBan, faCheckCircle, faCircleNotch, faClock, faExclamationTriangle, faFlagCheckered, faHourglassEnd, faHourglassStart, faImages } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { formatTime } from 'utils/time';
 import { roundScore } from '../utils';
@@ -99,17 +99,44 @@ function EvaluationLogCard({ event, hasForfeited }) {
       </div>
     </div>;
   } else if (event.type.startsWith('checkpoint')) {
-    return <div className='ch-evaluation-card ch-evaluation-checkpoint'>
-      <div className={`ch-evaluation-card-body ${event.payload ? 'ch-evaluation-checkpoint-info-available' : ''}`}>
-        <FontAwesomeIcon icon={faFlagCheckered} size='sm' fixedWidth />
-        <div className='ch-evaluation-card-text' title={timestamp && timestamp.toLocaleString()}>
-          <strong>Checkpoint #{event.payload.checkpoint + 1}</strong> was reached {formatTime(timestamp)} with a score of {roundScore(event.payload.score)}.
+    return <>
+      <div className='ch-evaluation-card ch-evaluation-checkpoint'>
+        <div className={`ch-evaluation-card-body ${event.payload ? 'ch-evaluation-checkpoint-info-available' : ''}`}>
+          <FontAwesomeIcon icon={faFlagCheckered} size='sm' fixedWidth />
+          <div className='ch-evaluation-card-text' title={timestamp && timestamp.toLocaleString()}>
+            <strong>Checkpoint #{event.payload.checkpoint + 1}</strong> was reached {formatTime(timestamp)} with an MS-SSIM score of {roundScore(event.payload.score)}.
+          </div>
+        </div>
+        <div className='ch-evaluation-card-checkpoint-info'>
+          {event.payload.images && event.payload.images.map((img, i) => <img key={i} src={`data:image/png;base64,${img}`} alt="Model output image" />)}
         </div>
       </div>
-      <div className='ch-evaluation-card-checkpoint-info'>
-        {event.payload.images && event.payload.images.map((img, i) => <img key={i} src={`data:image/png;base64,${img}`} alt="Model output image" />)}
-      </div>
-    </div>;
+
+      {event.payload.sequences && <div className='ch-evaluation-card ch-evaluation-sequence'>
+        <div className={`ch-evaluation-card-body ${event.payload ? 'ch-evaluation-checkpoint-info-available' : ''}`}>
+          <FontAwesomeIcon icon={faImages} size='sm' fixedWidth />
+          <div className='ch-evaluation-card-text' title={timestamp && timestamp.toLocaleString()}>
+            <strong>Checkpoint #{event.payload.checkpoint + 1}</strong>: SSIM={roundScore(event.payload.metrics.ssim)}, MSE={roundScore(event.payload.metrics.mse)}, MAE={roundScore(event.payload.metrics.mae)}, PSNR={roundScore(event.payload.metrics.psnr)}
+          </div>
+        </div>
+        <div className='ch-evaluation-card-sequence-info'>
+          {event.payload.sequences.map(seq => <>
+            <h4>Ground truth</h4>
+            {seq.true && <div className="ch-evaluation-card-sequence-images">
+              {seq.true.map((img, i) => <img key={i} src={`data:image/png;base64,${img}`} alt="Model output image" className="small-checkpoint-img" />)}
+            </div>}
+            <h4>Predictions</h4>
+            {seq.pred && <div className="ch-evaluation-card-sequence-images">
+              {seq.pred.map((img, i) => <img key={i} src={`data:image/png;base64,${img}`} alt="Model output image" className="small-checkpoint-img" />)}
+            </div>}
+            <h4>Difference maps</h4>
+            {seq.diff && <div className="ch-evaluation-card-sequence-images">
+              {seq.diff.map((img, i) => <img key={i} src={`data:image/png;base64,${img}`} alt="Model output image" className="small-checkpoint-img" />)}
+            </div>}
+          </>)}
+        </div>
+      </div>}
+    </>;
   }
 
   return null;

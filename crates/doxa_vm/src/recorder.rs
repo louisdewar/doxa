@@ -1,7 +1,6 @@
 use std::time::Duration;
 
-use tokio::io::{AsyncBufReadExt, BufReader};
-use tokio::process::{ChildStderr, ChildStdout};
+use tokio::io::{AsyncBufReadExt, AsyncRead, BufReader};
 use tokio::sync::oneshot;
 use tokio::task;
 use tokio::time::timeout;
@@ -20,8 +19,6 @@ const INIT_STARTED_MESSAGE: &str = "DOXA INIT started";
 pub struct VMRecorder {
     handle: task::JoinHandle<Result<String, std::io::Error>>,
     shutdown: oneshot::Sender<()>,
-    // stdout: Option<ChildStdout>,
-    // stdin: Option<ChildStdin>,
 }
 
 impl VMRecorder {
@@ -32,7 +29,11 @@ impl VMRecorder {
     /// starts (and the len reset to 0).
     ///
     /// NOTE: max_len should be considered a soft limit.
-    pub fn start(stdout: ChildStdout, stderr: ChildStderr, max_len: usize) -> Self {
+    pub fn start(
+        stdout: impl AsyncRead + Unpin + Send + 'static,
+        stderr: impl AsyncRead + Unpin + Send + 'static,
+        max_len: usize,
+    ) -> Self {
         let (sender, receiver) = oneshot::channel();
 
         let handle = tokio::spawn(async move {

@@ -16,11 +16,15 @@ pub fn register_upload_start(
 pub fn mark_upload_as_complete(
     conn: &PgConnection,
     id: String,
+    execution_environment: String,
+    file_size: i32,
 ) -> Result<AgentUpload, DieselError> {
     diesel::update(s::agents::dsl::agents.filter(s::agents::columns::id.eq(id)))
         .set((
             s::agents::columns::uploaded.eq(true),
             s::agents::columns::uploaded_at.eq(Utc::now()),
+            s::agents::columns::execution_environment.eq(execution_environment),
+            s::agents::columns::file_size.eq(file_size),
         ))
         .get_result(conn)
 }

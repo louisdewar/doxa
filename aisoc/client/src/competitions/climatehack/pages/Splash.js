@@ -239,12 +239,12 @@ export default function Splash({ baseUrl }) {
           <div className='ch-splash-format-description'>
             <div className='ch-splash-format-columns'>
               <div>
-                <h3>Launch</h3>
-                <h4>28th January</h4>
+                <h3>First round</h3>
+                <h4>Fri 28th January (18:00 GMT) until Wed 16th March (23:59 GMT)</h4>
               </div>
               <div>
                 <h3>In-person finals</h3>
-                <h4>24-26th March</h4>
+                <h4>Thu 24th March until Sat 26th March</h4>
               </div>
             </div>
 
@@ -274,7 +274,7 @@ export default function Splash({ baseUrl }) {
                   Teams of three finalists representing their respective universities compete to improve their models.
                 </p>
                 <p>
-                  Their final submissions will be used to determine the winning team by a panel of judges at the in-person final events in London and New York.
+                  Their final submissions will be used to determine the winning team by a panel of judges at the in-person final events in London and Boston.
                 </p>
               </div>
             </div>
@@ -296,7 +296,7 @@ export default function Splash({ baseUrl }) {
         <div className='ch-section-content ch-section-content'>
           <div className='ch-section-heading ch-section-heading'>
             <h2>
-              Joint Final in London and New York
+              Joint Final in London and Boston
             </h2>
           </div>
           <div className='ch-splash-joint-final-description'>
@@ -304,7 +304,7 @@ export default function Splash({ baseUrl }) {
               The competition will conclude with an <strong>in-person</strong> final weekend for the top 3 competitors from each university.
             </p>
             <p>
-              There will be two simultaneous final events hosted in New York and London for finalists in North America and London, respectively. All transport, accommodation and carbon offsetting expenses will be paid for. The winning team will be selected and announced on the last day of the competition.
+              There will be two simultaneous final events hosted in London and Boston for finalists in the UK and North America, respectively. All transport, accommodation and carbon offsetting expenses will be paid for. The winning team will be selected and announced on the last day of the competition.
             </p>
           </div>
         </div>

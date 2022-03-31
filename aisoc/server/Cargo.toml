@@ -8,7 +8,11 @@ edition = "2021"
 doxa_server = { path = "../../crates/doxa_server" }
 uttt = { path = "../../competitions/uttt" }
 climatehack = { path = "../../competitions/climatehack" }
+doxa_execution_node = { path = "../../crates/doxa_execution_node" }
+doxa_mq = { path = "../../crates/doxa_mq" }
+doxa_executor = { path = "../../crates/doxa_executor" }
 
-actix-web = "4.0.0-beta.14"
+actix-web = "4.0.0"
 clap = { version = "3.0.10", features = ["derive", "env"] }
 dotenv = "0.15.0"
+url = { version = "2.2.2", features = ["serde"] }

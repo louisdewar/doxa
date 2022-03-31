@@ -1,16 +1,16 @@
 use doxa_core::{actix_web::web, error::HttpResponse, EndpointResult};
-use doxa_db::model::{leaderboard::LeaderboardScore, user::User};
+use doxa_db::model::{leaderboard::LeaderboardScore, storage::AgentUpload, user::User};
 use doxa_user::PublicBasicUserInfo;
 use serde_json::json;
 
 use crate::client::{Competition, Context};
 
-fn leaderboard_response(leaderboard: Vec<(User, LeaderboardScore)>) -> HttpResponse {
+fn leaderboard_response(leaderboard: Vec<(User, LeaderboardScore, AgentUpload)>) -> HttpResponse {
     let mut output = Vec::with_capacity(leaderboard.len());
 
-    for (user, entry) in leaderboard {
+    for (user, entry, agent) in leaderboard {
         output
-            .push(json!({ "user": PublicBasicUserInfo::from(user), "agent": entry.agent, "score": entry.score }));
+            .push(json!({ "user": PublicBasicUserInfo::from(user), "agent": entry.agent, "score": entry.score, "activated_at": agent.activated_at, "uploaded_at": agent.uploaded_at }));
     }
 
     HttpResponse::Ok().json(json!({ "leaderboard": output }))

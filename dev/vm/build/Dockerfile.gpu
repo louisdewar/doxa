@@ -1,0 +1,32 @@
+FROM rust:1-bullseye as vm_executor
+
+WORKDIR /app
+
+RUN mkdir crates
+COPY ./crates/doxa_vm crates/doxa_vm
+COPY ./crates/doxa_firecracker_sdk crates/doxa_firecracker_sdk
+COPY ./Cargo.lock .
+# Copy slim Cargo.toml
+COPY ./dev/vm/build/Cargo.toml .
+
+RUN cargo build -p doxa_vm --bin vm_executor --release --workspace
+
+RUN cp /app/target/release/vm_executor /
+
+
+# FROM nvidia/cuda:11.4.0-runtime-ubuntu20.04
+FROM tensorflow/tensorflow:latest-gpu
+
+RUN apt-get update && apt-get install software-properties-common curl -y && add-apt-repository ppa:deadsnakes/ppa && apt-get install python3.9 python3.9-venv -y
+
+COPY ./dev/vm/build/vm_install.sh /
+RUN GPU=TRUE /vm_install.sh
+RUN rm /vm_install.sh
+
+RUN mkdir -p /scratch/agent && \
+  chown -R 1000:1000 /scratch/agent && \
+  chmod -R 770 /scratch/agent && \
+  mkdir -p /scratch/output && \
+  chown -R 1000:1000 /scratch/output && \
+  chmod -R 770 /scratch/output
+COPY --from=vm_executor /vm_executor /sbin/vm_executor
