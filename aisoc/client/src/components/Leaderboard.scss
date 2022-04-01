@@ -11,6 +11,7 @@
   .leaderboard-entry {
     display: flex;
     margin-bottom: 10px;
+    gap: 0.25rem;
 
     .leaderboard-position {
       flex: 0 0 auto;
@@ -19,11 +20,28 @@
 
     .leaderboard-username {
       flex: 4 1 auto;
+      flex-basis: 0;
+
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      text-decoration: underline;
+      text-underline-offset: 0.2rem;
 
       a {
         color: #fff;
-        text-underline-offset: 0.2rem;
       }
+    }
+
+    .leaderboard-university {
+      flex: 2 1 auto;
+      flex-basis: 0;
+      min-width: 11ch;
+
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .leaderboard-match-link {

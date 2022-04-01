@@ -104,6 +104,10 @@ const UNIVERSITIES_DOMAIN_MAP = {
   'cornell.edu': {
     name: 'Cornell',
     logo: null
+  },
+  'arts.ac.uk': {
+    name: 'UAL',
+    logo: null
   }
 };
 
